@@ -102,5 +102,7 @@ describe('fresh project installation', () => {
     assert.ok(prefs.agents.includes('Voss'));
     assert.ok(prefs.agents.includes('Beck'));
     assert.ok(prefs.hooks.includes('TDD enforcement'));
+    assert.equal(prefs.issueTracker, 'GitHub Issues');
+    assert.equal(prefs.branchConvention, 'feat/123-description');
   });
 });
