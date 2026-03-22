@@ -307,34 +307,44 @@ describe('dev-team-tdd-enforce', () => {
 describe('dev-team-pre-commit-gate', () => {
   const hook = 'dev-team-pre-commit-gate.js';
 
-  it('always exits 0 (advisory only)', () => {
-    // Hook reads from git, but outside a git repo it exits 0
+  it('exits 0 when no git repo', () => {
     const result = runHook(hook, {});
     assert.equal(result.code, 0);
   });
 
-  it('reminds about security review for staged auth files', () => {
+  it('blocks (exit 2) when pending reviews exist', () => {
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'dev-team-precommit-'));
     try {
       execFileSync('git', ['init'], { cwd: tmpDir, encoding: 'utf-8' });
       execFileSync('git', ['config', 'user.email', 'test@test.com'], { cwd: tmpDir, encoding: 'utf-8' });
       execFileSync('git', ['config', 'user.name', 'Test'], { cwd: tmpDir, encoding: 'utf-8' });
-      fs.writeFileSync(path.join(tmpDir, 'auth.js'), 'module.exports = {}');
-      execFileSync('git', ['add', 'auth.js'], { cwd: tmpDir, encoding: 'utf-8' });
+      fs.writeFileSync(path.join(tmpDir, 'handler.js'), 'module.exports = {}');
+      execFileSync('git', ['add', 'handler.js'], { cwd: tmpDir, encoding: 'utf-8' });
 
-      const stdout = execFileSync(process.execPath, [path.join(HOOKS_DIR, hook)], {
-        encoding: 'utf-8',
-        timeout: 5000,
-        cwd: tmpDir,
-      });
-      assert.ok(stdout.includes('@dev-team-szabo'));
-      assert.ok(stdout.includes('@dev-team-knuth'));
+      // Create pending review tracking file
+      fs.mkdirSync(path.join(tmpDir, '.claude'), { recursive: true });
+      fs.writeFileSync(
+        path.join(tmpDir, '.claude', 'dev-team-review-pending.json'),
+        JSON.stringify(['@dev-team-szabo', '@dev-team-knuth']),
+      );
+
+      try {
+        execFileSync(process.execPath, [path.join(HOOKS_DIR, hook)], {
+          encoding: 'utf-8',
+          timeout: 5000,
+          cwd: tmpDir,
+        });
+        assert.fail('Should exit 2 when pending reviews exist');
+      } catch (err) {
+        assert.equal(err.status, 2, 'should block with exit 2');
+        assert.ok(err.stderr.includes('@dev-team-szabo'), 'should list pending agents');
+      }
     } finally {
       fs.rmSync(tmpDir, { recursive: true, force: true });
     }
   });
 
-  it('produces no reminders when only non-code files are staged', () => {
+  it('exits 0 when no pending reviews', () => {
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'dev-team-precommit-'));
     try {
       execFileSync('git', ['init'], { cwd: tmpDir, encoding: 'utf-8' });
