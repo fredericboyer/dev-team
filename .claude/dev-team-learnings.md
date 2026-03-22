@@ -22,9 +22,12 @@
 
 ## Quality Benchmarks
 
-- 90 tests: 25 unit (files), 57 unit (hooks), 8 scenario (Node.js, Python, upgrade path)
+- 106 tests: 25 unit (files), 57 unit (hooks), 9 unit (scan), 7 integration (update), 8 scenario (Node.js, Python, upgrade path)
+- 9 agents: Voss, Mori, Szabo, Knuth, Beck, Deming, Docs, Architect, Release
+- 4 skills: challenge, task, review, audit
 - All 5 hooks have block-path and skip-path coverage.
 - CI: 3 OS x 3 Node versions + lint + format + agent validation + hook validation.
+- Always run `npm run format` before committing new `.ts` files — oxfmt formatting is checked in CI.
 
 ## Overruled Challenges
 <!-- When the human overrules an agent, record why — prevents re-flagging -->
