@@ -132,7 +132,39 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
     );
   }
 
-  // Step 4: Copy agents
+  // Step 4: Issue tracker preference
+  let issueTracker: string;
+  if (isAll) {
+    issueTracker = "GitHub Issues";
+  } else {
+    issueTracker = await prompts.select("Which issue tracker do you use?", [
+      { label: "GitHub Issues", description: "Track work with GitHub Issues" },
+      { label: "Jira", description: "Atlassian Jira" },
+      { label: "Linear", description: "Linear issue tracker" },
+      { label: "Other", description: "Another issue tracker" },
+      { label: "None", description: "No issue tracking enforcement" },
+    ]);
+  }
+
+  // Step 5: Branch naming convention
+  let branchConvention: string;
+  if (isAll) {
+    branchConvention = "feat/123-description";
+  } else {
+    branchConvention = await prompts.select("Branch naming convention?", [
+      {
+        label: "feat/123-description",
+        description: "Type/issue-number-description (e.g., feat/42-add-auth)",
+      },
+      {
+        label: "type/description",
+        description: "Type/description without issue number (e.g., feat/add-auth)",
+      },
+      { label: "None", description: "No branch naming enforcement" },
+    ]);
+  }
+
+  // Step 6: Copy agents (renumbered after adding workflow prompts)
   const templates = templateDir();
   let agentCount = 0;
 
@@ -151,7 +183,7 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
     agentCount++;
   }
 
-  // Step 5: Create agent memory directories
+  // Step 7: Create agent memory directories
   for (const agent of ALL_AGENTS) {
     if (!selectedAgents.includes(agent.label)) continue;
 
@@ -164,7 +196,7 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
     }
   }
 
-  // Step 6: Create shared team learnings
+  // Step 8: Create shared team learnings
   const learningsSrc = path.join(templates, "dev-team-learnings.md");
   const learningsDest = path.join(claudeDir, "dev-team-learnings.md");
   if (!fileExists(learningsDest)) {
@@ -242,6 +274,8 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
     version: "0.1.0",
     agents: selectedAgents,
     hooks: selectedHooks,
+    issueTracker,
+    branchConvention,
   };
   writeFile(prefsPath, JSON.stringify(prefs, null, 2) + "\n");
 
@@ -253,6 +287,7 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
   console.log(`  Memory:    ${selectedAgents.length} agent memories + shared learnings`);
   console.log(`  CLAUDE.md: ${claudeResult}`);
   console.log(`  Settings:  ${settingsPath}`);
+  console.log(`  Workflow:  ${issueTracker}${branchConvention !== "None" ? `, branches: ${branchConvention}` : ""}`);
   console.log("");
   console.log("Next steps:");
   console.log("  1. Review installed agents in .claude/agents/");
