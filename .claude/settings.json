@@ -46,6 +46,23 @@
             "command": "node .claude/hooks/dev-team-lint-format.js"
           }
         ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/dev-team-post-change-review.js"
+          },
+          {
+            "type": "command",
+            "command": "node .claude/hooks/dev-team-tdd-enforce.js"
+          },
+          {
+            "type": "command",
+            "command": "node .claude/hooks/dev-team-watch-list.js"
+          }
+        ]
       }
     ],
     "TaskCompleted": [

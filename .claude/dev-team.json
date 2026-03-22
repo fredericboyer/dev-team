@@ -17,6 +17,7 @@
     "Safety guard",
     "Post-change review",
     "Pre-commit gate",
-    "Task loop"
+    "Task loop",
+    "Watch list"
   ]
 }
