@@ -420,6 +420,103 @@ describe('dev-team-pre-commit-gate', () => {
   });
 });
 
+// ─── Watch List ──────────────────────────────────────────────────────────────
+
+describe('dev-team-watch-list', () => {
+  const hook = 'dev-team-watch-list.js';
+  let tmpDir;
+  let originalCwd;
+
+  beforeEach(() => {
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'dev-team-watchlist-'));
+    originalCwd = process.cwd();
+    process.chdir(tmpDir);
+    fs.mkdirSync(path.join(tmpDir, '.claude'), { recursive: true });
+  });
+
+  afterEach(() => {
+    process.chdir(originalCwd);
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  });
+
+  it('exits 0 with no config file', () => {
+    const input = JSON.stringify({ tool_input: { file_path: '/app/src/db/schema.ts' } });
+    const stdout = execFileSync(process.execPath, [path.join(HOOKS_DIR, hook), input], {
+      encoding: 'utf-8',
+      timeout: 5000,
+      cwd: tmpDir,
+    });
+    assert.equal(stdout, '');
+  });
+
+  it('matches file patterns and recommends agent spawn', () => {
+    const prefs = {
+      watchLists: [
+        { pattern: 'src/db/', agents: ['dev-team-codd'], reason: 'database code changed' },
+      ],
+    };
+    fs.writeFileSync(path.join(tmpDir, '.claude', 'dev-team.json'), JSON.stringify(prefs));
+
+    const input = JSON.stringify({ tool_input: { file_path: '/app/src/db/schema.ts' } });
+    const stdout = execFileSync(process.execPath, [path.join(HOOKS_DIR, hook), input], {
+      encoding: 'utf-8',
+      timeout: 5000,
+      cwd: tmpDir,
+    });
+    assert.ok(stdout.includes('@dev-team-codd'), 'should recommend codd');
+    assert.ok(stdout.includes('database code changed'), 'should include reason');
+  });
+
+  it('does not match when pattern does not match file', () => {
+    const prefs = {
+      watchLists: [
+        { pattern: 'src/db/', agents: ['dev-team-codd'], reason: 'database code changed' },
+      ],
+    };
+    fs.writeFileSync(path.join(tmpDir, '.claude', 'dev-team.json'), JSON.stringify(prefs));
+
+    const input = JSON.stringify({ tool_input: { file_path: '/app/src/ui/button.tsx' } });
+    const stdout = execFileSync(process.execPath, [path.join(HOOKS_DIR, hook), input], {
+      encoding: 'utf-8',
+      timeout: 5000,
+      cwd: tmpDir,
+    });
+    assert.equal(stdout, '');
+  });
+
+  it('handles multiple watch list entries', () => {
+    const prefs = {
+      watchLists: [
+        { pattern: '\\.graphql$', agents: ['dev-team-mori', 'dev-team-voss'], reason: 'API schema changed' },
+        { pattern: 'src/db/', agents: ['dev-team-codd'], reason: 'database code changed' },
+      ],
+    };
+    fs.writeFileSync(path.join(tmpDir, '.claude', 'dev-team.json'), JSON.stringify(prefs));
+
+    const input = JSON.stringify({ tool_input: { file_path: '/app/schema.graphql' } });
+    const stdout = execFileSync(process.execPath, [path.join(HOOKS_DIR, hook), input], {
+      encoding: 'utf-8',
+      timeout: 5000,
+      cwd: tmpDir,
+    });
+    assert.ok(stdout.includes('@dev-team-mori'), 'should recommend mori');
+    assert.ok(stdout.includes('@dev-team-voss'), 'should recommend voss');
+  });
+
+  it('exits 0 with empty watchLists', () => {
+    const prefs = { watchLists: [] };
+    fs.writeFileSync(path.join(tmpDir, '.claude', 'dev-team.json'), JSON.stringify(prefs));
+
+    const input = JSON.stringify({ tool_input: { file_path: '/app/src/index.ts' } });
+    const stdout = execFileSync(process.execPath, [path.join(HOOKS_DIR, hook), input], {
+      encoding: 'utf-8',
+      timeout: 5000,
+      cwd: tmpDir,
+    });
+    assert.equal(stdout, '');
+  });
+});
+
 // ─── Task Loop ───────────────────────────────────────────────────────────────
 
 describe('dev-team-task-loop', () => {

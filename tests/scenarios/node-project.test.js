@@ -43,7 +43,7 @@ describe('Node.js project scenario', () => {
 
     // Hooks installed
     const hooks = fs.readdirSync(path.join(tmpDir, '.claude', 'hooks'));
-    assert.equal(hooks.length, 5);
+    assert.equal(hooks.length, 6);
 
     // Existing CLAUDE.md preserved
     const claudeMd = fs.readFileSync(path.join(tmpDir, 'CLAUDE.md'), 'utf-8');
