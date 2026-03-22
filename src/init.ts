@@ -91,6 +91,11 @@ const QUALITY_HOOKS: HookDefinition[] = [
     file: "dev-team-task-loop.js",
     description: "Iterative task loop with adversarial review gates",
   },
+  {
+    label: "Watch list",
+    file: "dev-team-watch-list.js",
+    description: "Auto-spawn agents when file patterns match (configurable)",
+  },
 ];
 
 interface PresetDefinition {
