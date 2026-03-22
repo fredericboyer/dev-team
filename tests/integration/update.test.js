@@ -117,4 +117,23 @@ describe('dev-team update', () => {
     const content = fs.readFileSync(learningsPath, 'utf-8');
     assert.ok(content.includes('PostgreSQL'), 'learnings should not be overwritten');
   });
+
+  it('updates all agents including those added after initial install', async () => {
+    await run(tmpDir, ['--all']);
+
+    // Stale every agent file
+    const agentsDir = path.join(tmpDir, '.claude', 'agents');
+    const agentFiles = fs.readdirSync(agentsDir);
+    for (const f of agentFiles) {
+      fs.writeFileSync(path.join(agentsDir, f), 'stale');
+    }
+
+    await update(tmpDir);
+
+    // Every agent should be restored — none should be our sentinel value
+    for (const f of agentFiles) {
+      const content = fs.readFileSync(path.join(agentsDir, f), 'utf-8');
+      assert.ok(content.startsWith('---'), `${f} should have been updated (should start with frontmatter)`);
+    }
+  });
 });
