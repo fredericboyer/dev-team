@@ -63,9 +63,7 @@ export async function update(targetDir: string): Promise<void> {
   // Step 1: Read existing preferences
   const prefsContent = readFile(prefsPath);
   if (!prefsContent) {
-    console.error(
-      "Error: No dev-team.json found. Run `npx dev-team init` first.",
-    );
+    console.error("Error: No dev-team.json found. Run `npx dev-team init` first.");
     process.exit(1);
   }
 
@@ -174,9 +172,7 @@ export async function update(targetDir: string): Promise<void> {
   const settingsContent = readFile(path.join(templates, "settings.json"));
   if (settingsContent) {
     const settingsTemplate: HookSettings = JSON.parse(settingsContent);
-    const selectedHookFiles = prefs.hooks
-      .map((label) => HOOK_FILES[label])
-      .filter(Boolean);
+    const selectedHookFiles = prefs.hooks.map((label) => HOOK_FILES[label]).filter(Boolean);
 
     const filteredSettings: HookSettings = { hooks: {} };
     for (const [event, entries] of Object.entries(settingsTemplate.hooks)) {
@@ -245,7 +241,12 @@ export async function update(targetDir: string): Promise<void> {
   const hookChanges = [...summary.hooks.updated, ...summary.hooks.added];
   const skillChanges = [...summary.skills.updated, ...summary.skills.added];
 
-  if (agentChanges.length === 0 && hookChanges.length === 0 && skillChanges.length === 0 && summary.claudeMd === "unchanged") {
+  if (
+    agentChanges.length === 0 &&
+    hookChanges.length === 0 &&
+    skillChanges.length === 0 &&
+    summary.claudeMd === "unchanged"
+  ) {
     console.log("  Already up to date. No changes needed.\n");
     return;
   }
