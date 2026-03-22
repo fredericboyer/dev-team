@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-03-22
+
+### Added
+- 3 new agents: Docs (documentation sync), Architect (ADR compliance, read-only/opus), Release Manager (versioning, changelog, semver)
+- `/dev-team:review` skill — orchestrated multi-agent parallel review with file-pattern-based agent selection
+- `/dev-team:audit` skill — full codebase security + quality + tooling audit with priority matrix
+- `npx dev-team update` command — in-place upgrades preserving agent memory, learnings, and CLAUDE.md customizations
+- Deming auto-scan on install — detects linters, formatters, SAST, CI/CD, and dependency audit gaps
+- Post-change-review hook patterns for Docs, Architect, and Release Manager agents
+- 16 new tests (106 total): update command integration, scan unit tests, updated assertions
+
 ## [0.1.2] - 2026-03-22
 
 ### Fixed

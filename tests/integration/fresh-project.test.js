@@ -98,7 +98,7 @@ describe('fresh project installation', () => {
     await run(tmpDir, ['--all']);
 
     const prefs = JSON.parse(fs.readFileSync(path.join(tmpDir, '.claude', 'dev-team.json'), 'utf-8'));
-    assert.equal(prefs.version, '0.1.0');
+    assert.equal(prefs.version, '0.2.0');
     assert.ok(prefs.agents.includes('Voss'));
     assert.ok(prefs.agents.includes('Beck'));
     assert.ok(prefs.hooks.includes('TDD enforcement'));

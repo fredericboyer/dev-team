@@ -3,12 +3,10 @@ import {
   templateDir,
   copyFile,
   fileExists,
-  dirExists,
   readFile,
   writeFile,
   mergeSettings,
   mergeClaudeMd,
-  listFilesRecursive,
 } from "./files";
 import type { HookSettings, HookMatcher } from "./files";
 
