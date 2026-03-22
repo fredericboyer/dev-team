@@ -17,8 +17,11 @@ This project uses [dev-team](https://github.com/dev-team) — adversarial AI age
 | `@dev-team-docs` | Documentation Engineer | Doc accuracy, stale docs, README/API docs, doc-code sync |
 | `@dev-team-architect` | Architect | Architectural review, coupling, dependency direction, ADR compliance |
 | `@dev-team-release` | Release Manager | Versioning, changelog, release readiness, semver validation |
+| `@dev-team-lead` | Team Lead / Orchestrator | Auto-delegates to specialists, manages review loops, resolves conflicts |
 
 ### Workflow
+
+For automatic delegation, use `@dev-team-lead` — it analyzes the task and routes to the right specialist.
 
 For non-trivial work: explore the area first, then implement, then review.
 

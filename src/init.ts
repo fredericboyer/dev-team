@@ -63,6 +63,11 @@ const ALL_AGENTS: AgentDefinition[] = [
     file: "dev-team-release.md",
     description: "Release Manager",
   },
+  {
+    label: "Lead",
+    file: "dev-team-lead.md",
+    description: "Orchestrator / Team Lead",
+  },
 ];
 
 const QUALITY_HOOKS: HookDefinition[] = [
