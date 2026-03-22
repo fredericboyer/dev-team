@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-03-22
+
+### Fixed
+- Blocking hooks (safety-guard, tdd-enforce) now fail closed (exit 2) on malformed JSON input instead of silently allowing operations
+- `create-agent` frontmatter `name:` field now uses lowercase (`dev-team-codd`) instead of titlecase
+
+### Added
+- Update command auto-discovers new hooks not in preferences and installs them
+- Skill directories auto-discovered from templates/skills/ — no hardcoded lists in init or update
+- `listSubdirectories()` utility in files.ts
+- 6 new tests: create-agent (5 tests), hook auto-discovery (1 test)
+- 124 tests total
+
+### Changed
+- Cleaned up all lint warnings: unused `sessionId`, regex→`.endsWith()` — oxlint now reports 0 warnings
+
 ## [0.3.0] - 2026-03-22
 
 ### Added
