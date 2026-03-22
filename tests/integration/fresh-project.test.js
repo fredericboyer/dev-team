@@ -127,7 +127,7 @@ describe('fresh project installation', () => {
 
     const prefs = JSON.parse(fs.readFileSync(path.join(tmpDir, '.claude', 'dev-team.json'), 'utf-8'));
     assert.equal(prefs.preset, 'fullstack');
-    assert.equal(prefs.agents.length, 9);
+    assert.equal(prefs.agents.length, 10);
   });
 
   it('--preset data installs data pipeline agents', async () => {
