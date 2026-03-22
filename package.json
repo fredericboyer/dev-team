@@ -1,0 +1,35 @@
+{
+  "name": "@fredericboyer/dev-team",
+  "version": "0.1.1",
+  "description": "Adversarial AI agent team for any project — installs Claude Code agents, hooks, and skills that enforce quality through productive friction",
+  "bin": {
+    "dev-team": "bin/dev-team.js"
+  },
+  "files": [
+    "bin/",
+    "lib/",
+    "templates/"
+  ],
+  "scripts": {
+    "test": "node --test tests/unit/files.test.js tests/integration/fresh-project.test.js tests/integration/idempotency.test.js",
+    "test:unit": "node --test tests/unit/files.test.js",
+    "test:integration": "node --test tests/integration/fresh-project.test.js tests/integration/idempotency.test.js",
+    "test:scenarios": "node --test tests/scenarios/",
+    "lint": "eslint bin/ lib/ templates/hooks/",
+    "format:check": "prettier --check .",
+    "validate:agents": "node scripts/validate-agents.js"
+  },
+  "keywords": [
+    "claude-code",
+    "ai-agents",
+    "developer-tools",
+    "code-review",
+    "tdd",
+    "security"
+  ],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
