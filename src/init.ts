@@ -47,6 +47,21 @@ const ALL_AGENTS: AgentDefinition[] = [
     file: "dev-team-deming.md",
     description: "Tooling & DX Optimizer",
   },
+  {
+    label: "Docs",
+    file: "dev-team-docs.md",
+    description: "Documentation Engineer",
+  },
+  {
+    label: "Architect",
+    file: "dev-team-architect.md",
+    description: "Architect",
+  },
+  {
+    label: "Release",
+    file: "dev-team-release.md",
+    description: "Release Manager",
+  },
 ];
 
 const QUALITY_HOOKS: HookDefinition[] = [

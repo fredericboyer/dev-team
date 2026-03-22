@@ -45,6 +45,9 @@ This project uses [dev-team](https://github.com/dev-team) — adversarial AI age
 | `@dev-team-knuth` | Quality Auditor | Coverage gaps, boundary conditions, correctness verification |
 | `@dev-team-beck` | Test Implementer | Writing tests, TDD cycles, translating audit findings into test cases |
 | `@dev-team-deming` | Tooling Optimizer | Linters, formatters, CI/CD, hooks, onboarding, automation |
+| `@dev-team-docs` | Documentation Engineer | Doc accuracy, stale docs, README/API docs, doc-code sync |
+| `@dev-team-architect` | Architect | Architectural review, coupling, dependency direction, ADR compliance |
+| `@dev-team-release` | Release Manager | Versioning, changelog, release readiness, semver validation |
 
 ### Workflow
 

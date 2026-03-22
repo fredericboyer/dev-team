@@ -107,6 +107,51 @@ if (TOOLING_PATTERNS.some((p) => p.test(fullPath))) {
   flags.push("@dev-team-deming (tooling change)");
 }
 
+// Documentation patterns → flag for Docs
+const DOC_PATTERNS = [
+  /readme/,
+  /changelog/,
+  /\.md$/,
+  /\.mdx$/,
+  /\/docs?\//,
+  /api-doc/,
+  /jsdoc/,
+  /typedoc/,
+];
+
+if (DOC_PATTERNS.some((p) => p.test(fullPath))) {
+  flags.push("@dev-team-docs (documentation changed)");
+}
+
+// Architecture patterns → flag for Architect
+const ARCH_PATTERNS = [
+  /\/adr\//,
+  /architecture/,
+  /\/modules?\//,
+  /\/layers?\//,
+  /\/core\//,
+  /\/domain\//,
+  /\/shared\//,
+];
+
+if (ARCH_PATTERNS.some((p) => p.test(fullPath))) {
+  flags.push("@dev-team-architect (architectural boundary touched)");
+}
+
+// Release patterns → flag for Release
+const RELEASE_PATTERNS = [
+  /package\.json$/,
+  /pyproject\.toml$/,
+  /cargo\.toml$/i,
+  /changelog/i,
+  /version/,
+  /\.github\/workflows\/.*release/,
+];
+
+if (RELEASE_PATTERNS.some((p) => p.test(fullPath))) {
+  flags.push("@dev-team-release (version/release artifact changed)");
+}
+
 // Always flag Knuth for non-test implementation files
 const isTestFile = /\.(test|spec)\.|__tests__|\/tests?\//.test(fullPath);
 const isCodeFile = /\.(js|ts|jsx|tsx|py|rb|go|java|rs|c|cpp|cs)$/.test(fullPath);
