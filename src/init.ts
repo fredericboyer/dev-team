@@ -268,7 +268,7 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
 
   // Step 9: Copy skills
   const skillsSrcDir = path.join(templates, "skills");
-  const skillDirs = ["dev-team-challenge", "dev-team-task"];
+  const skillDirs = ["dev-team-challenge", "dev-team-task", "dev-team-review", "dev-team-audit"];
   for (const skillDir of skillDirs) {
     const src = path.join(skillsSrcDir, skillDir, "SKILL.md");
     const dest = path.join(skillsDir, skillDir, "SKILL.md");
@@ -298,7 +298,7 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
   console.log("\nDone! Installed:\n");
   console.log(`  Agents:    ${selectedAgents.join(", ")} (${agentCount} files)`);
   console.log(`  Hooks:     ${selectedHooks.join(", ")} (${hookCount} files)`);
-  console.log("  Skills:    challenge, task");
+  console.log("  Skills:    challenge, task, review, audit");
   console.log(`  Memory:    ${selectedAgents.length} agent memories + shared learnings`);
   console.log(`  CLAUDE.md: ${claudeResult}`);
   console.log(`  Settings:  ${settingsPath}`);
