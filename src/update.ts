@@ -9,6 +9,7 @@ import {
   mergeClaudeMd,
 } from "./files";
 import type { HookSettings, HookMatcher } from "./files";
+import { ALL_AGENTS, QUALITY_HOOKS } from "./init";
 
 interface Preferences {
   version: string;
@@ -26,27 +27,16 @@ interface UpdateSummary {
   settings: boolean;
 }
 
-/**
- * Maps agent labels to filenames. Must stay in sync with init.ts ALL_AGENTS.
- */
-const AGENT_FILES: Record<string, string> = {
-  Voss: "dev-team-voss.md",
-  Mori: "dev-team-mori.md",
-  Szabo: "dev-team-szabo.md",
-  Knuth: "dev-team-knuth.md",
-  Beck: "dev-team-beck.md",
-  Deming: "dev-team-deming.md",
-};
+// Derived from init.ts — single source of truth, no drift
+const AGENT_FILES: Record<string, string> = Object.fromEntries(
+  ALL_AGENTS.map((a) => [a.label, a.file]),
+);
 
-const HOOK_FILES: Record<string, string> = {
-  "TDD enforcement": "dev-team-tdd-enforce.js",
-  "Safety guard": "dev-team-safety-guard.js",
-  "Post-change review": "dev-team-post-change-review.js",
-  "Pre-commit gate": "dev-team-pre-commit-gate.js",
-  "Task loop": "dev-team-task-loop.js",
-};
+const HOOK_FILES: Record<string, string> = Object.fromEntries(
+  QUALITY_HOOKS.map((h) => [h.label, h.file]),
+);
 
-const SKILL_DIRS = ["dev-team-challenge", "dev-team-task"];
+const SKILL_DIRS = ["dev-team-challenge", "dev-team-task", "dev-team-review", "dev-team-audit"];
 
 /**
  * Update flow: upgrades installed agents, hooks, and skills to latest templates.
