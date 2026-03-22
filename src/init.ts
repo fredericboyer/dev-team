@@ -311,7 +311,10 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
   // Step 12: Optional Deming tooling scan
   let runScan = isAll;
   if (!isAll) {
-    runScan = await prompts.confirm("Run Deming tooling scan to check for linters, SAST, and CI gaps?", true);
+    runScan = await prompts.confirm(
+      "Run Deming tooling scan to check for linters, SAST, and CI gaps?",
+      true,
+    );
   }
 
   if (runScan) {

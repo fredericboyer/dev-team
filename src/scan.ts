@@ -30,9 +30,7 @@ export function scanProject(targetDir: string): ScanFinding[] {
     { file: ".golangci.yml", tool: "golangci-lint" },
   ];
 
-  const foundLinter = linters.find((l) =>
-    fileExists(path.join(targetDir, l.file)),
-  );
+  const foundLinter = linters.find((l) => fileExists(path.join(targetDir, l.file)));
   if (foundLinter) {
     findings.push({
       category: "linter",
@@ -74,9 +72,7 @@ export function scanProject(targetDir: string): ScanFinding[] {
     { file: ".clang-format", tool: "clang-format" },
   ];
 
-  const foundFormatter = formatters.find((f) =>
-    fileExists(path.join(targetDir, f.file)),
-  );
+  const foundFormatter = formatters.find((f) => fileExists(path.join(targetDir, f.file)));
   if (foundFormatter) {
     findings.push({
       category: "formatter",
@@ -105,9 +101,7 @@ export function scanProject(targetDir: string): ScanFinding[] {
     { file: ".safety-policy.yml", tool: "Safety" },
   ];
 
-  const foundSast = sastConfigs.find((s) =>
-    fileExists(path.join(targetDir, s.file)),
-  );
+  const foundSast = sastConfigs.find((s) => fileExists(path.join(targetDir, s.file)));
   if (foundSast) {
     findings.push({
       category: "sast",
@@ -169,9 +163,7 @@ export function scanProject(targetDir: string): ScanFinding[] {
     { file: "go.sum", tool: "govulncheck" },
   ];
 
-  const foundLock = lockFiles.find((l) =>
-    fileExists(path.join(targetDir, l.file)),
-  );
+  const foundLock = lockFiles.find((l) => fileExists(path.join(targetDir, l.file)));
   if (foundLock) {
     findings.push({
       category: "dependency",
@@ -206,9 +198,7 @@ export function formatScanReport(findings: ScanFinding[]): string {
   }
 
   if (missing.length > 0) {
-    lines.push(
-      "\n  Tip: Run @dev-team-deming for deeper analysis and automated setup.",
-    );
+    lines.push("\n  Tip: Run @dev-team-deming for deeper analysis and automated setup.");
   }
 
   return lines.join("\n");
