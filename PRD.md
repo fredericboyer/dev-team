@@ -189,7 +189,98 @@ Implementation files cannot be modified without corresponding test changes. This
 
 ## Release Process
 
-- **Semver**: Strict semantic versioning. Breaking changes to agent behavior = major bump.
-- **Changelog**: Every release has a `CHANGELOG.md` entry.
-- **CI/CD**: GitHub Actions — lint, test, validate agents, cross-platform matrix (Node 18/20/22 × ubuntu/macos/windows).
-- **npm publish**: Triggered by version tags (`v*`). Tag must match `package.json` version.
+### Versioning
+
+Strict semantic versioning:
+- **Major** (1.0.0 → 2.0.0): Breaking changes to agent behavior, hook behavior, CLI flags, or installed file structure that would break existing users.
+- **Minor** (0.1.0 → 0.2.0): New agents, hooks, skills, or CLI features that are additive and backward-compatible.
+- **Patch** (0.1.0 → 0.1.1): Bug fixes to existing agents, hooks, CLI, or documentation corrections.
+
+### CI/CD
+
+**Continuous Integration** (every push to `main` and every PR):
+1. Test suite (unit + integration) across Node 18/20/22 × ubuntu/macos/windows
+2. Agent frontmatter validation (required fields: name, description, model, memory)
+3. Hook script syntax validation (Node `--check`)
+
+**Release pipeline** (triggered by version tags `v*`):
+1. Validate tag matches `package.json` version
+2. Run full CI suite
+3. Publish to npm
+4. Create GitHub Release with changelog entry
+
+### Prerequisites
+
+Before the first release, these must be configured:
+- [ ] `NPM_TOKEN` secret in GitHub repo settings (for npm publish)
+- [ ] Branch protection on `main` (require PR, require CI pass, no force push)
+- [ ] Verify `dev-team` package name is available on npm (or choose alternative)
+- [ ] npm account or org configured for publishing
+
+### Cutting a release
+
+Every release follows this checklist:
+
+```
+1. Ensure main is green (CI passing, no open DEFECT issues)
+
+2. Create a release branch:
+   git checkout -b release/vX.Y.Z
+
+3. Update version:
+   - Edit package.json version field
+   - Update CHANGELOG.md with new version entry
+
+4. Changelog entry format:
+   ## [X.Y.Z] - YYYY-MM-DD
+   ### Added
+   - New feature or agent
+   ### Changed
+   - Modified behavior
+   ### Fixed
+   - Bug fix
+
+5. Commit:
+   git commit -am "chore: release vX.Y.Z"
+
+6. Open PR: release/vX.Y.Z → main
+   - CI must pass
+   - At least one human review
+
+7. Merge PR
+
+8. Tag the merge commit:
+   git checkout main && git pull
+   git tag vX.Y.Z
+   git push origin vX.Y.Z
+
+9. Release workflow triggers automatically:
+   - Validates tag matches package.json
+   - Runs full test suite
+   - Publishes to npm
+   - Creates GitHub Release
+
+10. Verify:
+    - npm info dev-team shows new version
+    - npx dev-team init --all works in a fresh directory
+    - GitHub Release page has correct changelog
+```
+
+### What triggers a release
+
+- **Feature complete for a roadmap milestone** (e.g., all v0.2 issues closed)
+- **Critical bug fix** that affects users
+- **Security fix** in hooks or agent behavior
+
+Releases are deliberate, not automated on every merge. The team decides when to cut a release based on value delivered.
+
+### Branch protection rules
+
+The `main` branch should be protected with:
+- Require PR before merging (no direct pushes)
+- Require CI status checks to pass
+- Require at least 1 review approval
+- No force pushes
+- No deletions
+
+These are enforced by GitHub branch protection AND locally by `dev-team-issue-pr-enforce.js` hook.
