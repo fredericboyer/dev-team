@@ -11,6 +11,7 @@ import {
 } from "./files";
 import type { HookSettings, HookMatcher } from "./files";
 import * as prompts from "./prompts";
+import { scanProject, formatScanReport } from "./scan";
 
 interface AgentDefinition {
   label: string;
@@ -306,9 +307,24 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
     `  Workflow:  ${issueTracker}${branchConvention !== "None" ? `, branches: ${branchConvention}` : ""}`,
   );
   console.log("");
+
+  // Step 12: Optional Deming tooling scan
+  let runScan = isAll;
+  if (!isAll) {
+    runScan = await prompts.confirm("Run Deming tooling scan to check for linters, SAST, and CI gaps?", true);
+  }
+
+  if (runScan) {
+    const findings = scanProject(targetDir);
+    console.log(formatScanReport(findings));
+    console.log("");
+  }
+
   console.log("Next steps:");
   console.log("  1. Review installed agents in .claude/agents/");
   console.log("  2. Customize agent personas and focus areas to fit your project");
-  console.log("  3. Run @dev-team-deming to scan for additional tooling recommendations");
+  if (!runScan) {
+    console.log("  3. Run @dev-team-deming to scan for additional tooling recommendations");
+  }
   console.log("");
 }
