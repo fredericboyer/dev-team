@@ -14,12 +14,10 @@ let input = {};
 try {
   input = JSON.parse(process.argv[2] || "{}");
 } catch (err) {
-  // SECURITY TRADEOFF: Failing open means parse errors bypass safety checks.
-  // We accept this because failing closed (exit 2) would block all Bash operations when input is malformed.
-  console.warn(
-    `[dev-team safety-guard] Warning: Failed to parse hook input, allowing operation. ${err.message}`,
+  console.error(
+    `[dev-team safety-guard] BLOCKED: Failed to parse hook input. Blocking for safety. ${err.message}`,
   );
-  process.exit(0);
+  process.exit(2);
 }
 const command = (input.tool_input && input.tool_input.command) || "";
 

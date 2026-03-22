@@ -77,20 +77,19 @@ describe('dev-team-safety-guard', () => {
     }
   });
 
-  it('allows operation on malformed JSON input (exit 0)', () => {
+  it('blocks on malformed JSON input (fail closed, exit 2)', () => {
     try {
-      const stdout = execFileSync(process.execPath, [path.join(HOOKS_DIR, hook), 'not-json'], {
+      execFileSync(process.execPath, [path.join(HOOKS_DIR, hook), 'not-json'], {
         encoding: 'utf-8',
         timeout: 5000,
       });
-      // exit 0 means it returned successfully
-      assert.ok(true);
+      assert.fail('Should exit 2 on malformed JSON');
     } catch (err) {
-      assert.fail(`Should exit 0 on malformed JSON, got exit ${err.status}`);
+      assert.equal(err.status, 2, 'should fail closed with exit 2');
     }
   });
 
-  it('allows operation when no input provided (exit 0)', () => {
+  it('allows when no input provided (empty fallback parses as {})', () => {
     try {
       execFileSync(process.execPath, [path.join(HOOKS_DIR, hook)], {
         encoding: 'utf-8',
@@ -230,15 +229,15 @@ describe('dev-team-tdd-enforce', () => {
     assert.equal(result.code, 0);
   });
 
-  it('exits 0 on malformed JSON input', () => {
+  it('blocks on malformed JSON input (fail closed, exit 2)', () => {
     try {
       execFileSync(process.execPath, [path.join(HOOKS_DIR, hook), 'not-json'], {
         encoding: 'utf-8',
         timeout: 5000,
       });
-      assert.ok(true);
+      assert.fail('Should exit 2 on malformed JSON');
     } catch (err) {
-      assert.fail(`Should exit 0 on malformed JSON, got exit ${err.status}`);
+      assert.equal(err.status, 2, 'should fail closed with exit 2');
     }
   });
 

@@ -38,7 +38,7 @@ try {
   process.exit(0);
 }
 
-const { prompt, iteration = 1, maxIterations = 10, sessionId } = state;
+const { prompt, iteration = 1, maxIterations = 10, sessionId: _sessionId } = state;
 
 // Check iteration limit
 if (iteration >= maxIterations) {

@@ -52,7 +52,7 @@ if (hasApiFiles) {
 
 // Memory freshness check: if significant work was done but no memory files were updated, remind.
 const hasMemoryUpdates = files.some(
-  (f) => /dev-team-learnings\.md$/.test(f) || /agent-memory\/.*MEMORY\.md$/.test(f),
+  (f) => f.endsWith("dev-team-learnings.md") || /agent-memory\/.*MEMORY\.md$/.test(f),
 );
 
 if (hasImplFiles && !hasMemoryUpdates) {
@@ -65,7 +65,7 @@ if (hasImplFiles && !hasMemoryUpdates) {
     });
     unstagedMemory = unstaged
       .split("\n")
-      .some((f) => /dev-team-learnings\.md$/.test(f) || /agent-memory\/.*MEMORY\.md$/.test(f));
+      .some((f) => f.endsWith("dev-team-learnings.md") || /agent-memory\/.*MEMORY\.md$/.test(f));
   } catch {
     // Ignore — best effort
   }

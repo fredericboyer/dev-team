@@ -21,10 +21,10 @@ let input = {};
 try {
   input = JSON.parse(process.argv[2] || "{}");
 } catch (err) {
-  console.warn(
-    `[dev-team tdd-enforce] Warning: Failed to parse hook input, allowing operation. ${err.message}`,
+  console.error(
+    `[dev-team tdd-enforce] BLOCKED: Failed to parse hook input. Blocking for safety. ${err.message}`,
   );
-  process.exit(0);
+  process.exit(2);
 }
 const filePath = (input.tool_input && (input.tool_input.file_path || input.tool_input.path)) || "";
 
