@@ -1,0 +1,18 @@
+{
+  "version": "0.1.0",
+  "agents": [
+    "Voss",
+    "Mori",
+    "Szabo",
+    "Knuth",
+    "Beck",
+    "Deming"
+  ],
+  "hooks": [
+    "TDD enforcement",
+    "Safety guard",
+    "Post-change review",
+    "Pre-commit gate",
+    "Task loop"
+  ]
+}

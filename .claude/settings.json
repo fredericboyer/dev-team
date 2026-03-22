@@ -9,6 +9,50 @@
             "command": "node .claude/hooks/dev-team-issue-pr-enforce.js"
           }
         ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/dev-team-safety-guard.js"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/dev-team-post-change-review.js"
+          },
+          {
+            "type": "command",
+            "command": "node .claude/hooks/dev-team-tdd-enforce.js"
+          }
+        ]
+      }
+    ],
+    "TaskCompleted": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/dev-team-pre-commit-gate.js"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/dev-team-task-loop.js"
+          }
+        ]
       }
     ]
   }

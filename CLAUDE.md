@@ -25,12 +25,31 @@ Adversarial AI agent team for any project. Installs Claude Code agents, hooks, a
 - `node bin/dev-team.js init --all` — test the installer locally
 - CommonJS, Node.js 18+, zero dependencies
 
-## Agents
-
-This project uses its own agents. Invoke with `@dev-team-voss`, `@dev-team-mori`, `@dev-team-szabo`, `@dev-team-knuth`, `@dev-team-deming`.
-
-When agents disagree, escalate to the human after one exchange each. Human decides, decision is final.
-
 ## Architecture decisions
 
 Stored in `docs/adr/`. Read before making changes to foundational patterns. Update if your change affects an existing ADR.
+
+<!-- dev-team:begin -->
+
+## Agents
+
+| Agent | Role | When to use |
+|-------|------|-------------|
+| `@dev-team-voss` | Backend Engineer | API design, data modeling, system architecture, error handling |
+| `@dev-team-mori` | Frontend/UI Engineer | Components, accessibility, UX patterns, state management |
+| `@dev-team-szabo` | Security Auditor | Vulnerability review, auth flows, attack surface analysis |
+| `@dev-team-knuth` | Quality Auditor | Coverage gaps, boundary conditions, correctness verification |
+| `@dev-team-beck` | Test Implementer | Writing tests, TDD cycles, translating audit findings into test cases |
+| `@dev-team-deming` | Tooling Optimizer | Linters, formatters, CI/CD, hooks, onboarding, automation |
+
+Agents challenge each other using classified findings:
+- `[DEFECT]` blocks progress. `[RISK]`, `[QUESTION]`, `[SUGGESTION]` are advisory.
+- When agents disagree, they escalate to the human after one exchange each. Human decides.
+
+### Skills
+
+- `/dev-team:challenge` — critically examine a proposal or implementation
+- `/dev-team:task` — start an iterative task loop with adversarial review gates
+
+<!-- dev-team:end -->
+
