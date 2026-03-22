@@ -1,5 +1,6 @@
 import { run } from "../init";
 import { update } from "../update";
+import { createAgent } from "../create-agent";
 
 const args = process.argv.slice(2);
 const command = args[0];
@@ -14,6 +15,8 @@ if (command === "init") {
     console.error(`Error: ${err.message}`);
     process.exit(1);
   });
+} else if (command === "create-agent") {
+  createAgent(process.cwd(), args[1]);
 } else {
   console.log("dev-team — Adversarial AI agent team for any project\n");
   console.log("Usage:");
@@ -23,6 +26,7 @@ if (command === "init") {
   console.log("  npx dev-team init --preset fullstack  Full-stack (all agents)");
   console.log("  npx dev-team init --preset data       Data pipeline (backend, quality, tooling)");
   console.log("  npx dev-team update                  Update agents, hooks, and skills to latest");
+  console.log("  npx dev-team create-agent <name>     Scaffold a new custom agent");
   console.log("");
   process.exit(command === "--help" || command === "-h" ? 0 : 1);
 }
