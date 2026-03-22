@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-03-22
+
 ### Added
 - 6 adversarial agents: Voss (backend), Mori (frontend), Szabo (security), Knuth (quality), Beck (tests), Deming (tooling)
 - 5 enforced hooks: safety guard, TDD enforcement, post-change review, pre-commit gate, task loop
@@ -17,3 +19,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 6 Architecture Decision Records
 - CI/CD with GitHub Actions (Node 18/20/22 x ubuntu/macos/windows)
 - Product Requirements Document
+- Release process with documented checklist
