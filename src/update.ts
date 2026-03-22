@@ -155,6 +155,18 @@ export async function update(targetDir: string): Promise<void> {
     }
   }
 
+  // Detect new hooks available in templates but not in preferences
+  for (const [label, file] of Object.entries(HOOK_FILES)) {
+    if (prefs.hooks.includes(label)) continue;
+    const src = path.join(templates, "hooks", file);
+    if (fileExists(src)) {
+      const dest = path.join(hooksDir, file);
+      copyFile(src, dest);
+      summary.hooks.added.push(label);
+      prefs.hooks.push(label);
+    }
+  }
+
   // Step 4: Update settings
   const settingsPath = path.join(claudeDir, "settings.json");
   const settingsContent = readFile(path.join(templates, "settings.json"));
