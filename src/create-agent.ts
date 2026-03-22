@@ -2,7 +2,7 @@ import path from "path";
 import { fileExists, writeFile } from "./files";
 
 const AGENT_TEMPLATE = `---
-name: dev-team-AGENTNAME
+name: FULLNAME
 description: ROLE. Use to TRIGGER_CONDITIONS.
 tools: Read, Edit, Write, Bash, Grep, Glob, Agent
 model: sonnet
@@ -90,8 +90,8 @@ export function createAgent(targetDir: string, name: string): void {
     process.exit(1);
   }
 
-  const agentContent = AGENT_TEMPLATE.replace(/AGENTNAME/g, titleName);
-  const memoryContent = MEMORY_TEMPLATE.replace(/AGENTNAME/g, `${titleName}`);
+  const agentContent = AGENT_TEMPLATE.replace(/FULLNAME/g, fullName).replace(/AGENTNAME/g, titleName);
+  const memoryContent = MEMORY_TEMPLATE.replace(/AGENTNAME/g, titleName);
 
   writeFile(agentPath, agentContent);
   writeFile(memoryPath, memoryContent);
