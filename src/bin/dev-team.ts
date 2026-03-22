@@ -17,9 +17,12 @@ if (command === "init") {
 } else {
   console.log("dev-team — Adversarial AI agent team for any project\n");
   console.log("Usage:");
-  console.log("  npx dev-team init          Interactive onboarding wizard");
-  console.log("  npx dev-team init --all    Install everything with defaults");
-  console.log("  npx dev-team update        Update agents, hooks, and skills to latest");
+  console.log("  npx dev-team init                    Interactive onboarding wizard");
+  console.log("  npx dev-team init --all              Install everything with defaults");
+  console.log("  npx dev-team init --preset backend   Backend-heavy (API, security, architecture)");
+  console.log("  npx dev-team init --preset fullstack  Full-stack (all agents)");
+  console.log("  npx dev-team init --preset data       Data pipeline (backend, quality, tooling)");
+  console.log("  npx dev-team update                  Update agents, hooks, and skills to latest");
   console.log("");
   process.exit(command === "--help" || command === "-h" ? 0 : 1);
 }

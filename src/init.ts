@@ -93,13 +93,57 @@ const QUALITY_HOOKS: HookDefinition[] = [
   },
 ];
 
+interface PresetDefinition {
+  label: string;
+  description: string;
+  agents: string[];
+  hooks: string[];
+}
+
+const PRESETS: Record<string, PresetDefinition> = {
+  backend: {
+    label: "backend",
+    description: "Backend-heavy — API, security, architecture, quality",
+    agents: ["Voss", "Szabo", "Knuth", "Beck", "Deming", "Architect", "Release"],
+    hooks: QUALITY_HOOKS.map((h) => h.label),
+  },
+  fullstack: {
+    label: "fullstack",
+    description: "Full-stack — all agents for end-to-end coverage",
+    agents: ALL_AGENTS.map((a) => a.label),
+    hooks: QUALITY_HOOKS.map((h) => h.label),
+  },
+  data: {
+    label: "data",
+    description: "Data pipeline — backend, quality, security, tooling",
+    agents: ["Voss", "Szabo", "Knuth", "Beck", "Deming", "Docs"],
+    hooks: QUALITY_HOOKS.map((h) => h.label),
+  },
+};
+
+export { PRESETS, ALL_AGENTS, QUALITY_HOOKS };
+
 /**
  * Main init flow.
  */
 export async function run(targetDir: string, flags: string[] = []): Promise<void> {
   const isAll = flags.includes("--all");
+  const presetFlag = flags.find((f) => f.startsWith("--preset"));
+  let presetName: string | undefined;
+  if (presetFlag) {
+    const idx = flags.indexOf(presetFlag);
+    presetName = presetFlag.includes("=") ? presetFlag.split("=")[1] : flags[idx + 1];
+  }
+  const preset = presetName ? PRESETS[presetName] : undefined;
+  if (presetName && !preset) {
+    console.error(`Unknown preset: ${presetName}. Available: ${Object.keys(PRESETS).join(", ")}`);
+    process.exit(1);
+  }
 
   console.log("\ndev-team — Adversarial AI agent team\n");
+  if (preset) {
+    console.log(`Using preset: ${preset.label} — ${preset.description}\n`);
+  }
 
   // Step 1: Detect existing state
   const claudeDir = path.join(targetDir, ".claude");
@@ -120,8 +164,8 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
 
   // Step 2: Agent selection
   let selectedAgents: string[];
-  if (isAll) {
-    selectedAgents = ALL_AGENTS.map((a) => a.label);
+  if (isAll || preset) {
+    selectedAgents = preset ? preset.agents : ALL_AGENTS.map((a) => a.label);
   } else {
     selectedAgents = await prompts.checkbox(
       "Which agents would you like to install?",
@@ -135,8 +179,8 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
 
   // Step 3: Hook selection
   let selectedHooks: string[];
-  if (isAll) {
-    selectedHooks = QUALITY_HOOKS.map((h) => h.label);
+  if (isAll || preset) {
+    selectedHooks = preset ? preset.hooks : QUALITY_HOOKS.map((h) => h.label);
   } else {
     selectedHooks = await prompts.checkbox(
       "Which quality hooks do you want to enforce?",
@@ -150,7 +194,7 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
 
   // Step 4: Issue tracker preference
   let issueTracker: string;
-  if (isAll) {
+  if (isAll || preset) {
     issueTracker = "GitHub Issues";
   } else {
     issueTracker = await prompts.select("Which issue tracker do you use?", [
@@ -164,7 +208,7 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
 
   // Step 5: Branch naming convention
   let branchConvention: string;
-  if (isAll) {
+  if (isAll || preset) {
     branchConvention = "feat/123-description";
   } else {
     branchConvention = await prompts.select("Branch naming convention?", [
@@ -190,7 +234,7 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
     const src = path.join(templates, "agents", agent.file);
     const dest = path.join(agentsDir, agent.file);
 
-    if (fileExists(dest) && !isAll) {
+    if (fileExists(dest) && !isAll && !preset) {
       const overwrite = await prompts.confirm(`  ${agent.file} already exists. Overwrite?`, false);
       if (!overwrite) continue;
     }
@@ -228,7 +272,7 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
     const src = path.join(templates, "hooks", hook.file);
     const dest = path.join(hooksDir, hook.file);
 
-    if (fileExists(dest) && !isAll) {
+    if (fileExists(dest) && !isAll && !preset) {
       const overwrite = await prompts.confirm(`  ${hook.file} already exists. Overwrite?`, false);
       if (!overwrite) continue;
     }
@@ -286,13 +330,16 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
   const claudeResult = mergeClaudeMd(claudeMdPath, claudeMdTemplate);
 
   // Save preferences
-  const prefs = {
+  const prefs: Record<string, unknown> = {
     version: "0.2.0",
     agents: selectedAgents,
     hooks: selectedHooks,
     issueTracker,
     branchConvention,
   };
+  if (preset) {
+    prefs.preset = preset.label;
+  }
   writeFile(prefsPath, JSON.stringify(prefs, null, 2) + "\n");
 
   // Step 11: Print summary
@@ -309,8 +356,8 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
   console.log("");
 
   // Step 12: Optional Deming tooling scan
-  let runScan = isAll;
-  if (!isAll) {
+  let runScan = isAll || !!preset;
+  if (!isAll && !preset) {
     runScan = await prompts.confirm(
       "Run Deming tooling scan to check for linters, SAST, and CI gaps?",
       true,
