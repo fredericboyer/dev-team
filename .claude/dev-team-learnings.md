@@ -22,10 +22,10 @@
 
 ## Quality Benchmarks
 
-- 106 tests: 25 unit (files), 57 unit (hooks), 9 unit (scan), 7 integration (update), 8 scenario (Node.js, Python, upgrade path)
-- 9 agents: Voss, Mori, Szabo, Knuth, Beck, Deming, Docs, Architect, Release
+- 117 tests: 25 unit (files), 62 unit (hooks + watch list), 9 unit (scan), 7 integration (update), 3 integration (presets), 11 scenario
+- 10 agents: Voss, Mori, Szabo, Knuth, Beck, Deming, Docs, Architect, Release, Lead
 - 4 skills: challenge, task, review, audit
-- All 5 hooks have block-path and skip-path coverage.
+- 6 hooks: TDD enforce, safety guard, post-change review, pre-commit gate, task loop, watch list
 - CI: 3 OS x 3 Node versions + lint + format + agent validation + hook validation.
 - Always run `npm run format` before committing new `.ts` files — oxfmt formatting is checked in CI.
 

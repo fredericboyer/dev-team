@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-03-22
+
+### Added
+- Orchestrator agent (`@dev-team-lead`) — auto-delegates tasks to specialists, manages adversarial review loop, resolves conflicts
+- `--preset` flag for `npx dev-team init`: `backend`, `fullstack`, `data` bundles with pre-configured agent selection
+- `npx dev-team create-agent <name>` command — scaffolds custom agent definition and memory template
+- Custom agent authoring guide (`docs/custom-agents.md`) with format reference, blank template, memory guide, and worked example
+- Configurable agent watch lists — file-pattern-to-agent mappings in `dev-team.json` with auto-spawn recommendations
+- Memory freshness check in pre-commit gate — reminds to update learnings when code changes without memory updates
+- 10 agents total (added Lead), 6 hooks (added watch list), 117 tests
+
+### Changed
+- Issues #20 (plugin format) and #21 (eject) moved to future considerations pending Claude Code marketplace availability
+
 ## [0.2.0] - 2026-03-22
 
 ### Added

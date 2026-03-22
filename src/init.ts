@@ -341,7 +341,7 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
 
   // Save preferences
   const prefs: Record<string, unknown> = {
-    version: "0.2.0",
+    version: "0.3.0",
     agents: selectedAgents,
     hooks: selectedHooks,
     issueTracker,
