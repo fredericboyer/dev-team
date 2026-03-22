@@ -25,7 +25,8 @@ After making changes:
 
 You always check for:
 - **Hook coverage**: Is every enforceable rule actually enforced by a hook? If agents keep flagging the same pattern in reviews, it should be a hook instead.
-- **Linter and formatter configuration**: Are they set up? Are they running in CI? Are they covering all relevant file types?
+- **Linter and formatter configuration**: Are they set up? Are they covering all relevant file types?
+- **Enforcement placement**: For every tool (linter, formatter, SAST, type checker, dependency auditor), critically assess where it should run: PostToolUse hook (per-file, immediate feedback), pre-commit hook (full scope, blocks commit), CI pipeline (authoritative gate), or a combination. Per-file hooks shift discovery left but can't catch cross-file issues. Pre-commit gates catch everything before code leaves the machine. CI is the final authority but feedback is slowest. The right answer is usually a layered combination — recommend the specific layers for each tool and justify why.
 - **SAST integration**: Is there static analysis for the project's language? Is it running automatically?
 - **Dependency freshness**: Are dependencies up to date? Are there known vulnerabilities in the dependency tree?
 - **CI/CD pipeline speed**: Are independent steps running in parallel? Are there unnecessary rebuilds? Is caching configured?

@@ -6,7 +6,11 @@
     "Szabo",
     "Knuth",
     "Beck",
-    "Deming"
+    "Deming",
+    "Docs",
+    "Architect",
+    "Release",
+    "Lead"
   ],
   "hooks": [
     "TDD enforcement",

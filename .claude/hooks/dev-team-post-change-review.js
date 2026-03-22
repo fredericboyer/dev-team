@@ -16,7 +16,9 @@ let input = {};
 try {
   input = JSON.parse(process.argv[2] || "{}");
 } catch (err) {
-  console.warn(`[dev-team post-change-review] Warning: Failed to parse hook input, allowing operation. ${err.message}`);
+  console.warn(
+    `[dev-team post-change-review] Warning: Failed to parse hook input, allowing operation. ${err.message}`,
+  );
   process.exit(0);
 }
 const filePath = (input.tool_input && (input.tool_input.file_path || input.tool_input.path)) || "";
@@ -103,6 +105,51 @@ const TOOLING_PATTERNS = [
 
 if (TOOLING_PATTERNS.some((p) => p.test(fullPath))) {
   flags.push("@dev-team-deming (tooling change)");
+}
+
+// Documentation patterns → flag for Docs
+const DOC_PATTERNS = [
+  /readme/,
+  /changelog/,
+  /\.md$/,
+  /\.mdx$/,
+  /\/docs?\//,
+  /api-doc/,
+  /jsdoc/,
+  /typedoc/,
+];
+
+if (DOC_PATTERNS.some((p) => p.test(fullPath))) {
+  flags.push("@dev-team-docs (documentation changed)");
+}
+
+// Architecture patterns → flag for Architect
+const ARCH_PATTERNS = [
+  /\/adr\//,
+  /architecture/,
+  /\/modules?\//,
+  /\/layers?\//,
+  /\/core\//,
+  /\/domain\//,
+  /\/shared\//,
+];
+
+if (ARCH_PATTERNS.some((p) => p.test(fullPath))) {
+  flags.push("@dev-team-architect (architectural boundary touched)");
+}
+
+// Release patterns → flag for Release
+const RELEASE_PATTERNS = [
+  /package\.json$/,
+  /pyproject\.toml$/,
+  /cargo\.toml$/i,
+  /changelog/i,
+  /version/,
+  /\.github\/workflows\/.*release/,
+];
+
+if (RELEASE_PATTERNS.some((p) => p.test(fullPath))) {
+  flags.push("@dev-team-release (version/release artifact changed)");
 }
 
 // Always flag Knuth for non-test implementation files
