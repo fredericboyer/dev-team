@@ -7,6 +7,7 @@ import {
   writeFile,
   mergeSettings,
   mergeClaudeMd,
+  listSubdirectories,
 } from "./files";
 import type { HookSettings, HookMatcher } from "./files";
 import { ALL_AGENTS, QUALITY_HOOKS } from "./init";
@@ -36,7 +37,7 @@ const HOOK_FILES: Record<string, string> = Object.fromEntries(
   QUALITY_HOOKS.map((h) => [h.label, h.file]),
 );
 
-const SKILL_DIRS = ["dev-team-challenge", "dev-team-task", "dev-team-review", "dev-team-audit"];
+// Skills auto-discovered at runtime from templates/skills/
 
 /**
  * Update flow: upgrades installed agents, hooks, and skills to latest templates.
@@ -194,11 +195,12 @@ export async function update(targetDir: string): Promise<void> {
     summary.settings = true;
   }
 
-  // Step 5: Update skills
+  // Step 5: Update skills (auto-discovered from templates/skills/)
   const skillsDir = path.join(claudeDir, "skills");
   const skillsSrcDir = path.join(templates, "skills");
+  const discoveredSkills = listSubdirectories(skillsSrcDir);
 
-  for (const skillDir of SKILL_DIRS) {
+  for (const skillDir of discoveredSkills) {
     const src = path.join(skillsSrcDir, skillDir, "SKILL.md");
     const dest = path.join(skillsDir, skillDir, "SKILL.md");
 

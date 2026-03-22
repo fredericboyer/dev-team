@@ -152,6 +152,21 @@ export function mergeClaudeMd(
 }
 
 /**
+ * Lists immediate subdirectory names in a directory.
+ * Returns empty array if directory doesn't exist.
+ */
+export function listSubdirectories(dir: string): string[] {
+  try {
+    return fs
+      .readdirSync(dir, { withFileTypes: true })
+      .filter((e) => e.isDirectory())
+      .map((e) => e.name);
+  } catch {
+    return [];
+  }
+}
+
+/**
  * Lists all files in a directory recursively.
  */
 export function listFilesRecursive(dir: string): string[] {
