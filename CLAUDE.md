@@ -4,8 +4,8 @@ Adversarial AI agent team for any project. Installs Claude Code agents, hooks, a
 
 ## Project structure
 
-- `bin/` — CLI entry point (`npx dev-team init`)
-- `lib/` — Core logic (init, prompts, file helpers). Zero npm dependencies.
+- `bin/` — CLI entry point shim (`npx dev-team init`)
+- `src/` — TypeScript source (compiled to `dist/` via `tsc`)
 - `templates/` — Agent definitions, hook scripts, skills, and CLAUDE.md template that get copied into target projects
 - `docs/adr/` — Architecture Decision Records. Every non-trivial decision gets an ADR.
 - `tests/` — Unit, integration, and scenario tests
@@ -23,7 +23,7 @@ Adversarial AI agent team for any project. Installs Claude Code agents, hooks, a
 
 - `npm test` — run all tests
 - `node bin/dev-team.js init --all` — test the installer locally
-- CommonJS, Node.js 18+, zero dependencies
+- TypeScript source, compiled to CommonJS. Node.js 18+, zero runtime dependencies.
 
 ## Architecture decisions
 
