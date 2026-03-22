@@ -8,6 +8,7 @@ import {
   writeFile,
   mergeSettings,
   mergeClaudeMd,
+  listSubdirectories,
 } from "./files";
 import type { HookSettings, HookMatcher } from "./files";
 import * as prompts from "./prompts";
@@ -321,9 +322,9 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
 
   mergeSettings(settingsPath, filteredSettings);
 
-  // Step 9: Copy skills
+  // Step 9: Copy skills (auto-discovered from templates/skills/)
   const skillsSrcDir = path.join(templates, "skills");
-  const skillDirs = ["dev-team-challenge", "dev-team-task", "dev-team-review", "dev-team-audit"];
+  const skillDirs = listSubdirectories(skillsSrcDir);
   for (const skillDir of skillDirs) {
     const src = path.join(skillsSrcDir, skillDir, "SKILL.md");
     const dest = path.join(skillsDir, skillDir, "SKILL.md");

@@ -136,4 +136,24 @@ describe('dev-team update', () => {
       assert.ok(content.startsWith('---'), `${f} should have been updated (should start with frontmatter)`);
     }
   });
+
+  it('auto-discovers and installs new hooks not in preferences', async () => {
+    await run(tmpDir, ['--all']);
+
+    // Remove a hook from preferences to simulate an older install
+    const prefsPath = path.join(tmpDir, '.claude', 'dev-team.json');
+    const prefs = JSON.parse(fs.readFileSync(prefsPath, 'utf-8'));
+    const removedHook = prefs.hooks.pop(); // Remove last hook
+    fs.writeFileSync(prefsPath, JSON.stringify(prefs, null, 2));
+
+    // Delete the hook file too
+    const hookFiles = fs.readdirSync(path.join(tmpDir, '.claude', 'hooks'));
+    const hookCountBefore = hookFiles.length;
+
+    await update(tmpDir);
+
+    // Hook should be re-added to preferences
+    const updatedPrefs = JSON.parse(fs.readFileSync(prefsPath, 'utf-8'));
+    assert.ok(updatedPrefs.hooks.includes(removedHook), `${removedHook} should be auto-discovered`);
+  });
 });
