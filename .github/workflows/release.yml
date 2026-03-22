@@ -2,15 +2,14 @@ name: Release
 
 on:
   push:
-    tags: ['v*']
-
-permissions:
-  contents: read
-  id-token: write
+    tags: ['v[0-9]*']
 
 jobs:
-  validate:
+  publish:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@v4
 
@@ -54,3 +53,34 @@ jobs:
         run: npm publish --access public --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  github-release:
+    needs: publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract changelog for this version
+        run: |
+          VERSION="${TAG_REF#v}"
+          NOTES=$(awk -v ver="$VERSION" '
+            index($0, "## [" ver "]") == 1 { found=1; next }
+            /^## \[/ { if(found) exit }
+            found { print }
+          ' CHANGELOG.md)
+          if [ -z "$NOTES" ]; then
+            echo "::warning::No changelog entry found for version ${VERSION}"
+            echo "Release ${VERSION}" > /tmp/release-notes.md
+          else
+            echo "$NOTES" | sed '/./,$!d' > /tmp/release-notes.md
+          fi
+        env:
+          TAG_REF: ${{ github.ref_name }}
+
+      - name: Create GitHub Release
+        run: gh release create "$TAG_REF" --title "$TAG_REF" --notes-file /tmp/release-notes.md
+        env:
+          TAG_REF: ${{ github.ref_name }}
+          GH_TOKEN: ${{ github.token }}
