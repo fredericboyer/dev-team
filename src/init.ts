@@ -287,7 +287,9 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
   console.log(`  Memory:    ${selectedAgents.length} agent memories + shared learnings`);
   console.log(`  CLAUDE.md: ${claudeResult}`);
   console.log(`  Settings:  ${settingsPath}`);
-  console.log(`  Workflow:  ${issueTracker}${branchConvention !== "None" ? `, branches: ${branchConvention}` : ""}`);
+  console.log(
+    `  Workflow:  ${issueTracker}${branchConvention !== "None" ? `, branches: ${branchConvention}` : ""}`,
+  );
   console.log("");
   console.log("Next steps:");
   console.log("  1. Review installed agents in .claude/agents/");
