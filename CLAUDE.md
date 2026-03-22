@@ -58,6 +58,8 @@ Agents challenge each other using classified findings:
 
 - `/dev-team:challenge` — critically examine a proposal or implementation
 - `/dev-team:task` — start an iterative task loop with adversarial review gates
+- `/dev-team:review` — orchestrated multi-agent parallel review of changes
+- `/dev-team:audit` — full codebase security + quality + tooling audit
 
 ### Learnings — where to write what
 
