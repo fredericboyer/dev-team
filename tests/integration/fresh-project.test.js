@@ -105,4 +105,39 @@ describe('fresh project installation', () => {
     assert.equal(prefs.issueTracker, 'GitHub Issues');
     assert.equal(prefs.branchConvention, 'feat/123-description');
   });
+
+  it('--preset backend installs only backend agents', async () => {
+    await run(tmpDir, ['--preset', 'backend']);
+
+    const prefs = JSON.parse(fs.readFileSync(path.join(tmpDir, '.claude', 'dev-team.json'), 'utf-8'));
+    assert.equal(prefs.preset, 'backend');
+    assert.ok(prefs.agents.includes('Voss'), 'should include Voss');
+    assert.ok(prefs.agents.includes('Szabo'), 'should include Szabo');
+    assert.ok(prefs.agents.includes('Architect'), 'should include Architect');
+    assert.ok(!prefs.agents.includes('Mori'), 'should not include Mori');
+    assert.ok(!prefs.agents.includes('Docs'), 'should not include Docs');
+
+    // Only selected agents should have files
+    const agents = fs.readdirSync(path.join(tmpDir, '.claude', 'agents'));
+    assert.equal(agents.length, prefs.agents.length);
+  });
+
+  it('--preset fullstack installs all agents', async () => {
+    await run(tmpDir, ['--preset', 'fullstack']);
+
+    const prefs = JSON.parse(fs.readFileSync(path.join(tmpDir, '.claude', 'dev-team.json'), 'utf-8'));
+    assert.equal(prefs.preset, 'fullstack');
+    assert.equal(prefs.agents.length, 9);
+  });
+
+  it('--preset data installs data pipeline agents', async () => {
+    await run(tmpDir, ['--preset', 'data']);
+
+    const prefs = JSON.parse(fs.readFileSync(path.join(tmpDir, '.claude', 'dev-team.json'), 'utf-8'));
+    assert.equal(prefs.preset, 'data');
+    assert.ok(prefs.agents.includes('Voss'), 'should include Voss');
+    assert.ok(prefs.agents.includes('Docs'), 'should include Docs');
+    assert.ok(!prefs.agents.includes('Mori'), 'should not include Mori');
+    assert.ok(!prefs.agents.includes('Architect'), 'should not include Architect');
+  });
 });
