@@ -13,12 +13,12 @@
  * State file: .claude/dev-team-task.json (created by /dev-team:task skill)
  */
 
-'use strict';
+"use strict";
 
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
-const STATE_FILE = path.join(process.cwd(), '.claude', 'dev-team-task.json');
+const STATE_FILE = path.join(process.cwd(), ".claude", "dev-team-task.json");
 
 // No state file means no active task loop — allow normal exit
 if (!fs.existsSync(STATE_FILE)) {
@@ -27,10 +27,14 @@ if (!fs.existsSync(STATE_FILE)) {
 
 let state;
 try {
-  state = JSON.parse(fs.readFileSync(STATE_FILE, 'utf-8'));
+  state = JSON.parse(fs.readFileSync(STATE_FILE, "utf-8"));
 } catch {
   // Corrupted state file — clean up and allow exit
-  try { fs.unlinkSync(STATE_FILE); } catch { /* ignore */ }
+  try {
+    fs.unlinkSync(STATE_FILE);
+  } catch {
+    /* ignore */
+  }
   process.exit(0);
 }
 
@@ -39,9 +43,13 @@ const { prompt, iteration = 1, maxIterations = 10, sessionId } = state;
 // Check iteration limit
 if (iteration >= maxIterations) {
   console.log(
-    `[dev-team task-loop] Max iterations (${maxIterations}) reached. Exiting loop. Review remaining issues manually.`
+    `[dev-team task-loop] Max iterations (${maxIterations}) reached. Exiting loop. Review remaining issues manually.`,
   );
-  try { fs.unlinkSync(STATE_FILE); } catch { /* ignore */ }
+  try {
+    fs.unlinkSync(STATE_FILE);
+  } catch {
+    /* ignore */
+  }
   process.exit(0);
 }
 
@@ -56,7 +64,7 @@ try {
 
 // Block exit and re-inject the task prompt
 const output = JSON.stringify({
-  decision: 'block',
+  decision: "block",
   reason: prompt,
   systemMessage: `[dev-team task-loop] Iteration ${iteration + 1}/${maxIterations}. Review findings and address any [DEFECT] challenges. When no [DEFECT] remains, output <promise>DONE</promise> to exit the loop. To cancel: delete .claude/dev-team-task.json`,
 });

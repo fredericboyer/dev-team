@@ -19,19 +19,30 @@ jobs:
           node-version: 22
           registry-url: 'https://registry.npmjs.org'
 
+      - run: npm install
+
       - name: Validate semver tag matches package.json
         run: |
           PKG_VERSION=$(node -p "require('./package.json').version")
-          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          TAG_VERSION="${TAG_REF#v}"
           if [ "$PKG_VERSION" != "$TAG_VERSION" ]; then
             echo "Tag version ($TAG_VERSION) does not match package.json version ($PKG_VERSION)"
             exit 1
           fi
         env:
-          GITHUB_REF_NAME: ${{ github.ref_name }}
+          TAG_REF: ${{ github.ref_name }}
+
+      - name: Build
+        run: npm run build
 
       - name: Run full test suite
         run: npm test
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Format check
+        run: npm run format:check
 
       - name: Validate agents
         run: node scripts/validate-agents.js

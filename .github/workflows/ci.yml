@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 jobs:
-  test:
+  build-and-test:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -20,8 +20,30 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
+      - run: npm install
+
+      - name: Build
+        run: npm run build
+
       - name: Run tests
         run: npm test
+
+  lint-and-format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - run: npm install
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Format check
+        run: npm run format:check
 
   validate-agents:
     runs-on: ubuntu-latest

@@ -2,22 +2,28 @@
   "name": "@fredericboyer/dev-team",
   "version": "0.1.2",
   "description": "Adversarial AI agent team for any project — installs Claude Code agents, hooks, and skills that enforce quality through productive friction",
+  "main": "dist/init.js",
+  "types": "dist/init.d.ts",
   "bin": {
     "dev-team": "bin/dev-team.js"
   },
   "files": [
     "bin/",
-    "lib/",
+    "dist/",
     "templates/"
   ],
   "scripts": {
+    "build": "tsc",
+    "pretest": "npm run build",
     "test": "node --test tests/unit/files.test.js tests/integration/fresh-project.test.js tests/integration/idempotency.test.js",
     "test:unit": "node --test tests/unit/files.test.js",
     "test:integration": "node --test tests/integration/fresh-project.test.js tests/integration/idempotency.test.js",
-    "test:scenarios": "node --test tests/scenarios/",
-    "lint": "eslint bin/ lib/ templates/hooks/",
-    "format:check": "prettier --check .",
-    "validate:agents": "node scripts/validate-agents.js"
+    "lint": "oxlint src/ scripts/ templates/hooks/",
+    "format": "oxfmt --write src/ scripts/ templates/hooks/",
+    "format:check": "oxfmt --check src/ scripts/ templates/hooks/",
+    "validate:agents": "node scripts/validate-agents.js",
+    "validate:hooks": "node scripts/validate-hooks.js",
+    "prepublishOnly": "npm run build"
   },
   "keywords": [
     "claude-code",
@@ -27,9 +33,23 @@
     "tdd",
     "security"
   ],
-  "author": "",
+  "author": "Frederic Boyer",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fredericboyer/dev-team.git"
+  },
+  "bugs": {
+    "url": "https://github.com/fredericboyer/dev-team/issues"
+  },
+  "homepage": "https://github.com/fredericboyer/dev-team#readme",
   "engines": {
     "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "oxfmt": "^0.41.0",
+    "oxlint": "^1.56.0",
+    "typescript": "^5.9.3"
   }
 }

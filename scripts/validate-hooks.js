@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 
-'use strict';
+"use strict";
 
-const { execFileSync } = require('child_process');
-const fs = require('fs');
-const path = require('path');
+const { execFileSync } = require("child_process");
+const fs = require("fs");
+const path = require("path");
 
-const dir = path.join(__dirname, '..', 'templates', 'hooks');
-const files = fs.readdirSync(dir).filter((f) => f.endsWith('.js'));
+const dir = path.join(__dirname, "..", "templates", "hooks");
+const files = fs.readdirSync(dir).filter((f) => f.endsWith(".js"));
 
 let errors = 0;
 
@@ -16,8 +16,8 @@ for (const file of files) {
 
   // Use Node's --check flag to syntax-validate without executing
   try {
-    execFileSync(process.execPath, ['--check', filePath], {
-      encoding: 'utf-8',
+    execFileSync(process.execPath, ["--check", filePath], {
+      encoding: "utf-8",
       timeout: 5000,
     });
     console.log(`  ok ${file}`);

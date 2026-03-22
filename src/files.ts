@@ -1,20 +1,32 @@
-'use strict';
+import fs from "fs";
+import path from "path";
 
-const fs = require('fs');
-const path = require('path');
+export interface HookEntry {
+  type: string;
+  command: string;
+}
+
+export interface HookMatcher {
+  matcher?: string;
+  hooks: HookEntry[];
+}
+
+export interface HookSettings {
+  hooks: Record<string, HookMatcher[]>;
+}
 
 /**
  * Returns the absolute path to the templates/ directory within the package.
  */
-function templateDir() {
-  return path.join(__dirname, '..', 'templates');
+export function templateDir(): string {
+  return path.join(__dirname, "..", "templates");
 }
 
 /**
  * Copies a file from src to dest, creating parent directories as needed.
- * Returns true if the file was written, false if skipped.
+ * Returns true if the file was written.
  */
-function copyFile(src, dest) {
+export function copyFile(src: string, dest: string): boolean {
   const dir = path.dirname(dest);
   fs.mkdirSync(dir, { recursive: true });
   fs.copyFileSync(src, dest);
@@ -24,7 +36,7 @@ function copyFile(src, dest) {
 /**
  * Checks if a file exists.
  */
-function fileExists(absPath) {
+export function fileExists(absPath: string): boolean {
   try {
     return fs.statSync(absPath).isFile();
   } catch {
@@ -35,7 +47,7 @@ function fileExists(absPath) {
 /**
  * Checks if a directory exists.
  */
-function dirExists(absPath) {
+export function dirExists(absPath: string): boolean {
   try {
     return fs.statSync(absPath).isDirectory();
   } catch {
@@ -46,9 +58,9 @@ function dirExists(absPath) {
 /**
  * Reads a file and returns its content, or null if it doesn't exist.
  */
-function readFile(absPath) {
+export function readFile(absPath: string): string | null {
   try {
-    return fs.readFileSync(absPath, 'utf-8');
+    return fs.readFileSync(absPath, "utf-8");
   } catch {
     return null;
   }
@@ -57,7 +69,7 @@ function readFile(absPath) {
 /**
  * Writes content to a file, creating parent directories as needed.
  */
-function writeFile(absPath, content) {
+export function writeFile(absPath: string, content: string): void {
   const dir = path.dirname(absPath);
   fs.mkdirSync(dir, { recursive: true });
   fs.writeFileSync(absPath, content);
@@ -67,10 +79,10 @@ function writeFile(absPath, content) {
  * Deep merges hook configurations from source into target settings.
  * Additive only — never removes existing hooks.
  */
-function mergeSettings(existingPath, newFragment) {
-  let existing = {};
+export function mergeSettings(existingPath: string, newFragment: HookSettings): void {
+  let existing: { hooks?: Record<string, HookMatcher[]> } = {};
   try {
-    existing = JSON.parse(fs.readFileSync(existingPath, 'utf-8'));
+    existing = JSON.parse(fs.readFileSync(existingPath, "utf-8"));
   } catch {
     // File doesn't exist or is invalid — start fresh
   }
@@ -97,7 +109,7 @@ function mergeSettings(existingPath, newFragment) {
     }
   }
 
-  fs.writeFileSync(existingPath, JSON.stringify(existing, null, 2) + '\n');
+  fs.writeFileSync(existingPath, JSON.stringify(existing, null, 2) + "\n");
 }
 
 /**
@@ -105,36 +117,36 @@ function mergeSettings(existingPath, newFragment) {
  * If markers already exist, replaces content between them.
  * If file doesn't exist, creates it with just the content.
  */
-function mergeClaudeMd(filePath, newContent) {
-  const BEGIN_MARKER = '<!-- dev-team:begin -->';
-  const END_MARKER = '<!-- dev-team:end -->';
+export function mergeClaudeMd(
+  filePath: string,
+  newContent: string,
+): "created" | "replaced" | "appended" {
+  const BEGIN_MARKER = "<!-- dev-team:begin -->";
+  const END_MARKER = "<!-- dev-team:end -->";
 
   const existing = readFile(filePath);
 
   if (!existing) {
-    // File doesn't exist — create with content
     writeFile(filePath, newContent);
-    return 'created';
+    return "created";
   }
 
   if (existing.includes(BEGIN_MARKER)) {
-    // Markers exist — replace between them
     const beforeMarker = existing.substring(0, existing.indexOf(BEGIN_MARKER));
     const afterMarker = existing.substring(existing.indexOf(END_MARKER) + END_MARKER.length);
     writeFile(filePath, beforeMarker + newContent + afterMarker);
-    return 'replaced';
+    return "replaced";
   }
 
-  // No markers — append
-  writeFile(filePath, existing.trimEnd() + '\n\n' + newContent + '\n');
-  return 'appended';
+  writeFile(filePath, existing.trimEnd() + "\n\n" + newContent + "\n");
+  return "appended";
 }
 
 /**
  * Lists all files in a directory recursively.
  */
-function listFilesRecursive(dir) {
-  const results = [];
+export function listFilesRecursive(dir: string): string[] {
+  const results: string[] = [];
   const entries = fs.readdirSync(dir, { withFileTypes: true });
   for (const entry of entries) {
     const fullPath = path.join(dir, entry.name);
@@ -146,15 +158,3 @@ function listFilesRecursive(dir) {
   }
   return results;
 }
-
-module.exports = {
-  templateDir,
-  copyFile,
-  fileExists,
-  dirExists,
-  readFile,
-  writeFile,
-  mergeSettings,
-  mergeClaudeMd,
-  listFilesRecursive,
-};

@@ -1,21 +1,21 @@
 #!/usr/bin/env node
 
-'use strict';
+"use strict";
 
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
-const dir = path.join(__dirname, '..', 'templates', 'agents');
-const files = fs.readdirSync(dir).filter((f) => f.endsWith('.md'));
+const dir = path.join(__dirname, "..", "templates", "agents");
+const files = fs.readdirSync(dir).filter((f) => f.endsWith(".md"));
 
-const REQUIRED_FIELDS = ['name:', 'description:', 'model:', 'memory: project'];
+const REQUIRED_FIELDS = ["name:", "description:", "model:", "memory: project"];
 
 let errors = 0;
 
 for (const file of files) {
-  const content = fs.readFileSync(path.join(dir, file), 'utf-8');
+  const content = fs.readFileSync(path.join(dir, file), "utf-8");
 
-  if (!content.startsWith('---')) {
+  if (!content.startsWith("---")) {
     console.error(`FAIL ${file}: missing YAML frontmatter delimiter`);
     errors++;
     continue;
