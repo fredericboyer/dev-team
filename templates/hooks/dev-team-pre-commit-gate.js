@@ -50,8 +50,39 @@ if (hasApiFiles) {
   reminders.push("@dev-team-mori for UI impact review");
 }
 
+// Memory freshness check: if significant work was done but no memory files were updated, remind.
+const hasMemoryUpdates = files.some(
+  (f) => /dev-team-learnings\.md$/.test(f) || /agent-memory\/.*MEMORY\.md$/.test(f),
+);
+
+if (hasImplFiles && !hasMemoryUpdates) {
+  // Check unstaged memory changes too — author may have updated but not staged yet
+  let unstagedMemory = false;
+  try {
+    const unstaged = execFileSync("git", ["diff", "--name-only"], {
+      encoding: "utf-8",
+      timeout: 5000,
+    });
+    unstagedMemory = unstaged
+      .split("\n")
+      .some((f) => /dev-team-learnings\.md$/.test(f) || /agent-memory\/.*MEMORY\.md$/.test(f));
+  } catch {
+    // Ignore — best effort
+  }
+
+  if (unstagedMemory) {
+    reminders.push(
+      "Memory files were updated but not staged — run `git add .claude/dev-team-learnings.md .claude/agent-memory/` if learnings should be included",
+    );
+  } else {
+    reminders.push(
+      "Update .claude/dev-team-learnings.md or agent memory with any patterns, conventions, or decisions from this work",
+    );
+  }
+}
+
 if (reminders.length > 0) {
-  console.log(`[dev-team pre-commit] Before committing, consider running: ${reminders.join(", ")}`);
+  console.log(`[dev-team pre-commit] Before committing, consider: ${reminders.join("; ")}`);
 }
 
 process.exit(0);

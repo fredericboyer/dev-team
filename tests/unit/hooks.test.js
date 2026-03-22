@@ -354,6 +354,70 @@ describe('dev-team-pre-commit-gate', () => {
       fs.rmSync(tmpDir, { recursive: true, force: true });
     }
   });
+
+  it('reminds to update memory when code is staged without memory files', () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'dev-team-precommit-'));
+    try {
+      execFileSync('git', ['init'], { cwd: tmpDir, encoding: 'utf-8' });
+      execFileSync('git', ['config', 'user.email', 'test@test.com'], { cwd: tmpDir, encoding: 'utf-8' });
+      execFileSync('git', ['config', 'user.name', 'Test'], { cwd: tmpDir, encoding: 'utf-8' });
+      fs.writeFileSync(path.join(tmpDir, 'handler.js'), 'module.exports = {}');
+      execFileSync('git', ['add', 'handler.js'], { cwd: tmpDir, encoding: 'utf-8' });
+
+      const stdout = execFileSync(process.execPath, [path.join(HOOKS_DIR, hook)], {
+        encoding: 'utf-8',
+        timeout: 5000,
+        cwd: tmpDir,
+      });
+      assert.ok(stdout.includes('dev-team-learnings'), 'should remind about learnings');
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  it('does not remind about memory when learnings file is staged', () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'dev-team-precommit-'));
+    try {
+      execFileSync('git', ['init'], { cwd: tmpDir, encoding: 'utf-8' });
+      execFileSync('git', ['config', 'user.email', 'test@test.com'], { cwd: tmpDir, encoding: 'utf-8' });
+      execFileSync('git', ['config', 'user.name', 'Test'], { cwd: tmpDir, encoding: 'utf-8' });
+      fs.mkdirSync(path.join(tmpDir, '.claude'), { recursive: true });
+      fs.writeFileSync(path.join(tmpDir, 'handler.js'), 'module.exports = {}');
+      fs.writeFileSync(path.join(tmpDir, '.claude', 'dev-team-learnings.md'), '# Updated');
+      execFileSync('git', ['add', 'handler.js', '.claude/dev-team-learnings.md'], { cwd: tmpDir, encoding: 'utf-8' });
+
+      const stdout = execFileSync(process.execPath, [path.join(HOOKS_DIR, hook)], {
+        encoding: 'utf-8',
+        timeout: 5000,
+        cwd: tmpDir,
+      });
+      assert.ok(!stdout.includes('dev-team-learnings'), 'should not remind when learnings are staged');
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  it('does not remind about memory when agent memory is staged', () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'dev-team-precommit-'));
+    try {
+      execFileSync('git', ['init'], { cwd: tmpDir, encoding: 'utf-8' });
+      execFileSync('git', ['config', 'user.email', 'test@test.com'], { cwd: tmpDir, encoding: 'utf-8' });
+      execFileSync('git', ['config', 'user.name', 'Test'], { cwd: tmpDir, encoding: 'utf-8' });
+      fs.mkdirSync(path.join(tmpDir, '.claude', 'agent-memory', 'dev-team-voss'), { recursive: true });
+      fs.writeFileSync(path.join(tmpDir, 'handler.js'), 'module.exports = {}');
+      fs.writeFileSync(path.join(tmpDir, '.claude', 'agent-memory', 'dev-team-voss', 'MEMORY.md'), '# Updated');
+      execFileSync('git', ['add', 'handler.js', '.claude/agent-memory/dev-team-voss/MEMORY.md'], { cwd: tmpDir, encoding: 'utf-8' });
+
+      const stdout = execFileSync(process.execPath, [path.join(HOOKS_DIR, hook)], {
+        encoding: 'utf-8',
+        timeout: 5000,
+        cwd: tmpDir,
+      });
+      assert.ok(!stdout.includes('dev-team-learnings'), 'should not remind when agent memory is staged');
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
 });
 
 // ─── Task Loop ───────────────────────────────────────────────────────────────
