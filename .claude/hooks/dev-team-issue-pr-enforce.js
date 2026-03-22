@@ -13,7 +13,13 @@
 
 'use strict';
 
-const input = JSON.parse(process.argv[2] || '{}');
+let input = {};
+try {
+  input = JSON.parse(process.argv[2] || '{}');
+} catch (err) {
+  console.warn(`[dev-team issue-pr-enforce] Warning: Failed to parse hook input, allowing operation. ${err.message}`);
+  process.exit(0);
+}
 const command = (input.tool_input && input.tool_input.command) || '';
 
 function isGitCommit(cmd) {

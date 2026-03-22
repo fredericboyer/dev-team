@@ -83,8 +83,10 @@ export function mergeSettings(existingPath: string, newFragment: HookSettings): 
   let existing: { hooks?: Record<string, HookMatcher[]> } = {};
   try {
     existing = JSON.parse(fs.readFileSync(existingPath, "utf-8"));
-  } catch {
-    // File doesn't exist or is invalid — start fresh
+  } catch (err: unknown) {
+    if ((err as NodeJS.ErrnoException).code !== "ENOENT") {
+      console.warn(`Warning: ${existingPath} exists but is not valid JSON. Starting fresh.`);
+    }
   }
 
   if (!existing.hooks) {
@@ -132,6 +134,13 @@ export function mergeClaudeMd(
   }
 
   if (existing.includes(BEGIN_MARKER)) {
+    if (!existing.includes(END_MARKER)) {
+      console.warn(
+        "Warning: Found dev-team begin marker but no end marker in CLAUDE.md. Appending instead of replacing.",
+      );
+      writeFile(filePath, existing.trimEnd() + "\n\n" + newContent + "\n");
+      return "appended";
+    }
     const beforeMarker = existing.substring(0, existing.indexOf(BEGIN_MARKER));
     const afterMarker = existing.substring(existing.indexOf(END_MARKER) + END_MARKER.length);
     writeFile(filePath, beforeMarker + newContent + afterMarker);

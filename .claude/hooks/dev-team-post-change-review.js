@@ -12,7 +12,13 @@
 
 const path = require("path");
 
-const input = JSON.parse(process.argv[2] || "{}");
+let input = {};
+try {
+  input = JSON.parse(process.argv[2] || "{}");
+} catch (err) {
+  console.warn(`[dev-team post-change-review] Warning: Failed to parse hook input, allowing operation. ${err.message}`);
+  process.exit(0);
+}
 const filePath = (input.tool_input && (input.tool_input.file_path || input.tool_input.path)) || "";
 
 if (!filePath) {

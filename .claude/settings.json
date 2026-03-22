@@ -18,6 +18,15 @@
             "command": "node .claude/hooks/dev-team-safety-guard.js"
           }
         ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/dev-team-precommit-lint-format.js"
+          }
+        ]
       }
     ],
     "PostToolUse": [
@@ -31,6 +40,10 @@
           {
             "type": "command",
             "command": "node .claude/hooks/dev-team-tdd-enforce.js"
+          },
+          {
+            "type": "command",
+            "command": "node .claude/hooks/dev-team-lint-format.js"
           }
         ]
       }

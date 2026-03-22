@@ -105,6 +105,17 @@ describe('mergeSettings', () => {
     const result = JSON.parse(fs.readFileSync(settingsPath, 'utf-8'));
     assert.equal(result.hooks.PreToolUse.length, 1);
   });
+
+  it('warns and starts fresh when settings file contains corrupt JSON', () => {
+    const settingsPath = path.join(tmpDir, 'settings.json');
+    fs.writeFileSync(settingsPath, '{ invalid json');
+
+    const fragment = { hooks: { PostToolUse: [{ matcher: 'Edit', hooks: [{ type: 'command', command: 'test' }] }] } };
+    mergeSettings(settingsPath, fragment);
+
+    const result = JSON.parse(fs.readFileSync(settingsPath, 'utf-8'));
+    assert.deepEqual(result.hooks.PostToolUse[0].matcher, 'Edit');
+  });
 });
 
 describe('mergeClaudeMd', () => {
@@ -137,5 +148,17 @@ describe('mergeClaudeMd', () => {
     assert.ok(content.includes('updated'));
     assert.ok(!content.includes('old'));
     assert.ok(content.includes('Footer'));
+  });
+
+  it('appends instead of corrupting when begin marker exists but end marker is missing', () => {
+    const p = path.join(tmpDir, 'CLAUDE.md');
+    fs.writeFileSync(p, '# Project\n\n<!-- dev-team:begin -->\nold content without end marker');
+
+    const result = mergeClaudeMd(p, '<!-- dev-team:begin -->\nnew\n<!-- dev-team:end -->');
+    assert.equal(result, 'appended');
+
+    const content = fs.readFileSync(p, 'utf-8');
+    assert.ok(content.includes('old content without end marker'), 'should preserve original content');
+    assert.ok(content.includes('new'), 'should append new content');
   });
 });
