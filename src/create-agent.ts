@@ -90,7 +90,10 @@ export function createAgent(targetDir: string, name: string): void {
     process.exit(1);
   }
 
-  const agentContent = AGENT_TEMPLATE.replace(/FULLNAME/g, fullName).replace(/AGENTNAME/g, titleName);
+  const agentContent = AGENT_TEMPLATE.replace(/FULLNAME/g, fullName).replace(
+    /AGENTNAME/g,
+    titleName,
+  );
   const memoryContent = MEMORY_TEMPLATE.replace(/AGENTNAME/g, titleName);
 
   writeFile(agentPath, agentContent);
