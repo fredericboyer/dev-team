@@ -6,7 +6,7 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 
-const { run } = require('../../lib/init');
+const { run } = require('../../dist/init');
 
 let tmpDir;
 let originalCwd;

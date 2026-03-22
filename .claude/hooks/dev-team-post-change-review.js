@@ -8,12 +8,12 @@
  * the file's domain. Advisory only — always exits 0.
  */
 
-'use strict';
+"use strict";
 
-const path = require('path');
+const path = require("path");
 
-const input = JSON.parse(process.argv[2] || '{}');
-const filePath = (input.tool_input && (input.tool_input.file_path || input.tool_input.path)) || '';
+const input = JSON.parse(process.argv[2] || "{}");
+const filePath = (input.tool_input && (input.tool_input.file_path || input.tool_input.path)) || "";
 
 if (!filePath) {
   process.exit(0);
@@ -47,7 +47,7 @@ const SECURITY_PATTERNS = [
 ];
 
 if (SECURITY_PATTERNS.some((p) => p.test(fullPath) || p.test(basename))) {
-  flags.push('@dev-team-szabo (security surface changed)');
+  flags.push("@dev-team-szabo (security surface changed)");
 }
 
 // API/contract patterns → flag for Mori
@@ -63,7 +63,7 @@ const API_PATTERNS = [
 ];
 
 if (API_PATTERNS.some((p) => p.test(fullPath))) {
-  flags.push('@dev-team-mori (API contract may affect UI)');
+  flags.push("@dev-team-mori (API contract may affect UI)");
 }
 
 // Config/infra patterns → flag for Voss
@@ -79,7 +79,7 @@ const INFRA_PATTERNS = [
 ];
 
 if (INFRA_PATTERNS.some((p) => p.test(fullPath))) {
-  flags.push('@dev-team-voss (architectural/config change)');
+  flags.push("@dev-team-voss (architectural/config change)");
 }
 
 // Tooling patterns → flag for Deming
@@ -96,7 +96,7 @@ const TOOLING_PATTERNS = [
 ];
 
 if (TOOLING_PATTERNS.some((p) => p.test(fullPath))) {
-  flags.push('@dev-team-deming (tooling change)');
+  flags.push("@dev-team-deming (tooling change)");
 }
 
 // Always flag Knuth for non-test implementation files
@@ -104,11 +104,11 @@ const isTestFile = /\.(test|spec)\.|__tests__|\/tests?\//.test(fullPath);
 const isCodeFile = /\.(js|ts|jsx|tsx|py|rb|go|java|rs|c|cpp|cs)$/.test(fullPath);
 
 if (isCodeFile && !isTestFile) {
-  flags.push('@dev-team-knuth (new or changed code path to audit)');
+  flags.push("@dev-team-knuth (new or changed code path to audit)");
 }
 
 if (flags.length > 0) {
-  console.log(`[dev-team review] Flag for review: ${flags.join(', ')}`);
+  console.log(`[dev-team review] Flag for review: ${flags.join(", ")}`);
 }
 
 process.exit(0);

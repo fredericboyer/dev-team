@@ -31,3 +31,4 @@ What becomes easier or more difficult?
 | [004](004-tdd-enforcement.md) | TDD enforced by hook | accepted |
 | [005](005-adversarial-agents.md) | Devil's advocate agent culture | accepted |
 | [006](006-cli-over-plugin.md) | CLI installer first, plugin later | accepted |
+| [007](007-typescript-oxc-tooling.md) | TypeScript migration with oxlint/oxfmt | accepted |

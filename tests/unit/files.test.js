@@ -6,7 +6,7 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 
-const { copyFile, fileExists, dirExists, readFile, writeFile, mergeSettings, mergeClaudeMd } = require('../../lib/files');
+const { copyFile, fileExists, dirExists, readFile, writeFile, mergeSettings, mergeClaudeMd } = require('../../dist/files');
 
 let tmpDir;
 

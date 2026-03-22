@@ -31,7 +31,11 @@ Stored in `docs/adr/`. Read before making changes to foundational patterns. Upda
 
 <!-- dev-team:begin -->
 
-## Agents
+## Dev Team
+
+This project uses [dev-team](https://github.com/dev-team) — adversarial AI agents that enforce quality through productive friction.
+
+### Agents
 
 | Agent | Role | When to use |
 |-------|------|-------------|
@@ -41,6 +45,10 @@ Stored in `docs/adr/`. Read before making changes to foundational patterns. Upda
 | `@dev-team-knuth` | Quality Auditor | Coverage gaps, boundary conditions, correctness verification |
 | `@dev-team-beck` | Test Implementer | Writing tests, TDD cycles, translating audit findings into test cases |
 | `@dev-team-deming` | Tooling Optimizer | Linters, formatters, CI/CD, hooks, onboarding, automation |
+
+### Workflow
+
+For non-trivial work: explore the area first, then implement, then review.
 
 Agents challenge each other using classified findings:
 - `[DEFECT]` blocks progress. `[RISK]`, `[QUESTION]`, `[SUGGESTION]` are advisory.
@@ -52,4 +60,5 @@ Agents challenge each other using classified findings:
 - `/dev-team:task` — start an iterative task loop with adversarial review gates
 
 <!-- dev-team:end -->
+
 
