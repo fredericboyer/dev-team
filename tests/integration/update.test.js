@@ -106,6 +106,24 @@ describe('dev-team update', () => {
     await update(tmpDir);
   });
 
+  it('reports "already at latest version" when version matches', async () => {
+    await run(tmpDir, ['--all']);
+
+    // Capture console output during update
+    const logs = [];
+    const originalLog = console.log;
+    console.log = (...args) => { logs.push(args.join(' ')); };
+
+    try {
+      await update(tmpDir);
+    } finally {
+      console.log = originalLog;
+    }
+
+    const alreadyMsg = logs.find((l) => l.includes('Already at latest version'));
+    assert.ok(alreadyMsg, 'should report already at latest version when versions match');
+  });
+
   it('preserves shared team learnings', async () => {
     await run(tmpDir, ['--all']);
 

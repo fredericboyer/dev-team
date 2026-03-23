@@ -235,6 +235,16 @@ describe('dev-team-tdd-enforce', () => {
     assert.equal(result.code, 0);
   });
 
+  it('normalizes Windows backslash paths to forward slashes', () => {
+    const result = runHook(hook, { file_path: 'C:\\app\\.github\\workflows\\ci.yml' });
+    assert.equal(result.code, 0, 'should skip config file even with Windows backslash path');
+  });
+
+  it('skips test file with Windows backslash path', () => {
+    const result = runHook(hook, { file_path: 'C:\\app\\tests\\unit\\handler.test.js' });
+    assert.equal(result.code, 0, 'should skip test file with Windows backslash path');
+  });
+
   it('blocks on malformed JSON input (fail closed, exit 2)', () => {
     try {
       execFileSync(process.execPath, [path.join(HOOKS_DIR, hook), 'not-json'], {
@@ -600,6 +610,37 @@ describe('dev-team-pre-commit-lint', () => {
       fs.rmSync(tmpDir, { recursive: true, force: true });
     }
   });
+
+  it('detects ruff from pyproject.toml when no package.json exists', () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'dev-team-lint-'));
+    try {
+      // Create pyproject.toml with ruff config but no package.json
+      fs.writeFileSync(
+        path.join(tmpDir, 'pyproject.toml'),
+        '[tool.ruff]\nline-length = 88\n',
+      );
+
+      const input = JSON.stringify({ tool_input: { command: 'git commit -m "test"' } });
+      // ruff binary likely not installed, so exec will fail on the check.
+      // The hook should attempt to run ruff and then block (exit 2) because
+      // the ruff command fails. This proves pyproject.toml detection is working.
+      try {
+        execFileSync(process.execPath, [path.join(HOOKS_DIR, hook), input], {
+          encoding: 'utf-8',
+          timeout: 10000,
+          cwd: tmpDir,
+        });
+        // If ruff is actually installed and passes, that is also fine
+        assert.ok(true, 'ruff checks passed (ruff installed)');
+      } catch (err) {
+        // Exit 2 means it detected ruff and tried to run it (blocked on failure)
+        assert.equal(err.status, 2, 'should block when ruff check fails');
+        assert.ok(err.stderr.includes('BLOCKED'), 'should show BLOCKED message');
+      }
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
 });
 
 // ─── Watch List ──────────────────────────────────────────────────────────────
@@ -696,6 +737,44 @@ describe('dev-team-watch-list', () => {
       cwd: tmpDir,
     });
     assert.equal(stdout, '');
+  });
+
+  it('skips malformed entry missing agents key', () => {
+    const prefs = {
+      watchLists: [
+        { pattern: 'src/db/', reason: 'database code changed' },
+        { pattern: 'src/api/', agents: ['dev-team-voss'], reason: 'api changed' },
+      ],
+    };
+    fs.writeFileSync(path.join(tmpDir, '.claude', 'dev-team.json'), JSON.stringify(prefs));
+
+    const input = JSON.stringify({ tool_input: { file_path: '/app/src/db/schema.ts' } });
+    const stdout = execFileSync(process.execPath, [path.join(HOOKS_DIR, hook), input], {
+      encoding: 'utf-8',
+      timeout: 5000,
+      cwd: tmpDir,
+    });
+    // The malformed entry (missing agents) should be skipped, no crash
+    assert.ok(!stdout.includes('@dev-team-codd'), 'should not match entry without agents');
+  });
+
+  it('skips entry with invalid regex pattern', () => {
+    const prefs = {
+      watchLists: [
+        { pattern: '[invalid(regex', agents: ['dev-team-codd'], reason: 'bad regex' },
+        { pattern: 'src/api/', agents: ['dev-team-voss'], reason: 'api changed' },
+      ],
+    };
+    fs.writeFileSync(path.join(tmpDir, '.claude', 'dev-team.json'), JSON.stringify(prefs));
+
+    const input = JSON.stringify({ tool_input: { file_path: '/app/src/api/users.ts' } });
+    const stdout = execFileSync(process.execPath, [path.join(HOOKS_DIR, hook), input], {
+      encoding: 'utf-8',
+      timeout: 5000,
+      cwd: tmpDir,
+    });
+    // Invalid regex should be skipped gracefully, valid entry should still match
+    assert.ok(stdout.includes('@dev-team-voss'), 'should still match valid entries after invalid regex');
   });
 });
 

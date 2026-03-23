@@ -67,6 +67,28 @@ describe('scanProject', () => {
     assert.ok(missing.length >= 4, `expected at least 4 missing categories, got ${missing.length}`);
   });
 
+  it('detects both linter and formatter when both configs exist', () => {
+    fs.writeFileSync(path.join(tmpDir, '.eslintrc.json'), '{}');
+    fs.writeFileSync(path.join(tmpDir, '.prettierrc'), '{}');
+    const findings = scanProject(tmpDir);
+    const linter = findings.find((f) => f.category === 'linter');
+    const formatter = findings.find((f) => f.category === 'formatter');
+    assert.equal(linter.status, 'found');
+    assert.ok(linter.tool.includes('ESLint'));
+    assert.equal(formatter.status, 'found');
+    assert.ok(formatter.tool.includes('Prettier'));
+  });
+
+  it('handles package.json with empty scripts key', () => {
+    fs.writeFileSync(
+      path.join(tmpDir, 'package.json'),
+      JSON.stringify({ scripts: {} }),
+    );
+    const findings = scanProject(tmpDir);
+    const linter = findings.find((f) => f.category === 'linter');
+    assert.equal(linter.status, 'missing', 'linter should be missing with empty scripts');
+  });
+
   it('detects lint script in package.json when no config file exists', () => {
     fs.writeFileSync(
       path.join(tmpDir, 'package.json'),
@@ -76,6 +98,25 @@ describe('scanProject', () => {
     const linter = findings.find((f) => f.category === 'linter');
     assert.equal(linter.status, 'found');
     assert.ok(linter.tool.includes('npm lint'));
+  });
+
+  it('detects Biome as both linter and formatter from single config', () => {
+    fs.writeFileSync(path.join(tmpDir, 'biome.json'), '{}');
+    const findings = scanProject(tmpDir);
+    const linter = findings.find((f) => f.category === 'linter');
+    const formatter = findings.find((f) => f.category === 'formatter');
+    assert.equal(linter.status, 'found');
+    assert.ok(linter.tool.includes('Biome'));
+    assert.equal(formatter.status, 'found');
+    assert.ok(formatter.tool.includes('Biome'));
+  });
+
+  it('detects pyproject.toml as linter config', () => {
+    fs.writeFileSync(path.join(tmpDir, 'pyproject.toml'), '[tool.ruff]\n');
+    const findings = scanProject(tmpDir);
+    const linter = findings.find((f) => f.category === 'linter');
+    assert.equal(linter.status, 'found');
+    assert.ok(linter.tool.includes('ruff'));
   });
 });
 
@@ -186,6 +227,25 @@ describe('enforcement gap detection', () => {
       'expected no enforcement findings without package.json',
     );
   });
+
+  it('flags gap when CI scripts exist but settings.json is empty', () => {
+    fs.writeFileSync(
+      path.join(tmpDir, 'package.json'),
+      JSON.stringify({ scripts: { lint: 'eslint .' } }),
+    );
+    fs.mkdirSync(path.join(tmpDir, '.claude'), { recursive: true });
+    fs.writeFileSync(
+      path.join(tmpDir, '.claude', 'settings.json'),
+      JSON.stringify({}),
+    );
+    const findings = scanProject(tmpDir);
+    const gaps = findings.filter(
+      (f) => f.category === 'enforcement' && f.status === 'gap',
+    );
+    assert.ok(gaps.length > 0, 'expected enforcement gap with empty settings');
+    const lintGap = gaps.find((f) => f.tool === 'lint');
+    assert.ok(lintGap, 'expected a gap for lint with empty settings');
+  });
 });
 
 describe('parseCiScripts', () => {
@@ -213,6 +273,24 @@ describe('parseCiScripts', () => {
 
   it('returns empty array for invalid JSON', () => {
     fs.writeFileSync(path.join(tmpDir, 'package.json'), 'not json');
+    const scripts = parseCiScripts(tmpDir);
+    assert.deepEqual(scripts, []);
+  });
+
+  it('returns empty array when scripts key is empty', () => {
+    fs.writeFileSync(
+      path.join(tmpDir, 'package.json'),
+      JSON.stringify({ scripts: {} }),
+    );
+    const scripts = parseCiScripts(tmpDir);
+    assert.deepEqual(scripts, []);
+  });
+
+  it('returns empty array when all scripts are non-CI-relevant', () => {
+    fs.writeFileSync(
+      path.join(tmpDir, 'package.json'),
+      JSON.stringify({ scripts: { dev: 'nodemon', start: 'node .' } }),
+    );
     const scripts = parseCiScripts(tmpDir);
     assert.deepEqual(scripts, []);
   });
