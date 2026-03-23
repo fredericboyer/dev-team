@@ -384,6 +384,273 @@ describe("dev-team-tdd-enforce", () => {
       fs.rmSync(gitDir, { recursive: true, force: true });
     }
   });
+
+  it("writes cache files with mode 0o600", { skip: process.platform === "win32" }, () => {
+    const { createHash } = require("crypto");
+    const cacheDir = os.tmpdir();
+    const gitDir = fs.mkdtempSync(path.join(os.tmpdir(), "dev-team-cache-perms-"));
+    // Resolve symlinks so hash matches what process.cwd() returns inside the hook
+    const resolvedGitDir = fs.realpathSync(gitDir);
+    const cwdHash = createHash("md5").update(resolvedGitDir).digest("hex").slice(0, 8);
+    try {
+      execFileSync("git", ["init"], { cwd: gitDir, encoding: "utf-8" });
+      execFileSync("git", ["config", "user.email", "test@test.com"], {
+        cwd: gitDir,
+        encoding: "utf-8",
+      });
+      execFileSync("git", ["config", "user.name", "Test"], { cwd: gitDir, encoding: "utf-8" });
+      fs.mkdirSync(path.join(gitDir, "src"), { recursive: true });
+      fs.writeFileSync(path.join(gitDir, "src", "app.js"), "module.exports = {}");
+
+      const input = JSON.stringify({
+        tool_input: { file_path: path.join(gitDir, "src", "app.js") },
+      });
+      try {
+        execFileSync(process.execPath, [path.join(HOOKS_DIR, hook), input], {
+          encoding: "utf-8",
+          timeout: 5000,
+          cwd: gitDir,
+        });
+      } catch {
+        // Expected to block — we just want to verify cache permissions
+      }
+
+      // Only check cache files created by THIS test (keyed by cwdHash)
+      const cacheFiles = fs
+        .readdirSync(cacheDir)
+        .filter((f) => f.startsWith(`dev-team-git-cache-${cwdHash}-`));
+      assert.ok(cacheFiles.length > 0, "should create at least one git cache file for this test");
+      for (const f of cacheFiles) {
+        const stat = fs.statSync(path.join(cacheDir, f));
+        const mode = stat.mode & 0o777;
+        assert.equal(mode, 0o600, `cache file ${f} should have mode 0600, got ${mode.toString(8)}`);
+      }
+    } finally {
+      // Clean up cache files created by this test
+      const tmpCacheFiles = fs
+        .readdirSync(cacheDir)
+        .filter((f) => f.startsWith(`dev-team-git-cache-${cwdHash}-`));
+      for (const cf of tmpCacheFiles) {
+        try {
+          fs.unlinkSync(path.join(cacheDir, cf));
+        } catch {
+          /* ignore */
+        }
+      }
+      fs.rmSync(gitDir, { recursive: true, force: true });
+    }
+  });
+
+  it("stale cache (>5s) triggers a fresh git call", () => {
+    const { createHash } = require("crypto");
+    const gitDir = fs.mkdtempSync(path.join(os.tmpdir(), "dev-team-cache-stale-"));
+    // Resolve symlinks so hash matches what process.cwd() returns inside the hook
+    const resolvedGitDir = fs.realpathSync(gitDir);
+    const cwdHash = createHash("md5").update(resolvedGitDir).digest("hex").slice(0, 8);
+    try {
+      execFileSync("git", ["init"], { cwd: gitDir, encoding: "utf-8" });
+      execFileSync("git", ["config", "user.email", "test@test.com"], {
+        cwd: gitDir,
+        encoding: "utf-8",
+      });
+      execFileSync("git", ["config", "user.name", "Test"], { cwd: gitDir, encoding: "utf-8" });
+      fs.mkdirSync(path.join(gitDir, "src"), { recursive: true });
+      fs.writeFileSync(path.join(gitDir, "src", "app.js"), "module.exports = {}");
+
+      // Pre-create a stale cache file with known content
+      const cacheFile = path.join(
+        os.tmpdir(),
+        `dev-team-git-cache-${cwdHash}-diff---name-only.txt`,
+      );
+      fs.writeFileSync(cacheFile, "STALE_CONTENT\n", { mode: 0o600 });
+      // Set mtime to 10 seconds ago to make it stale
+      const staleTime = new Date(Date.now() - 10000);
+      fs.utimesSync(cacheFile, staleTime, staleTime);
+
+      const input = JSON.stringify({
+        tool_input: { file_path: path.join(gitDir, "src", "app.js") },
+      });
+      try {
+        execFileSync(process.execPath, [path.join(HOOKS_DIR, hook), input], {
+          encoding: "utf-8",
+          timeout: 5000,
+          cwd: gitDir,
+        });
+      } catch {
+        // Expected to block
+      }
+
+      // After the hook runs, the cache file should be refreshed (no longer contain STALE_CONTENT)
+      const content = fs.readFileSync(cacheFile, "utf-8");
+      assert.ok(
+        !content.includes("STALE_CONTENT"),
+        "stale cache should be replaced with fresh git output",
+      );
+    } finally {
+      // Clean up cache files created by this test
+      const tmpCacheFiles = fs
+        .readdirSync(os.tmpdir())
+        .filter((f) => f.startsWith(`dev-team-git-cache-${cwdHash}-`));
+      for (const cf of tmpCacheFiles) {
+        try {
+          fs.unlinkSync(path.join(os.tmpdir(), cf));
+        } catch {
+          /* ignore */
+        }
+      }
+      fs.rmSync(gitDir, { recursive: true, force: true });
+    }
+  });
+
+  it("corrupted cache file falls through gracefully", () => {
+    const { createHash } = require("crypto");
+    const gitDir = fs.mkdtempSync(path.join(os.tmpdir(), "dev-team-cache-corrupt-"));
+    // Resolve symlinks so hash matches what process.cwd() returns inside the hook
+    const resolvedGitDir = fs.realpathSync(gitDir);
+    try {
+      execFileSync("git", ["init"], { cwd: gitDir, encoding: "utf-8" });
+      execFileSync("git", ["config", "user.email", "test@test.com"], {
+        cwd: gitDir,
+        encoding: "utf-8",
+      });
+      execFileSync("git", ["config", "user.name", "Test"], { cwd: gitDir, encoding: "utf-8" });
+      fs.mkdirSync(path.join(gitDir, "src"), { recursive: true });
+      fs.writeFileSync(path.join(gitDir, "src", "app.js"), "module.exports = {}");
+
+      // Create a cache file that is a directory (simulates corruption — readFileSync will throw)
+      const cwdHash = createHash("md5").update(resolvedGitDir).digest("hex").slice(0, 8);
+      const cacheFile = path.join(
+        os.tmpdir(),
+        `dev-team-git-cache-${cwdHash}-diff---name-only.txt`,
+      );
+      // Remove if exists, then create as directory to corrupt
+      try {
+        fs.rmSync(cacheFile, { recursive: true, force: true });
+      } catch {
+        /* ignore */
+      }
+      fs.mkdirSync(cacheFile, { recursive: true });
+
+      const input = JSON.stringify({
+        tool_input: { file_path: path.join(gitDir, "src", "app.js") },
+      });
+      // The hook should not crash — it should fall through to a direct git call
+      try {
+        execFileSync(process.execPath, [path.join(HOOKS_DIR, hook), input], {
+          encoding: "utf-8",
+          timeout: 5000,
+          cwd: gitDir,
+        });
+      } catch (err) {
+        // Exit 2 (TDD block) is acceptable — the important thing is it didn't crash
+        // with an unhandled exception (which would give a different exit code)
+        assert.ok(
+          err.status === 2,
+          `hook should exit 2 (TDD block) not crash; got exit code ${err.status}`,
+        );
+      }
+    } finally {
+      // Clean up the directory we created as a "corrupted" cache
+      const { createHash: ch } = require("crypto");
+      const cwdHash = ch("md5").update(resolvedGitDir).digest("hex").slice(0, 8);
+      const cacheFile = path.join(
+        os.tmpdir(),
+        `dev-team-git-cache-${cwdHash}-diff---name-only.txt`,
+      );
+      try {
+        fs.rmSync(cacheFile, { recursive: true, force: true });
+      } catch {
+        /* ignore */
+      }
+      fs.rmSync(gitDir, { recursive: true, force: true });
+    }
+  });
+
+  it(
+    "rejects symlink cache files and falls through to git call",
+    { skip: process.platform === "win32" },
+    () => {
+      const { createHash } = require("crypto");
+      const gitDir = fs.mkdtempSync(path.join(os.tmpdir(), "dev-team-cache-symlink-"));
+      // Resolve symlinks so hash matches what process.cwd() returns inside the hook
+      const resolvedGitDir = fs.realpathSync(gitDir);
+      try {
+        execFileSync("git", ["init"], { cwd: gitDir, encoding: "utf-8" });
+        execFileSync("git", ["config", "user.email", "test@test.com"], {
+          cwd: gitDir,
+          encoding: "utf-8",
+        });
+        execFileSync("git", ["config", "user.name", "Test"], { cwd: gitDir, encoding: "utf-8" });
+        fs.mkdirSync(path.join(gitDir, "src"), { recursive: true });
+        fs.writeFileSync(path.join(gitDir, "src", "app.js"), "module.exports = {}");
+
+        // Create a symlink at the cache file path pointing to a harmless target
+        const cwdHash = createHash("md5").update(resolvedGitDir).digest("hex").slice(0, 8);
+        const cacheFile = path.join(
+          os.tmpdir(),
+          `dev-team-git-cache-${cwdHash}-diff---name-only.txt`,
+        );
+        const targetFile = path.join(os.tmpdir(), `dev-team-symlink-target-${cwdHash}.txt`);
+        fs.writeFileSync(targetFile, "SYMLINK_TARGET_CONTENT\n");
+        try {
+          fs.unlinkSync(cacheFile);
+        } catch {
+          /* ignore */
+        }
+        fs.symlinkSync(targetFile, cacheFile);
+
+        const input = JSON.stringify({
+          tool_input: { file_path: path.join(gitDir, "src", "app.js") },
+        });
+        try {
+          execFileSync(process.execPath, [path.join(HOOKS_DIR, hook), input], {
+            encoding: "utf-8",
+            timeout: 5000,
+            cwd: gitDir,
+          });
+        } catch {
+          // Expected to block (TDD violation)
+        }
+
+        // The symlink should have been removed
+        let symlinkExists = false;
+        try {
+          symlinkExists = fs.lstatSync(cacheFile).isSymbolicLink();
+        } catch {
+          // File doesn't exist — symlink was cleaned up
+        }
+        assert.ok(!symlinkExists, "symlink cache file should be removed");
+
+        // The target file should NOT have been overwritten with git output
+        const targetContent = fs.readFileSync(targetFile, "utf-8");
+        assert.equal(
+          targetContent,
+          "SYMLINK_TARGET_CONTENT\n",
+          "symlink target should not be modified",
+        );
+      } finally {
+        // Clean up
+        const { createHash: ch } = require("crypto");
+        const cwdHash = ch("md5").update(resolvedGitDir).digest("hex").slice(0, 8);
+        const cacheFile = path.join(
+          os.tmpdir(),
+          `dev-team-git-cache-${cwdHash}-diff---name-only.txt`,
+        );
+        const targetFile = path.join(os.tmpdir(), `dev-team-symlink-target-${cwdHash}.txt`);
+        try {
+          fs.unlinkSync(cacheFile);
+        } catch {
+          /* ignore */
+        }
+        try {
+          fs.unlinkSync(targetFile);
+        } catch {
+          /* ignore */
+        }
+        fs.rmSync(gitDir, { recursive: true, force: true });
+      }
+    },
+  );
 });
 
 // ─── Pre-commit Gate ─────────────────────────────────────────────────────────
