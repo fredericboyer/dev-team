@@ -63,7 +63,15 @@ export async function update(targetDir: string): Promise<void> {
   try {
     prefs = JSON.parse(prefsContent);
   } catch {
-    console.error("Error: dev-team.json is corrupted. Run `npx dev-team init` to reinitialize.");
+    const backupPath = prefsPath + ".bak";
+    try {
+      copyFile(prefsPath, backupPath);
+      console.error(
+        `Error: dev-team.json is corrupted. Backed up to ${backupPath}. Run \`npx dev-team init\` to reinitialize.`,
+      );
+    } catch {
+      console.error("Error: dev-team.json is corrupted. Run `npx dev-team init` to reinitialize.");
+    }
     process.exit(1);
   }
 
