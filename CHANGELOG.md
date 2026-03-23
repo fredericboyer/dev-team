@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-03-23
+
+### Added
+- `npx dev-team doctor` — installation health check (prefs, agents, hooks, CLAUDE.md, memory)
+- `npx dev-team status` — show installed version, agents, hooks, skills, and memory status
+- `npx dev-team --version` / `-v` — print version from package.json
+- ADR-018: Shared git context for hook deduplication (temp file cache with 5s TTL)
+- ADR-019: Parallel implementation with review waves (5-phase orchestration model)
+- Cached git diff helper in tdd-enforce and pre-commit-gate hooks (reduced redundant git calls)
+- Process audit: all 11 agents now have at least one automatic invocation trigger
+- Beck flagged by post-change-review hook when test files change
+- Borges spawned at completion of /dev-team:review and /dev-team:audit skills
+- Drucker parallel orchestration section for multi-issue coordination
+- 15 new tests from comprehensive coverage pass (174 total)
+
+### Changed
+- Hook timeouts reduced from 5000ms to 2000ms for cached git calls
+- CLAUDE.md template includes parallel execution instructions
+
 ## [0.4.1] - 2026-03-23
 
 ### Fixed
