@@ -8,7 +8,7 @@ The `/dev-team:task` skill runs a single-issue loop: one implementing agent, fol
 Background agents spawned via the Agent tool can implement code in parallel on separate branches, but the current orchestration model has no concept of coordinated review timing. Without coordination, reviews start at arbitrary times, Borges runs once per issue instead of once across all, and there is no mechanism to detect file conflicts between parallel branches before they happen.
 
 ## Decision
-Introduce a **parallel orchestration model** managed by Drucker with four distinct phases:
+Introduce a **parallel orchestration model** managed by Drucker with five distinct phases:
 
 ### Phase 0: Brooks pre-assessment (batch)
 Before any implementation begins, Drucker spawns Brooks once with the full batch of issues. Brooks assesses:
