@@ -15,7 +15,7 @@ This project uses [dev-team](https://github.com/dev-team) — adversarial AI age
 | `@dev-team-beck` | Test Implementer | Writing tests, TDD cycles, translating audit findings into test cases |
 | `@dev-team-deming` | Tooling Optimizer | Linters, formatters, CI/CD, hooks, onboarding, automation |
 | `@dev-team-tufte` | Documentation Engineer | Doc accuracy, stale docs, README/API docs, doc-code sync |
-| `@dev-team-brooks` | Architect | Architectural review, coupling, dependency direction, ADR compliance |
+| `@dev-team-brooks` | Architect & Quality Reviewer | Architectural review, coupling, ADR compliance, quality attributes (performance, maintainability, scalability) |
 | `@dev-team-conway` | Release Manager | Versioning, changelog, release readiness, semver validation |
 | `@dev-team-drucker` | Team Lead / Orchestrator | Auto-delegates to specialists, manages review loops, resolves conflicts |
 | `@dev-team-borges` | Librarian | End-of-task/review/audit memory review, cross-agent coherence, system improvement |
@@ -33,14 +33,14 @@ For non-trivial work: explore the area first, then implement, then review.
 - **Voss** — auto-flagged when infrastructure/config files change (docker, .env, migrations, etc.)
 - **Deming** — auto-flagged when tooling files change (eslint, CI workflows, package.json, etc.)
 - **Tufte** — auto-flagged when documentation files change (.md, /docs/, README, etc.)
-- **Brooks** — auto-flagged when architectural boundaries are touched (/adr/, /core/, /domain/, /lib/, build config, etc.)
+- **Brooks** — auto-flagged when any non-test implementation code changes (quality attributes) and when architectural boundaries are touched (/adr/, /core/, /domain/, /lib/, build config, etc.)
 - **Conway** — auto-flagged when release artifacts change (package.json, changelog, version files, release/publish/deploy workflows, etc.)
 
 **End-of-workflow agents:**
 - **Borges** — mandatory at end of every `/dev-team:task`, `/dev-team:review`, and `/dev-team:audit`. Reviews memory freshness, cross-agent coherence, and system improvement opportunities.
 
 **Orchestration:**
-- **Drucker** — delegates tasks to the right implementing agent and spawns reviewers. Brooks reviews ALL structural changes (not just explicit architecture files). Szabo and Knuth review all code changes.
+- **Drucker** — delegates tasks to the right implementing agent and spawns reviewers. Szabo, Knuth, and Brooks review all code changes. Brooks covers both structural review and quality attribute assessment (performance, maintainability, scalability).
 
 Agents challenge each other using classified findings:
 - `[DEFECT]` blocks progress. `[RISK]`, `[QUESTION]`, `[SUGGESTION]` are advisory.

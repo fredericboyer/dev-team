@@ -123,7 +123,11 @@ if (DOC_PATTERNS.some((p) => p.test(fullPath))) {
   flags.push("@dev-team-tufte (documentation changed)");
 }
 
-// Architecture patterns → flag for Architect
+// Architecture patterns → flag for Architect. For architectural boundary files,
+// Brooks is flagged here with the "architectural boundary touched" reason. The
+// dedupe check below skips the generic "quality attribute review" reason for
+// these files — this is intentional because Brooks's expanded agent definition
+// already includes quality attribute assessment in every review.
 const ARCH_PATTERNS = [
   /\/adr\//,
   /architecture/,
@@ -163,12 +167,15 @@ if (RELEASE_PATTERNS.some((p) => p.test(fullPath))) {
   flags.push("@dev-team-conway (version/release artifact changed)");
 }
 
-// Always flag Knuth for non-test implementation files
+// Always flag Knuth and Brooks for non-test implementation files
 const isTestFile = /\.(test|spec)\.|__tests__|\/tests?\//.test(fullPath);
 const isCodeFile = /\.(js|ts|jsx|tsx|py|rb|go|java|rs|c|cpp|cs)$/.test(fullPath);
 
 if (isCodeFile && !isTestFile) {
   flags.push("@dev-team-knuth (new or changed code path to audit)");
+  if (!flags.some((f) => f.startsWith("@dev-team-brooks"))) {
+    flags.push("@dev-team-brooks (quality attribute review)");
+  }
 }
 
 // Flag Beck for test file changes (test quality review)
