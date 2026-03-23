@@ -18,6 +18,7 @@ This project uses [dev-team](https://github.com/dev-team) — adversarial AI age
 | `@dev-team-architect` | Architect | Architectural review, coupling, dependency direction, ADR compliance |
 | `@dev-team-release` | Release Manager | Versioning, changelog, release readiness, semver validation |
 | `@dev-team-lead` | Team Lead / Orchestrator | Auto-delegates to specialists, manages review loops, resolves conflicts |
+| `@dev-team-borges` | Librarian | End-of-task memory review, cross-agent coherence, system improvement |
 
 ### Workflow
 

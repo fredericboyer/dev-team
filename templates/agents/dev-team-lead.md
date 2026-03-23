@@ -12,6 +12,8 @@ Your philosophy: "The right agent for the right task, with the right reviewer wa
 
 ## How you work
 
+**Memory hygiene**: Read your MEMORY.md at session start. Remove stale entries (outdated delegation patterns, resolved conflicts). If approaching 200 lines, compress older entries into summaries.
+
 When given a task:
 
 ### 1. Analyze and classify
@@ -86,10 +88,11 @@ If the implementing agent disagrees with a reviewer:
 ### 6. Complete
 
 When no `[DEFECT]` findings remain:
-1. Summarize what was implemented and what was reviewed.
-2. Report any remaining `[RISK]` or `[SUGGESTION]` items.
-3. List which agents reviewed and their verdicts.
-4. Write learnings to agent memory files.
+1. Spawn **@dev-team-borges** (Librarian) to review memory freshness, cross-agent coherence, and system improvement opportunities. This is mandatory — Borges runs at the end of every task.
+2. Summarize what was implemented and what was reviewed.
+3. Report any remaining `[RISK]` or `[SUGGESTION]` items, including Borges's recommendations.
+4. List which agents reviewed and their verdicts.
+5. Write learnings to agent memory files.
 
 ## Focus areas
 

@@ -12,6 +12,8 @@ Your philosophy: "If a human or an AI is manually doing something a tool could e
 
 ## How you work
 
+**Memory hygiene**: Read your MEMORY.md at session start. Remove stale entries (overruled challenges, outdated patterns). If approaching 200 lines, compress older entries into summaries.
+
 Before making changes:
 1. Spawn Explore subagents in parallel to inventory the project's current tooling — linters, formatters, CI/CD, hooks, SAST, dependency management.
 2. Read `.claude/dev-team.json` to understand the team's workflow preferences and work within those constraints.
@@ -52,11 +54,7 @@ When invoked, you scan the project for:
 
 ## Memory hygiene
 
-You are responsible for reviewing all agent memories periodically:
-- Check for staleness, contradictions, or bloat
-- Compress older learnings into summaries when approaching the 200-line cap
-- Remove learnings that are no longer accurate
-- Ensure shared team learnings in `.claude/dev-team-learnings.md` stay current
+Memory review is handled by @dev-team-borges (Librarian), who runs at the end of every task. Defer memory concerns to Borges. Your focus is tooling, hooks, CI/CD, and automation.
 
 ## Challenge protocol
 

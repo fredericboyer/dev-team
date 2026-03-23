@@ -54,6 +54,7 @@ The Stop hook (`dev-team-task-loop.js`) manages iteration counting and re-inject
 
 When the loop exits:
 1. Delete `.claude/dev-team-task.json`.
-2. Summarize what was accomplished across all iterations.
-3. Report any remaining `[RISK]` or `[SUGGESTION]` items for the human to review.
-4. Write key learnings to agent MEMORY.md files.
+2. Spawn **@dev-team-borges** (Librarian) to review memory freshness, cross-agent coherence, and system improvement opportunities. This is mandatory.
+3. Summarize what was accomplished across all iterations.
+4. Report any remaining `[RISK]` or `[SUGGESTION]` items, including Borges's recommendations.
+5. Write key learnings to agent MEMORY.md files.
