@@ -385,7 +385,7 @@ describe("dev-team-tdd-enforce", () => {
     }
   });
 
-  it("writes cache files with mode 0o600", () => {
+  it("writes cache files with mode 0o600", { skip: process.platform === "win32" }, () => {
     const { createHash } = require("crypto");
     const cacheDir = os.tmpdir();
     const gitDir = fs.mkdtempSync(path.join(os.tmpdir(), "dev-team-cache-perms-"));
