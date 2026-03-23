@@ -171,6 +171,11 @@ if (isCodeFile && !isTestFile) {
   flags.push("@dev-team-knuth (new or changed code path to audit)");
 }
 
+// Flag Beck for test file changes (test quality review)
+if (isTestFile && isCodeFile) {
+  flags.push("@dev-team-beck (test file changed — review test quality)");
+}
+
 if (flags.length === 0) {
   process.exit(0);
 }
