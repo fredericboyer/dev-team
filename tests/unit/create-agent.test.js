@@ -90,4 +90,25 @@ describe('createAgent', () => {
     assert.ok(content.includes('model: sonnet'), 'should default to sonnet');
     assert.ok(content.includes('memory: project'), 'should have memory: project');
   });
+
+  it('lowercases uppercase characters in name', () => {
+    createAgent(tmpDir, 'MyAgent');
+
+    const agentPath = path.join(tmpDir, '.claude', 'agents', 'dev-team-myagent.md');
+    assert.ok(fs.existsSync(agentPath), 'agent file should exist with lowercased name');
+
+    const content = fs.readFileSync(agentPath, 'utf-8');
+    assert.ok(content.includes('name: dev-team-myagent'), 'frontmatter should have lowercased name');
+    assert.ok(content.includes('Myagent'), 'body should have title-cased display name');
+  });
+
+  it('handles name that is just "dev-team-" prefix with nothing after', () => {
+    createAgent(tmpDir, 'dev-team-');
+
+    const agentPath = path.join(tmpDir, '.claude', 'agents', 'dev-team-.md');
+    assert.ok(fs.existsSync(agentPath), 'agent file should exist even with empty suffix');
+
+    const content = fs.readFileSync(agentPath, 'utf-8');
+    assert.ok(content.includes('name: dev-team-'), 'should have name with trailing dash');
+  });
 });
