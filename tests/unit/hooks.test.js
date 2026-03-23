@@ -479,7 +479,7 @@ describe('dev-team-pre-commit-lint', () => {
     try {
       fs.writeFileSync(
         path.join(tmpDir, 'package.json'),
-        JSON.stringify({ scripts: { lint: 'exit 1' } }),
+        JSON.stringify({ scripts: { lint: 'node -e "process.exit(1)"' } }),
       );
       const input = JSON.stringify({ tool_input: { command: 'git commit -m "test"' } });
       execFileSync(process.execPath, [path.join(HOOKS_DIR, hook), input], {
@@ -501,7 +501,7 @@ describe('dev-team-pre-commit-lint', () => {
     try {
       fs.writeFileSync(
         path.join(tmpDir, 'package.json'),
-        JSON.stringify({ scripts: { lint: 'exit 0', 'format:check': 'exit 0' } }),
+        JSON.stringify({ scripts: { lint: 'node -e "process.exit(0)"', 'format:check': 'node -e "process.exit(0)"' } }),
       );
       const input = JSON.stringify({ tool_input: { command: 'git commit -m "test"' } });
       execFileSync(process.execPath, [path.join(HOOKS_DIR, hook), input], {
@@ -520,7 +520,7 @@ describe('dev-team-pre-commit-lint', () => {
     try {
       fs.writeFileSync(
         path.join(tmpDir, 'package.json'),
-        JSON.stringify({ scripts: { lint: 'exit 1' } }),
+        JSON.stringify({ scripts: { lint: 'node -e "process.exit(1)"' } }),
       );
       const input = JSON.stringify({ tool_input: { command: 'git commit --no-verify -m "skip"' } });
       execFileSync(process.execPath, [path.join(HOOKS_DIR, hook), input], {
@@ -539,7 +539,7 @@ describe('dev-team-pre-commit-lint', () => {
     try {
       fs.writeFileSync(
         path.join(tmpDir, 'package.json'),
-        JSON.stringify({ scripts: { lint: 'exit 0', 'format:check': 'exit 1' } }),
+        JSON.stringify({ scripts: { lint: 'node -e "process.exit(0)"', 'format:check': 'node -e "process.exit(1)"' } }),
       );
       const input = JSON.stringify({ tool_input: { command: 'git commit -m "test"' } });
       execFileSync(process.execPath, [path.join(HOOKS_DIR, hook), input], {
