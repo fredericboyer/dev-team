@@ -2,8 +2,8 @@ import path from "path";
 import { fileExists, readFile, dirExists } from "./files";
 
 export interface ScanFinding {
-  category: "linter" | "formatter" | "sast" | "ci" | "dependency";
-  status: "found" | "missing" | "outdated";
+  category: "linter" | "formatter" | "sast" | "ci" | "dependency" | "enforcement";
+  status: "found" | "missing" | "outdated" | "gap";
   tool: string;
   recommendation: string;
 }
@@ -173,6 +173,65 @@ export function scanProject(targetDir: string): ScanFinding[] {
     });
   }
 
+  // Enforcement gap detection: CI checks vs local hook coverage
+  const ciScripts = parseCiScripts(targetDir);
+  const hookCommands = parseHookCommands(targetDir);
+
+  const coverageMappings: Array<{
+    scriptNames: string[];
+    hookFile: string;
+    partial?: boolean;
+    partialReason?: string;
+  }> = [
+    { scriptNames: ["lint"], hookFile: "dev-team-pre-commit-lint.js" },
+    { scriptNames: ["format:check"], hookFile: "dev-team-pre-commit-lint.js" },
+    {
+      scriptNames: ["test"],
+      hookFile: "dev-team-tdd-enforce.js",
+      partial: true,
+      partialReason: "hook ensures tests exist but does not run them",
+    },
+  ];
+
+  for (const scriptName of ciScripts) {
+    const mapping = coverageMappings.find((m) => m.scriptNames.includes(scriptName));
+
+    if (!mapping) {
+      findings.push({
+        category: "enforcement",
+        status: "gap",
+        tool: scriptName,
+        recommendation: `CI runs "${scriptName}" but no local hook enforces it. Add a hook or accept the delayed feedback.`,
+      });
+      continue;
+    }
+
+    const hookPresent = hookCommands.some((cmd) => cmd.includes(mapping.hookFile));
+
+    if (!hookPresent) {
+      findings.push({
+        category: "enforcement",
+        status: "gap",
+        tool: scriptName,
+        recommendation: `CI runs "${scriptName}" but the corresponding hook (${mapping.hookFile}) is not installed. Run dev-team init to add it.`,
+      });
+    } else if (mapping.partial) {
+      findings.push({
+        category: "enforcement",
+        status: "found",
+        tool: scriptName,
+        recommendation: `CI runs "${scriptName}" \u2014 partially covered by ${mapping.hookFile} (${mapping.partialReason}).`,
+      });
+    } else {
+      findings.push({
+        category: "enforcement",
+        status: "found",
+        tool: scriptName,
+        recommendation: `CI runs "${scriptName}" \u2014 covered locally by ${mapping.hookFile}.`,
+      });
+    }
+  }
+
   return findings;
 }
 
@@ -185,8 +244,9 @@ export function formatScanReport(findings: ScanFinding[]): string {
 
   const missing = findings.filter((f) => f.status === "missing");
   const found = findings.filter((f) => f.status === "found");
+  const gaps = findings.filter((f) => f.status === "gap");
 
-  if (missing.length === 0) {
+  if (missing.length === 0 && gaps.length === 0) {
     lines.push("  All checked tooling categories are covered.\n");
   }
 
@@ -196,10 +256,62 @@ export function formatScanReport(findings: ScanFinding[]): string {
   for (const f of missing) {
     lines.push(`  [MISSING] ${f.category}: ${f.recommendation}`);
   }
+  for (const f of gaps) {
+    lines.push(`  [GAP]     ${f.category}: ${f.recommendation}`);
+  }
 
-  if (missing.length > 0) {
+  if (missing.length > 0 || gaps.length > 0) {
     lines.push("\n  Tip: Run @dev-team-deming for deeper analysis and automated setup.");
   }
 
   return lines.join("\n");
+}
+
+/**
+ * Parses package.json scripts to find CI-relevant check names.
+ * Returns script names for: lint, format:check, test, typecheck, build.
+ */
+export function parseCiScripts(targetDir: string): string[] {
+  const ciRelevantScripts = ["lint", "format:check", "test", "typecheck", "build"];
+  const pkgContent = readFile(path.join(targetDir, "package.json"));
+  if (!pkgContent) return [];
+
+  try {
+    const pkg = JSON.parse(pkgContent);
+    const scripts = pkg.scripts || {};
+    return ciRelevantScripts.filter((name) => name in scripts);
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Parses .claude/settings.json to extract all hook command strings.
+ * Returns an array of command strings found across all hook events.
+ */
+export function parseHookCommands(targetDir: string): string[] {
+  const settingsContent = readFile(path.join(targetDir, ".claude", "settings.json"));
+  if (!settingsContent) return [];
+
+  try {
+    const settings = JSON.parse(settingsContent);
+    const hooks = settings.hooks || {};
+    const commands: string[] = [];
+
+    for (const matchers of Object.values(hooks) as Array<
+      Array<{ hooks?: Array<{ command?: string }> }>
+    >) {
+      for (const matcher of matchers) {
+        for (const hook of matcher.hooks || []) {
+          if (hook.command) {
+            commands.push(hook.command);
+          }
+        }
+      }
+    }
+
+    return commands;
+  } catch {
+    return [];
+  }
 }
