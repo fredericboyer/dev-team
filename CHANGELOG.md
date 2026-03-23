@@ -7,6 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-03-23
+
+### Added
+- @dev-team-borges (Librarian) — always spawned at end of every task for memory review, cross-agent coherence, and system improvement
+- Memory self-maintenance for all 11 agents — read/prune/compress MEMORY.md at session start
+- Pre-commit lint/format hook — intercepts `git commit`, runs lint + format:check, blocks on failure
+- Deming hook gap analysis — compares CI enforcement against local hooks, flags [GAP] findings
+- Active hook spawning — post-change-review outputs mandatory `ACTION REQUIRED` directives, pre-commit gate blocks if reviews not completed
+- Drucker (Lead) spawns Brooks (Architect) for ADR assessment before delegation
+- Version migration in update command — compares/stamps package version
+- Backup corrupted settings — copies corrupt JSON to .bak before overwriting
+- Duplicate BEGIN marker protection in CLAUDE.md — replaces first pair only, preserves user content
+- `getPackageVersion()` shared utility — eliminates hardcoded version strings
+- Enforcement gap detection in scan module with [GAP] reporting
+- 10 ADRs (008-017) covering all v0.2/v0.3 architectural decisions
+- 154 tests total (20 new)
+
+### Changed
+- Agent rename: Architect→Brooks, Docs→Tufte, Release→Conway, Lead→Drucker (named after notable figures)
+- Blocking hooks (safety-guard, tdd-enforce) fail closed on malformed input
+- Windows path compatibility — all hooks normalize backslashes before pattern matching
+- `readFile()` distinguishes ENOENT from EACCES/EPERM (warns on permission denied, re-throws others)
+- Deming memory hygiene deferred to Borges (scope separation)
+- Presets include Drucker + Borges in all bundles (prevents spawn failures)
+- Zero lint warnings (oxlint clean)
+
+### Fixed
+- `--no-verify` regex tightened to avoid matching inside commit messages
+- `npm` invocation on Windows uses `shell: true` for .cmd resolution
+- Cross-platform test scripts use helper files instead of shell builtins
+- `init.ts` version derived from `package.json` instead of hardcoded string
+
 ## [0.3.1] - 2026-03-22
 
 ### Fixed
