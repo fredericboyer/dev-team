@@ -7,6 +7,7 @@
  * Zero runtime dependencies (project constraint from ADR-002).
  */
 
+import fs from "fs";
 import path from "path";
 import { readFile, writeFile, fileExists } from "./files";
 
@@ -110,7 +111,6 @@ export function stateExists(projectRoot: string): boolean {
 export function deleteState(projectRoot: string): boolean {
   const fp = statePath(projectRoot);
   if (!fileExists(fp)) return false;
-  const fs = require("fs");
   fs.unlinkSync(fp);
   return true;
 }
