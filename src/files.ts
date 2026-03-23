@@ -39,8 +39,11 @@ export function copyFile(src: string, dest: string): boolean {
 export function fileExists(absPath: string): boolean {
   try {
     return fs.statSync(absPath).isFile();
-  } catch {
-    return false;
+  } catch (err: unknown) {
+    if ((err as NodeJS.ErrnoException).code === "ENOENT") {
+      return false;
+    }
+    throw err;
   }
 }
 
@@ -50,8 +53,11 @@ export function fileExists(absPath: string): boolean {
 export function dirExists(absPath: string): boolean {
   try {
     return fs.statSync(absPath).isDirectory();
-  } catch {
-    return false;
+  } catch (err: unknown) {
+    if ((err as NodeJS.ErrnoException).code === "ENOENT") {
+      return false;
+    }
+    throw err;
   }
 }
 
@@ -61,8 +67,16 @@ export function dirExists(absPath: string): boolean {
 export function readFile(absPath: string): string | null {
   try {
     return fs.readFileSync(absPath, "utf-8");
-  } catch {
-    return null;
+  } catch (err: unknown) {
+    const code = (err as NodeJS.ErrnoException).code;
+    if (code === "ENOENT") {
+      return null;
+    }
+    if (code === "EACCES" || code === "EPERM") {
+      console.warn(`Warning: permission denied reading ${absPath}`);
+      return null;
+    }
+    throw err;
   }
 }
 

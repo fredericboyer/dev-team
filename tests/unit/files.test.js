@@ -28,6 +28,10 @@ describe('fileExists', () => {
   it('returns false for non-existent files', () => {
     assert.equal(fileExists(path.join(tmpDir, 'nope.txt')), false);
   });
+
+  it('re-throws on unexpected errors', () => {
+    assert.throws(() => fileExists(path.join(tmpDir, 'bad\x00path')));
+  });
 });
 
 describe('dirExists', () => {
@@ -37,6 +41,10 @@ describe('dirExists', () => {
 
   it('returns false for non-existent directories', () => {
     assert.equal(dirExists(path.join(tmpDir, 'nope')), false);
+  });
+
+  it('re-throws on unexpected errors', () => {
+    assert.throws(() => dirExists(path.join(tmpDir, 'bad\x00path')));
   });
 });
 
@@ -61,6 +69,12 @@ describe('readFile', () => {
 
   it('returns null for non-existent files', () => {
     assert.equal(readFile(path.join(tmpDir, 'nope.txt')), null);
+  });
+
+  it('re-throws on unexpected errors (EISDIR)', () => {
+    const dir = path.join(tmpDir, 'a-directory');
+    fs.mkdirSync(dir);
+    assert.throws(() => readFile(dir), (err) => err.code === 'EISDIR');
   });
 });
 
