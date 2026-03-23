@@ -98,6 +98,11 @@ const QUALITY_HOOKS: HookDefinition[] = [
     description: "Iterative task loop with adversarial review gates",
   },
   {
+    label: "Pre-commit lint",
+    file: "dev-team-pre-commit-lint.js",
+    description: "Run lint + format checks before git commit",
+  },
+  {
     label: "Watch list",
     file: "dev-team-watch-list.js",
     description: "Auto-spawn agents when file patterns match (configurable)",

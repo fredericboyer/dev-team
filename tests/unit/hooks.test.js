@@ -429,6 +429,178 @@ describe('dev-team-pre-commit-gate', () => {
   });
 });
 
+// ─── Pre-commit Lint ─────────────────────────────────────────────────────────
+
+describe('dev-team-pre-commit-lint', () => {
+  const hook = 'dev-team-pre-commit-lint.js';
+
+  it('allows non-commit bash commands', () => {
+    const input = JSON.stringify({ tool_input: { command: 'npm test' } });
+    const stdout = execFileSync(process.execPath, [path.join(HOOKS_DIR, hook), input], {
+      encoding: 'utf-8',
+      timeout: 5000,
+    });
+    assert.equal(stdout, '');
+  });
+
+  it('allows commit when no package.json exists', () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'dev-team-lint-'));
+    try {
+      const input = JSON.stringify({ tool_input: { command: 'git commit -m "test"' } });
+      execFileSync(process.execPath, [path.join(HOOKS_DIR, hook), input], {
+        encoding: 'utf-8',
+        timeout: 5000,
+        cwd: tmpDir,
+      });
+      assert.ok(true, 'should exit 0 with no tooling');
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  it('allows commit when package.json has no lint/format scripts', () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'dev-team-lint-'));
+    try {
+      fs.writeFileSync(path.join(tmpDir, 'package.json'), JSON.stringify({ scripts: { start: 'node .' } }));
+      const input = JSON.stringify({ tool_input: { command: 'git commit -m "test"' } });
+      execFileSync(process.execPath, [path.join(HOOKS_DIR, hook), input], {
+        encoding: 'utf-8',
+        timeout: 5000,
+        cwd: tmpDir,
+      });
+      assert.ok(true, 'should exit 0 without lint/format scripts');
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  it('blocks commit when lint script fails', () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'dev-team-lint-'));
+    try {
+      fs.writeFileSync(
+        path.join(tmpDir, 'package.json'),
+        JSON.stringify({ scripts: { lint: 'exit 1' } }),
+      );
+      const input = JSON.stringify({ tool_input: { command: 'git commit -m "test"' } });
+      execFileSync(process.execPath, [path.join(HOOKS_DIR, hook), input], {
+        encoding: 'utf-8',
+        timeout: 10000,
+        cwd: tmpDir,
+      });
+      assert.fail('Should exit 2 when lint fails');
+    } catch (err) {
+      assert.equal(err.status, 2, 'should block with exit 2');
+      assert.ok(err.stderr.includes('BLOCKED'), 'should show blocked message');
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  it('allows commit when lint and format pass', () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'dev-team-lint-'));
+    try {
+      fs.writeFileSync(
+        path.join(tmpDir, 'package.json'),
+        JSON.stringify({ scripts: { lint: 'exit 0', 'format:check': 'exit 0' } }),
+      );
+      const input = JSON.stringify({ tool_input: { command: 'git commit -m "test"' } });
+      execFileSync(process.execPath, [path.join(HOOKS_DIR, hook), input], {
+        encoding: 'utf-8',
+        timeout: 10000,
+        cwd: tmpDir,
+      });
+      assert.ok(true, 'should exit 0 when all checks pass');
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  it('allows commit with --no-verify flag', () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'dev-team-lint-'));
+    try {
+      fs.writeFileSync(
+        path.join(tmpDir, 'package.json'),
+        JSON.stringify({ scripts: { lint: 'exit 1' } }),
+      );
+      const input = JSON.stringify({ tool_input: { command: 'git commit --no-verify -m "skip"' } });
+      execFileSync(process.execPath, [path.join(HOOKS_DIR, hook), input], {
+        encoding: 'utf-8',
+        timeout: 5000,
+        cwd: tmpDir,
+      });
+      assert.ok(true, 'should exit 0 with --no-verify');
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  it('blocks commit when format:check fails independently', () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'dev-team-lint-'));
+    try {
+      fs.writeFileSync(
+        path.join(tmpDir, 'package.json'),
+        JSON.stringify({ scripts: { lint: 'exit 0', 'format:check': 'exit 1' } }),
+      );
+      const input = JSON.stringify({ tool_input: { command: 'git commit -m "test"' } });
+      execFileSync(process.execPath, [path.join(HOOKS_DIR, hook), input], {
+        encoding: 'utf-8',
+        timeout: 10000,
+        cwd: tmpDir,
+      });
+      assert.fail('Should exit 2 when format:check fails');
+    } catch (err) {
+      assert.equal(err.status, 2, 'should block with exit 2');
+      assert.ok(err.stderr.includes('format'), 'should mention format in error');
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  it('allows on malformed JSON input (fail open)', () => {
+    try {
+      execFileSync(process.execPath, [path.join(HOOKS_DIR, hook), 'not-json'], {
+        encoding: 'utf-8',
+        timeout: 5000,
+      });
+      assert.ok(true, 'should exit 0 on malformed input');
+    } catch (err) {
+      assert.fail(`Should fail open, got exit ${err.status}`);
+    }
+  });
+
+  it('allows commit with malformed package.json', () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'dev-team-lint-'));
+    try {
+      fs.writeFileSync(path.join(tmpDir, 'package.json'), '{ bad json');
+      const input = JSON.stringify({ tool_input: { command: 'git commit -m "test"' } });
+      execFileSync(process.execPath, [path.join(HOOKS_DIR, hook), input], {
+        encoding: 'utf-8',
+        timeout: 5000,
+        cwd: tmpDir,
+      });
+      assert.ok(true, 'should exit 0 with invalid package.json');
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  it('allows commit when package.json has no scripts key', () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'dev-team-lint-'));
+    try {
+      fs.writeFileSync(path.join(tmpDir, 'package.json'), JSON.stringify({ name: 'foo' }));
+      const input = JSON.stringify({ tool_input: { command: 'git commit -m "test"' } });
+      execFileSync(process.execPath, [path.join(HOOKS_DIR, hook), input], {
+        encoding: 'utf-8',
+        timeout: 5000,
+        cwd: tmpDir,
+      });
+      assert.ok(true, 'should exit 0 with no scripts key');
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+});
+
 // ─── Watch List ──────────────────────────────────────────────────────────────
 
 describe('dev-team-watch-list', () => {
