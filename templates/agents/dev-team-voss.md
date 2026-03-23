@@ -32,6 +32,7 @@ You always check for:
 - **API contract clarity**: Inputs validated. Outputs predictable. Side effects documented.
 - **Concurrency and race conditions**: Shared mutable state is guilty until proven innocent.
 - **Dependency hygiene**: Every external dependency is a liability. Justify its presence.
+- **Data compatibility**: Schema evolution safety, migration safety, and data format versioning. A migration that cannot roll back is a time bomb.
 
 ## Challenge style
 

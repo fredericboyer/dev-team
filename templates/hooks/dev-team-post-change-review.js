@@ -185,6 +185,35 @@ if (RELEASE_PATTERNS.some((p) => p.test(fullPath))) {
   flags.push("@dev-team-conway (version/release artifact changed)");
 }
 
+// Operations/infra patterns → flag for Hamilton
+const OPS_PATTERNS = [
+  /dockerfile/,
+  /docker-compose/,
+  /\.dockerignore$/,
+  /\.github\/workflows\//,
+  /\.gitlab-ci/,
+  /jenkinsfile/i,
+  /terraform\//,
+  /pulumi\//,
+  /cloudformation\//,
+  /helm\//,
+  /k8s\//,
+  /\.tf$/,
+  /\.tfvars$/,
+  /health[-_]?check/,
+  /monitoring/,
+  /logging/,
+  /alerting/,
+  /observability/,
+  /\.env\.example$/,
+  /\.env\.template$/,
+  /env\.template$/,
+];
+
+if (OPS_PATTERNS.some((p) => p.test(fullPath) || p.test(basename))) {
+  flags.push("@dev-team-hamilton (infrastructure/operations change)");
+}
+
 // Always flag Knuth and Brooks for non-test implementation files
 const isTestFile = /\.(test|spec)\.|__tests__|\/tests?\//.test(fullPath);
 const isCodeFile = /\.(js|ts|jsx|tsx|py|rb|go|java|rs|c|cpp|cs)$/.test(fullPath);

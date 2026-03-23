@@ -288,6 +288,110 @@ describe("dev-team-post-change-review", () => {
       assert.ok(result.stdout.includes("@dev-team-tufte"), `should flag Tufte for ${file_path}`);
     }
   });
+
+  // ─── Hamilton operations reviewer ──────────────────────────────────────
+
+  it("flags Hamilton for Dockerfile", () => {
+    const result = runHook(hook, { file_path: "/app/Dockerfile" });
+    assert.equal(result.code, 0);
+    assert.ok(result.stdout.includes("@dev-team-hamilton"), "should flag Hamilton for Dockerfile");
+  });
+
+  it("flags Hamilton for docker-compose files", () => {
+    const result = runHook(hook, { file_path: "/app/docker-compose.yml" });
+    assert.equal(result.code, 0);
+    assert.ok(
+      result.stdout.includes("@dev-team-hamilton"),
+      "should flag Hamilton for docker-compose",
+    );
+  });
+
+  it("flags Hamilton for GitHub workflow files", () => {
+    const result = runHook(hook, { file_path: "/app/.github/workflows/deploy.yml" });
+    assert.equal(result.code, 0);
+    assert.ok(
+      result.stdout.includes("@dev-team-hamilton"),
+      "should flag Hamilton for CI workflows",
+    );
+  });
+
+  it("flags Hamilton for Terraform files", () => {
+    const result = runHook(hook, { file_path: "/app/terraform/main.tf" });
+    assert.equal(result.code, 0);
+    assert.ok(result.stdout.includes("@dev-team-hamilton"), "should flag Hamilton for .tf files");
+  });
+
+  it("flags Hamilton for Helm charts", () => {
+    const result = runHook(hook, { file_path: "/app/helm/values.yaml" });
+    assert.equal(result.code, 0);
+    assert.ok(
+      result.stdout.includes("@dev-team-hamilton"),
+      "should flag Hamilton for helm directory",
+    );
+  });
+
+  it("flags Hamilton for k8s manifests", () => {
+    const result = runHook(hook, { file_path: "/app/k8s/deployment.yaml" });
+    assert.equal(result.code, 0);
+    assert.ok(
+      result.stdout.includes("@dev-team-hamilton"),
+      "should flag Hamilton for k8s directory",
+    );
+  });
+
+  it("flags Hamilton for health check files", () => {
+    const result = runHook(hook, { file_path: "/app/src/healthcheck.ts" });
+    assert.equal(result.code, 0);
+    assert.ok(
+      result.stdout.includes("@dev-team-hamilton"),
+      "should flag Hamilton for health check files",
+    );
+  });
+
+  it("flags Hamilton for monitoring config", () => {
+    const result = runHook(hook, { file_path: "/app/monitoring/prometheus.yml" });
+    assert.equal(result.code, 0);
+    assert.ok(
+      result.stdout.includes("@dev-team-hamilton"),
+      "should flag Hamilton for monitoring config",
+    );
+  });
+
+  it("flags Hamilton for .env.example", () => {
+    const result = runHook(hook, { file_path: "/app/.env.example" });
+    assert.equal(result.code, 0);
+    assert.ok(
+      result.stdout.includes("@dev-team-hamilton"),
+      "should flag Hamilton for .env.example",
+    );
+  });
+
+  it("flags Hamilton for .dockerignore", () => {
+    const result = runHook(hook, { file_path: "/app/.dockerignore" });
+    assert.equal(result.code, 0);
+    assert.ok(
+      result.stdout.includes("@dev-team-hamilton"),
+      "should flag Hamilton for .dockerignore",
+    );
+  });
+
+  it("flags Hamilton for tfvars files", () => {
+    const result = runHook(hook, { file_path: "/app/infra/prod.tfvars" });
+    assert.equal(result.code, 0);
+    assert.ok(
+      result.stdout.includes("@dev-team-hamilton"),
+      "should flag Hamilton for .tfvars files",
+    );
+  });
+
+  it("does not flag Hamilton for regular source files", () => {
+    const result = runHook(hook, { file_path: "/app/src/utils/helpers.ts" });
+    assert.equal(result.code, 0);
+    assert.ok(
+      !result.stdout.includes("@dev-team-hamilton"),
+      "should not flag Hamilton for regular code",
+    );
+  });
 });
 
 // ─── TDD Enforce ─────────────────────────────────────────────────────────────

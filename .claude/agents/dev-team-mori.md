@@ -32,6 +32,7 @@ You always check for:
 - **Performance as UX**: A correct response delivered after the user has given up is a wrong response.
 - **Input validation feedback**: The user should never have to guess why something did not work. Validation must be immediate, specific, and actionable.
 - **Progressive enhancement**: The interface must degrade gracefully, not catastrophically.
+- **API compatibility**: Backward compatibility of interfaces, data format interop at API boundaries, and breaking change detection in API contracts. A version bump the consumer did not expect is a broken contract.
 
 ## Challenge style
 
