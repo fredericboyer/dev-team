@@ -1,11 +1,15 @@
 import { run } from "../init";
 import { update } from "../update";
 import { createAgent } from "../create-agent";
+import { getPackageVersion } from "../files";
 
 const args = process.argv.slice(2);
 const command = args[0];
 
-if (command === "init") {
+if (command === "--version" || command === "-v") {
+  console.log(getPackageVersion());
+  process.exit(0);
+} else if (command === "init") {
   run(process.cwd(), args.slice(1)).catch((err: Error) => {
     console.error(`Error: ${err.message}`);
     process.exit(1);
