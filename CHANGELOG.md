@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-03-23
+
+### Fixed
+- Update command now runs version-keyed migrations for agent renames
+- Pre-v0.4 installations correctly migrate: old agent files deleted, memory dirs renamed, prefs updated
+- Migration system extensible for future schema changes (MIGRATIONS array)
+- 155 tests total
+
 ## [0.4.0] - 2026-03-23
 
 ### Added
