@@ -1,4 +1,4 @@
-# Agent Memory: Architect
+# Agent Memory: Tufte (Documentation Engineer)
 <!-- First 200 lines are loaded into agent context. Keep concise. -->
 
 ## Project Conventions

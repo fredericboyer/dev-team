@@ -1,4 +1,4 @@
-# Agent Memory: Lead (Orchestrator)
+# Agent Memory: Drucker (Orchestrator)
 <!-- First 200 lines are loaded into agent context. Keep concise. -->
 
 ## Delegation Patterns

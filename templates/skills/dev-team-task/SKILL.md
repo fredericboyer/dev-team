@@ -26,11 +26,11 @@ Start a task loop for: $ARGUMENTS
    - Frontend/UI work → @dev-team-mori
    - Test writing → @dev-team-beck
    - Tooling/config → @dev-team-deming
-   - Documentation → @dev-team-docs
-   - Release/versioning → @dev-team-release
+   - Documentation → @dev-team-tufte
+   - Release/versioning → @dev-team-conway
 
 4. **Architect pre-assessment** (skip for bug fixes, typo fixes, config tweaks):
-   Spawn @dev-team-architect to assess:
+   Spawn @dev-team-brooks to assess:
    - Does this task introduce a new pattern, tool, or convention?
    - Does it change module boundaries, dependency direction, or layer responsibilities?
    - Does it contradict or extend an existing ADR?
