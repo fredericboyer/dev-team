@@ -29,7 +29,10 @@ try {
   process.exit(0);
 }
 
-const files = stagedFiles.split("\n").filter(Boolean);
+const files = stagedFiles
+  .split("\n")
+  .filter(Boolean)
+  .map((f) => f.split("\\").join("/"));
 
 if (files.length === 0) {
   process.exit(0);
@@ -82,6 +85,7 @@ if (hasImplFiles && !hasMemoryUpdates) {
     });
     unstagedMemory = unstaged
       .split("\n")
+      .map((f) => f.split("\\").join("/"))
       .some((f) => f.endsWith("dev-team-learnings.md") || /agent-memory\/.*MEMORY\.md$/.test(f));
   } catch {
     // Ignore — best effort
