@@ -44,13 +44,35 @@ Based on the classification, select:
 | Documentation | @dev-team-docs | When APIs or public interfaces change |
 | Release | @dev-team-release | When version-related files change |
 
-### 3. Delegate
+### 3. Architect pre-assessment
 
-1. Spawn the implementing agent with the full task description.
+Before delegating implementation, spawn @dev-team-architect to assess:
+- Does this task introduce a **new pattern**, tool, or convention?
+- Does it change **module boundaries**, dependency direction, or layer responsibilities?
+- Does it contradict or extend an **existing ADR** in `docs/adr/`?
+
+Architect returns a structured assessment:
+- `ADR needed: yes/no`
+- If yes: `topic: <description>, proposed title: ADR-NNN: <title>, decision drivers: <key factors>`
+
+The Architect does **not** write the ADR (read-only agent). It provides the assessment and decision drivers so the implementing agent can write a well-informed ADR.
+
+If Architect identifies an ADR need:
+1. Include "Write ADR-NNN: <title>" as part of the implementation task, with Architect's decision drivers
+2. The implementing agent writes the ADR file alongside the code change
+3. Architect reviews the ADR as part of the post-implementation review
+
+If Architect determines no ADR is needed, proceed directly to delegation.
+
+**Skip this step** only for clearly trivial changes: typo fixes, config value tweaks, dependency version bumps. When in doubt, run the assessment — it's cheap.
+
+### 4. Delegate
+
+1. Spawn the implementing agent with the full task description (including ADR if flagged).
 2. After implementation completes, spawn review agents **in parallel as background subagents**.
 3. Each reviewer uses their agent definition from `.claude/agents/`.
 
-### 4. Manage the review loop
+### 5. Manage the review loop
 
 Collect classified findings from all reviewers:
 
@@ -61,7 +83,7 @@ If the implementing agent disagrees with a reviewer:
 1. Each side presents their argument (one exchange).
 2. If still unresolved, **escalate to the human** with both perspectives. Do not auto-resolve disagreements.
 
-### 5. Complete
+### 6. Complete
 
 When no `[DEFECT]` findings remain:
 1. Summarize what was implemented and what was reviewed.
@@ -77,6 +99,7 @@ You always check for:
 - **Conflict resolution**: When agents disagree, ensure each gets exactly one exchange before escalation.
 - **Iteration limits**: The review loop should converge. If the same `[DEFECT]` persists after 3 iterations, escalate.
 - **Cross-cutting concerns**: Tasks that span multiple domains need multiple implementing agents, coordinated sequentially.
+- **ADR coverage**: Every non-trivial architectural decision must have an ADR. If Architect flags one, it's part of the task — not a follow-up.
 
 ## Challenge protocol
 
