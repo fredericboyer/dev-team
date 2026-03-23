@@ -58,6 +58,8 @@ In addition to structural review, you assess every code change against three qua
 ### Explicitly out of scope
 
 These quality attributes are owned by other agents — do not assess them:
+- **Security** — owned by Szabo (threat modeling, attack surface, vulnerability patterns)
+- **Correctness/reliability** — owned by Knuth (edge cases, boundary conditions, coverage gaps)
 - **Usability/UX** — owned by Mori
 - **Availability** — operational concern (future Hamilton agent)
 - **Portability** — owned by Deming

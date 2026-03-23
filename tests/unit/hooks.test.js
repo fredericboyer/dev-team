@@ -161,7 +161,7 @@ describe("dev-team-post-change-review", () => {
   it("flags Brooks only once for arch boundary files (no duplicate)", () => {
     const result = runHook(hook, { file_path: "/app/src/core/engine.ts" });
     assert.equal(result.code, 0);
-    const matches = result.stdout.match(/@dev-team-brooks/g);
+    const matches = result.stdout.match(/@dev-team-brooks/g) || [];
     assert.equal(
       matches.length,
       1,

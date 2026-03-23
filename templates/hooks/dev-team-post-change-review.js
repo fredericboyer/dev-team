@@ -123,9 +123,11 @@ if (DOC_PATTERNS.some((p) => p.test(fullPath))) {
   flags.push("@dev-team-tufte (documentation changed)");
 }
 
-// Architecture patterns → flag for Architect (structural review only — these
-// trigger the "architectural boundary touched" message). Brooks is ALSO flagged
-// below for ALL non-test code files (quality attribute assessment).
+// Architecture patterns → flag for Architect. For architectural boundary files,
+// Brooks is flagged here with the "architectural boundary touched" reason. The
+// dedupe check below skips the generic "quality attribute review" reason for
+// these files — this is intentional because Brooks's expanded agent definition
+// already includes quality attribute assessment in every review.
 const ARCH_PATTERNS = [
   /\/adr\//,
   /architecture/,
