@@ -270,6 +270,16 @@ describe("dev-team-post-change-review", () => {
     );
   });
 
+  it("flags Tufte for repo-relative paths without leading slash (doc-drift)", () => {
+    const result = runHook(hook, { file_path: "src/utils/helpers.ts" });
+    assert.equal(result.code, 0);
+    assert.ok(
+      result.stdout.includes("@dev-team-tufte"),
+      "should flag Tufte for repo-relative src/ path",
+    );
+    assert.ok(result.stdout.includes("doc drift"), "should mention doc drift");
+  });
+
   it("existing doc-file triggers still work", () => {
     const docFiles = ["/app/docs/guide.md", "/app/src/api-doc/index.html", "/app/CHANGELOG.md"];
     for (const file_path of docFiles) {

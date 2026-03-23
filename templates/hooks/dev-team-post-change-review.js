@@ -125,14 +125,14 @@ if (DOC_PATTERNS.some((p) => p.test(fullPath))) {
 
 // Doc-drift patterns → flag Tufte for implementation changes that may need doc updates
 const DOC_DRIFT_PATTERNS = [
-  /\/src\/.*\.(ts|js)$/, // New or changed source files
-  /\/templates\/agents\//, // New or changed agent definitions
-  /\/templates\/skills\//, // New or changed skill definitions
-  /\/templates\/hooks\//, // New or changed hook definitions
-  /\/src\/init\.(ts|js)$/, // Installer changes
-  /\/src\/cli\.(ts|js)$/, // CLI entry point changes
-  /\/bin\//, // CLI shim changes
-  /package\.json$/, // Dependency or script changes
+  /(?:^|\/)src\/.*\.(ts|js)$/, // New or changed source files
+  /(?:^|\/)templates\/agents\//, // New or changed agent definitions
+  /(?:^|\/)templates\/skills\//, // New or changed skill definitions
+  /(?:^|\/)templates\/hooks\//, // New or changed hook definitions
+  /(?:^|\/)src\/init\.(ts|js)$/, // Installer changes
+  /(?:^|\/)src\/cli\.(ts|js)$/, // CLI entry point changes
+  /(?:^|\/)bin\//, // CLI shim changes
+  /(?:^|\/)package\.json$/, // Dependency or script changes
 ];
 
 // Only flag for doc-drift if Tufte was not already flagged for a direct doc change
