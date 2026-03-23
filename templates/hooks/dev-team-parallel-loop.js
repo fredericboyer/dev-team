@@ -8,7 +8,7 @@
  * - Reads current phase and issue statuses
  * - Enforces sync barrier: blocks review until all implementations complete
  * - Enforces phase transitions: prevents skipping phases
- * - Tracks phase transitions with timestamps
+ * - Validates phase transitions and enforces sync barriers
  *
  * State file: .claude/dev-team-parallel.json (created by Drucker orchestrator)
  */
@@ -52,6 +52,36 @@ if (!state.mode || state.mode !== "parallel" || !Array.isArray(state.issues) || 
 
 const phase = state.phase;
 const issues = state.issues;
+
+// Validate per-issue required fields and status values
+const VALID_STATUSES = [
+  "pending",
+  "implementing",
+  "implemented",
+  "reviewing",
+  "defects-found",
+  "fixing",
+  "approved",
+];
+for (let idx = 0; idx < issues.length; idx++) {
+  const entry = issues[idx];
+  if (!entry || typeof entry.issue !== "number" || typeof entry.status !== "string") {
+    const output = JSON.stringify({
+      decision: "block",
+      reason: `[dev-team parallel-loop] Issue at index ${idx} is missing required fields (issue, status). Cannot proceed with invalid parallel state.`,
+    });
+    console.log(output);
+    process.exit(0);
+  }
+  if (!VALID_STATUSES.includes(entry.status)) {
+    const output = JSON.stringify({
+      decision: "block",
+      reason: `[dev-team parallel-loop] Issue #${entry.issue} has unrecognized status "${entry.status}". Cannot proceed with invalid parallel state.`,
+    });
+    console.log(output);
+    process.exit(0);
+  }
+}
 
 // Phase: done — clean up and exit
 if (phase === "done") {
@@ -101,19 +131,26 @@ if (phase === "sync-barrier") {
 // Phase: review-wave — check if all reviews reported
 if (phase === "review-wave") {
   const wave = state.reviewWave;
-  if (wave) {
-    const reported = Object.keys(wave.findings || {});
-    const branches = wave.branches || [];
-    const pending = branches.filter((b) => !reported.includes(b));
+  if (!wave || !Array.isArray(wave.branches) || wave.branches.length === 0) {
+    const output = JSON.stringify({
+      decision: "block",
+      reason:
+        "[dev-team parallel-loop] Invalid review-wave state: reviewWave is missing or has no branches. Cannot proceed without a valid review wave.",
+    });
+    console.log(output);
+    process.exit(0);
+  }
 
-    if (pending.length > 0) {
-      const output = JSON.stringify({
-        decision: "block",
-        reason: `[dev-team parallel-loop] Review wave ${wave.wave}: ${pending.length} branch(es) awaiting review results (${pending.join(", ")}). Collect all findings before routing defects.`,
-      });
-      console.log(output);
-      process.exit(0);
-    }
+  const reported = Object.keys(wave.findings || {});
+  const pending = wave.branches.filter((b) => !reported.includes(b));
+
+  if (pending.length > 0) {
+    const output = JSON.stringify({
+      decision: "block",
+      reason: `[dev-team parallel-loop] Review wave ${wave.wave}: ${pending.length} branch(es) awaiting review results (${pending.join(", ")}). Collect all findings before routing defects.`,
+    });
+    console.log(output);
+    process.exit(0);
   }
 
   // All reviews complete

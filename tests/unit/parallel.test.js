@@ -618,9 +618,10 @@ describe("checkConvergence", () => {
 
   it("not converged when issues pending", () => {
     const result = parallel.checkConvergence(state);
-    // pending issues are neither approved nor defects — they are converged vacuously
-    assert.equal(result.converged, true);
+    // pending issues are not approved or exhausted — they block convergence
+    assert.equal(result.converged, false);
     assert.equal(result.allApproved, false);
+    assert.deepEqual(result.pendingDefects, [42, 43]);
   });
 
   it("converged when all approved", () => {

@@ -391,13 +391,13 @@ export function checkConvergence(state: ParallelState): ConvergenceResult {
       approved.push(issue.issue);
     } else if ((issue.reviewIteration || 0) >= state.maxIterations) {
       exhausted.push(issue.issue);
-    } else if (issue.status === "defects-found" || issue.status === "fixing") {
+    } else {
       pendingDefects.push(issue.issue);
     }
   }
 
   return {
-    converged: pendingDefects.length === 0,
+    converged: approved.length + exhausted.length === state.issues.length,
     allApproved: approved.length === state.issues.length,
     exhaustedBranches: exhausted,
     pendingDefects,
