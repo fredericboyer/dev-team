@@ -28,7 +28,7 @@ if (!filePath) {
 }
 
 const basename = path.basename(filePath).toLowerCase();
-const fullPath = filePath.toLowerCase();
+const fullPath = filePath.split("\\").join("/").toLowerCase();
 
 const flags = [];
 

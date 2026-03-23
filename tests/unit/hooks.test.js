@@ -167,6 +167,12 @@ describe('dev-team-post-change-review', () => {
     const result = runHook(hook, { file_path: '/app/src/crypto/encrypt.ts' });
     assert.equal(result.code, 0);
   });
+
+  it('flags Szabo for Windows-style backslash paths', () => {
+    const result = runHook(hook, { file_path: 'C:\\app\\src\\auth\\login.ts' });
+    assert.equal(result.code, 0);
+    assert.ok(result.stdout.includes('@dev-team-szabo'), 'should flag Szabo for auth path with backslashes');
+  });
 });
 
 // ─── TDD Enforce ─────────────────────────────────────────────────────────────
