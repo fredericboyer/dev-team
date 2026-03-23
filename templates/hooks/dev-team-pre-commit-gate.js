@@ -14,16 +14,41 @@
 
 "use strict";
 
-const fs = require("fs");
-const path = require("path");
+const { createHash } = require("crypto");
 const { execFileSync } = require("child_process");
+const fs = require("fs");
+const os = require("os");
+const path = require("path");
+
+/**
+ * Cached git diff — reads from a temp file if it was written < 5 seconds ago,
+ * otherwise shells out to git and writes the result for subsequent hooks.
+ * Cache key includes cwd hash so different repos don't share cache.
+ */
+function cachedGitDiff(args, timeoutMs) {
+  const cwdHash = createHash("md5").update(process.cwd()).digest("hex").slice(0, 8);
+  const argsKey = args.join("-").replace(/[^a-zA-Z0-9-]/g, "");
+  const cacheFile = path.join(os.tmpdir(), `dev-team-git-cache-${cwdHash}-${argsKey}.txt`);
+  try {
+    const stat = fs.statSync(cacheFile);
+    if (Date.now() - stat.mtimeMs < 5000) {
+      return fs.readFileSync(cacheFile, "utf-8");
+    }
+  } catch {
+    // No cache or stale — fall through to git call
+  }
+  const result = execFileSync("git", args, { encoding: "utf-8", timeout: timeoutMs });
+  try {
+    fs.writeFileSync(cacheFile, result);
+  } catch {
+    // Best effort — don't fail the hook over caching
+  }
+  return result;
+}
 
 let stagedFiles = "";
 try {
-  stagedFiles = execFileSync("git", ["diff", "--cached", "--name-only"], {
-    encoding: "utf-8",
-    timeout: 5000,
-  });
+  stagedFiles = cachedGitDiff(["diff", "--cached", "--name-only"], 2000);
 } catch {
   // Not in a git repo or git not available
   process.exit(0);
@@ -79,10 +104,7 @@ const hasMemoryUpdates = files.some(
 if (hasImplFiles && !hasMemoryUpdates) {
   let unstagedMemory = false;
   try {
-    const unstaged = execFileSync("git", ["diff", "--name-only"], {
-      encoding: "utf-8",
-      timeout: 5000,
-    });
+    const unstaged = cachedGitDiff(["diff", "--name-only"], 2000);
     unstagedMemory = unstaged
       .split("\n")
       .map((f) => f.split("\\").join("/"))
