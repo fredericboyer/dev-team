@@ -113,6 +113,11 @@ const QUALITY_HOOKS: HookDefinition[] = [
     file: "dev-team-watch-list.js",
     description: "Auto-spawn agents when file patterns match (configurable)",
   },
+  {
+    label: "Parallel loop",
+    file: "dev-team-parallel-loop.js",
+    description: "Enforce parallel review wave protocol (ADR-019)",
+  },
 ];
 
 interface PresetDefinition {

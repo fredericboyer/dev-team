@@ -50,6 +50,10 @@
           {
             "type": "command",
             "command": "node .claude/hooks/dev-team-task-loop.js"
+          },
+          {
+            "type": "command",
+            "command": "node .claude/hooks/dev-team-parallel-loop.js"
           }
         ]
       }
