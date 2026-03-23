@@ -26,7 +26,8 @@ try {
   );
   process.exit(2);
 }
-const filePath = (input.tool_input && (input.tool_input.file_path || input.tool_input.path)) || "";
+let filePath = (input.tool_input && (input.tool_input.file_path || input.tool_input.path)) || "";
+filePath = filePath.split("\\").join("/");
 
 if (!filePath) {
   process.exit(0);
@@ -93,6 +94,7 @@ try {
 const hasTestChanges = changedFiles
   .split("\n")
   .filter(Boolean)
+  .map((f) => f.split("\\").join("/"))
   .some((f) => TEST_PATTERNS.some((p) => p.test(f)));
 
 if (hasTestChanges) {

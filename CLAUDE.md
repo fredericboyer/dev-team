@@ -45,14 +45,15 @@ This project uses [dev-team](https://github.com/dev-team) — adversarial AI age
 | `@dev-team-knuth` | Quality Auditor | Coverage gaps, boundary conditions, correctness verification |
 | `@dev-team-beck` | Test Implementer | Writing tests, TDD cycles, translating audit findings into test cases |
 | `@dev-team-deming` | Tooling Optimizer | Linters, formatters, CI/CD, hooks, onboarding, automation |
-| `@dev-team-docs` | Documentation Engineer | Doc accuracy, stale docs, README/API docs, doc-code sync |
-| `@dev-team-architect` | Architect | Architectural review, coupling, dependency direction, ADR compliance |
-| `@dev-team-release` | Release Manager | Versioning, changelog, release readiness, semver validation |
-| `@dev-team-lead` | Team Lead / Orchestrator | Auto-delegates to specialists, manages review loops, resolves conflicts |
+| `@dev-team-tufte` | Documentation Engineer | Doc accuracy, stale docs, README/API docs, doc-code sync |
+| `@dev-team-brooks` | Architect | Architectural review, coupling, dependency direction, ADR compliance |
+| `@dev-team-conway` | Release Manager | Versioning, changelog, release readiness, semver validation |
+| `@dev-team-drucker` | Team Lead / Orchestrator | Auto-delegates to specialists, manages review loops, resolves conflicts |
+| `@dev-team-borges` | Librarian | End-of-task memory review, cross-agent coherence, system improvement |
 
 ### Workflow
 
-For automatic delegation, use `@dev-team-lead` — it analyzes the task and routes to the right specialist.
+For automatic delegation, use `@dev-team-drucker` — it analyzes the task and routes to the right specialist.
 
 For non-trivial work: explore the area first, then implement, then review.
 
@@ -91,6 +92,7 @@ All project and process learnings MUST go to in-repo files, NOT to machine-local
 When the human gives feedback about process, coding style, or tool behavior: write it to `dev-team-learnings.md`. Only use machine-local memory for things that are truly personal and would not apply to another developer on the same project.
 
 <!-- dev-team:end -->
+
 
 
 

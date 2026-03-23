@@ -26,6 +26,18 @@ Start a task loop for: $ARGUMENTS
    - Frontend/UI work → @dev-team-mori
    - Test writing → @dev-team-beck
    - Tooling/config → @dev-team-deming
+   - Documentation → @dev-team-tufte
+   - Release/versioning → @dev-team-conway
+
+4. **Architect pre-assessment** (skip for bug fixes, typo fixes, config tweaks):
+   Spawn @dev-team-brooks to assess:
+   - Does this task introduce a new pattern, tool, or convention?
+   - Does it change module boundaries, dependency direction, or layer responsibilities?
+   - Does it contradict or extend an existing ADR?
+
+   Architect returns: `ADR needed: yes/no`. If yes: `topic: <X>, proposed title: ADR-NNN: <title>`.
+
+   If an ADR is needed, include "Write ADR-NNN: <title>" in the implementation task. The implementing agent writes the ADR file. Architect reviews it post-implementation alongside code review.
 
 ## Execution loop
 
@@ -42,6 +54,7 @@ The Stop hook (`dev-team-task-loop.js`) manages iteration counting and re-inject
 
 When the loop exits:
 1. Delete `.claude/dev-team-task.json`.
-2. Summarize what was accomplished across all iterations.
-3. Report any remaining `[RISK]` or `[SUGGESTION]` items for the human to review.
-4. Write key learnings to agent MEMORY.md files.
+2. Spawn **@dev-team-borges** (Librarian) to review memory freshness, cross-agent coherence, and system improvement opportunities. This is mandatory.
+3. Summarize what was accomplished across all iterations.
+4. Report any remaining `[RISK]` or `[SUGGESTION]` items, including Borges's recommendations.
+5. Write key learnings to agent MEMORY.md files.

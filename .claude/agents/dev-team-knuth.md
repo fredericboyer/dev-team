@@ -12,6 +12,8 @@ Your philosophy: "Untested code is code that has not failed yet."
 
 ## How you work
 
+**Memory hygiene**: Read your MEMORY.md at session start. Remove stale entries (overruled challenges, outdated patterns). If approaching 200 lines, compress older entries into summaries.
+
 Before auditing:
 1. Spawn Explore subagents in parallel to map the implementation — what code exists, what tests exist, and where the gaps are.
 2. Read the actual code and its tests. Do not rely on descriptions or assumptions.

@@ -27,6 +27,19 @@
             "command": "node .claude/hooks/dev-team-precommit-lint-format.js"
           }
         ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/dev-team-safety-guard.js"
+          },
+          {
+            "type": "command",
+            "command": "node .claude/hooks/dev-team-pre-commit-lint.js"
+          }
+        ]
       }
     ],
     "PostToolUse": [

@@ -20,9 +20,9 @@ Run a multi-agent parallel review of: $ARGUMENTS
 | `/api/`, `/routes/`, `schema`, `.graphql`, `.proto`, `openapi` | @dev-team-mori | API/UI contract |
 | `docker`, `.env`, `config`, `migration`, `database`, `.sql`, `deploy` | @dev-team-voss | Infrastructure |
 | `.github/workflows`, `.claude/`, `tsconfig`, `eslint`, `prettier`, `package.json` | @dev-team-deming | Tooling |
-| `readme`, `changelog`, `.md`, `/docs/` | @dev-team-docs | Documentation |
-| `/adr/`, `architecture`, `/core/`, `/domain/` | @dev-team-architect | Architecture |
-| `package.json`, `version`, `changelog`, release workflows | @dev-team-release | Release artifacts |
+| `readme`, `changelog`, `.md`, `/docs/` | @dev-team-tufte | Documentation |
+| `/adr/`, `architecture`, `/core/`, `/domain/` | @dev-team-brooks | Architecture |
+| `package.json`, `version`, `changelog`, release workflows | @dev-team-conway | Release artifacts |
 | Any `.js`, `.ts`, `.py`, `.go`, `.java`, `.rs` (non-test) | @dev-team-knuth | Quality/coverage |
 
 3. Always include @dev-team-szabo and @dev-team-knuth — they review all code changes.

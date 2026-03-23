@@ -1,5 +1,5 @@
 {
-  "version": "0.1.0",
+  "version": "0.4.0",
   "agents": [
     "Voss",
     "Mori",
@@ -7,10 +7,11 @@
     "Knuth",
     "Beck",
     "Deming",
-    "Docs",
-    "Architect",
-    "Release",
-    "Lead"
+    "Tufte",
+    "Brooks",
+    "Conway",
+    "Drucker",
+    "Borges"
   ],
   "hooks": [
     "TDD enforcement",
@@ -18,6 +19,7 @@
     "Post-change review",
     "Pre-commit gate",
     "Task loop",
-    "Watch list"
+    "Watch list",
+    "Pre-commit lint"
   ]
 }
