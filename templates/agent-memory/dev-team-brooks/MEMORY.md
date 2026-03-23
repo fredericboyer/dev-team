@@ -1,4 +1,4 @@
-# Agent Memory: Docs (Documentation Engineer)
+# Agent Memory: Brooks (Architect)
 <!-- First 200 lines are loaded into agent context. Keep concise. -->
 
 ## Project Conventions

@@ -51,23 +51,23 @@ const ALL_AGENTS: AgentDefinition[] = [
     description: "Tooling & DX Optimizer",
   },
   {
-    label: "Docs",
-    file: "dev-team-docs.md",
+    label: "Tufte",
+    file: "dev-team-tufte.md",
     description: "Documentation Engineer",
   },
   {
-    label: "Architect",
-    file: "dev-team-architect.md",
+    label: "Brooks",
+    file: "dev-team-brooks.md",
     description: "Architect",
   },
   {
-    label: "Release",
-    file: "dev-team-release.md",
+    label: "Conway",
+    file: "dev-team-conway.md",
     description: "Release Manager",
   },
   {
-    label: "Lead",
-    file: "dev-team-lead.md",
+    label: "Drucker",
+    file: "dev-team-drucker.md",
     description: "Orchestrator / Team Lead",
   },
   {
@@ -126,7 +126,7 @@ const PRESETS: Record<string, PresetDefinition> = {
   backend: {
     label: "backend",
     description: "Backend-heavy — API, security, architecture, quality",
-    agents: ["Voss", "Szabo", "Knuth", "Beck", "Deming", "Architect", "Release", "Lead", "Borges"],
+    agents: ["Voss", "Szabo", "Knuth", "Beck", "Deming", "Brooks", "Conway", "Drucker", "Borges"],
     hooks: QUALITY_HOOKS.map((h) => h.label),
   },
   fullstack: {
@@ -138,7 +138,7 @@ const PRESETS: Record<string, PresetDefinition> = {
   data: {
     label: "data",
     description: "Data pipeline — backend, quality, security, tooling",
-    agents: ["Voss", "Szabo", "Knuth", "Beck", "Deming", "Docs", "Lead", "Borges"],
+    agents: ["Voss", "Szabo", "Knuth", "Beck", "Deming", "Tufte", "Drucker", "Borges"],
     hooks: QUALITY_HOOKS.map((h) => h.label),
   },
 };

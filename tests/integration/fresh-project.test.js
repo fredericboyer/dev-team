@@ -114,11 +114,11 @@ describe('fresh project installation', () => {
     assert.equal(prefs.preset, 'backend');
     assert.ok(prefs.agents.includes('Voss'), 'should include Voss');
     assert.ok(prefs.agents.includes('Szabo'), 'should include Szabo');
-    assert.ok(prefs.agents.includes('Architect'), 'should include Architect');
-    assert.ok(prefs.agents.includes('Lead'), 'should include Lead');
+    assert.ok(prefs.agents.includes('Brooks'), 'should include Architect');
+    assert.ok(prefs.agents.includes('Drucker'), 'should include Lead');
     assert.ok(prefs.agents.includes('Borges'), 'should include Borges');
     assert.ok(!prefs.agents.includes('Mori'), 'should not include Mori');
-    assert.ok(!prefs.agents.includes('Docs'), 'should not include Docs');
+    assert.ok(!prefs.agents.includes('Tufte'), 'should not include Docs');
 
     // Only selected agents should have files
     const agents = fs.readdirSync(path.join(tmpDir, '.claude', 'agents'));
@@ -139,8 +139,8 @@ describe('fresh project installation', () => {
     const prefs = JSON.parse(fs.readFileSync(path.join(tmpDir, '.claude', 'dev-team.json'), 'utf-8'));
     assert.equal(prefs.preset, 'data');
     assert.ok(prefs.agents.includes('Voss'), 'should include Voss');
-    assert.ok(prefs.agents.includes('Docs'), 'should include Docs');
+    assert.ok(prefs.agents.includes('Tufte'), 'should include Docs');
     assert.ok(!prefs.agents.includes('Mori'), 'should not include Mori');
-    assert.ok(!prefs.agents.includes('Architect'), 'should not include Architect');
+    assert.ok(!prefs.agents.includes('Brooks'), 'should not include Architect');
   });
 });

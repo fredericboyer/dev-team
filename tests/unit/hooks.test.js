@@ -154,7 +154,7 @@ describe('dev-team-post-change-review', () => {
   it('flags Docs for documentation files', () => {
     const result = runHook(hook, { file_path: '/app/README.md' });
     assert.equal(result.code, 0);
-    assert.ok(result.stdout.includes('@dev-team-docs'), 'should flag Docs for .md files');
+    assert.ok(result.stdout.includes('@dev-team-tufte'), 'should flag Tufte for .md files');
   });
 
   it('exits 0 with no file path', () => {

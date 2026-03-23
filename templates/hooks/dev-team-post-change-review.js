@@ -120,7 +120,7 @@ const DOC_PATTERNS = [
 ];
 
 if (DOC_PATTERNS.some((p) => p.test(fullPath))) {
-  flags.push("@dev-team-docs (documentation changed)");
+  flags.push("@dev-team-tufte (documentation changed)");
 }
 
 // Architecture patterns → flag for Architect
@@ -135,7 +135,7 @@ const ARCH_PATTERNS = [
 ];
 
 if (ARCH_PATTERNS.some((p) => p.test(fullPath))) {
-  flags.push("@dev-team-architect (architectural boundary touched)");
+  flags.push("@dev-team-brooks (architectural boundary touched)");
 }
 
 // Release patterns → flag for Release
@@ -149,7 +149,7 @@ const RELEASE_PATTERNS = [
 ];
 
 if (RELEASE_PATTERNS.some((p) => p.test(fullPath))) {
-  flags.push("@dev-team-release (version/release artifact changed)");
+  flags.push("@dev-team-conway (version/release artifact changed)");
 }
 
 // Always flag Knuth for non-test implementation files

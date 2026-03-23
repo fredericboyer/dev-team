@@ -1,4 +1,4 @@
-# Agent Memory: Release (Release Manager)
+# Agent Memory: Conway (Release Manager)
 <!-- First 200 lines are loaded into agent context. Keep concise. -->
 
 ## Project Conventions
