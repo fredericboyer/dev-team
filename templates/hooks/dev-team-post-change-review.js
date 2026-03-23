@@ -132,6 +132,11 @@ const ARCH_PATTERNS = [
   /\/core\//,
   /\/domain\//,
   /\/shared\//,
+  /\/lib\//,
+  /\/plugins?\//,
+  /\/middleware\//,
+  /tsconfig/,
+  /webpack|vite|rollup|esbuild/,
 ];
 
 if (ARCH_PATTERNS.some((p) => p.test(fullPath))) {
@@ -146,6 +151,12 @@ const RELEASE_PATTERNS = [
   /changelog/i,
   /version/,
   /\.github\/workflows\/.*release/,
+  /\.github\/workflows\/.*publish/,
+  /\.github\/workflows\/.*deploy/,
+  /\.npmrc$/,
+  /\.npmignore$/,
+  /release\.config/,
+  /lerna\.json$/,
 ];
 
 if (RELEASE_PATTERNS.some((p) => p.test(fullPath))) {

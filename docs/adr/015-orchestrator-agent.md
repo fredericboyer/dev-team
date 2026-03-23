@@ -23,4 +23,4 @@ Lead does not implement code itself. It delegates to specialist agents. This kee
 - Cross-domain tasks get appropriate multi-agent coverage automatically
 - The delegation table is embedded in the agent definition (not code) — adjustable per project
 - Lead's conflict resolution caps at one exchange per side before escalation — prevents infinite loops
-- Known gap: no iteration limit on the review loop itself (tracked for future improvement)
+- Review loop iteration limit addressed in ADR-019 (parallel review waves) — default 10 per branch
