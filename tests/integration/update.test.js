@@ -137,6 +137,28 @@ describe('dev-team update', () => {
     }
   });
 
+  it('upgrades version in prefs when package version is newer', async () => {
+    // Initial install - saves current package version
+    await run(tmpDir, ['--all']);
+
+    const prefsPath = path.join(tmpDir, '.claude', 'dev-team.json');
+    const prefs = JSON.parse(fs.readFileSync(prefsPath, 'utf-8'));
+    const currentVersion = prefs.version;
+    assert.ok(currentVersion, 'init should set a version in prefs');
+
+    // Manually downgrade the version to simulate an older install
+    prefs.version = '0.0.1';
+    fs.writeFileSync(prefsPath, JSON.stringify(prefs, null, 2) + '\n');
+
+    // Run update - should detect the version difference and upgrade
+    await update(tmpDir);
+
+    // Verify version is now current
+    const updatedPrefs = JSON.parse(fs.readFileSync(prefsPath, 'utf-8'));
+    assert.equal(updatedPrefs.version, currentVersion, 'version should be upgraded to current package version');
+    assert.notEqual(updatedPrefs.version, '0.0.1', 'version should no longer be the old value');
+  });
+
   it('auto-discovers and installs new hooks not in preferences', async () => {
     await run(tmpDir, ['--all']);
 

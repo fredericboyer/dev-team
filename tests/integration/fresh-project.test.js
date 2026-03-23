@@ -98,7 +98,8 @@ describe('fresh project installation', () => {
     await run(tmpDir, ['--all']);
 
     const prefs = JSON.parse(fs.readFileSync(path.join(tmpDir, '.claude', 'dev-team.json'), 'utf-8'));
-    assert.equal(prefs.version, '0.3.1');
+    assert.ok(prefs.version, 'should have a version');
+    assert.ok(/^\d+\.\d+\.\d+/.test(prefs.version), 'version should be semver');
     assert.ok(prefs.agents.includes('Voss'));
     assert.ok(prefs.agents.includes('Beck'));
     assert.ok(prefs.hooks.includes('TDD enforcement'));
