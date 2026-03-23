@@ -12,6 +12,18 @@ import {
 import type { HookSettings, HookMatcher } from "./files";
 import { ALL_AGENTS, QUALITY_HOOKS } from "./init";
 
+/**
+ * Returns the current package version from package.json.
+ */
+function getPackageVersion(): string {
+  const pkgPath = path.join(templateDir(), "..", "package.json");
+  const content = readFile(pkgPath);
+  if (!content) {
+    throw new Error("Cannot read package.json");
+  }
+  return JSON.parse(content).version;
+}
+
 interface Preferences {
   version: string;
   agents: string[];
@@ -64,7 +76,14 @@ export async function update(targetDir: string): Promise<void> {
     process.exit(1);
   }
 
-  console.log(`Current installation: v${prefs.version}`);
+  const packageVersion = getPackageVersion();
+
+  if (prefs.version === packageVersion) {
+    console.log(`Already at latest version (v${packageVersion})`);
+  } else {
+    console.log(`Upgrading from v${prefs.version} to v${packageVersion}`);
+  }
+
   console.log(`  Agents: ${prefs.agents.join(", ")}`);
   console.log(`  Hooks:  ${prefs.hooks.join(", ")}`);
   console.log("");
@@ -233,7 +252,8 @@ export async function update(targetDir: string): Promise<void> {
     copyFile(learningsSrc, learningsDest);
   }
 
-  // Step 8: Save updated preferences
+  // Step 8: Save updated preferences (stamp current package version)
+  prefs.version = packageVersion;
   writeFile(prefsPath, JSON.stringify(prefs, null, 2) + "\n");
 
   // Step 9: Print summary
