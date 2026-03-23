@@ -426,6 +426,17 @@ describe("dev-team-tdd-enforce", () => {
         assert.equal(mode, 0o600, `cache file ${f} should have mode 0600, got ${mode.toString(8)}`);
       }
     } finally {
+      // Clean up cache files created by this test
+      const tmpCacheFiles = fs
+        .readdirSync(cacheDir)
+        .filter((f) => f.startsWith(`dev-team-git-cache-${cwdHash}-`));
+      for (const cf of tmpCacheFiles) {
+        try {
+          fs.unlinkSync(path.join(cacheDir, cf));
+        } catch {
+          /* ignore */
+        }
+      }
       fs.rmSync(gitDir, { recursive: true, force: true });
     }
   });
@@ -435,6 +446,7 @@ describe("dev-team-tdd-enforce", () => {
     const gitDir = fs.mkdtempSync(path.join(os.tmpdir(), "dev-team-cache-stale-"));
     // Resolve symlinks so hash matches what process.cwd() returns inside the hook
     const resolvedGitDir = fs.realpathSync(gitDir);
+    const cwdHash = createHash("md5").update(resolvedGitDir).digest("hex").slice(0, 8);
     try {
       execFileSync("git", ["init"], { cwd: gitDir, encoding: "utf-8" });
       execFileSync("git", ["config", "user.email", "test@test.com"], {
@@ -446,7 +458,6 @@ describe("dev-team-tdd-enforce", () => {
       fs.writeFileSync(path.join(gitDir, "src", "app.js"), "module.exports = {}");
 
       // Pre-create a stale cache file with known content
-      const cwdHash = createHash("md5").update(resolvedGitDir).digest("hex").slice(0, 8);
       const cacheFile = path.join(
         os.tmpdir(),
         `dev-team-git-cache-${cwdHash}-diff---name-only.txt`,
@@ -476,6 +487,17 @@ describe("dev-team-tdd-enforce", () => {
         "stale cache should be replaced with fresh git output",
       );
     } finally {
+      // Clean up cache files created by this test
+      const tmpCacheFiles = fs
+        .readdirSync(os.tmpdir())
+        .filter((f) => f.startsWith(`dev-team-git-cache-${cwdHash}-`));
+      for (const cf of tmpCacheFiles) {
+        try {
+          fs.unlinkSync(path.join(os.tmpdir(), cf));
+        } catch {
+          /* ignore */
+        }
+      }
       fs.rmSync(gitDir, { recursive: true, force: true });
     }
   });
@@ -544,87 +566,91 @@ describe("dev-team-tdd-enforce", () => {
     }
   });
 
-  it("rejects symlink cache files and falls through to git call", () => {
-    const { createHash } = require("crypto");
-    const gitDir = fs.mkdtempSync(path.join(os.tmpdir(), "dev-team-cache-symlink-"));
-    // Resolve symlinks so hash matches what process.cwd() returns inside the hook
-    const resolvedGitDir = fs.realpathSync(gitDir);
-    try {
-      execFileSync("git", ["init"], { cwd: gitDir, encoding: "utf-8" });
-      execFileSync("git", ["config", "user.email", "test@test.com"], {
-        cwd: gitDir,
-        encoding: "utf-8",
-      });
-      execFileSync("git", ["config", "user.name", "Test"], { cwd: gitDir, encoding: "utf-8" });
-      fs.mkdirSync(path.join(gitDir, "src"), { recursive: true });
-      fs.writeFileSync(path.join(gitDir, "src", "app.js"), "module.exports = {}");
-
-      // Create a symlink at the cache file path pointing to a harmless target
-      const cwdHash = createHash("md5").update(resolvedGitDir).digest("hex").slice(0, 8);
-      const cacheFile = path.join(
-        os.tmpdir(),
-        `dev-team-git-cache-${cwdHash}-diff---name-only.txt`,
-      );
-      const targetFile = path.join(os.tmpdir(), `dev-team-symlink-target-${cwdHash}.txt`);
-      fs.writeFileSync(targetFile, "SYMLINK_TARGET_CONTENT\n");
+  it(
+    "rejects symlink cache files and falls through to git call",
+    { skip: process.platform === "win32" },
+    () => {
+      const { createHash } = require("crypto");
+      const gitDir = fs.mkdtempSync(path.join(os.tmpdir(), "dev-team-cache-symlink-"));
+      // Resolve symlinks so hash matches what process.cwd() returns inside the hook
+      const resolvedGitDir = fs.realpathSync(gitDir);
       try {
-        fs.unlinkSync(cacheFile);
-      } catch {
-        /* ignore */
-      }
-      fs.symlinkSync(targetFile, cacheFile);
-
-      const input = JSON.stringify({
-        tool_input: { file_path: path.join(gitDir, "src", "app.js") },
-      });
-      try {
-        execFileSync(process.execPath, [path.join(HOOKS_DIR, hook), input], {
-          encoding: "utf-8",
-          timeout: 5000,
+        execFileSync("git", ["init"], { cwd: gitDir, encoding: "utf-8" });
+        execFileSync("git", ["config", "user.email", "test@test.com"], {
           cwd: gitDir,
+          encoding: "utf-8",
         });
-      } catch {
-        // Expected to block (TDD violation)
-      }
+        execFileSync("git", ["config", "user.name", "Test"], { cwd: gitDir, encoding: "utf-8" });
+        fs.mkdirSync(path.join(gitDir, "src"), { recursive: true });
+        fs.writeFileSync(path.join(gitDir, "src", "app.js"), "module.exports = {}");
 
-      // The symlink should have been removed
-      let symlinkExists = false;
-      try {
-        symlinkExists = fs.lstatSync(cacheFile).isSymbolicLink();
-      } catch {
-        // File doesn't exist — symlink was cleaned up
-      }
-      assert.ok(!symlinkExists, "symlink cache file should be removed");
+        // Create a symlink at the cache file path pointing to a harmless target
+        const cwdHash = createHash("md5").update(resolvedGitDir).digest("hex").slice(0, 8);
+        const cacheFile = path.join(
+          os.tmpdir(),
+          `dev-team-git-cache-${cwdHash}-diff---name-only.txt`,
+        );
+        const targetFile = path.join(os.tmpdir(), `dev-team-symlink-target-${cwdHash}.txt`);
+        fs.writeFileSync(targetFile, "SYMLINK_TARGET_CONTENT\n");
+        try {
+          fs.unlinkSync(cacheFile);
+        } catch {
+          /* ignore */
+        }
+        fs.symlinkSync(targetFile, cacheFile);
 
-      // The target file should NOT have been overwritten with git output
-      const targetContent = fs.readFileSync(targetFile, "utf-8");
-      assert.equal(
-        targetContent,
-        "SYMLINK_TARGET_CONTENT\n",
-        "symlink target should not be modified",
-      );
-    } finally {
-      // Clean up
-      const { createHash: ch } = require("crypto");
-      const cwdHash = ch("md5").update(resolvedGitDir).digest("hex").slice(0, 8);
-      const cacheFile = path.join(
-        os.tmpdir(),
-        `dev-team-git-cache-${cwdHash}-diff---name-only.txt`,
-      );
-      const targetFile = path.join(os.tmpdir(), `dev-team-symlink-target-${cwdHash}.txt`);
-      try {
-        fs.unlinkSync(cacheFile);
-      } catch {
-        /* ignore */
+        const input = JSON.stringify({
+          tool_input: { file_path: path.join(gitDir, "src", "app.js") },
+        });
+        try {
+          execFileSync(process.execPath, [path.join(HOOKS_DIR, hook), input], {
+            encoding: "utf-8",
+            timeout: 5000,
+            cwd: gitDir,
+          });
+        } catch {
+          // Expected to block (TDD violation)
+        }
+
+        // The symlink should have been removed
+        let symlinkExists = false;
+        try {
+          symlinkExists = fs.lstatSync(cacheFile).isSymbolicLink();
+        } catch {
+          // File doesn't exist — symlink was cleaned up
+        }
+        assert.ok(!symlinkExists, "symlink cache file should be removed");
+
+        // The target file should NOT have been overwritten with git output
+        const targetContent = fs.readFileSync(targetFile, "utf-8");
+        assert.equal(
+          targetContent,
+          "SYMLINK_TARGET_CONTENT\n",
+          "symlink target should not be modified",
+        );
+      } finally {
+        // Clean up
+        const { createHash: ch } = require("crypto");
+        const cwdHash = ch("md5").update(resolvedGitDir).digest("hex").slice(0, 8);
+        const cacheFile = path.join(
+          os.tmpdir(),
+          `dev-team-git-cache-${cwdHash}-diff---name-only.txt`,
+        );
+        const targetFile = path.join(os.tmpdir(), `dev-team-symlink-target-${cwdHash}.txt`);
+        try {
+          fs.unlinkSync(cacheFile);
+        } catch {
+          /* ignore */
+        }
+        try {
+          fs.unlinkSync(targetFile);
+        } catch {
+          /* ignore */
+        }
+        fs.rmSync(gitDir, { recursive: true, force: true });
       }
-      try {
-        fs.unlinkSync(targetFile);
-      } catch {
-        /* ignore */
-      }
-      fs.rmSync(gitDir, { recursive: true, force: true });
-    }
-  });
+    },
+  );
 });
 
 // ─── Pre-commit Gate ─────────────────────────────────────────────────────────
