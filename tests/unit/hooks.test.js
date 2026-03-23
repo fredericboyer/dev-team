@@ -203,6 +203,91 @@ describe("dev-team-post-change-review", () => {
       "should flag Szabo for auth path with backslashes",
     );
   });
+
+  // ─── Tufte doc-drift detection ───────────────────────────────────────────
+
+  it("flags Tufte for src/ implementation files (doc-drift)", () => {
+    const result = runHook(hook, { file_path: "/app/src/utils/helpers.ts" });
+    assert.equal(result.code, 0);
+    assert.ok(result.stdout.includes("@dev-team-tufte"), "should flag Tufte for src/ changes");
+    assert.ok(result.stdout.includes("doc drift"), "should mention doc drift");
+  });
+
+  it("flags Tufte for new agent definitions (doc-drift)", () => {
+    const result = runHook(hook, { file_path: "/app/templates/agents/dev-team-new-agent.md" });
+    assert.equal(result.code, 0);
+    assert.ok(result.stdout.includes("@dev-team-tufte"), "should flag Tufte for agent changes");
+  });
+
+  it("flags Tufte for new skill definitions (doc-drift)", () => {
+    const result = runHook(hook, { file_path: "/app/templates/skills/new-skill.md" });
+    assert.equal(result.code, 0);
+    assert.ok(result.stdout.includes("@dev-team-tufte"), "should flag Tufte for skill changes");
+  });
+
+  it("flags Tufte for new hook definitions (doc-drift)", () => {
+    const result = runHook(hook, { file_path: "/app/templates/hooks/new-hook.js" });
+    assert.equal(result.code, 0);
+    assert.ok(result.stdout.includes("@dev-team-tufte"), "should flag Tufte for hook changes");
+  });
+
+  it("flags Tufte for init.ts changes (doc-drift)", () => {
+    const result = runHook(hook, { file_path: "/app/src/init.ts" });
+    assert.equal(result.code, 0);
+    assert.ok(result.stdout.includes("@dev-team-tufte"), "should flag Tufte for init.ts changes");
+  });
+
+  it("flags Tufte for cli.ts changes (doc-drift)", () => {
+    const result = runHook(hook, { file_path: "/app/src/cli.ts" });
+    assert.equal(result.code, 0);
+    assert.ok(result.stdout.includes("@dev-team-tufte"), "should flag Tufte for cli.ts changes");
+  });
+
+  it("flags Tufte for bin/ changes (doc-drift)", () => {
+    const result = runHook(hook, { file_path: "/app/bin/dev-team.js" });
+    assert.equal(result.code, 0);
+    assert.ok(result.stdout.includes("@dev-team-tufte"), "should flag Tufte for bin/ changes");
+  });
+
+  it("flags Tufte for package.json changes (doc-drift)", () => {
+    const result = runHook(hook, { file_path: "/app/package.json" });
+    assert.equal(result.code, 0);
+    assert.ok(
+      result.stdout.includes("@dev-team-tufte"),
+      "should flag Tufte for package.json changes",
+    );
+  });
+
+  it("does not double-flag Tufte when doc file also matches drift patterns", () => {
+    // README.md matches DOC_PATTERNS — should NOT also get a doc-drift flag
+    const result = runHook(hook, { file_path: "/app/README.md" });
+    assert.equal(result.code, 0);
+    const tufteMatches = result.stdout.match(/@dev-team-tufte/g);
+    assert.equal(tufteMatches.length, 1, "Tufte should appear exactly once");
+    assert.ok(
+      result.stdout.includes("documentation changed"),
+      "should use doc-change message, not drift",
+    );
+  });
+
+  it("flags Tufte for repo-relative paths without leading slash (doc-drift)", () => {
+    const result = runHook(hook, { file_path: "src/utils/helpers.ts" });
+    assert.equal(result.code, 0);
+    assert.ok(
+      result.stdout.includes("@dev-team-tufte"),
+      "should flag Tufte for repo-relative src/ path",
+    );
+    assert.ok(result.stdout.includes("doc drift"), "should mention doc drift");
+  });
+
+  it("existing doc-file triggers still work", () => {
+    const docFiles = ["/app/docs/guide.md", "/app/src/api-doc/index.html", "/app/CHANGELOG.md"];
+    for (const file_path of docFiles) {
+      const result = runHook(hook, { file_path });
+      assert.equal(result.code, 0);
+      assert.ok(result.stdout.includes("@dev-team-tufte"), `should flag Tufte for ${file_path}`);
+    }
+  });
 });
 
 // ─── TDD Enforce ─────────────────────────────────────────────────────────────

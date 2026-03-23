@@ -123,6 +123,24 @@ if (DOC_PATTERNS.some((p) => p.test(fullPath))) {
   flags.push("@dev-team-tufte (documentation changed)");
 }
 
+// Doc-drift patterns → flag Tufte for implementation changes that may need doc updates
+const DOC_DRIFT_PATTERNS = [
+  /(?:^|\/)src\/.*\.(ts|js)$/, // New or changed source files
+  /(?:^|\/)templates\/agents\//, // New or changed agent definitions
+  /(?:^|\/)templates\/skills\//, // New or changed skill definitions
+  /(?:^|\/)templates\/hooks\//, // New or changed hook definitions
+  /(?:^|\/)src\/init\.(ts|js)$/, // Installer changes
+  /(?:^|\/)src\/cli\.(ts|js)$/, // CLI entry point changes
+  /(?:^|\/)bin\//, // CLI shim changes
+  /(?:^|\/)package\.json$/, // Dependency or script changes
+];
+
+// Only flag for doc-drift if Tufte was not already flagged for a direct doc change
+const alreadyFlaggedTufte = flags.some((f) => f.startsWith("@dev-team-tufte"));
+if (!alreadyFlaggedTufte && DOC_DRIFT_PATTERNS.some((p) => p.test(fullPath))) {
+  flags.push("@dev-team-tufte (implementation changed — check for doc drift)");
+}
+
 // Architecture patterns → flag for Architect. For architectural boundary files,
 // Brooks is flagged here with the "architectural boundary touched" reason. The
 // dedupe check below skips the generic "quality attribute review" reason for
