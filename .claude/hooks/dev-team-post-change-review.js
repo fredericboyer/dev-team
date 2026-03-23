@@ -186,6 +186,10 @@ if (RELEASE_PATTERNS.some((p) => p.test(fullPath))) {
 }
 
 // Operations/infra patterns → flag for Hamilton
+// NOTE: Docker and .env patterns intentionally overlap with INFRA_PATTERNS (Voss).
+// Voss reviews Docker files for infrastructure correctness (base images, build stages, networking),
+// while Hamilton reviews them for operational concerns (resource limits, health checks, image optimization).
+// This dual-review is by design — both perspectives add value.
 const OPS_PATTERNS = [
   /dockerfile/,
   /docker-compose/,
@@ -201,10 +205,11 @@ const OPS_PATTERNS = [
   /\.tf$/,
   /\.tfvars$/,
   /health[-_]?check/,
-  /monitoring/,
-  /logging/,
-  /alerting/,
-  /observability/,
+  /(?:^|\/)(?:monitoring|prometheus|grafana|datadog)\.(?:ya?ml|json|conf|config|toml)$/, // monitoring config files (not src/monitoring.ts)
+  /(?:^|\/)(?:logging|logs)\.(?:ya?ml|json|conf|config|toml)$/, // logging config files (not src/logging.ts)
+  /(?:^|\/)(?:alerting|alerts?)\.(?:ya?ml|json|conf|config|toml)$/, // alerting config files
+  /(?:^|\/)(?:observability|otel|opentelemetry)\.(?:ya?ml|json|conf|config|toml)$/, // observability config files
+  /(?<!\/src)\/(?:monitoring|logging|alerting|observability)\//, // ops directories (but not under src/)
   /\.env\.example$/,
   /\.env\.template$/,
   /env\.template$/,

@@ -392,6 +392,75 @@ describe("dev-team-post-change-review", () => {
       "should not flag Hamilton for regular code",
     );
   });
+
+  it("does not flag Hamilton for src/logging.ts", () => {
+    const result = runHook(hook, { file_path: "/app/src/logging.ts" });
+    assert.equal(result.code, 0);
+    assert.ok(
+      !result.stdout.includes("@dev-team-hamilton"),
+      "should not flag Hamilton for src/logging.ts",
+    );
+  });
+
+  it("does not flag Hamilton for src/monitoring/dashboard.tsx", () => {
+    const result = runHook(hook, { file_path: "/app/src/monitoring/dashboard.tsx" });
+    assert.equal(result.code, 0);
+    assert.ok(
+      !result.stdout.includes("@dev-team-hamilton"),
+      "should not flag Hamilton for src/monitoring/dashboard.tsx",
+    );
+  });
+
+  it("does not flag Hamilton for src/alerting.ts", () => {
+    const result = runHook(hook, { file_path: "/app/src/alerting.ts" });
+    assert.equal(result.code, 0);
+    assert.ok(
+      !result.stdout.includes("@dev-team-hamilton"),
+      "should not flag Hamilton for src/alerting.ts",
+    );
+  });
+
+  it("does not flag Hamilton for src/observability/tracer.ts", () => {
+    const result = runHook(hook, { file_path: "/app/src/observability/tracer.ts" });
+    assert.equal(result.code, 0);
+    assert.ok(
+      !result.stdout.includes("@dev-team-hamilton"),
+      "should not flag Hamilton for src/observability/tracer.ts",
+    );
+  });
+
+  it("flags Hamilton for config/logging.yml", () => {
+    const result = runHook(hook, { file_path: "/app/config/logging.yml" });
+    assert.equal(result.code, 0);
+    assert.ok(
+      result.stdout.includes("@dev-team-hamilton"),
+      "should flag Hamilton for config/logging.yml",
+    );
+  });
+
+  it("flags Hamilton for alerting.yaml", () => {
+    const result = runHook(hook, { file_path: "/app/alerting.yaml" });
+    assert.equal(result.code, 0);
+    assert.ok(
+      result.stdout.includes("@dev-team-hamilton"),
+      "should flag Hamilton for alerting.yaml",
+    );
+  });
+
+  it("flags Hamilton for observability.json", () => {
+    const result = runHook(hook, { file_path: "/app/observability.json" });
+    assert.equal(result.code, 0);
+    assert.ok(
+      result.stdout.includes("@dev-team-hamilton"),
+      "should flag Hamilton for observability.json",
+    );
+  });
+
+  it("flags Hamilton for otel.yaml config", () => {
+    const result = runHook(hook, { file_path: "/app/otel.yaml" });
+    assert.equal(result.code, 0);
+    assert.ok(result.stdout.includes("@dev-team-hamilton"), "should flag Hamilton for otel.yaml");
+  });
 });
 
 // ─── TDD Enforce ─────────────────────────────────────────────────────────────
