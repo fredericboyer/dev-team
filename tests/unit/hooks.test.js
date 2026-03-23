@@ -434,6 +434,13 @@ describe('dev-team-pre-commit-gate', () => {
 describe('dev-team-pre-commit-lint', () => {
   const hook = 'dev-team-pre-commit-lint.js';
 
+  // Cross-platform helper: write pass.js/fail.js + package.json with npm scripts
+  function makePkgScripts(dir, scripts) {
+    fs.writeFileSync(path.join(dir, 'pass.js'), 'process.exit(0)');
+    fs.writeFileSync(path.join(dir, 'fail.js'), 'process.exit(1)');
+    fs.writeFileSync(path.join(dir, 'package.json'), JSON.stringify({ scripts }));
+  }
+
   it('allows non-commit bash commands', () => {
     const input = JSON.stringify({ tool_input: { command: 'npm test' } });
     const stdout = execFileSync(process.execPath, [path.join(HOOKS_DIR, hook), input], {
@@ -477,10 +484,7 @@ describe('dev-team-pre-commit-lint', () => {
   it('blocks commit when lint script fails', () => {
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'dev-team-lint-'));
     try {
-      fs.writeFileSync(
-        path.join(tmpDir, 'package.json'),
-        JSON.stringify({ scripts: { lint: 'node -e "process.exit(1)"' } }),
-      );
+      makePkgScripts(tmpDir, { lint: 'node fail.js' });
       const input = JSON.stringify({ tool_input: { command: 'git commit -m "test"' } });
       execFileSync(process.execPath, [path.join(HOOKS_DIR, hook), input], {
         encoding: 'utf-8',
@@ -499,10 +503,7 @@ describe('dev-team-pre-commit-lint', () => {
   it('allows commit when lint and format pass', () => {
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'dev-team-lint-'));
     try {
-      fs.writeFileSync(
-        path.join(tmpDir, 'package.json'),
-        JSON.stringify({ scripts: { lint: 'node -e "process.exit(0)"', 'format:check': 'node -e "process.exit(0)"' } }),
-      );
+      makePkgScripts(tmpDir, { lint: 'node pass.js', 'format:check': 'node pass.js' });
       const input = JSON.stringify({ tool_input: { command: 'git commit -m "test"' } });
       execFileSync(process.execPath, [path.join(HOOKS_DIR, hook), input], {
         encoding: 'utf-8',
@@ -518,10 +519,7 @@ describe('dev-team-pre-commit-lint', () => {
   it('allows commit with --no-verify flag', () => {
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'dev-team-lint-'));
     try {
-      fs.writeFileSync(
-        path.join(tmpDir, 'package.json'),
-        JSON.stringify({ scripts: { lint: 'node -e "process.exit(1)"' } }),
-      );
+      makePkgScripts(tmpDir, { lint: 'node fail.js' });
       const input = JSON.stringify({ tool_input: { command: 'git commit --no-verify -m "skip"' } });
       execFileSync(process.execPath, [path.join(HOOKS_DIR, hook), input], {
         encoding: 'utf-8',
@@ -537,10 +535,7 @@ describe('dev-team-pre-commit-lint', () => {
   it('blocks commit when format:check fails independently', () => {
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'dev-team-lint-'));
     try {
-      fs.writeFileSync(
-        path.join(tmpDir, 'package.json'),
-        JSON.stringify({ scripts: { lint: 'node -e "process.exit(0)"', 'format:check': 'node -e "process.exit(1)"' } }),
-      );
+      makePkgScripts(tmpDir, { lint: 'node pass.js', 'format:check': 'node fail.js' });
       const input = JSON.stringify({ tool_input: { command: 'git commit -m "test"' } });
       execFileSync(process.execPath, [path.join(HOOKS_DIR, hook), input], {
         encoding: 'utf-8',

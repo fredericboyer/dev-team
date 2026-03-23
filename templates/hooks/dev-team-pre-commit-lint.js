@@ -81,6 +81,9 @@ if (checks.length === 0) {
 
 const failures = [];
 
+// On Windows, npm is a .cmd file — execFileSync needs shell: true to find it
+const isWindows = process.platform === "win32";
+
 for (const check of checks) {
   const bin = check.bin || "npm";
   try {
@@ -88,6 +91,7 @@ for (const check of checks) {
       encoding: "utf-8",
       timeout: 30000,
       stdio: "pipe",
+      shell: isWindows,
     });
   } catch (err) {
     failures.push({
