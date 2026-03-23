@@ -316,6 +316,34 @@ describe('dev-team-tdd-enforce', () => {
       assert.ok(true);
     });
   });
+
+  it('creates a git cache file in tmpdir after running', () => {
+    const cacheDir = os.tmpdir();
+    const gitDir = fs.mkdtempSync(path.join(os.tmpdir(), 'dev-team-cache-test-'));
+    try {
+      execFileSync('git', ['init'], { cwd: gitDir, encoding: 'utf-8' });
+      execFileSync('git', ['config', 'user.email', 'test@test.com'], { cwd: gitDir, encoding: 'utf-8' });
+      execFileSync('git', ['config', 'user.name', 'Test'], { cwd: gitDir, encoding: 'utf-8' });
+      fs.mkdirSync(path.join(gitDir, 'src'), { recursive: true });
+      fs.writeFileSync(path.join(gitDir, 'src', 'app.js'), 'module.exports = {}');
+
+      const input = JSON.stringify({ tool_input: { file_path: path.join(gitDir, 'src', 'app.js') } });
+      try {
+        execFileSync(process.execPath, [path.join(HOOKS_DIR, hook), input], {
+          encoding: 'utf-8',
+          timeout: 5000,
+          cwd: gitDir,
+        });
+      } catch {
+        // Expected to block — we just want to verify cache was created
+      }
+
+      const cacheFiles = fs.readdirSync(cacheDir).filter(f => f.startsWith('dev-team-git-cache-'));
+      assert.ok(cacheFiles.length > 0, 'should create at least one git cache file');
+    } finally {
+      fs.rmSync(gitDir, { recursive: true, force: true });
+    }
+  });
 });
 
 // ─── Pre-commit Gate ─────────────────────────────────────────────────────────

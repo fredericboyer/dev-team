@@ -14,8 +14,37 @@
 
 "use strict";
 
+const { createHash } = require("crypto");
 const { execFileSync } = require("child_process");
+const fs = require("fs");
+const os = require("os");
 const path = require("path");
+
+/**
+ * Cached git diff — reads from a temp file if it was written < 5 seconds ago,
+ * otherwise shells out to git and writes the result for subsequent hooks.
+ * Cache key includes cwd hash so different repos don't share cache.
+ */
+function cachedGitDiff(args, timeoutMs) {
+  const cwdHash = createHash("md5").update(process.cwd()).digest("hex").slice(0, 8);
+  const argsKey = args.join("-").replace(/[^a-zA-Z0-9-]/g, "");
+  const cacheFile = path.join(os.tmpdir(), `dev-team-git-cache-${cwdHash}-${argsKey}.txt`);
+  try {
+    const stat = fs.statSync(cacheFile);
+    if (Date.now() - stat.mtimeMs < 5000) {
+      return fs.readFileSync(cacheFile, "utf-8");
+    }
+  } catch {
+    // No cache or stale — fall through to git call
+  }
+  const result = execFileSync("git", args, { encoding: "utf-8", timeout: timeoutMs });
+  try {
+    fs.writeFileSync(cacheFile, result);
+  } catch {
+    // Best effort — don't fail the hook over caching
+  }
+  return result;
+}
 
 let input = {};
 try {
@@ -82,10 +111,7 @@ if (SKIP_PATTERNS.some((p) => p.test(filePath))) {
 // Check if any test file has been modified in this session
 let changedFiles = "";
 try {
-  changedFiles = execFileSync("git", ["diff", "--name-only"], {
-    encoding: "utf-8",
-    timeout: 5000,
-  });
+  changedFiles = cachedGitDiff(["diff", "--name-only"], 2000);
 } catch {
   // If git is not available or fails, allow the change
   process.exit(0);
@@ -105,7 +131,6 @@ if (hasTestChanges) {
 // No test changes — check if a corresponding test file already exists.
 // This allows refactoring (modifying existing tested code) without
 // requiring the test file to also be modified.
-const fs = require("fs");
 const dir = path.dirname(filePath);
 const name = path.basename(filePath, ext);
 
