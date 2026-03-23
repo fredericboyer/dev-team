@@ -130,6 +130,19 @@ describe('mergeSettings', () => {
     const result = JSON.parse(fs.readFileSync(settingsPath, 'utf-8'));
     assert.deepEqual(result.hooks.PostToolUse[0].matcher, 'Edit');
   });
+
+  it('backs up corrupted settings file before overwriting', () => {
+    const settingsPath = path.join(tmpDir, 'settings.json');
+    const corruptContent = '{ invalid json }}}';
+    fs.writeFileSync(settingsPath, corruptContent);
+
+    const fragment = { hooks: { PostToolUse: [{ matcher: 'Edit', hooks: [{ type: 'command', command: 'test' }] }] } };
+    mergeSettings(settingsPath, fragment);
+
+    const backupPath = settingsPath + '.bak';
+    assert.ok(fs.existsSync(backupPath), 'backup file should exist');
+    assert.equal(fs.readFileSync(backupPath, 'utf-8'), corruptContent);
+  });
 });
 
 describe('mergeClaudeMd', () => {
@@ -162,6 +175,21 @@ describe('mergeClaudeMd', () => {
     assert.ok(content.includes('updated'));
     assert.ok(!content.includes('old'));
     assert.ok(content.includes('Footer'));
+  });
+
+  it('preserves user content between duplicate marker pairs', () => {
+    const p = path.join(tmpDir, 'CLAUDE.md');
+    const duplicated = '# My Project\n\n<!-- dev-team:begin -->\nold1\n<!-- dev-team:end -->\n\nUser paragraph\n\n<!-- dev-team:begin -->\nold2\n<!-- dev-team:end -->\n\nUser footer\n';
+    fs.writeFileSync(p, duplicated);
+
+    const result = mergeClaudeMd(p, '<!-- dev-team:begin -->\nnew\n<!-- dev-team:end -->');
+    assert.equal(result, 'replaced');
+
+    const content = fs.readFileSync(p, 'utf-8');
+    assert.ok(content.includes('My Project'), 'should preserve content before first marker');
+    assert.ok(content.includes('new'), 'should have new content');
+    assert.ok(content.includes('User paragraph'), 'should preserve content between pairs');
+    assert.ok(content.includes('User footer'), 'should preserve content after last pair');
   });
 
   it('appends instead of corrupting when begin marker exists but end marker is missing', () => {

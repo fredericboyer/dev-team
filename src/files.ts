@@ -99,7 +99,15 @@ export function mergeSettings(existingPath: string, newFragment: HookSettings): 
     existing = JSON.parse(fs.readFileSync(existingPath, "utf-8"));
   } catch (err: unknown) {
     if ((err as NodeJS.ErrnoException).code !== "ENOENT") {
-      console.warn(`Warning: ${existingPath} exists but is not valid JSON. Starting fresh.`);
+      const backupPath = existingPath + ".bak";
+      try {
+        fs.copyFileSync(existingPath, backupPath);
+        console.warn(
+          `Warning: ${existingPath} is not valid JSON. Backed up to ${backupPath}. Starting fresh.`,
+        );
+      } catch {
+        console.warn(`Warning: ${existingPath} is not valid JSON. Starting fresh.`);
+      }
     }
   }
 
@@ -155,8 +163,18 @@ export function mergeClaudeMd(
       writeFile(filePath, existing.trimEnd() + "\n\n" + newContent + "\n");
       return "appended";
     }
-    const beforeMarker = existing.substring(0, existing.indexOf(BEGIN_MARKER));
-    const afterMarker = existing.substring(existing.indexOf(END_MARKER) + END_MARKER.length);
+    const firstBegin = existing.indexOf(BEGIN_MARKER);
+    const firstEnd = existing.indexOf(END_MARKER);
+
+    const secondBegin = existing.indexOf(BEGIN_MARKER, firstBegin + 1);
+    if (secondBegin !== -1) {
+      console.warn(
+        "Warning: Found duplicate dev-team marker pairs in CLAUDE.md. Replacing the first pair only and preserving all other content.",
+      );
+    }
+
+    const beforeMarker = existing.substring(0, firstBegin);
+    const afterMarker = existing.substring(firstEnd + END_MARKER.length);
     writeFile(filePath, beforeMarker + newContent + afterMarker);
     return "replaced";
   }
