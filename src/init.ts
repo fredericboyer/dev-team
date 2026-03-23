@@ -9,6 +9,7 @@ import {
   mergeSettings,
   mergeClaudeMd,
   listSubdirectories,
+  getPackageVersion,
 } from "./files";
 import type { HookSettings, HookMatcher } from "./files";
 import * as prompts from "./prompts";
@@ -352,7 +353,7 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
 
   // Save preferences
   const prefs: Record<string, unknown> = {
-    version: "0.3.1",
+    version: getPackageVersion(),
     agents: selectedAgents,
     hooks: selectedHooks,
     issueTracker,

@@ -167,6 +167,22 @@ export function listSubdirectories(dir: string): string[] {
 }
 
 /**
+ * Returns the current package version from package.json.
+ */
+export function getPackageVersion(): string {
+  const pkgPath = path.join(templateDir(), "..", "package.json");
+  const content = readFile(pkgPath);
+  if (!content) {
+    throw new Error("Cannot read package.json");
+  }
+  const parsed = JSON.parse(content);
+  if (!parsed.version) {
+    throw new Error("package.json missing version field");
+  }
+  return parsed.version;
+}
+
+/**
  * Lists all files in a directory recursively.
  */
 export function listFilesRecursive(dir: string): string[] {

@@ -8,21 +8,12 @@ import {
   mergeSettings,
   mergeClaudeMd,
   listSubdirectories,
+  getPackageVersion,
 } from "./files";
 import type { HookSettings, HookMatcher } from "./files";
 import { ALL_AGENTS, QUALITY_HOOKS } from "./init";
 
-/**
- * Returns the current package version from package.json.
- */
-function getPackageVersion(): string {
-  const pkgPath = path.join(templateDir(), "..", "package.json");
-  const content = readFile(pkgPath);
-  if (!content) {
-    throw new Error("Cannot read package.json");
-  }
-  return JSON.parse(content).version;
-}
+// getPackageVersion imported from files.ts — shared utility
 
 interface Preferences {
   version: string;

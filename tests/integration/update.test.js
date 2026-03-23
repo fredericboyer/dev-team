@@ -159,7 +159,7 @@ describe('dev-team update', () => {
     assert.notEqual(updatedPrefs.version, '0.0.1', 'version should no longer be the old value');
   });
 
-    it('auto-discovers and installs new hooks not in preferences', async () => {
+  it('auto-discovers and installs new hooks not in preferences', async () => {
     await run(tmpDir, ['--all']);
 
     // Remove a hook from preferences to simulate an older install
