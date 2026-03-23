@@ -15,7 +15,7 @@
   "scripts": {
     "build": "tsc",
     "pretest": "npm run build",
-    "test": "node --test tests/unit/files.test.js tests/unit/hooks.test.js tests/unit/scan.test.js tests/unit/create-agent.test.js tests/integration/fresh-project.test.js tests/integration/idempotency.test.js tests/integration/update.test.js tests/scenarios/node-project.test.js tests/scenarios/python-project.test.js tests/scenarios/upgrade-path.test.js",
+    "test": "node --test tests/unit/files.test.js tests/unit/hooks.test.js tests/unit/scan.test.js tests/unit/create-agent.test.js tests/unit/cli.test.js tests/integration/fresh-project.test.js tests/integration/idempotency.test.js tests/integration/update.test.js tests/scenarios/node-project.test.js tests/scenarios/python-project.test.js tests/scenarios/upgrade-path.test.js",
     "test:unit": "node --test tests/unit/files.test.js tests/unit/hooks.test.js",
     "test:integration": "node --test tests/integration/fresh-project.test.js tests/integration/idempotency.test.js",
     "test:scenarios": "node --test tests/scenarios/node-project.test.js tests/scenarios/python-project.test.js tests/scenarios/upgrade-path.test.js",
