@@ -30,8 +30,16 @@ function cachedGitDiff(args, timeoutMs) {
   const argsKey = args.join("-").replace(/[^a-zA-Z0-9-]/g, "");
   const cacheFile = path.join(os.tmpdir(), `dev-team-git-cache-${cwdHash}-${argsKey}.txt`);
   try {
-    const stat = fs.statSync(cacheFile);
-    if (Date.now() - stat.mtimeMs < 5000) {
+    const stat = fs.lstatSync(cacheFile);
+    // Reject symlinks to prevent symlink attacks (attacker could point cache
+    // file at a sensitive path and have us overwrite it on the next write)
+    if (stat.isSymbolicLink()) {
+      try {
+        fs.unlinkSync(cacheFile);
+      } catch {
+        /* best effort cleanup */
+      }
+    } else if (Date.now() - stat.mtimeMs < 5000) {
       return fs.readFileSync(cacheFile, "utf-8");
     }
   } catch {
@@ -39,7 +47,7 @@ function cachedGitDiff(args, timeoutMs) {
   }
   const result = execFileSync("git", args, { encoding: "utf-8", timeout: timeoutMs });
   try {
-    fs.writeFileSync(cacheFile, result);
+    fs.writeFileSync(cacheFile, result, { mode: 0o600 });
   } catch {
     // Best effort — don't fail the hook over caching
   }

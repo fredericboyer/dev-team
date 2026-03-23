@@ -28,3 +28,15 @@ Hook timeouts are reduced from 5000ms to 2000ms, since cached reads are near-ins
 - The cache file is written to `os.tmpdir()`, which is cleaned by the OS and does not pollute the working directory
 - Each hook remains a standalone script — the helper is duplicated, not extracted to a shared module, consistent with ADR-003
 - If a hook cannot write the cache file (permissions, disk full), it falls back to a direct git call with no user-visible impact
+
+### Security hardening
+- Cache files are written with mode `0o600` (owner read/write only) to prevent other users on shared systems from reading or tampering with cached git output
+- `lstatSync` is used instead of `statSync` to detect symlinks — if the cache file is a symlink, it is removed and the cache is treated as a miss. This prevents symlink attacks where an attacker creates a symlink at the cache path pointing to a sensitive file, causing the hook to overwrite it on the next git call
+
+### Timeout trade-off
+Hook timeouts are set to 2000ms (reduced from an initial 5000ms). The rationale:
+- **Cached reads** are near-instant filesystem operations, well within any timeout
+- **Cold git calls** on local repos typically complete in under 500ms, even on large repositories
+- The 2000ms timeout provides a 4x margin over typical cold-call latency while keeping hooks responsive
+- On extremely large repositories or slow NFS/network filesystems, cold calls could theoretically exceed 2000ms. In practice this has not been observed, and the fallback behavior (hook proceeds without cached data) is safe
+- If cold-call timeouts become an issue in specific environments, the timeout can be increased per-deployment by editing the hook script — the value is a plain constant, not derived from configuration
