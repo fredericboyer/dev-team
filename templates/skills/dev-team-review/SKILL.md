@@ -66,3 +66,9 @@ Group by severity:
 - **Request changes** — `[DEFECT]` findings must be resolved.
 
 State the verdict clearly. List what must be fixed for approval if requesting changes.
+
+### Completion
+
+After the review report is delivered:
+1. Spawn **@dev-team-borges** (Librarian) to review memory freshness and capture any learnings from the review findings. This is mandatory.
+2. Include Borges's recommendations in the final report.

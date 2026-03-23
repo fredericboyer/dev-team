@@ -83,3 +83,9 @@ Same grouping. Include actionable recommendations.
 ### Recommended next steps
 
 Numbered list of concrete actions, ordered by priority. Each action should reference the specific finding it addresses.
+
+### Completion
+
+After the audit report is delivered:
+1. Spawn **@dev-team-borges** (Librarian) to review memory freshness and capture learnings from the audit findings. This is mandatory.
+2. Include Borges's recommendations in the final report.
