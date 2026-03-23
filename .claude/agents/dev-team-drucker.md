@@ -44,6 +44,7 @@ Based on the classification, select:
 | Quality/correctness | @dev-team-knuth | Always for code changes |
 | Architecture & quality attributes | @dev-team-brooks | Always for code changes (structural review + performance, maintainability, scalability assessment) |
 | Documentation | @dev-team-tufte | When APIs, public interfaces, or documentation files change |
+| Operations | @dev-team-hamilton | When infrastructure files change (Dockerfile, docker-compose, CI workflows, Terraform, Helm, k8s, health checks, logging/monitoring config, .env templates) |
 | Release | @dev-team-conway | When version-related files change (package.json, changelog, version bumps, release workflows) |
 
 ### 3. Architect pre-assessment

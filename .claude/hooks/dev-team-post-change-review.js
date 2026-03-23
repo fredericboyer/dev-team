@@ -185,6 +185,40 @@ if (RELEASE_PATTERNS.some((p) => p.test(fullPath))) {
   flags.push("@dev-team-conway (version/release artifact changed)");
 }
 
+// Operations/infra patterns → flag for Hamilton
+// NOTE: Docker and .env patterns intentionally overlap with INFRA_PATTERNS (Voss).
+// Voss reviews Docker files for infrastructure correctness (base images, build stages, networking),
+// while Hamilton reviews them for operational concerns (resource limits, health checks, image optimization).
+// This dual-review is by design — both perspectives add value.
+const OPS_PATTERNS = [
+  /dockerfile/,
+  /docker-compose/,
+  /\.dockerignore$/,
+  /\.github\/workflows\//,
+  /\.gitlab-ci/,
+  /jenkinsfile/i,
+  /terraform\//,
+  /pulumi\//,
+  /cloudformation\//,
+  /helm\//,
+  /k8s\//,
+  /\.tf$/,
+  /\.tfvars$/,
+  /health[-_]?check/,
+  /(?:^|\/)(?:monitoring|prometheus|grafana|datadog)\.(?:ya?ml|json|conf|config|toml)$/, // monitoring config files (not src/monitoring.ts)
+  /(?:^|\/)(?:logging|logs)\.(?:ya?ml|json|conf|config|toml)$/, // logging config files (not src/logging.ts)
+  /(?:^|\/)(?:alerting|alerts?)\.(?:ya?ml|json|conf|config|toml)$/, // alerting config files
+  /(?:^|\/)(?:observability|otel|opentelemetry)\.(?:ya?ml|json|conf|config|toml)$/, // observability config files
+  /(?<!\/src)\/(?:monitoring|logging|alerting|observability)\//, // ops directories (but not under src/)
+  /\.env\.example$/,
+  /\.env\.template$/,
+  /env\.template$/,
+];
+
+if (OPS_PATTERNS.some((p) => p.test(fullPath) || p.test(basename))) {
+  flags.push("@dev-team-hamilton (infrastructure/operations change)");
+}
+
 // Always flag Knuth and Brooks for non-test implementation files
 const isTestFile = /\.(test|spec)\.|__tests__|\/tests?\//.test(fullPath);
 const isCodeFile = /\.(js|ts|jsx|tsx|py|rb|go|java|rs|c|cpp|cs)$/.test(fullPath);
