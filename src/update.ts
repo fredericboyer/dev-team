@@ -11,9 +11,104 @@ import {
   getPackageVersion,
 } from "./files";
 import type { HookSettings, HookMatcher } from "./files";
+import fs from "fs";
 import { ALL_AGENTS, QUALITY_HOOKS } from "./init";
 
-// getPackageVersion imported from files.ts — shared utility
+interface AgentRename {
+  oldLabel: string;
+  oldFile: string;
+  newLabel: string;
+  newFile: string;
+}
+
+interface Migration {
+  version: string;
+  agentRenames?: AgentRename[];
+}
+
+const MIGRATIONS: Migration[] = [
+  {
+    version: "0.4.0",
+    agentRenames: [
+      {
+        oldLabel: "Architect",
+        oldFile: "dev-team-architect.md",
+        newLabel: "Brooks",
+        newFile: "dev-team-brooks.md",
+      },
+      {
+        oldLabel: "Docs",
+        oldFile: "dev-team-docs.md",
+        newLabel: "Tufte",
+        newFile: "dev-team-tufte.md",
+      },
+      {
+        oldLabel: "Release",
+        oldFile: "dev-team-release.md",
+        newLabel: "Conway",
+        newFile: "dev-team-conway.md",
+      },
+      {
+        oldLabel: "Lead",
+        oldFile: "dev-team-lead.md",
+        newLabel: "Drucker",
+        newFile: "dev-team-drucker.md",
+      },
+    ],
+  },
+];
+
+function runMigrations(prefs: Preferences, fromVersion: string, claudeDir: string): string[] {
+  const log: string[] = [];
+
+  for (const migration of MIGRATIONS) {
+    // Skip migrations for versions already applied
+    if (fromVersion >= migration.version) continue;
+
+    if (migration.agentRenames) {
+      for (const rename of migration.agentRenames) {
+        const agentsDir = path.join(claudeDir, "agents");
+        const memoryDir = path.join(claudeDir, "agent-memory");
+
+        // Rename agent file
+        const oldAgentPath = path.join(agentsDir, rename.oldFile);
+        if (fileExists(oldAgentPath)) {
+          try {
+            fs.unlinkSync(oldAgentPath);
+          } catch {
+            // ignore
+          }
+          log.push(`Renamed agent: ${rename.oldLabel} → ${rename.newLabel}`);
+        }
+
+        // Rename memory directory (preserve calibration data)
+        const oldMemDir = path.join(memoryDir, rename.oldFile.replace(".md", ""));
+        const newMemDir = path.join(memoryDir, rename.newFile.replace(".md", ""));
+        if (
+          fileExists(path.join(oldMemDir, "MEMORY.md")) &&
+          !fileExists(path.join(newMemDir, "MEMORY.md"))
+        ) {
+          try {
+            fs.mkdirSync(newMemDir, { recursive: true });
+            fs.renameSync(path.join(oldMemDir, "MEMORY.md"), path.join(newMemDir, "MEMORY.md"));
+            fs.rmdirSync(oldMemDir);
+          } catch {
+            // Best effort — new memory template will be created if this fails
+          }
+          log.push(`Migrated memory: ${rename.oldLabel} → ${rename.newLabel}`);
+        }
+
+        // Update prefs: replace old label with new
+        const idx = prefs.agents.indexOf(rename.oldLabel);
+        if (idx !== -1) {
+          prefs.agents[idx] = rename.newLabel;
+        }
+      }
+    }
+  }
+
+  return log;
+}
 
 interface Preferences {
   version: string;
@@ -81,6 +176,16 @@ export async function update(targetDir: string): Promise<void> {
     console.log(`Already at latest version (v${packageVersion})`);
   } else {
     console.log(`Upgrading from v${prefs.version} to v${packageVersion}`);
+  }
+
+  // Run version migrations before updating agents
+  const migrationLog = runMigrations(prefs, prefs.version || "0.0.0", claudeDir);
+  if (migrationLog.length > 0) {
+    console.log("Migrations:");
+    for (const entry of migrationLog) {
+      console.log(`  ${entry}`);
+    }
+    console.log("");
   }
 
   console.log(`  Agents: ${prefs.agents.join(", ")}`);

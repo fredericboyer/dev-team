@@ -178,4 +178,52 @@ describe('dev-team update', () => {
     const updatedPrefs = JSON.parse(fs.readFileSync(prefsPath, 'utf-8'));
     assert.ok(updatedPrefs.hooks.includes(removedHook), `${removedHook} should be auto-discovered`);
   });
+
+  it('migrates renamed agents on update', async () => {
+    await run(tmpDir, ['--all']);
+
+    // Simulate pre-v0.4 prefs with old agent names
+    const prefsPath = path.join(tmpDir, '.claude', 'dev-team.json');
+    const prefs = JSON.parse(fs.readFileSync(prefsPath, 'utf-8'));
+    prefs.version = '0.3.1';
+
+    // Replace new names with old names
+    prefs.agents = prefs.agents.map((a) => {
+      if (a === 'Brooks') return 'Architect';
+      if (a === 'Tufte') return 'Docs';
+      if (a === 'Conway') return 'Release';
+      if (a === 'Drucker') return 'Lead';
+      return a;
+    });
+
+    // Create old agent files to simulate old install
+    const agentsDir = path.join(tmpDir, '.claude', 'agents');
+    fs.writeFileSync(path.join(agentsDir, 'dev-team-architect.md'), '---\nname: dev-team-architect\n---');
+    fs.writeFileSync(path.join(agentsDir, 'dev-team-docs.md'), '---\nname: dev-team-docs\n---');
+    fs.writeFileSync(path.join(agentsDir, 'dev-team-release.md'), '---\nname: dev-team-release\n---');
+    fs.writeFileSync(path.join(agentsDir, 'dev-team-lead.md'), '---\nname: dev-team-lead\n---');
+
+    fs.writeFileSync(prefsPath, JSON.stringify(prefs, null, 2));
+
+    await update(tmpDir);
+
+    // Verify old names replaced with new in prefs
+    const updated = JSON.parse(fs.readFileSync(prefsPath, 'utf-8'));
+    assert.ok(updated.agents.includes('Brooks'), 'should have Brooks');
+    assert.ok(updated.agents.includes('Tufte'), 'should have Tufte');
+    assert.ok(updated.agents.includes('Conway'), 'should have Conway');
+    assert.ok(updated.agents.includes('Drucker'), 'should have Drucker');
+    assert.ok(!updated.agents.includes('Architect'), 'should not have old Architect');
+    assert.ok(!updated.agents.includes('Docs'), 'should not have old Docs');
+    assert.ok(!updated.agents.includes('Release'), 'should not have old Release');
+    assert.ok(!updated.agents.includes('Lead'), 'should not have old Lead');
+
+    // Verify old agent files removed
+    assert.ok(!fs.existsSync(path.join(agentsDir, 'dev-team-architect.md')), 'old architect file should be removed');
+    assert.ok(!fs.existsSync(path.join(agentsDir, 'dev-team-docs.md')), 'old docs file should be removed');
+
+    // Verify new agent files exist
+    assert.ok(fs.existsSync(path.join(agentsDir, 'dev-team-brooks.md')), 'new brooks file should exist');
+    assert.ok(fs.existsSync(path.join(agentsDir, 'dev-team-tufte.md')), 'new tufte file should exist');
+  });
 });
