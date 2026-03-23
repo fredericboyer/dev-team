@@ -12,9 +12,9 @@ Proactively monitor all GitHub Advanced Security signals for this repository.
 
 1. **Run all checks in parallel** using the Bash tool with `gh api`. Derive {owner}/{repo} from `gh repo view --json nameWithOwner --jq .nameWithOwner`:
 
-   - Code scanning alerts (CodeQL, code quality): `gh api repos/{owner}/{repo}/code-scanning/alerts?state=open`
-   - Dependabot alerts (vulnerable dependencies): `gh api repos/{owner}/{repo}/dependabot/alerts?state=open`
-   - Secret scanning alerts: `gh api repos/{owner}/{repo}/secret-scanning/alerts?state=open`
+   - Code scanning alerts (CodeQL, code quality): `gh api --paginate repos/{owner}/{repo}/code-scanning/alerts?state=open`
+   - Dependabot alerts (vulnerable dependencies): `gh api --paginate repos/{owner}/{repo}/dependabot/alerts?state=open`
+   - Secret scanning alerts: `gh api --paginate repos/{owner}/{repo}/secret-scanning/alerts?state=open`
    - Pending Dependabot PRs: `gh pr list --label dependencies`
    - Copilot review status on open PRs: check reviews on each open PR
 
