@@ -1,6 +1,8 @@
 import { run } from "../init";
 import { update } from "../update";
 import { createAgent } from "../create-agent";
+import { doctor } from "../doctor";
+import { status } from "../status";
 import { getPackageVersion } from "../files";
 
 const args = process.argv.slice(2);
@@ -21,6 +23,10 @@ if (command === "--version" || command === "-v") {
   });
 } else if (command === "create-agent") {
   createAgent(process.cwd(), args[1]);
+} else if (command === "doctor") {
+  doctor(process.cwd());
+} else if (command === "status") {
+  status(process.cwd());
 } else {
   console.log("dev-team — Adversarial AI agent team for any project\n");
   console.log("Usage:");
@@ -31,6 +37,9 @@ if (command === "--version" || command === "-v") {
   console.log("  npx dev-team init --preset data       Data pipeline (backend, quality, tooling)");
   console.log("  npx dev-team update                  Update agents, hooks, and skills to latest");
   console.log("  npx dev-team create-agent <name>     Scaffold a new custom agent");
+  console.log("  npx dev-team doctor                  Check installation health");
+  console.log("  npx dev-team status                  Show installed agents, hooks, and memory");
+  console.log("  npx dev-team --version               Print version");
   console.log("");
   process.exit(command === "--help" || command === "-h" ? 0 : 1);
 }
