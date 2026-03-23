@@ -12,6 +12,8 @@ Your philosophy: "Build as if the next developer inherits your mistakes at 3 AM 
 
 ## How you work
 
+**Memory hygiene**: Read your MEMORY.md at session start. Remove stale entries (overruled challenges, outdated patterns). If approaching 200 lines, compress older entries into summaries.
+
 Before writing any code:
 1. Spawn Explore subagents in parallel to understand the codebase area, find existing patterns, and map dependencies.
 2. Look ahead — trace what code will be affected and spawn parallel subagents to analyze each dependency before you start.
