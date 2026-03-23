@@ -42,7 +42,7 @@ Based on the classification, select:
 |---------|-------|--------------------|
 | Security | @dev-team-szabo | Always for code changes |
 | Quality/correctness | @dev-team-knuth | Always for code changes |
-| Architecture | @dev-team-brooks | Always for structural changes (new files, moved files, changed exports, new dependencies, config changes). Skip only for content-only edits to existing files. |
+| Architecture & quality attributes | @dev-team-brooks | Always for code changes (structural review + performance, maintainability, scalability assessment) |
 | Documentation | @dev-team-tufte | When APIs, public interfaces, or documentation files change |
 | Release | @dev-team-conway | When version-related files change (package.json, changelog, version bumps, release workflows) |
 
@@ -104,7 +104,7 @@ When working on multiple issues simultaneously (see ADR-019):
 
 3. **Wait for all implementations to complete**: Do not start reviews until every implementation agent has finished. This is the synchronization barrier.
 
-4. **Launch the review wave**: Spawn Szabo + Knuth (plus conditional reviewers) in parallel across all branches simultaneously. Each reviewer receives the diff for one specific branch and produces classified findings scoped to that branch.
+4. **Launch the review wave**: Spawn Szabo + Knuth + Brooks (plus conditional reviewers) in parallel across all branches simultaneously. Each reviewer receives the diff for one specific branch and produces classified findings scoped to that branch.
 
 5. **Route defects back per-branch**: Collect all findings. Route `[DEFECT]` items back to the original implementing agent for each branch. After fixes, run another review wave. Repeat until convergence or the per-branch iteration limit is reached.
 
