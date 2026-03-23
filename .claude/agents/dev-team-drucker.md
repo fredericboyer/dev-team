@@ -42,9 +42,9 @@ Based on the classification, select:
 |---------|-------|--------------------|
 | Security | @dev-team-szabo | Always for code changes |
 | Quality/correctness | @dev-team-knuth | Always for code changes |
-| Architecture | @dev-team-brooks | When touching module boundaries, dependencies, or ADRs |
-| Documentation | @dev-team-tufte | When APIs or public interfaces change |
-| Release | @dev-team-conway | When version-related files change |
+| Architecture | @dev-team-brooks | Always for structural changes (new files, moved files, changed exports, new dependencies, config changes). Skip only for content-only edits to existing files. |
+| Documentation | @dev-team-tufte | When APIs, public interfaces, or documentation files change |
+| Release | @dev-team-conway | When version-related files change (package.json, changelog, version bumps, release workflows) |
 
 ### 3. Architect pre-assessment
 
@@ -93,6 +93,24 @@ When no `[DEFECT]` findings remain:
 3. Report any remaining `[RISK]` or `[SUGGESTION]` items, including Borges's recommendations.
 4. List which agents reviewed and their verdicts.
 5. Write learnings to agent memory files.
+
+### Parallel orchestration
+
+When working on multiple issues simultaneously (see ADR-019):
+
+1. **Analyze for file independence**: Spawn @dev-team-brooks with the full batch of issues. Brooks identifies conflict groups — issues that touch overlapping files and must execute sequentially. Independent issues can proceed in parallel.
+
+2. **Spawn implementation agents in parallel**: For each independent issue, spawn one implementing agent on its own branch (`feat/<issue>-<description>`). Each agent works without awareness of other parallel agents. Track state in `.claude/dev-team-parallel.json`.
+
+3. **Wait for all implementations to complete**: Do not start reviews until every implementation agent has finished. This is the synchronization barrier.
+
+4. **Launch the review wave**: Spawn Szabo + Knuth (plus conditional reviewers) in parallel across all branches simultaneously. Each reviewer receives the diff for one specific branch and produces classified findings scoped to that branch.
+
+5. **Route defects back per-branch**: Collect all findings. Route `[DEFECT]` items back to the original implementing agent for each branch. After fixes, run another review wave. Repeat until convergence or the per-branch iteration limit is reached.
+
+6. **Spawn Borges once at end**: After the final review wave clears across all branches, run @dev-team-borges once with visibility into all branches. This ensures cross-branch coherence for memory files, learnings, and system improvement recommendations.
+
+Conflict groups (issues with file overlaps) execute sequentially within the group but in parallel with other groups and independent issues.
 
 ## Focus areas
 

@@ -132,6 +132,11 @@ const ARCH_PATTERNS = [
   /\/core\//,
   /\/domain\//,
   /\/shared\//,
+  /\/lib\//,
+  /\/plugins?\//,
+  /\/middleware\//,
+  /tsconfig/,
+  /webpack|vite|rollup|esbuild/,
 ];
 
 if (ARCH_PATTERNS.some((p) => p.test(fullPath))) {
@@ -146,6 +151,12 @@ const RELEASE_PATTERNS = [
   /changelog/i,
   /version/,
   /\.github\/workflows\/.*release/,
+  /\.github\/workflows\/.*publish/,
+  /\.github\/workflows\/.*deploy/,
+  /\.npmrc$/,
+  /\.npmignore$/,
+  /release\.config/,
+  /lerna\.json$/,
 ];
 
 if (RELEASE_PATTERNS.some((p) => p.test(fullPath))) {
@@ -158,6 +169,11 @@ const isCodeFile = /\.(js|ts|jsx|tsx|py|rb|go|java|rs|c|cpp|cs)$/.test(fullPath)
 
 if (isCodeFile && !isTestFile) {
   flags.push("@dev-team-knuth (new or changed code path to audit)");
+}
+
+// Flag Beck for test file changes (test quality review)
+if (isTestFile && isCodeFile) {
+  flags.push("@dev-team-beck (test file changed — review test quality)");
 }
 
 if (flags.length === 0) {

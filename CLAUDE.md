@@ -49,7 +49,7 @@ This project uses [dev-team](https://github.com/dev-team) — adversarial AI age
 | `@dev-team-brooks` | Architect | Architectural review, coupling, dependency direction, ADR compliance |
 | `@dev-team-conway` | Release Manager | Versioning, changelog, release readiness, semver validation |
 | `@dev-team-drucker` | Team Lead / Orchestrator | Auto-delegates to specialists, manages review loops, resolves conflicts |
-| `@dev-team-borges` | Librarian | End-of-task memory review, cross-agent coherence, system improvement |
+| `@dev-team-borges` | Librarian | End-of-task/review/audit memory review, cross-agent coherence, system improvement |
 
 ### Workflow
 
@@ -57,9 +57,29 @@ For automatic delegation, use `@dev-team-drucker` — it analyzes the task and r
 
 For non-trivial work: explore the area first, then implement, then review.
 
+**Automatic invocation (hooks):**
+- **Szabo** — auto-flagged when security-sensitive files change (auth, token, session, crypto, etc.)
+- **Knuth** — auto-flagged when any non-test implementation code changes
+- **Mori** — auto-flagged when API contract files change (/api/, /routes/, schema, etc.)
+- **Voss** — auto-flagged when infrastructure/config files change (docker, .env, migrations, etc.)
+- **Deming** — auto-flagged when tooling files change (eslint, CI workflows, package.json, etc.)
+- **Tufte** — auto-flagged when documentation files change (.md, /docs/, README, etc.)
+- **Brooks** — auto-flagged when architectural boundaries are touched (/adr/, /core/, /domain/, /lib/, build config, etc.)
+- **Conway** — auto-flagged when release artifacts change (package.json, changelog, version files, release/publish/deploy workflows, etc.)
+
+**End-of-workflow agents:**
+- **Borges** — mandatory at end of every `/dev-team:task`, `/dev-team:review`, and `/dev-team:audit`. Reviews memory freshness, cross-agent coherence, and system improvement opportunities.
+
+**Orchestration:**
+- **Drucker** — delegates tasks to the right implementing agent and spawns reviewers. Brooks reviews ALL structural changes (not just explicit architecture files). Szabo and Knuth review all code changes.
+
 Agents challenge each other using classified findings:
 - `[DEFECT]` blocks progress. `[RISK]`, `[QUESTION]`, `[SUGGESTION]` are advisory.
 - When agents disagree, they escalate to the human after one exchange each. Human decides.
+
+### Parallel execution
+
+When working on multiple independent issues, use parallel agents on separate branches. Drucker coordinates the review wave after all implementations complete. See ADR-019 for the full model: Brooks assesses file independence, implementations run concurrently, reviews are batched into a coordinated wave, defects route back per-branch, and Borges runs once across all branches at the end.
 
 ### Hook directives are MANDATORY
 
@@ -92,6 +112,7 @@ All project and process learnings MUST go to in-repo files, NOT to machine-local
 When the human gives feedback about process, coding style, or tool behavior: write it to `dev-team-learnings.md`. Only use machine-local memory for things that are truly personal and would not apply to another developer on the same project.
 
 <!-- dev-team:end -->
+
 
 
 
