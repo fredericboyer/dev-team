@@ -94,6 +94,7 @@ try {
 const hasTestChanges = changedFiles
   .split("\n")
   .filter(Boolean)
+  .map((f) => f.split("\\").join("/"))
   .some((f) => TEST_PATTERNS.some((p) => p.test(f)));
 
 if (hasTestChanges) {

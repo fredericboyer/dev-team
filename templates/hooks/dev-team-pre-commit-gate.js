@@ -85,6 +85,7 @@ if (hasImplFiles && !hasMemoryUpdates) {
     });
     unstagedMemory = unstaged
       .split("\n")
+      .map((f) => f.split("\\").join("/"))
       .some((f) => f.endsWith("dev-team-learnings.md") || /agent-memory\/.*MEMORY\.md$/.test(f));
   } catch {
     // Ignore — best effort
