@@ -71,11 +71,6 @@ const ALL_AGENTS: AgentDefinition[] = [
     description: "Release Manager",
   },
   {
-    label: "Hamilton",
-    file: "dev-team-hamilton.md",
-    description: "Operations Reviewer",
-  },
-  {
     label: "Drucker",
     file: "dev-team-drucker.md",
     description: "Orchestrator / Team Lead",

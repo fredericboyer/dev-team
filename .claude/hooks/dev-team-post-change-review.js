@@ -74,36 +74,9 @@ if (API_PATTERNS.some((p) => p.test(fullPath))) {
   flags.push("@dev-team-mori (API contract may affect UI)");
 }
 
-// Infrastructure patterns → flag for Hamilton (infrastructure implementer/owner)
-// Hamilton owns: Docker, IaC, deployment, k8s, monitoring, CI/CD infra
-const OPS_PATTERNS = [
-  /docker/,
-  /dockerfile/,
-  /compose/,
-  /terraform/,
-  /pulumi/,
-  /cloudformation/,
-  /helm/,
-  /k8s/,
-  /kubernetes/,
-  /\.ya?ml$/, // k8s manifests, compose files
-  /infrastructure/,
-  /deploy/,
-  /monitoring/,
-  /observability/,
-  /grafana/,
-  /prometheus/,
-  /healthcheck/,
-  /health-check/,
-];
-
-if (OPS_PATTERNS.some((p) => p.test(fullPath))) {
-  flags.push("@dev-team-hamilton (infrastructure change)");
-}
-
 // App config patterns → flag for Voss
 // Voss owns: application config, migrations, database, .env (app-specific)
-// Intentional overlap: Docker files trigger Hamilton above; .env files trigger
+// Intentional overlap: Docker files trigger Hamilton below; .env files trigger
 // Voss here for app-config review. Both perspectives are valuable.
 const APP_CONFIG_PATTERNS = [/\.env/, /config/, /migration/, /database/, /\.sql$/];
 

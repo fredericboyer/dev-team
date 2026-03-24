@@ -49,7 +49,6 @@ This project uses [dev-team](https://github.com/dev-team) — adversarial AI age
 | `@dev-team-tufte` | Documentation Engineer | Doc accuracy, stale docs, README/API docs, doc-code sync |
 | `@dev-team-brooks` | Architect & Quality Reviewer | Architectural review, coupling, ADR compliance, quality attributes (performance, maintainability, scalability) |
 | `@dev-team-conway` | Release Manager | Versioning, changelog, release readiness, semver validation |
-| `@dev-team-hamilton` | Operations Reviewer | Infrastructure, deployment, observability, availability, operational resilience |
 | `@dev-team-drucker` | Team Lead / Orchestrator | Auto-delegates to specialists, manages review loops, resolves conflicts |
 | `@dev-team-borges` | Librarian | End-of-task/review/audit memory review, cross-agent coherence, system improvement |
 
@@ -63,12 +62,11 @@ For non-trivial work: explore the area first, then implement, then review.
 - **Szabo** — auto-flagged when security-sensitive files change (auth, token, session, crypto, etc.)
 - **Knuth** — auto-flagged when any non-test implementation code changes
 - **Mori** — auto-flagged when API contract files change (/api/, /routes/, schema, etc.)
-- **Hamilton** — auto-flagged when infrastructure files change (docker, IaC, k8s, deployment, monitoring, etc.)
+- **Hamilton** — auto-flagged when infrastructure/operations files change (Dockerfile, docker-compose, CI workflows, Terraform, Helm, k8s, health checks, monitoring config, .env templates, etc.)
 - **Voss** — auto-flagged when app config/data files change (.env, config, migrations, database, etc.)
 - **Deming** — auto-flagged when tooling files change (eslint, CI workflows, package.json, etc.)
 - **Tufte** — auto-flagged when documentation files change (.md, /docs/, README, etc.) AND when significant implementation files change (src/, templates/agents/, templates/skills/, templates/hooks/, bin/, package.json) to detect doc-code drift
 - **Brooks** — auto-flagged when any non-test implementation code changes (quality attributes) and when architectural boundaries are touched (/adr/, /core/, /domain/, /lib/, build config, etc.)
-- **Hamilton** — auto-flagged when infrastructure/operations files change (Dockerfile, docker-compose, CI workflows, Terraform, Helm, k8s, health checks, logging/monitoring config, .env templates, etc.)
 - **Conway** — auto-flagged when release artifacts change (package.json, changelog, version files, release/publish/deploy workflows, etc.)
 
 **End-of-workflow agents:**
