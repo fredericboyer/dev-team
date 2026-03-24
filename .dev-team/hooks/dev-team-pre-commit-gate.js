@@ -2,10 +2,12 @@
 
 /**
  * dev-team-pre-commit-gate.js
- * TaskCompleted hook.
+ * Pre-commit hook — memory freshness gate.
  *
- * When a task completes, checks whether memory files need updating.
- * Advisory (exit 0) — reminds but does not block.
+ * Runs before each commit. Checks whether memory files need updating.
+ * Blocks (exit 1) when implementation files are staged without memory updates.
+ * Override: create an empty `.dev-team/.memory-reviewed` file to acknowledge
+ * that memory was reviewed and nothing needs updating.
  */
 
 "use strict";
@@ -80,8 +82,7 @@ if (files.length === 0) {
   process.exit(0);
 }
 
-// Memory freshness check (advisory only)
-const reminders = [];
+// Memory freshness check (blocking unless overridden)
 
 const hasImplFiles = files.some(
   (f) => /\.(js|ts|jsx|tsx|py|rb|go|java|rs)$/.test(f) && !/\.(test|spec)\./.test(f),
@@ -92,6 +93,27 @@ const hasMemoryUpdates = files.some(
 );
 
 if (hasImplFiles && !hasMemoryUpdates) {
+  // Check for .memory-reviewed override marker
+  const markerPath = path.join(process.cwd(), ".dev-team", ".memory-reviewed");
+  let hasOverride = false;
+  try {
+    const stat = fs.lstatSync(markerPath);
+    // Require regular file — reject symlinks, directories, FIFOs, etc.
+    hasOverride = stat.isFile() && !stat.isSymbolicLink();
+  } catch {
+    // No marker file
+  }
+
+  if (hasOverride) {
+    // Override acknowledged — clean up the marker file after this commit
+    try {
+      fs.unlinkSync(markerPath);
+    } catch {
+      // Best effort — don't fail the hook over cleanup
+    }
+    process.exit(0);
+  }
+
   let unstagedMemory = false;
   try {
     const unstaged = cachedGitDiff(["diff", "--name-only"], 2000);
@@ -104,18 +126,19 @@ if (hasImplFiles && !hasMemoryUpdates) {
   }
 
   if (unstagedMemory) {
-    reminders.push(
-      "Memory files were updated but not staged — run `git add .dev-team/learnings.md .dev-team/agent-memory/` if learnings should be included",
+    console.error(
+      "[dev-team pre-commit] BLOCKED: Memory files were updated but not staged. " +
+        "Run `git add .dev-team/learnings.md .dev-team/agent-memory/` to include learnings, " +
+        "or create an empty `.dev-team/.memory-reviewed` file to acknowledge that memory was reviewed.",
     );
   } else {
-    reminders.push(
-      "Update .dev-team/learnings.md or agent memory with any patterns, conventions, or decisions from this work",
+    console.error(
+      "[dev-team pre-commit] BLOCKED: Implementation files staged without memory updates. " +
+        "Update .dev-team/learnings.md or agent memory with any patterns, conventions, or decisions from this work. " +
+        "If no learnings apply, create an empty `.dev-team/.memory-reviewed` file to acknowledge.",
     );
   }
-}
-
-if (reminders.length > 0) {
-  console.log(`[dev-team pre-commit] Before committing, consider: ${reminders.join("; ")}`);
+  process.exit(1);
 }
 
 process.exit(0);

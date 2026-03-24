@@ -10,10 +10,10 @@ import {
   mergeClaudeMd,
   listSubdirectories,
   getPackageVersion,
-} from "./files";
-import type { HookSettings, HookMatcher } from "./files";
-import * as prompts from "./prompts";
-import { scanProject, formatScanReport } from "./scan";
+} from "./files.js";
+import type { HookSettings, HookMatcher } from "./files.js";
+import * as prompts from "./prompts.js";
+import { scanProject, formatScanReport } from "./scan.js";
 
 interface AgentDefinition {
   label: string;
@@ -380,7 +380,8 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
   console.log("\nDone! Installed:\n");
   console.log(`  Agents:    ${selectedAgents.join(", ")} (${agentCount} files)`);
   console.log(`  Hooks:     ${selectedHooks.join(", ")} (${hookCount} files)`);
-  console.log("  Skills:    challenge, task, review, audit");
+  const skillNames = skillDirs.map((d) => d.replace("dev-team-", "")).join(", ");
+  console.log(`  Skills:    ${skillNames}`);
   console.log(`  Memory:    ${selectedAgents.length} agent memories + shared learnings`);
   console.log(`  CLAUDE.md: ${claudeResult}`);
   console.log(`  Settings:  ${settingsPath}`);

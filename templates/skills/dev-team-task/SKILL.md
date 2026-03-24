@@ -75,10 +75,15 @@ Parallel mode is complete when:
 1. All branches have zero `[DEFECT]` findings, OR the per-branch iteration limit (default: 10) is reached
 2. Borges has run across all branches
 
+## Security preamble
+
+Before starting work, check for open security alerts: run `/dev-team:security-status` if available, or check `gh api repos/{owner}/{repo}/code-scanning/alerts?state=open` and `gh api repos/{owner}/{repo}/dependabot/alerts?state=open`. Flag any critical findings before proceeding.
+
 ## Completion
 
 When the loop exits:
-1. Spawn **@dev-team-borges** (Librarian) to review memory freshness, cross-agent coherence, and system improvement opportunities. This is mandatory.
-2. Summarize what was accomplished across all iterations.
-3. Report any remaining `[RISK]` or `[SUGGESTION]` items, including Borges's recommendations.
-4. Write key learnings to agent MEMORY.md files.
+1. You MUST spawn **@dev-team-borges** (Librarian) as the final step to review memory freshness, cross-agent coherence, and system improvement opportunities. Do NOT skip this.
+2. If Borges was not spawned, the task is INCOMPLETE.
+3. Summarize what was accomplished across all iterations.
+4. Report any remaining `[RISK]` or `[SUGGESTION]` items, including Borges's recommendations.
+5. Write key learnings to agent MEMORY.md files.

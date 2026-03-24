@@ -2,7 +2,7 @@
 Date: 2026-03-22
 Status: amended
 
-**Amended by**: Issue #113 — the state file (`dev-team-parallel.json`) and Stop hook (`dev-team-parallel-loop.js`) were removed. The parallel orchestration model remains, but state tracking now lives in Drucker's conversation context rather than on disk. The Agent tool's built-in completion notifications provide the sync barrier, eliminating the need for file-based state management.
+**Amended by**: Issue #113 — the state file (`.dev-team/parallel.json`) and Stop hook (`dev-team-parallel-loop.js`) were removed. The parallel orchestration model remains, but state tracking now lives in Drucker's conversation context rather than on disk. The Agent tool's built-in completion notifications provide the sync barrier, eliminating the need for file-based state management.
 
 ## Context
 The `/dev-team:task` skill runs a single-issue loop: one implementing agent, followed by reviewers, iterated until convergence. When multiple independent issues need to be addressed in the same session, they execute sequentially — each issue waits for the previous one to complete its full review cycle. This is slow and wastes available concurrency.

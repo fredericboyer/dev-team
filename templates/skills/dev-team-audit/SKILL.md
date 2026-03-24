@@ -84,8 +84,13 @@ Same grouping. Include actionable recommendations.
 
 Numbered list of concrete actions, ordered by priority. Each action should reference the specific finding it addresses.
 
+### Security preamble
+
+Before starting the audit, check for open security alerts: run `/dev-team:security-status` if available, or check `gh api repos/{owner}/{repo}/code-scanning/alerts?state=open` and `gh api repos/{owner}/{repo}/dependabot/alerts?state=open`. Include these in the audit scope.
+
 ### Completion
 
 After the audit report is delivered:
-1. Spawn **@dev-team-borges** (Librarian) to review memory freshness and capture learnings from the audit findings. This is mandatory.
-2. Include Borges's recommendations in the final report.
+1. You MUST spawn **@dev-team-borges** (Librarian) as the final step to review memory freshness and capture learnings from the audit findings. Do NOT skip this.
+2. If Borges was not spawned, the audit is INCOMPLETE.
+3. Include Borges's recommendations in the final report.

@@ -11,10 +11,10 @@ import {
   listSubdirectories,
   listFilesRecursive,
   getPackageVersion,
-} from "./files";
-import type { HookSettings, HookMatcher } from "./files";
+} from "./files.js";
+import type { HookSettings, HookMatcher } from "./files.js";
 import fs from "fs";
-import { ALL_AGENTS, QUALITY_HOOKS } from "./init";
+import { ALL_AGENTS, QUALITY_HOOKS } from "./init.js";
 
 interface AgentRename {
   oldLabel: string;
@@ -60,12 +60,22 @@ const MIGRATIONS: Migration[] = [
   },
 ];
 
+export function compareSemver(a: string, b: string): number {
+  const pa = a.split(".").map((n) => parseInt(n, 10));
+  const pb = b.split(".").map((n) => parseInt(n, 10));
+  for (let i = 0; i < 3; i++) {
+    const diff = (pa[i] || 0) - (pb[i] || 0);
+    if (diff !== 0) return diff;
+  }
+  return 0;
+}
+
 function runMigrations(prefs: Preferences, fromVersion: string, devTeamDir: string): string[] {
   const log: string[] = [];
 
   for (const migration of MIGRATIONS) {
     // Skip migrations for versions already applied
-    if (fromVersion >= migration.version) continue;
+    if (compareSemver(fromVersion, migration.version) >= 0) continue;
 
     if (migration.agentRenames) {
       for (const rename of migration.agentRenames) {
@@ -160,13 +170,19 @@ function migrateFromClaude(targetDir: string): string[] {
     { from: path.join(claudeDir, "skills"), to: path.join(devTeamDir, "skills") },
   ];
 
+  // Protected files that must never be overwritten during migration
+  const protectedPatterns = ["learnings.md", "MEMORY.md"];
+
   for (const { from, to } of dirMappings) {
     if (dirExists(from)) {
       const files = listFilesRecursive(from);
       for (const filePath of files) {
         const relativePath = path.relative(from, filePath);
         const destPath = path.join(to, relativePath);
-        copyFile(filePath, destPath);
+        // Never overwrite existing files in .dev-team/ (partial migration safety)
+        if (!fileExists(destPath)) {
+          copyFile(filePath, destPath);
+        }
       }
       log.push(`Migrated ${path.basename(from)}/ → .dev-team/${path.basename(to)}/`);
     }
@@ -183,7 +199,11 @@ function migrateFromClaude(targetDir: string): string[] {
 
   for (const { from, to } of fileMappings) {
     if (fileExists(from)) {
-      copyFile(from, to);
+      const isProtected = protectedPatterns.some((p) => to.endsWith(p));
+      // Never overwrite protected files (learnings, memory)
+      if (!isProtected || !fileExists(to)) {
+        copyFile(from, to);
+      }
       log.push(`Migrated ${path.basename(from)} → .dev-team/${path.basename(to)}`);
     }
   }
@@ -245,7 +265,7 @@ export async function update(targetDir: string): Promise<void> {
   const oldPrefsPath = path.join(claudeDir, "dev-team.json");
   const newPrefsPath = path.join(devTeamDir, "config.json");
 
-  const needsMigration = fileExists(oldPrefsPath) && !dirExists(devTeamDir);
+  const needsMigration = fileExists(oldPrefsPath) && !fileExists(newPrefsPath);
 
   if (needsMigration) {
     console.log("Migrating from .claude/ to .dev-team/ directory structure...\n");

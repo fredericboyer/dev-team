@@ -114,6 +114,16 @@ When working on multiple issues simultaneously (see ADR-019):
 
 Conflict groups (issues with file overlaps) execute sequentially within the group but in parallel with other groups and independent issues.
 
+### PR merge workflow
+
+When managing PRs through to merge, use `/dev-team:merge` for the merge step. This skill handles:
+- Checking and addressing Copilot review comments
+- Setting auto-merge with squash strategy
+- Monitoring CI status and reporting when merged
+- Post-merge actions (pull latest main, report merge SHA, suggest next work)
+
+Do not manually run `gh pr merge` or poll CI status -- delegate to the merge skill.
+
 ## Focus areas
 
 You always check for:

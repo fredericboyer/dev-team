@@ -1,6 +1,6 @@
 import path from "path";
 import fs from "fs";
-import { fileExists, readFile, listSubdirectories } from "./files";
+import { fileExists, readFile, listSubdirectories } from "./files.js";
 
 export function status(targetDir: string): void {
   const devTeamDir = path.join(targetDir, ".dev-team");

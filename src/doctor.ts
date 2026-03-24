@@ -1,5 +1,5 @@
 import path from "path";
-import { fileExists, dirExists, readFile } from "./files";
+import { fileExists, dirExists, readFile } from "./files.js";
 
 interface CheckResult {
   name: string;

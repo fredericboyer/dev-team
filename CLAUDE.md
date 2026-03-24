@@ -70,7 +70,7 @@ For non-trivial work: explore the area first, then implement, then review.
 - **Conway** — auto-flagged when release artifacts change (package.json, changelog, version files, release/publish/deploy workflows, etc.)
 
 **End-of-workflow agents:**
-- **Borges** — mandatory at end of every `/dev-team:task`, `/dev-team:review`, and `/dev-team:audit`. Reviews memory freshness, cross-agent coherence, and system improvement opportunities.
+- **Borges** — mandatory at end of every `/dev-team:task`, `/dev-team:review`, `/dev-team:audit`, and `/dev-team:assess`. Reviews memory freshness, cross-agent coherence, and system improvement opportunities.
 
 **Orchestration:**
 - **Drucker** — delegates tasks to the right implementing agent and spawns reviewers. Szabo, Knuth, and Brooks review all code changes. Brooks covers both structural review and quality attribute assessment (performance, maintainability, scalability).
@@ -98,6 +98,8 @@ Do NOT skip this. Do NOT treat hook output as optional. If you believe a review 
 - `/dev-team:task` — start an iterative task loop with adversarial review gates
 - `/dev-team:review` — orchestrated multi-agent parallel review of changes
 - `/dev-team:audit` — full codebase security + quality + tooling audit
+- `/dev-team:merge` — merge a PR with Copilot review handling, auto-merge, CI monitoring, and post-merge actions
+- `/dev-team:assess` — audit knowledge base health (learnings, agent memory, CLAUDE.md)
 
 ### Learnings — where to write what
 

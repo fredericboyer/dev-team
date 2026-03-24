@@ -40,13 +40,21 @@ describe("fresh project installation", () => {
     assert.ok(
       fs.existsSync(path.join(tmpDir, ".dev-team", "hooks", "dev-team-post-change-review.js")),
     );
-    assert.ok(fs.existsSync(path.join(tmpDir, ".dev-team", "hooks", "dev-team-pre-commit-gate.js")));
+    assert.ok(
+      fs.existsSync(path.join(tmpDir, ".dev-team", "hooks", "dev-team-pre-commit-gate.js")),
+    );
 
     // Skills
     assert.ok(
       fs.existsSync(path.join(tmpDir, ".dev-team", "skills", "dev-team-challenge", "SKILL.md")),
     );
     assert.ok(fs.existsSync(path.join(tmpDir, ".dev-team", "skills", "dev-team-task", "SKILL.md")));
+    assert.ok(
+      fs.existsSync(path.join(tmpDir, ".dev-team", "skills", "dev-team-merge", "SKILL.md")),
+    );
+    assert.ok(
+      fs.existsSync(path.join(tmpDir, ".dev-team", "skills", "dev-team-assess", "SKILL.md")),
+    );
 
     // Memory
     assert.ok(

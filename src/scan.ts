@@ -1,5 +1,5 @@
 import path from "path";
-import { fileExists, readFile, dirExists } from "./files";
+import { fileExists, readFile, dirExists } from "./files.js";
 
 export interface ScanFinding {
   category: "linter" | "formatter" | "sast" | "ci" | "dependency" | "enforcement";
