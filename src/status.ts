@@ -3,8 +3,8 @@ import fs from "fs";
 import { fileExists, readFile, listSubdirectories } from "./files";
 
 export function status(targetDir: string): void {
-  const claudeDir = path.join(targetDir, ".claude");
-  const prefsPath = path.join(claudeDir, "dev-team.json");
+  const devTeamDir = path.join(targetDir, ".dev-team");
+  const prefsPath = path.join(devTeamDir, "config.json");
 
   const prefsContent = readFile(prefsPath);
   if (!prefsContent) {
@@ -16,7 +16,7 @@ export function status(targetDir: string): void {
   try {
     prefs = JSON.parse(prefsContent);
   } catch {
-    console.error("dev-team.json is corrupted.");
+    console.error("config.json is corrupted.");
     process.exit(1);
   }
 
@@ -37,7 +37,7 @@ export function status(targetDir: string): void {
   console.log(`  Hooks:    ${hooks.join(", ")} (${hooks.length})`);
 
   // Skills (auto-discovered)
-  const skillsDir = path.join(claudeDir, "skills");
+  const skillsDir = path.join(devTeamDir, "skills");
   const skills = listSubdirectories(skillsDir).map((s) => s.replace("dev-team-", ""));
   console.log(`  Skills:   ${skills.length > 0 ? skills.join(", ") : "none"} (${skills.length})`);
 
@@ -51,7 +51,7 @@ export function status(targetDir: string): void {
 
   // Memory status
   console.log("\n  Memory:");
-  const memoryDir = path.join(claudeDir, "agent-memory");
+  const memoryDir = path.join(devTeamDir, "agent-memory");
   for (const label of agents) {
     const dirName = `dev-team-${label.toLowerCase()}`;
     const memPath = path.join(memoryDir, dirName, "MEMORY.md");
@@ -69,7 +69,7 @@ export function status(targetDir: string): void {
   }
 
   // Shared learnings
-  const learningsPath = path.join(claudeDir, "dev-team-learnings.md");
+  const learningsPath = path.join(devTeamDir, "learnings.md");
   if (fileExists(learningsPath)) {
     try {
       const stat = fs.statSync(learningsPath);

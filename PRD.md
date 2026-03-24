@@ -71,8 +71,9 @@ Rules: concrete evidence required, one exchange before escalation, human decides
 | `dev-team-safety-guard.js` | PreToolUse (Bash) | Blocks rm -rf, force push, DROP TABLE, etc. |
 | `dev-team-tdd-enforce.js` | PostToolUse (Edit/Write) | Blocks impl changes without corresponding tests |
 | `dev-team-post-change-review.js` | PostToolUse (Edit/Write) | Flags which agents should review based on changed files |
-| `dev-team-pre-commit-gate.js` | TaskCompleted | Reminds about review agents before committing |
-| `dev-team-task-loop.js` | Stop | Iterative task loop with adversarial review gates |
+| `dev-team-pre-commit-gate.js` | TaskCompleted | Memory freshness check before committing |
+| `dev-team-pre-commit-lint.js` | PreToolUse (Bash) | Lint + format checks before git commit |
+| `dev-team-watch-list.js` | PostToolUse (Edit/Write) | Custom pattern-to-agent matching |
 
 All hooks are Node.js scripts — work on macOS, Linux, and Windows.
 
@@ -89,12 +90,12 @@ The adversarial review IS the quality gate — the implementing agent can't decl
 
 ### 5. Continuous learning
 
-Each agent maintains persistent memory (`.claude/agent-memory/<agent>/MEMORY.md`) that is automatically injected into their context every session:
+Each agent maintains persistent memory (`.dev-team/agent-memory/<agent>/MEMORY.md`) that is automatically injected into their context every session:
 - Project-specific patterns and conventions
 - Adversarial calibration (what was accepted/overruled)
 - Quality benchmarks
 
-Shared team memory (`.claude/dev-team-learnings.md`) captures cross-cutting learnings.
+Shared team memory (`.dev-team/learnings.md`) captures cross-cutting learnings.
 
 ### 6. CLI installer (onboarding wizard)
 
@@ -109,7 +110,7 @@ Asks:
 - Issue/PR workflow preferences (GitHub Issues, Jira, Linear, Other, None)
 - Branch naming convention (or None)
 
-Creates `.claude/agents/`, `.claude/hooks/`, `.claude/skills/`, `.claude/agent-memory/`, updates `CLAUDE.md` and `settings.json`.
+Creates `.dev-team/agents/`, `.dev-team/hooks/`, `.dev-team/skills/`, `.dev-team/agent-memory/`, updates `CLAUDE.md` and `.claude/settings.json`.
 
 ### 7. Skills
 

@@ -10,27 +10,27 @@ interface CheckResult {
 export function doctor(targetDir: string): void {
   console.log("\ndev-team doctor — Installation health check\n");
 
-  const claudeDir = path.join(targetDir, ".claude");
+  const devTeamDir = path.join(targetDir, ".dev-team");
   const results: CheckResult[] = [];
 
-  // 1. dev-team.json exists and is valid
-  const prefsPath = path.join(claudeDir, "dev-team.json");
+  // 1. config.json exists and is valid
+  const prefsPath = path.join(devTeamDir, "config.json");
   const prefsContent = readFile(prefsPath);
   let prefs: { version?: string; agents?: string[]; hooks?: string[] } | null = null;
   if (!prefsContent) {
-    results.push({ name: "dev-team.json", pass: false, detail: "Not found" });
+    results.push({ name: "config.json", pass: false, detail: "Not found" });
   } else {
     try {
       prefs = JSON.parse(prefsContent);
-      results.push({ name: "dev-team.json", pass: true, detail: `v${prefs!.version}` });
+      results.push({ name: "config.json", pass: true, detail: `v${prefs!.version}` });
     } catch {
-      results.push({ name: "dev-team.json", pass: false, detail: "Invalid JSON" });
+      results.push({ name: "config.json", pass: false, detail: "Invalid JSON" });
     }
   }
 
   // 2. Agent files exist
   if (prefs?.agents) {
-    const agentsDir = path.join(claudeDir, "agents");
+    const agentsDir = path.join(devTeamDir, "agents");
     for (const label of prefs.agents) {
       // Convert label to filename pattern
       const fileName = `dev-team-${label.toLowerCase()}.md`;
@@ -45,13 +45,12 @@ export function doctor(targetDir: string): void {
 
   // 3. Hook files exist
   if (prefs?.hooks) {
-    const hooksDir = path.join(claudeDir, "hooks");
+    const hooksDir = path.join(devTeamDir, "hooks");
     const hookFileMap: Record<string, string> = {
       "TDD enforcement": "dev-team-tdd-enforce.js",
       "Safety guard": "dev-team-safety-guard.js",
       "Post-change review": "dev-team-post-change-review.js",
       "Pre-commit gate": "dev-team-pre-commit-gate.js",
-      "Task loop": "dev-team-task-loop.js",
       "Watch list": "dev-team-watch-list.js",
       "Pre-commit lint": "dev-team-pre-commit-lint.js",
     };
@@ -83,7 +82,7 @@ export function doctor(targetDir: string): void {
 
   // 5. Agent memory directories
   if (prefs?.agents) {
-    const memoryDir = path.join(claudeDir, "agent-memory");
+    const memoryDir = path.join(devTeamDir, "agent-memory");
     for (const label of prefs.agents) {
       const dirName = `dev-team-${label.toLowerCase()}`;
       const memPath = path.join(memoryDir, dirName, "MEMORY.md");
