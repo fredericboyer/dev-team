@@ -67,6 +67,7 @@ Do NOT skip this. Do NOT treat hook output as optional. If you believe a review 
 - `/dev-team:task` — start an iterative task loop with adversarial review gates
 - `/dev-team:review` — orchestrated multi-agent parallel review of changes
 - `/dev-team:audit` — full codebase security + quality + tooling audit
+- `/dev-team:merge` — merge a PR with Copilot review handling, auto-merge, CI monitoring, and post-merge actions
 
 ### Learnings — where to write what
 

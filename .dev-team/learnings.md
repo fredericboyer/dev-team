@@ -11,6 +11,8 @@
 ## Process
 
 - **Before merging a PR, ALWAYS check for Copilot review comments** (`gh api repos/{owner}/{repo}/pulls/{pr}/reviews` and `gh api repos/{owner}/{repo}/pulls/{pr}/comments`). Address any findings before merging.
+- **Security check at session start.** Run `/dev-team:security-status` at the beginning of every session to check code scanning, Dependabot, and secret scanning alerts. Also run before releases.
+- **Use `/dev-team:merge` to merge PRs.** It handles Copilot review comments, auto-merge, CI monitoring, and post-merge actions automatically. Do not manually run `gh pr merge` or check Copilot comments separately.
 - Always use `/dev-team:task` for implementation work — dogfood the agents.
 - Spawn review agents as `general-purpose` subagents with the actual agent definition loaded from `.dev-team/agents/dev-team-*.md`. Do NOT use `pr-review-toolkit:*` as proxies — they have different behavior.
 - Don't ask for approval to continue between tasks. Just do the work. Only pause for critical decisions.
@@ -27,7 +29,7 @@
 
 - 273 tests total (was 117 at v0.3.0)
 - 12 agents: Voss, Mori, Szabo, Knuth, Beck, Deming, Tufte, Brooks, Conway, Drucker, Borges, Hamilton
-- 5 skills: challenge, task, review, audit, security-status
+- 6 skills: challenge, task, review, audit, security-status, merge
 - 6 hooks: TDD enforce, safety guard, post-change review, pre-commit gate (blocking), pre-commit lint, watch list
 - 3 always-on reviewers: Szabo (security), Knuth (correctness), Brooks (architecture + quality attributes)
 - CI: 3 OS x 3 Node versions + lint + format + agent validation + hook validation.
