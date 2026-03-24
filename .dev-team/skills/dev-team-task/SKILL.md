@@ -78,7 +78,7 @@ Before starting work, check for open security alerts: run `/dev-team:security-st
 ## Completion
 
 When the loop exits:
-1. **Create PR and merge**: If changes are on a feature branch, create the PR (body must include `Closes #<issue>`) and invoke `/dev-team:merge` to set auto-merge, monitor CI, handle Copilot review comments, and verify the merge completes. Work is NOT done until the PR is merged. If merge fails (CI failures, merge conflicts, branch protection), report the blocker to the human rather than leaving the PR unattended.
+1. **Deliver the work**: If changes are on a feature branch, create the PR (body must include `Closes #<issue>`). Ensure the PR is ready to merge: CI green, reviews passed, branch up to date. Then follow the project's merge workflow — use `/dev-team:merge` if the project has it configured, otherwise report readiness. If merge fails (CI failures, merge conflicts, branch protection), report the blocker to the human rather than leaving work unattended.
 2. **Clean up worktree**: If the work was done in a worktree, clean it up after the branch is pushed and the PR is created. Do not wait for merge to clean the worktree.
 3. You MUST spawn **@dev-team-borges** (Librarian) as the final step to review memory freshness, cross-agent coherence, and system improvement opportunities. Do NOT skip this.
 4. If Borges was not spawned, the task is INCOMPLETE.

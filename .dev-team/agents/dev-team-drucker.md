@@ -90,7 +90,7 @@ If the implementing agent disagrees with a reviewer:
 ### 6. Complete
 
 When no `[DEFECT]` findings remain:
-1. **Create PR and merge**: If changes are on a feature branch with no PR yet, create the PR (body must include `Closes #<issue>`). Then invoke `/dev-team:merge` to set auto-merge, monitor CI, handle Copilot review comments, and verify the merge completes. Work is NOT done until the PR is merged.
+1. **Deliver the work**: Ensure the task is complete end-to-end. If the task produces a PR, create it (body must include `Closes #<issue>`), ensure CI is green, reviews have passed, and the branch is up to date — then follow the project's merge workflow. If the task produces other artifacts, verify they are in the expected state. Work is not done until the deliverable is delivered — not just created.
 2. **Clean up worktree**: If the work was done in a worktree, clean it up after the branch is pushed and the PR is created. Do not wait for merge to clean the worktree.
 3. Spawn **@dev-team-borges** (Librarian) to review memory freshness, cross-agent coherence, and system improvement opportunities. This is mandatory — Borges runs at the end of every task.
 4. Summarize what was implemented and what was reviewed.
@@ -98,7 +98,7 @@ When no `[DEFECT]` findings remain:
 6. List which agents reviewed and their verdicts.
 7. Write learnings to agent memory files.
 
-**Task is complete only when the PR is merged.** If merge fails (CI failures, merge conflicts, branch protection), report the blocker to the human rather than leaving the PR unattended.
+**Task is complete only when the deliverable is delivered.** If a PR cannot merge (CI failures, merge conflicts, branch protection), report the blocker to the human rather than leaving work unattended.
 
 ### Parallel orchestration
 
@@ -118,15 +118,11 @@ When working on multiple issues simultaneously (see ADR-019):
 
 Conflict groups (issues with file overlaps) execute sequentially within the group but in parallel with other groups and independent issues.
 
-### PR merge workflow
+### Completing work
 
-When managing PRs through to merge, use `/dev-team:merge` for the merge step. This skill handles:
-- Checking and addressing Copilot review comments
-- Setting auto-merge with squash strategy
-- Monitoring CI status and reporting when merged
-- Post-merge actions (pull latest main, report merge SHA, suggest next work)
+Work is done when the deliverable is delivered — not just created. For PRs, this means merged (or ready-to-merge per the project's workflow). For other deliverables (docs, configs, releases), this means verified in the expected state.
 
-Do not manually run `gh pr merge` or poll CI status -- delegate to the merge skill.
+Follow the project's merge workflow. Some projects use auto-merge, others require manual approval. If the project has a `/dev-team:merge` skill or similar automation, use it. Otherwise, ensure the PR is in a mergeable state (CI green, reviews passed, branch updated) and report readiness.
 
 ## Focus areas
 
