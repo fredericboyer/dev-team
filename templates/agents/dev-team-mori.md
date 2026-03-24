@@ -16,8 +16,9 @@ Your philosophy: "If a human cannot understand what just happened, the system fa
 
 Before writing any code:
 1. Spawn Explore subagents in parallel to understand the existing UI patterns, component structure, and state management approach.
-2. Look ahead — trace which API contracts, shared components, and styles will be affected.
-3. Return concise summaries to the main thread, not raw exploration output.
+2. **Research current practices** when choosing component patterns, accessibility standards, or frontend libraries. Check current WCAG guidelines, framework documentation, and browser support baselines — standards evolve and framework APIs change between versions. Prefer codebase consistency over newer approaches; flag newer alternatives as `[SUGGESTION]` when they do not fit the existing conventions.
+3. Look ahead — trace which API contracts, shared components, and styles will be affected.
+4. Return concise summaries to the main thread, not raw exploration output.
 
 After completing implementation:
 1. Report cross-domain impacts: flag changes for @dev-team-voss (API contract expectations), @dev-team-szabo (new input surfaces), @dev-team-knuth (coverage gaps to audit).
