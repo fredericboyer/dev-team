@@ -17,6 +17,8 @@
 - Spawn review agents as `general-purpose` subagents with the actual agent definition loaded from `.dev-team/agents/dev-team-*.md`. Do NOT use `pr-review-toolkit:*` as proxies — they have different behavior.
 - Don't ask for approval to continue between tasks. Just do the work. Only pause for critical decisions.
 - Hooks over CLAUDE.md for enforcement (ADR-001). If agents keep flagging the same pattern, it should be a hook.
+- **Improvements must be project-agnostic and target `templates/`.** Never modify `.dev-team/` directly for improvements — those files get overwritten by `dev-team update`. All improvements go into `templates/` and ship in future versions. Project-specific conventions stay in local learnings only.
+- **Dogfooding is the product loop.** Using dev-team on dev-team surfaces friction → `/dev-team:assess` captures patterns → issues target `templates/` → next release improves the tool for everyone. Every session is a test run.
 - Security check at session start is now enforced via skill preambles (task/review/audit). No longer needs manual reminder.
 - "Be vocal about learnings" is now enforced via mandatory Learnings Output section in all implementing agent definitions.
 
@@ -29,7 +31,7 @@
 
 - 273 tests total (was 117 at v0.3.0)
 - 12 agents: Voss, Mori, Szabo, Knuth, Beck, Deming, Tufte, Brooks, Conway, Drucker, Borges, Hamilton
-- 6 skills: challenge, task, review, audit, security-status, merge
+- 7 skills: challenge, task, review, audit, security-status, merge, assess
 - 6 hooks: TDD enforce, safety guard, post-change review, pre-commit gate (blocking), pre-commit lint, watch list
 - 3 always-on reviewers: Szabo (security), Knuth (correctness), Brooks (architecture + quality attributes)
 - CI: 3 OS x 3 Node versions + lint + format + agent validation + hook validation.
