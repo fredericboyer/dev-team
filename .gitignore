@@ -7,7 +7,7 @@ coverage/
 .env.*
 
 # Runtime state files (created by task loop, not committed)
-.claude/dev-team-task.json
+.dev-team/task.json
 
 # npm
 npm-debug.log*

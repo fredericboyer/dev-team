@@ -90,12 +90,12 @@ The adversarial review IS the quality gate — the implementing agent can't decl
 
 ### 5. Continuous learning
 
-Each agent maintains persistent memory (`.claude/agent-memory/<agent>/MEMORY.md`) that is automatically injected into their context every session:
+Each agent maintains persistent memory (`.dev-team/agent-memory/<agent>/MEMORY.md`) that is automatically injected into their context every session:
 - Project-specific patterns and conventions
 - Adversarial calibration (what was accepted/overruled)
 - Quality benchmarks
 
-Shared team memory (`.claude/dev-team-learnings.md`) captures cross-cutting learnings.
+Shared team memory (`.dev-team/learnings.md`) captures cross-cutting learnings.
 
 ### 6. CLI installer (onboarding wizard)
 
@@ -110,7 +110,7 @@ Asks:
 - Issue/PR workflow preferences (GitHub Issues, Jira, Linear, Other, None)
 - Branch naming convention (or None)
 
-Creates `.claude/agents/`, `.claude/hooks/`, `.claude/skills/`, `.claude/agent-memory/`, updates `CLAUDE.md` and `settings.json`.
+Creates `.dev-team/agents/`, `.dev-team/hooks/`, `.dev-team/skills/`, `.dev-team/agent-memory/`, updates `CLAUDE.md` and `.claude/settings.json`.
 
 ### 7. Skills
 

@@ -152,7 +152,7 @@ describe('enforcement gap detection', () => {
               hooks: [
                 {
                   type: 'command',
-                  command: 'node .claude/hooks/dev-team-pre-commit-lint.js',
+                  command: 'node .dev-team/hooks/dev-team-pre-commit-lint.js',
                 },
               ],
             },
@@ -185,7 +185,7 @@ describe('enforcement gap detection', () => {
               hooks: [
                 {
                   type: 'command',
-                  command: 'node .claude/hooks/dev-team-tdd-enforce.js',
+                  command: 'node .dev-team/hooks/dev-team-tdd-enforce.js',
                 },
               ],
             },
@@ -309,7 +309,7 @@ describe('parseHookCommands', () => {
               hooks: [
                 {
                   type: 'command',
-                  command: 'node .claude/hooks/dev-team-pre-commit-lint.js',
+                  command: 'node .dev-team/hooks/dev-team-pre-commit-lint.js',
                 },
               ],
             },
@@ -320,7 +320,7 @@ describe('parseHookCommands', () => {
               hooks: [
                 {
                   type: 'command',
-                  command: 'node .claude/hooks/dev-team-tdd-enforce.js',
+                  command: 'node .dev-team/hooks/dev-team-tdd-enforce.js',
                 },
               ],
             },
@@ -330,10 +330,10 @@ describe('parseHookCommands', () => {
     );
     const commands = parseHookCommands(tmpDir);
     assert.ok(
-      commands.includes('node .claude/hooks/dev-team-pre-commit-lint.js'),
+      commands.includes('node .dev-team/hooks/dev-team-pre-commit-lint.js'),
     );
     assert.ok(
-      commands.includes('node .claude/hooks/dev-team-tdd-enforce.js'),
+      commands.includes('node .dev-team/hooks/dev-team-tdd-enforce.js'),
     );
   });
 

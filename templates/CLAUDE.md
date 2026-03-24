@@ -56,7 +56,7 @@ When working on multiple independent issues, use parallel agents on separate bra
 
 When a dev-team hook outputs `ACTION REQUIRED — spawn these agents`, you MUST:
 1. Spawn each listed agent as a **background** subagent using the Agent tool with `subagent_type: "general-purpose"`
-2. Include the agent's full definition by reading from `.claude/agents/<agent>.md`
+2. Include the agent's full definition by reading from `.dev-team/agents/<agent>.md`
 3. Include the changed file path and instruction to produce classified findings
 
 Do NOT skip this. Do NOT treat hook output as optional. If you believe a review is unnecessary for trivial changes, explain why to the user.
@@ -74,8 +74,8 @@ All project and process learnings MUST go to in-repo files, NOT to machine-local
 
 | What | Where | Examples |
 |------|-------|---------|
-| Project patterns, process rules, tech debt, overruled challenges | `.claude/dev-team-learnings.md` | "We use PostgreSQL", "Hooks over guidelines", "Knuth's finding X was overruled because Y" |
-| Agent-specific calibration | `.claude/agent-memory/<agent>/MEMORY.md` | Szabo: "Auth uses JWT not sessions", Knuth: "Coverage weak in parsers" |
+| Project patterns, process rules, tech debt, overruled challenges | `.dev-team/learnings.md` | "We use PostgreSQL", "Hooks over guidelines", "Knuth's finding X was overruled because Y" |
+| Agent-specific calibration | `.dev-team/agent-memory/<agent>/MEMORY.md` | Szabo: "Auth uses JWT not sessions", Knuth: "Coverage weak in parsers" |
 | Formal architecture decisions | `docs/adr/` | ADR format, not learnings |
 | User-specific preferences only | Machine-local memory | Personal style, name, role — things that vary per person, not per project |
 

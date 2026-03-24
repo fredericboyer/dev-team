@@ -4,11 +4,11 @@
  * dev-team-watch-list.js
  * PostToolUse hook on Edit/Write.
  *
- * Reads configurable file-pattern-to-agent mappings from .claude/dev-team.json
+ * Reads configurable file-pattern-to-agent mappings from .dev-team/config.json
  * and outputs structured spawn recommendations when patterns match.
  * Advisory only — always exits 0.
  *
- * Config format in dev-team.json:
+ * Config format in config.json:
  * {
  *   "watchLists": [
  *     { "pattern": "src/db/", "agents": ["dev-team-codd"], "reason": "database code changed" },
@@ -42,7 +42,7 @@ if (!filePath) {
 // Read watch list config
 let watchLists = [];
 try {
-  const prefsPath = path.join(process.cwd(), ".claude", "dev-team.json");
+  const prefsPath = path.join(process.cwd(), ".dev-team", "config.json");
   const prefs = JSON.parse(fs.readFileSync(prefsPath, "utf-8"));
   watchLists = prefs.watchLists || [];
 } catch {

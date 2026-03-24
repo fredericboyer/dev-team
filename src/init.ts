@@ -180,16 +180,17 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
 
   // Step 1: Detect existing state
   const claudeDir = path.join(targetDir, ".claude");
-  const agentsDir = path.join(claudeDir, "agents");
-  const hooksDir = path.join(claudeDir, "hooks");
-  const skillsDir = path.join(claudeDir, "skills");
-  const memoryDir = path.join(claudeDir, "agent-memory");
+  const devTeamDir = path.join(targetDir, ".dev-team");
+  const agentsDir = path.join(devTeamDir, "agents");
+  const hooksDir = path.join(devTeamDir, "hooks");
+  const skillsDir = path.join(devTeamDir, "skills");
+  const memoryDir = path.join(devTeamDir, "agent-memory");
   const settingsPath = path.join(claudeDir, "settings.json");
   const claudeMdPath = path.join(targetDir, "CLAUDE.md");
-  const prefsPath = path.join(claudeDir, "dev-team.json");
+  const prefsPath = path.join(devTeamDir, "config.json");
 
   console.log("Detected:");
-  console.log(`  .claude/ directory: ${dirExists(claudeDir) ? "exists" : "will be created"}`);
+  console.log(`  .dev-team/ directory: ${dirExists(devTeamDir) ? "exists" : "will be created"}`);
   console.log(
     `  CLAUDE.md: ${fileExists(claudeMdPath) ? "exists (will merge)" : "will be created"}`,
   );
@@ -291,7 +292,7 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
 
   // Step 8: Create shared team learnings
   const learningsSrc = path.join(templates, "dev-team-learnings.md");
-  const learningsDest = path.join(claudeDir, "dev-team-learnings.md");
+  const learningsDest = path.join(devTeamDir, "learnings.md");
   if (!fileExists(learningsDest)) {
     copyFile(learningsSrc, learningsDest);
   }
@@ -404,7 +405,7 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
   }
 
   console.log("Next steps:");
-  console.log("  1. Review installed agents in .claude/agents/");
+  console.log("  1. Review installed agents in .dev-team/agents/");
   console.log("  2. Customize agent personas and focus areas to fit your project");
   if (!runScan) {
     console.log("  3. Run @dev-team-deming to scan for additional tooling recommendations");

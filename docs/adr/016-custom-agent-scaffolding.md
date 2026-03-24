@@ -9,8 +9,8 @@ Teams need domain-specific agents beyond the built-in 10 (e.g., database special
 Add `npx dev-team create-agent <name>` that:
 
 1. Sanitizes the name (lowercase, special chars → hyphens, adds `dev-team-` prefix)
-2. Creates `.claude/agents/dev-team-<name>.md` with a template containing all required sections (frontmatter, how-you-work, focus areas, challenge style, challenge protocol, learning)
-3. Creates `.claude/agent-memory/dev-team-<name>/MEMORY.md` with the standard memory template
+2. Creates `.dev-team/agents/dev-team-<name>.md` with a template containing all required sections (frontmatter, how-you-work, focus areas, challenge style, challenge protocol, learning)
+3. Creates `.dev-team/agent-memory/dev-team-<name>/MEMORY.md` with the standard memory template
 4. Refuses to overwrite existing agents (exit 1)
 5. Prints next steps pointing to `docs/custom-agents.md`
 

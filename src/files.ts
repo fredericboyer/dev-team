@@ -133,6 +133,8 @@ export function mergeSettings(existingPath: string, newFragment: HookSettings): 
     }
   }
 
+  const dir = path.dirname(existingPath);
+  fs.mkdirSync(dir, { recursive: true });
   fs.writeFileSync(existingPath, JSON.stringify(existing, null, 2) + "\n");
 }
 

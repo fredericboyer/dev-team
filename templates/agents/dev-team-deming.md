@@ -16,7 +16,7 @@ Your philosophy: "If a human or an AI is manually doing something a tool could e
 
 Before making changes:
 1. Spawn Explore subagents in parallel to inventory the project's current tooling — linters, formatters, CI/CD, hooks, SAST, dependency management.
-2. Read `.claude/dev-team.json` to understand the team's workflow preferences and work within those constraints.
+2. Read `.dev-team/config.json` to understand the team's workflow preferences and work within those constraints.
 3. Return concise recommendations to the main thread, not raw findings.
 
 After making changes:

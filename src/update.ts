@@ -3,11 +3,13 @@ import {
   templateDir,
   copyFile,
   fileExists,
+  dirExists,
   readFile,
   writeFile,
   mergeSettings,
   mergeClaudeMd,
   listSubdirectories,
+  listFilesRecursive,
   getPackageVersion,
 } from "./files";
 import type { HookSettings, HookMatcher } from "./files";
@@ -58,7 +60,7 @@ const MIGRATIONS: Migration[] = [
   },
 ];
 
-function runMigrations(prefs: Preferences, fromVersion: string, claudeDir: string): string[] {
+function runMigrations(prefs: Preferences, fromVersion: string, devTeamDir: string): string[] {
   const log: string[] = [];
 
   for (const migration of MIGRATIONS) {
@@ -67,8 +69,8 @@ function runMigrations(prefs: Preferences, fromVersion: string, claudeDir: strin
 
     if (migration.agentRenames) {
       for (const rename of migration.agentRenames) {
-        const agentsDir = path.join(claudeDir, "agents");
-        const memoryDir = path.join(claudeDir, "agent-memory");
+        const agentsDir = path.join(devTeamDir, "agents");
+        const memoryDir = path.join(devTeamDir, "agent-memory");
 
         // Rename agent file
         const oldAgentPath = path.join(agentsDir, rename.oldFile);
@@ -141,16 +143,125 @@ const HOOK_FILES: Record<string, string> = Object.fromEntries(
  * Update flow: upgrades installed agents, hooks, and skills to latest templates.
  * Preserves user customizations in CLAUDE.md and agent memory files.
  */
+/**
+ * Migrates files from .claude/ to .dev-team/ directory structure.
+ * Preserves all user content (memories, learnings).
+ */
+function migrateFromClaude(targetDir: string): string[] {
+  const log: string[] = [];
+  const claudeDir = path.join(targetDir, ".claude");
+  const devTeamDir = path.join(targetDir, ".dev-team");
+
+  // Directories to move
+  const dirMappings: Array<{ from: string; to: string }> = [
+    { from: path.join(claudeDir, "agents"), to: path.join(devTeamDir, "agents") },
+    { from: path.join(claudeDir, "agent-memory"), to: path.join(devTeamDir, "agent-memory") },
+    { from: path.join(claudeDir, "hooks"), to: path.join(devTeamDir, "hooks") },
+    { from: path.join(claudeDir, "skills"), to: path.join(devTeamDir, "skills") },
+  ];
+
+  for (const { from, to } of dirMappings) {
+    if (dirExists(from)) {
+      const files = listFilesRecursive(from);
+      for (const filePath of files) {
+        const relativePath = path.relative(from, filePath);
+        const destPath = path.join(to, relativePath);
+        copyFile(filePath, destPath);
+      }
+      log.push(`Migrated ${path.basename(from)}/ → .dev-team/${path.basename(to)}/`);
+    }
+  }
+
+  // File mappings
+  const fileMappings: Array<{ from: string; to: string }> = [
+    {
+      from: path.join(claudeDir, "dev-team-learnings.md"),
+      to: path.join(devTeamDir, "learnings.md"),
+    },
+    { from: path.join(claudeDir, "dev-team.json"), to: path.join(devTeamDir, "config.json") },
+  ];
+
+  for (const { from, to } of fileMappings) {
+    if (fileExists(from)) {
+      copyFile(from, to);
+      log.push(`Migrated ${path.basename(from)} → .dev-team/${path.basename(to)}`);
+    }
+  }
+
+  // Rewrite settings.json hook paths from .claude/hooks/ to .dev-team/hooks/
+  const settingsPath = path.join(claudeDir, "settings.json");
+  const settingsContent = readFile(settingsPath);
+  if (settingsContent) {
+    const updated = settingsContent.replace(/\.claude\/hooks\//g, ".dev-team/hooks/");
+    writeFile(settingsPath, updated);
+    log.push("Rewrote settings.json hook paths to .dev-team/hooks/");
+  }
+
+  // Clean up old .claude/ files (except settings.json and settings.local.json)
+  for (const { from } of dirMappings) {
+    if (dirExists(from)) {
+      try {
+        fs.rmSync(from, { recursive: true });
+      } catch {
+        // best effort
+      }
+    }
+  }
+  for (const { from } of fileMappings) {
+    if (fileExists(from)) {
+      try {
+        fs.unlinkSync(from);
+      } catch {
+        // best effort
+      }
+    }
+  }
+
+  // Clean up other dev-team files in .claude/
+  const otherFiles = [
+    path.join(claudeDir, "dev-team-review-pending.json"),
+    path.join(claudeDir, "dev-team-task.json"),
+  ];
+  for (const f of otherFiles) {
+    if (fileExists(f)) {
+      try {
+        fs.unlinkSync(f);
+      } catch {
+        // best effort
+      }
+    }
+  }
+
+  return log;
+}
+
 export async function update(targetDir: string): Promise<void> {
   console.log("\ndev-team update — Upgrading to latest templates\n");
 
   const claudeDir = path.join(targetDir, ".claude");
-  const prefsPath = path.join(claudeDir, "dev-team.json");
+  const devTeamDir = path.join(targetDir, ".dev-team");
+
+  // Check if migration from .claude/ to .dev-team/ is needed
+  const oldPrefsPath = path.join(claudeDir, "dev-team.json");
+  const newPrefsPath = path.join(devTeamDir, "config.json");
+
+  const needsMigration = fileExists(oldPrefsPath) && !dirExists(devTeamDir);
+
+  if (needsMigration) {
+    console.log("Migrating from .claude/ to .dev-team/ directory structure...\n");
+    const migrationLog = migrateFromClaude(targetDir);
+    for (const entry of migrationLog) {
+      console.log(`  ${entry}`);
+    }
+    console.log("");
+  }
+
+  const prefsPath = newPrefsPath;
 
   // Step 1: Read existing preferences
   const prefsContent = readFile(prefsPath);
   if (!prefsContent) {
-    console.error("Error: No dev-team.json found. Run `npx dev-team init` first.");
+    console.error("Error: No .dev-team/config.json found. Run `npx dev-team init` first.");
     process.exit(1);
   }
 
@@ -179,10 +290,10 @@ export async function update(targetDir: string): Promise<void> {
   }
 
   // Run version migrations before updating agents
-  const migrationLog = runMigrations(prefs, prefs.version || "0.0.0", claudeDir);
-  if (migrationLog.length > 0) {
+  const agentMigrationLog = runMigrations(prefs, prefs.version || "0.0.0", devTeamDir);
+  if (agentMigrationLog.length > 0) {
     console.log("Migrations:");
-    for (const entry of migrationLog) {
+    for (const entry of agentMigrationLog) {
       console.log(`  ${entry}`);
     }
     console.log("");
@@ -202,8 +313,8 @@ export async function update(targetDir: string): Promise<void> {
   };
 
   // Step 2: Update agents
-  const agentsDir = path.join(claudeDir, "agents");
-  const memoryDir = path.join(claudeDir, "agent-memory");
+  const agentsDir = path.join(devTeamDir, "agents");
+  const memoryDir = path.join(devTeamDir, "agent-memory");
 
   for (const label of prefs.agents) {
     const file = AGENT_FILES[label];
@@ -255,7 +366,7 @@ export async function update(targetDir: string): Promise<void> {
   }
 
   // Step 3: Update hooks
-  const hooksDir = path.join(claudeDir, "hooks");
+  const hooksDir = path.join(devTeamDir, "hooks");
 
   for (const label of prefs.hooks) {
     const file = HOOK_FILES[label];
@@ -319,7 +430,7 @@ export async function update(targetDir: string): Promise<void> {
   }
 
   // Step 5: Update skills (auto-discovered from templates/skills/)
-  const skillsDir = path.join(claudeDir, "skills");
+  const skillsDir = path.join(devTeamDir, "skills");
   const skillsSrcDir = path.join(templates, "skills");
   const discoveredSkills = listSubdirectories(skillsSrcDir);
 
@@ -351,7 +462,7 @@ export async function update(targetDir: string): Promise<void> {
 
   // Step 7: Update shared learnings template (only if missing)
   const learningsSrc = path.join(templates, "dev-team-learnings.md");
-  const learningsDest = path.join(claudeDir, "dev-team-learnings.md");
+  const learningsDest = path.join(devTeamDir, "learnings.md");
   if (!fileExists(learningsDest)) {
     copyFile(learningsSrc, learningsDest);
   }

@@ -74,7 +74,7 @@ If Architect determines no ADR is needed, proceed directly to delegation.
 
 1. Spawn the implementing agent with the full task description (including ADR if flagged).
 2. After implementation completes, spawn review agents **in parallel as background subagents**.
-3. Each reviewer uses their agent definition from `.claude/agents/`.
+3. Each reviewer uses their agent definition from `.dev-team/agents/`.
 
 ### 5. Manage the review loop
 

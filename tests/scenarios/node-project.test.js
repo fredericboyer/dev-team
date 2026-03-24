@@ -49,13 +49,13 @@ describe("Node.js project scenario", () => {
   it("installs into a project with existing package.json and CLAUDE.md", async () => {
     await run(tmpDir, ["--all"]);
 
-    // Agents installed
-    const agents = fs.readdirSync(path.join(tmpDir, ".claude", "agents"));
+    // Agents installed in .dev-team/
+    const agents = fs.readdirSync(path.join(tmpDir, ".dev-team", "agents"));
     assert.equal(agents.length, 12);
     assert.ok(agents.includes("dev-team-voss.md"));
 
-    // Hooks installed
-    const hooks = fs.readdirSync(path.join(tmpDir, ".claude", "hooks"));
+    // Hooks installed in .dev-team/
+    const hooks = fs.readdirSync(path.join(tmpDir, ".dev-team", "hooks"));
     assert.equal(hooks.length, 6);
 
     // Existing CLAUDE.md preserved
@@ -67,7 +67,7 @@ describe("Node.js project scenario", () => {
     const pkg = JSON.parse(fs.readFileSync(path.join(tmpDir, "package.json"), "utf-8"));
     assert.equal(pkg.name, "my-node-app");
 
-    // Settings.json has hook configuration
+    // Settings.json has hook configuration (stays in .claude/)
     const settings = JSON.parse(
       fs.readFileSync(path.join(tmpDir, ".claude", "settings.json"), "utf-8"),
     );
@@ -80,7 +80,7 @@ describe("Node.js project scenario", () => {
 
     // Voss agent should not be Node-specific
     const voss = fs.readFileSync(
-      path.join(tmpDir, ".claude", "agents", "dev-team-voss.md"),
+      path.join(tmpDir, ".dev-team", "agents", "dev-team-voss.md"),
       "utf-8",
     );
     assert.ok(!voss.includes("require("), "agent should not contain Node-specific code");
@@ -90,7 +90,7 @@ describe("Node.js project scenario", () => {
   it("hooks are executable Node.js scripts", async () => {
     await run(tmpDir, ["--all"]);
 
-    const hookDir = path.join(tmpDir, ".claude", "hooks");
+    const hookDir = path.join(tmpDir, ".dev-team", "hooks");
     const hookFiles = fs.readdirSync(hookDir);
 
     for (const file of hookFiles) {

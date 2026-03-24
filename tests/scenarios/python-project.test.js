@@ -34,9 +34,9 @@ describe('Python project scenario', () => {
   it('installs into a Python project without Node artifacts', async () => {
     await run(tmpDir, ['--all']);
 
-    // Agents installed
-    assert.ok(fs.existsSync(path.join(tmpDir, '.claude', 'agents', 'dev-team-szabo.md')));
-    assert.ok(fs.existsSync(path.join(tmpDir, '.claude', 'agents', 'dev-team-knuth.md')));
+    // Agents installed in .dev-team/
+    assert.ok(fs.existsSync(path.join(tmpDir, '.dev-team', 'agents', 'dev-team-szabo.md')));
+    assert.ok(fs.existsSync(path.join(tmpDir, '.dev-team', 'agents', 'dev-team-knuth.md')));
 
     // No package.json created (dev-team should not add Node artifacts to Python projects)
     assert.ok(!fs.existsSync(path.join(tmpDir, 'package.json')), 'should not create package.json');
@@ -56,7 +56,7 @@ describe('Python project scenario', () => {
 
     // The post-change-review hook should flag Knuth for .py files
     const { execFileSync } = require('child_process');
-    const hookPath = path.join(tmpDir, '.claude', 'hooks', 'dev-team-post-change-review.js');
+    const hookPath = path.join(tmpDir, '.dev-team', 'hooks', 'dev-team-post-change-review.js');
     const input = JSON.stringify({ tool_input: { file_path: '/app/src/my_app/main.py' } });
 
     const stdout = execFileSync(process.execPath, [hookPath, input], {
@@ -70,7 +70,7 @@ describe('Python project scenario', () => {
     await run(tmpDir, ['--all']);
 
     const { execFileSync } = require('child_process');
-    const hookPath = path.join(tmpDir, '.claude', 'hooks', 'dev-team-tdd-enforce.js');
+    const hookPath = path.join(tmpDir, '.dev-team', 'hooks', 'dev-team-tdd-enforce.js');
 
     // Python test files should be skipped (not blocked)
     const input = JSON.stringify({ tool_input: { file_path: '/app/tests/test_main.py' } });

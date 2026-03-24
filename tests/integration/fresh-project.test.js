@@ -27,52 +27,52 @@ describe("fresh project installation", () => {
     await run(tmpDir, ["--all"]);
 
     // Agents
-    assert.ok(fs.existsSync(path.join(tmpDir, ".claude", "agents", "dev-team-voss.md")));
-    assert.ok(fs.existsSync(path.join(tmpDir, ".claude", "agents", "dev-team-mori.md")));
-    assert.ok(fs.existsSync(path.join(tmpDir, ".claude", "agents", "dev-team-szabo.md")));
-    assert.ok(fs.existsSync(path.join(tmpDir, ".claude", "agents", "dev-team-knuth.md")));
-    assert.ok(fs.existsSync(path.join(tmpDir, ".claude", "agents", "dev-team-beck.md")));
-    assert.ok(fs.existsSync(path.join(tmpDir, ".claude", "agents", "dev-team-deming.md")));
+    assert.ok(fs.existsSync(path.join(tmpDir, ".dev-team", "agents", "dev-team-voss.md")));
+    assert.ok(fs.existsSync(path.join(tmpDir, ".dev-team", "agents", "dev-team-mori.md")));
+    assert.ok(fs.existsSync(path.join(tmpDir, ".dev-team", "agents", "dev-team-szabo.md")));
+    assert.ok(fs.existsSync(path.join(tmpDir, ".dev-team", "agents", "dev-team-knuth.md")));
+    assert.ok(fs.existsSync(path.join(tmpDir, ".dev-team", "agents", "dev-team-beck.md")));
+    assert.ok(fs.existsSync(path.join(tmpDir, ".dev-team", "agents", "dev-team-deming.md")));
 
     // Hooks
-    assert.ok(fs.existsSync(path.join(tmpDir, ".claude", "hooks", "dev-team-safety-guard.js")));
-    assert.ok(fs.existsSync(path.join(tmpDir, ".claude", "hooks", "dev-team-tdd-enforce.js")));
+    assert.ok(fs.existsSync(path.join(tmpDir, ".dev-team", "hooks", "dev-team-safety-guard.js")));
+    assert.ok(fs.existsSync(path.join(tmpDir, ".dev-team", "hooks", "dev-team-tdd-enforce.js")));
     assert.ok(
-      fs.existsSync(path.join(tmpDir, ".claude", "hooks", "dev-team-post-change-review.js")),
+      fs.existsSync(path.join(tmpDir, ".dev-team", "hooks", "dev-team-post-change-review.js")),
     );
-    assert.ok(fs.existsSync(path.join(tmpDir, ".claude", "hooks", "dev-team-pre-commit-gate.js")));
+    assert.ok(fs.existsSync(path.join(tmpDir, ".dev-team", "hooks", "dev-team-pre-commit-gate.js")));
 
     // Skills
     assert.ok(
-      fs.existsSync(path.join(tmpDir, ".claude", "skills", "dev-team-challenge", "SKILL.md")),
+      fs.existsSync(path.join(tmpDir, ".dev-team", "skills", "dev-team-challenge", "SKILL.md")),
     );
-    assert.ok(fs.existsSync(path.join(tmpDir, ".claude", "skills", "dev-team-task", "SKILL.md")));
+    assert.ok(fs.existsSync(path.join(tmpDir, ".dev-team", "skills", "dev-team-task", "SKILL.md")));
 
     // Memory
     assert.ok(
-      fs.existsSync(path.join(tmpDir, ".claude", "agent-memory", "dev-team-voss", "MEMORY.md")),
+      fs.existsSync(path.join(tmpDir, ".dev-team", "agent-memory", "dev-team-voss", "MEMORY.md")),
     );
     assert.ok(
-      fs.existsSync(path.join(tmpDir, ".claude", "agent-memory", "dev-team-beck", "MEMORY.md")),
+      fs.existsSync(path.join(tmpDir, ".dev-team", "agent-memory", "dev-team-beck", "MEMORY.md")),
     );
-    assert.ok(fs.existsSync(path.join(tmpDir, ".claude", "dev-team-learnings.md")));
+    assert.ok(fs.existsSync(path.join(tmpDir, ".dev-team", "learnings.md")));
 
-    // Settings
+    // Settings (stays in .claude/)
     assert.ok(fs.existsSync(path.join(tmpDir, ".claude", "settings.json")));
 
     // CLAUDE.md
     assert.ok(fs.existsSync(path.join(tmpDir, "CLAUDE.md")));
 
     // Preferences
-    assert.ok(fs.existsSync(path.join(tmpDir, ".claude", "dev-team.json")));
+    assert.ok(fs.existsSync(path.join(tmpDir, ".dev-team", "config.json")));
   });
 
   it("agent files have valid YAML frontmatter", async () => {
     await run(tmpDir, ["--all"]);
 
-    const agentFiles = fs.readdirSync(path.join(tmpDir, ".claude", "agents"));
+    const agentFiles = fs.readdirSync(path.join(tmpDir, ".dev-team", "agents"));
     for (const file of agentFiles) {
-      const content = fs.readFileSync(path.join(tmpDir, ".claude", "agents", file), "utf-8");
+      const content = fs.readFileSync(path.join(tmpDir, ".dev-team", "agents", file), "utf-8");
       assert.ok(content.startsWith("---"), `${file} should start with YAML frontmatter`);
       assert.ok(content.includes("name:"), `${file} should have a name field`);
       assert.ok(content.includes("description:"), `${file} should have a description field`);
@@ -106,7 +106,7 @@ describe("fresh project installation", () => {
     await run(tmpDir, ["--all"]);
 
     const prefs = JSON.parse(
-      fs.readFileSync(path.join(tmpDir, ".claude", "dev-team.json"), "utf-8"),
+      fs.readFileSync(path.join(tmpDir, ".dev-team", "config.json"), "utf-8"),
     );
     assert.ok(prefs.version, "should have a version");
     assert.ok(/^\d+\.\d+\.\d+/.test(prefs.version), "version should be semver");
@@ -121,7 +121,7 @@ describe("fresh project installation", () => {
     await run(tmpDir, ["--preset", "backend"]);
 
     const prefs = JSON.parse(
-      fs.readFileSync(path.join(tmpDir, ".claude", "dev-team.json"), "utf-8"),
+      fs.readFileSync(path.join(tmpDir, ".dev-team", "config.json"), "utf-8"),
     );
     assert.equal(prefs.preset, "backend");
     assert.ok(prefs.agents.includes("Voss"), "should include Voss");
@@ -133,7 +133,7 @@ describe("fresh project installation", () => {
     assert.ok(!prefs.agents.includes("Tufte"), "should not include Docs");
 
     // Only selected agents should have files
-    const agents = fs.readdirSync(path.join(tmpDir, ".claude", "agents"));
+    const agents = fs.readdirSync(path.join(tmpDir, ".dev-team", "agents"));
     assert.equal(agents.length, prefs.agents.length);
   });
 
@@ -141,7 +141,7 @@ describe("fresh project installation", () => {
     await run(tmpDir, ["--preset", "fullstack"]);
 
     const prefs = JSON.parse(
-      fs.readFileSync(path.join(tmpDir, ".claude", "dev-team.json"), "utf-8"),
+      fs.readFileSync(path.join(tmpDir, ".dev-team", "config.json"), "utf-8"),
     );
     assert.equal(prefs.preset, "fullstack");
     assert.equal(prefs.agents.length, 12);
@@ -151,7 +151,7 @@ describe("fresh project installation", () => {
     await run(tmpDir, ["--preset", "data"]);
 
     const prefs = JSON.parse(
-      fs.readFileSync(path.join(tmpDir, ".claude", "dev-team.json"), "utf-8"),
+      fs.readFileSync(path.join(tmpDir, ".dev-team", "config.json"), "utf-8"),
     );
     assert.equal(prefs.preset, "data");
     assert.ok(prefs.agents.includes("Voss"), "should include Voss");

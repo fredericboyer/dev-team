@@ -88,7 +88,7 @@ const hasImplFiles = files.some(
 );
 
 const hasMemoryUpdates = files.some(
-  (f) => f.endsWith("dev-team-learnings.md") || /agent-memory\/.*MEMORY\.md$/.test(f),
+  (f) => f.endsWith("learnings.md") || /agent-memory\/.*MEMORY\.md$/.test(f),
 );
 
 if (hasImplFiles && !hasMemoryUpdates) {
@@ -98,18 +98,18 @@ if (hasImplFiles && !hasMemoryUpdates) {
     unstagedMemory = unstaged
       .split("\n")
       .map((f) => f.split("\\").join("/"))
-      .some((f) => f.endsWith("dev-team-learnings.md") || /agent-memory\/.*MEMORY\.md$/.test(f));
+      .some((f) => f.endsWith("learnings.md") || /agent-memory\/.*MEMORY\.md$/.test(f));
   } catch {
     // Ignore — best effort
   }
 
   if (unstagedMemory) {
     reminders.push(
-      "Memory files were updated but not staged — run `git add .claude/dev-team-learnings.md .claude/agent-memory/` if learnings should be included",
+      "Memory files were updated but not staged — run `git add .dev-team/learnings.md .dev-team/agent-memory/` if learnings should be included",
     );
   } else {
     reminders.push(
-      "Update .claude/dev-team-learnings.md or agent memory with any patterns, conventions, or decisions from this work",
+      "Update .dev-team/learnings.md or agent memory with any patterns, conventions, or decisions from this work",
     );
   }
 }

@@ -25,7 +25,7 @@ Drucker spawns one implementing agent per independent issue, each on its own bra
 
 State is tracked in Drucker's conversation context (not on disk). The Agent tool's built-in completion notifications provide the synchronization barrier between phases.
 
-> **Historical note:** Prior to Issue #113, state was tracked in a `.claude/dev-team-parallel.json` file on disk. That file and its associated Stop hook were removed in favor of conversation-context tracking.
+> **Historical note:** Prior to Issue #113, state was tracked in a `.dev-team/parallel.json` file on disk. That file and its associated Stop hook were removed in favor of conversation-context tracking.
 
 ### Phase 2: Coordinated review wave
 Reviews do **not** start until **all** implementation agents have completed. This is the key coordination point. Once all implementations are done, Drucker spawns review agents (Szabo + Knuth, plus conditional reviewers) in parallel across all branches simultaneously.

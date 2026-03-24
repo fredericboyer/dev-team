@@ -19,7 +19,7 @@ Run a multi-agent parallel review of: $ARGUMENTS
 | `auth`, `login`, `password`, `token`, `session`, `crypto`, `secret`, `permission`, `oauth`, `jwt`, `cors`, `csrf` | @dev-team-szabo | Security surface |
 | `/api/`, `/routes/`, `schema`, `.graphql`, `.proto`, `openapi` | @dev-team-mori | API/UI contract |
 | `docker`, `.env`, `config`, `migration`, `database`, `.sql`, `deploy` | @dev-team-voss | Infrastructure |
-| `.github/workflows`, `.claude/`, `tsconfig`, `eslint`, `prettier`, `package.json` | @dev-team-deming | Tooling |
+| `.github/workflows`, `.dev-team/`, `tsconfig`, `eslint`, `prettier`, `package.json` | @dev-team-deming | Tooling |
 | `readme`, `changelog`, `.md`, `/docs/` | @dev-team-tufte | Documentation |
 | `/adr/`, `architecture`, `/core/`, `/domain/` | @dev-team-brooks | Architecture |
 | `package.json`, `version`, `changelog`, release workflows | @dev-team-conway | Release artifacts |
@@ -32,7 +32,7 @@ Run a multi-agent parallel review of: $ARGUMENTS
 1. Spawn each selected agent as a **parallel background subagent** using the Agent tool with `subagent_type: "general-purpose"`.
 
 2. Each agent's prompt must include:
-   - The agent's full definition (read from `.claude/agents/<agent>.md`)
+   - The agent's full definition (read from `.dev-team/agents/<agent>.md`)
    - The list of changed files relevant to their domain
    - Instruction to produce classified findings: `[DEFECT]`, `[RISK]`, `[QUESTION]`, `[SUGGESTION]`
    - Instruction to read the actual code — not just the diff — for full context
