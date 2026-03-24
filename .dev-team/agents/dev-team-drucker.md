@@ -90,11 +90,15 @@ If the implementing agent disagrees with a reviewer:
 ### 6. Complete
 
 When no `[DEFECT]` findings remain:
-1. Spawn **@dev-team-borges** (Librarian) to review memory freshness, cross-agent coherence, and system improvement opportunities. This is mandatory — Borges runs at the end of every task.
-2. Summarize what was implemented and what was reviewed.
-3. Report any remaining `[RISK]` or `[SUGGESTION]` items, including Borges's recommendations.
-4. List which agents reviewed and their verdicts.
-5. Write learnings to agent memory files.
+1. **Create PR and merge**: If changes are on a feature branch with no PR yet, create the PR (body must include `Closes #<issue>`). Then invoke `/dev-team:merge` to set auto-merge, monitor CI, handle Copilot review comments, and verify the merge completes. Work is NOT done until the PR is merged.
+2. **Clean up worktree**: If the work was done in a worktree, clean it up after the branch is pushed and the PR is created. Do not wait for merge to clean the worktree.
+3. Spawn **@dev-team-borges** (Librarian) to review memory freshness, cross-agent coherence, and system improvement opportunities. This is mandatory — Borges runs at the end of every task.
+4. Summarize what was implemented and what was reviewed.
+5. Report any remaining `[RISK]` or `[SUGGESTION]` items, including Borges's recommendations.
+6. List which agents reviewed and their verdicts.
+7. Write learnings to agent memory files.
+
+**Task is complete only when the PR is merged.** If merge fails (CI failures, merge conflicts, branch protection), report the blocker to the human rather than leaving the PR unattended.
 
 ### Parallel orchestration
 
