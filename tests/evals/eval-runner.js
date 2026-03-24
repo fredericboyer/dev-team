@@ -25,7 +25,9 @@
 const fs = require("node:fs");
 const path = require("node:path");
 
-const AGENTS_DIR = path.join(__dirname, "..", "..", "templates", "agents");
+const DEV_TEAM_AGENTS_DIR = path.join(__dirname, "..", "..", ".dev-team", "agents");
+const TEMPLATE_AGENTS_DIR = path.join(__dirname, "..", "..", "templates", "agents");
+const AGENTS_DIR = fs.existsSync(DEV_TEAM_AGENTS_DIR) ? DEV_TEAM_AGENTS_DIR : TEMPLATE_AGENTS_DIR;
 const EXPECTED_DIR = path.join(__dirname, "expected");
 
 function usage() {
@@ -81,7 +83,15 @@ function findExpectedFindings(agentName, sampleFilename) {
   return null;
 }
 
-function constructPrompt(agentDefinition, sample, agentName) {
+function addLineNumbers(content) {
+  return content
+    .split("\n")
+    .map((line, i) => `${String(i + 1).padStart(4)}  ${line}`)
+    .join("\n");
+}
+
+function constructPrompt(agentDefinition, sample) {
+  const numberedCode = addLineNumbers(sample.content);
   return `# Agent Evaluation Prompt
 
 ## Agent Definition
@@ -109,7 +119,7 @@ For each finding, include:
 File: \`${sample.filename}\`
 
 \`\`\`javascript
-${sample.content}
+${numberedCode}
 \`\`\`
 
 ## Instructions
@@ -118,6 +128,7 @@ ${sample.content}
 - Apply your full agent lens (security for Szabo, correctness for Knuth, etc.)
 - Do not assume context beyond what is shown — review the code as presented
 - Produce your findings in the classified format above
+- Line numbers are shown in the left margin — use them in your findings
 `;
 }
 
@@ -134,17 +145,18 @@ function main() {
   const sample = loadSampleCode(samplePath);
   const expected = findExpectedFindings(agentName, sample.filename);
 
-  const prompt = constructPrompt(agentDefinition, sample, agentName);
+  const prompt = constructPrompt(agentDefinition, sample);
 
   // Output the prompt
   console.log(prompt);
 
-  // If expected findings exist, output them as a reference section
+  // If expected findings exist, output them to stderr so copy-pasting the
+  // prompt from stdout doesn't include the answers
   if (expected) {
-    console.log("\n---\n");
-    console.log("# Expected Findings (for comparison after running)");
-    console.log("");
-    console.log(expected);
+    console.error("\n---\n");
+    console.error("# Expected Findings (for comparison after running)");
+    console.error("");
+    console.error(expected);
   }
 
   // Summary to stderr so it does not pollute the prompt on stdout

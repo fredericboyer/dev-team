@@ -1010,39 +1010,43 @@ describe("dev-team-pre-commit-gate", () => {
     }
   });
 
-  it("does not allow symlink as .memory-reviewed override", () => {
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "dev-team-precommit-"));
-    try {
-      execFileSync("git", ["init"], { cwd: tmpDir, encoding: "utf-8" });
-      execFileSync("git", ["config", "user.email", "test@test.com"], {
-        cwd: tmpDir,
-        encoding: "utf-8",
-      });
-      execFileSync("git", ["config", "user.name", "Test"], { cwd: tmpDir, encoding: "utf-8" });
-      fs.writeFileSync(path.join(tmpDir, "handler.js"), "module.exports = {}");
-      execFileSync("git", ["add", "handler.js"], { cwd: tmpDir, encoding: "utf-8" });
+  it(
+    "does not allow symlink as .memory-reviewed override",
+    { skip: process.platform === "win32" },
+    () => {
+      const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "dev-team-precommit-"));
+      try {
+        execFileSync("git", ["init"], { cwd: tmpDir, encoding: "utf-8" });
+        execFileSync("git", ["config", "user.email", "test@test.com"], {
+          cwd: tmpDir,
+          encoding: "utf-8",
+        });
+        execFileSync("git", ["config", "user.name", "Test"], { cwd: tmpDir, encoding: "utf-8" });
+        fs.writeFileSync(path.join(tmpDir, "handler.js"), "module.exports = {}");
+        execFileSync("git", ["add", "handler.js"], { cwd: tmpDir, encoding: "utf-8" });
 
-      // Create a symlink as the override marker (should be rejected)
-      fs.mkdirSync(path.join(tmpDir, ".dev-team"), { recursive: true });
-      fs.writeFileSync(path.join(tmpDir, ".dev-team", "real-file"), "");
-      fs.symlinkSync(
-        path.join(tmpDir, ".dev-team", "real-file"),
-        path.join(tmpDir, ".dev-team", ".memory-reviewed"),
-      );
+        // Create a symlink as the override marker (should be rejected)
+        fs.mkdirSync(path.join(tmpDir, ".dev-team"), { recursive: true });
+        fs.writeFileSync(path.join(tmpDir, ".dev-team", "real-file"), "");
+        fs.symlinkSync(
+          path.join(tmpDir, ".dev-team", "real-file"),
+          path.join(tmpDir, ".dev-team", ".memory-reviewed"),
+        );
 
-      execFileSync(process.execPath, [path.join(HOOKS_DIR, hook)], {
-        encoding: "utf-8",
-        timeout: 5000,
-        cwd: tmpDir,
-      });
-      assert.fail("Should exit 1 when override is a symlink");
-    } catch (err) {
-      assert.equal(err.status, 1, "should block with exit 1");
-      assert.ok(err.stderr.includes("BLOCKED"), "should show BLOCKED message");
-    } finally {
-      fs.rmSync(tmpDir, { recursive: true, force: true });
-    }
-  });
+        execFileSync(process.execPath, [path.join(HOOKS_DIR, hook)], {
+          encoding: "utf-8",
+          timeout: 5000,
+          cwd: tmpDir,
+        });
+        assert.fail("Should exit 1 when override is a symlink");
+      } catch (err) {
+        assert.equal(err.status, 1, "should block with exit 1");
+        assert.ok(err.stderr.includes("BLOCKED"), "should show BLOCKED message");
+      } finally {
+        fs.rmSync(tmpDir, { recursive: true, force: true });
+      }
+    },
+  );
 
   it("does not block when learnings file is staged", () => {
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "dev-team-precommit-"));

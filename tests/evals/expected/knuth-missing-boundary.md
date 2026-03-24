@@ -3,7 +3,7 @@
 ## Must detect
 
 ### [DEFECT] calculateAverage crashes on null/undefined input
-- **Line**: 12
+- **Line**: 13
 - **Issue**: `scores.length` throws TypeError when `scores` is null or undefined
 - **Counter-example**: `calculateAverage(null)` -> TypeError
 
@@ -13,27 +13,27 @@
 - **Counter-example**: `calculateAverage([])` -> NaN
 
 ### [DEFECT] getRange returns undefined values for empty array
-- **Lines**: 24-25
+- **Lines**: 25-26
 - **Issue**: `items[0]` and `items[items.length - 1]` are both `undefined` for empty arrays
 - **Counter-example**: `getRange([])` -> `{ first: undefined, last: undefined }`
 
 ### [DEFECT] getRange crashes on null/undefined input
-- **Line**: 24
+- **Line**: 25
 - **Issue**: Property access on null/undefined throws TypeError
 - **Counter-example**: `getRange(null)` -> TypeError
 
 ### [DEFECT] findTopScorer crashes on empty array
-- **Line**: 33
+- **Line**: 35
 - **Issue**: `users[0]` is `undefined`, then `users[i].score > top.score` throws TypeError
 - **Counter-example**: `findTopScorer([])` -> TypeError on next iteration comparison
 
 ### [DEFECT] findTopScorer crashes on null/undefined input
-- **Line**: 33
+- **Line**: 35
 - **Issue**: Property access on null/undefined throws TypeError
 - **Counter-example**: `findTopScorer(null)` -> TypeError
 
 ### [DEFECT] mergeConfigs crashes on null/undefined input
-- **Line**: 46
+- **Line**: 50
 - **Issue**: `for...of` on null/undefined throws TypeError
 - **Counter-example**: `mergeConfigs(null)` -> TypeError
 
