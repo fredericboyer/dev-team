@@ -39,7 +39,7 @@ Brooks explicitly does NOT cover:
 - **Security** -- owned by Szabo (threat modeling, attack surface, vulnerability patterns)
 - **Correctness/reliability** -- owned by Knuth (edge cases, boundary conditions, coverage gaps)
 - **Usability/UX** -- owned by Mori (user-facing lens)
-- **Availability** -- operational concern, will be owned by future Hamilton agent (#98)
+- **Availability** -- owned by Hamilton (health checks, graceful degradation, deployment quality) (#111)
 - **Portability** -- owned by Deming (tooling/environment lens)
 
 ### Hook trigger change

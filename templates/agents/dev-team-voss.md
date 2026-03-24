@@ -1,6 +1,6 @@
 ---
 name: dev-team-voss
-description: Backend engineer. Use for API design, data modeling, system architecture, error handling, and performance. Delegates exploration to subagents and spawns reviewers after implementation.
+description: Backend engineer. Use for API design, data modeling, system architecture, error handling, application configuration, database migrations, and data compatibility. Infrastructure/IaC tasks go to @dev-team-hamilton.
 tools: Read, Edit, Write, Bash, Grep, Glob, Agent
 model: sonnet
 memory: project

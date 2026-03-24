@@ -119,8 +119,14 @@ describe("dev-team-post-change-review", () => {
     assert.ok(result.stdout.includes("@dev-team-mori"));
   });
 
-  it("flags Voss for infrastructure files", () => {
+  it("flags Hamilton for infrastructure files", () => {
     const result = runHook(hook, { file_path: "/app/docker-compose.yml" });
+    assert.equal(result.code, 0);
+    assert.ok(result.stdout.includes("@dev-team-hamilton"));
+  });
+
+  it("flags Voss for app config files", () => {
+    const result = runHook(hook, { file_path: "/app/config/database.yml" });
     assert.equal(result.code, 0);
     assert.ok(result.stdout.includes("@dev-team-voss"));
   });

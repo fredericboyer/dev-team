@@ -40,6 +40,7 @@ This project uses [dev-team](https://github.com/dev-team) — adversarial AI age
 | Agent | Role | When to use |
 |-------|------|-------------|
 | `@dev-team-voss` | Backend Engineer | API design, data modeling, system architecture, error handling |
+| `@dev-team-hamilton` | Infrastructure Engineer | Dockerfiles, IaC, CI/CD, k8s, deployment, health checks, monitoring |
 | `@dev-team-mori` | Frontend/UI Engineer | Components, accessibility, UX patterns, state management |
 | `@dev-team-szabo` | Security Auditor | Vulnerability review, auth flows, attack surface analysis |
 | `@dev-team-knuth` | Quality Auditor | Coverage gaps, boundary conditions, correctness verification |
@@ -62,7 +63,8 @@ For non-trivial work: explore the area first, then implement, then review.
 - **Szabo** — auto-flagged when security-sensitive files change (auth, token, session, crypto, etc.)
 - **Knuth** — auto-flagged when any non-test implementation code changes
 - **Mori** — auto-flagged when API contract files change (/api/, /routes/, schema, etc.)
-- **Voss** — auto-flagged when infrastructure/config files change (docker, .env, migrations, etc.)
+- **Hamilton** — auto-flagged when infrastructure files change (docker, IaC, k8s, deployment, monitoring, etc.)
+- **Voss** — auto-flagged when app config/data files change (.env, config, migrations, database, etc.)
 - **Deming** — auto-flagged when tooling files change (eslint, CI workflows, package.json, etc.)
 - **Tufte** — auto-flagged when documentation files change (.md, /docs/, README, etc.) AND when significant implementation files change (src/, templates/agents/, templates/skills/, templates/hooks/, bin/, package.json) to detect doc-code drift
 - **Brooks** — auto-flagged when any non-test implementation code changes (quality attributes) and when architectural boundaries are touched (/adr/, /core/, /domain/, /lib/, build config, etc.)

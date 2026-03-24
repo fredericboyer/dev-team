@@ -30,6 +30,11 @@ interface HookDefinition {
 const ALL_AGENTS: AgentDefinition[] = [
   { label: "Voss", file: "dev-team-voss.md", description: "Backend Engineer" },
   {
+    label: "Hamilton",
+    file: "dev-team-hamilton.md",
+    description: "Infrastructure Engineer",
+  },
+  {
     label: "Mori",
     file: "dev-team-mori.md",
     description: "Frontend/UI Engineer",
@@ -138,13 +143,13 @@ const PRESETS: Record<string, PresetDefinition> = {
     description: "Backend-heavy — API, security, architecture, quality",
     agents: [
       "Voss",
+      "Hamilton",
       "Szabo",
       "Knuth",
       "Beck",
       "Deming",
       "Brooks",
       "Conway",
-      "Hamilton",
       "Drucker",
       "Borges",
     ],
