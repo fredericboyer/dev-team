@@ -8,6 +8,7 @@ coverage/
 
 # Runtime state files (created by task loop, not committed)
 .dev-team/task.json
+.dev-team/.memory-reviewed
 
 # npm
 npm-debug.log*

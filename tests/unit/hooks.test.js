@@ -950,7 +950,7 @@ describe("dev-team-pre-commit-gate", () => {
     }
   });
 
-  it("reminds to update memory when code is staged without memory files", () => {
+  it("blocks when code is staged without memory files", () => {
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "dev-team-precommit-"));
     try {
       execFileSync("git", ["init"], { cwd: tmpDir, encoding: "utf-8" });
@@ -962,18 +962,89 @@ describe("dev-team-pre-commit-gate", () => {
       fs.writeFileSync(path.join(tmpDir, "handler.js"), "module.exports = {}");
       execFileSync("git", ["add", "handler.js"], { cwd: tmpDir, encoding: "utf-8" });
 
-      const stdout = execFileSync(process.execPath, [path.join(HOOKS_DIR, hook)], {
+      execFileSync(process.execPath, [path.join(HOOKS_DIR, hook)], {
         encoding: "utf-8",
         timeout: 5000,
         cwd: tmpDir,
       });
-      assert.ok(stdout.includes("learnings.md"), "should remind about learnings");
+      assert.fail("Should exit 1 when impl files staged without memory updates");
+    } catch (err) {
+      assert.equal(err.status, 1, "should block with exit 1");
+      assert.ok(err.stderr.includes("BLOCKED"), "should show BLOCKED message");
+      assert.ok(err.stderr.includes("learnings.md"), "should mention learnings");
     } finally {
       fs.rmSync(tmpDir, { recursive: true, force: true });
     }
   });
 
-  it("does not remind about memory when learnings file is staged", () => {
+  it("allows commit with .memory-reviewed override", () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "dev-team-precommit-"));
+    try {
+      execFileSync("git", ["init"], { cwd: tmpDir, encoding: "utf-8" });
+      execFileSync("git", ["config", "user.email", "test@test.com"], {
+        cwd: tmpDir,
+        encoding: "utf-8",
+      });
+      execFileSync("git", ["config", "user.name", "Test"], { cwd: tmpDir, encoding: "utf-8" });
+      fs.writeFileSync(path.join(tmpDir, "handler.js"), "module.exports = {}");
+      execFileSync("git", ["add", "handler.js"], { cwd: tmpDir, encoding: "utf-8" });
+
+      // Create the override marker
+      fs.mkdirSync(path.join(tmpDir, ".dev-team"), { recursive: true });
+      fs.writeFileSync(path.join(tmpDir, ".dev-team", ".memory-reviewed"), "");
+
+      const stdout = execFileSync(process.execPath, [path.join(HOOKS_DIR, hook)], {
+        encoding: "utf-8",
+        timeout: 5000,
+        cwd: tmpDir,
+      });
+      assert.equal(stdout, "", "should not output anything with override");
+
+      // Marker file should be cleaned up
+      assert.ok(
+        !fs.existsSync(path.join(tmpDir, ".dev-team", ".memory-reviewed")),
+        "should delete marker file after use",
+      );
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  it("does not allow symlink as .memory-reviewed override", () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "dev-team-precommit-"));
+    try {
+      execFileSync("git", ["init"], { cwd: tmpDir, encoding: "utf-8" });
+      execFileSync("git", ["config", "user.email", "test@test.com"], {
+        cwd: tmpDir,
+        encoding: "utf-8",
+      });
+      execFileSync("git", ["config", "user.name", "Test"], { cwd: tmpDir, encoding: "utf-8" });
+      fs.writeFileSync(path.join(tmpDir, "handler.js"), "module.exports = {}");
+      execFileSync("git", ["add", "handler.js"], { cwd: tmpDir, encoding: "utf-8" });
+
+      // Create a symlink as the override marker (should be rejected)
+      fs.mkdirSync(path.join(tmpDir, ".dev-team"), { recursive: true });
+      fs.writeFileSync(path.join(tmpDir, ".dev-team", "real-file"), "");
+      fs.symlinkSync(
+        path.join(tmpDir, ".dev-team", "real-file"),
+        path.join(tmpDir, ".dev-team", ".memory-reviewed"),
+      );
+
+      execFileSync(process.execPath, [path.join(HOOKS_DIR, hook)], {
+        encoding: "utf-8",
+        timeout: 5000,
+        cwd: tmpDir,
+      });
+      assert.fail("Should exit 1 when override is a symlink");
+    } catch (err) {
+      assert.equal(err.status, 1, "should block with exit 1");
+      assert.ok(err.stderr.includes("BLOCKED"), "should show BLOCKED message");
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  it("does not block when learnings file is staged", () => {
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "dev-team-precommit-"));
     try {
       execFileSync("git", ["init"], { cwd: tmpDir, encoding: "utf-8" });
@@ -995,16 +1066,13 @@ describe("dev-team-pre-commit-gate", () => {
         timeout: 5000,
         cwd: tmpDir,
       });
-      assert.ok(
-        !stdout.includes("learnings.md"),
-        "should not remind when learnings are staged",
-      );
+      assert.equal(stdout, "", "should not block when learnings are staged");
     } finally {
       fs.rmSync(tmpDir, { recursive: true, force: true });
     }
   });
 
-  it("does not remind about memory when agent memory is staged", () => {
+  it("does not block when agent memory is staged", () => {
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "dev-team-precommit-"));
     try {
       execFileSync("git", ["init"], { cwd: tmpDir, encoding: "utf-8" });
@@ -1031,10 +1099,7 @@ describe("dev-team-pre-commit-gate", () => {
         timeout: 5000,
         cwd: tmpDir,
       });
-      assert.ok(
-        !stdout.includes("dev-team-learnings"),
-        "should not remind when agent memory is staged",
-      );
+      assert.equal(stdout, "", "should not block when agent memory is staged");
     } finally {
       fs.rmSync(tmpDir, { recursive: true, force: true });
     }

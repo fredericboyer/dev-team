@@ -65,3 +65,10 @@ After completing work, write key learnings to your MEMORY.md:
 - Accessibility issues found and resolved (do not re-flag)
 - Component patterns the team prefers
 - Challenges you raised that were accepted (reinforce) or overruled (calibrate)
+
+## Learnings Output (mandatory)
+
+After completing work, you MUST output a "Learnings" section in your response:
+- What was surprising or non-obvious about this task?
+- What should be calibrated for next time? (e.g., assumptions that were wrong, patterns that worked well)
+- Where should this be recorded? (`agent memory` for agent-specific calibration / `team learnings` for shared process rules / `ADR` for architectural decisions)
