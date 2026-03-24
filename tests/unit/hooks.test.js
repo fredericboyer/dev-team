@@ -927,7 +927,7 @@ describe("dev-team-pre-commit-gate", () => {
     assert.equal(result.code, 0);
   });
 
-  it("exits 0 when no staged files trigger review", () => {
+  it("exits 0 when no staged files trigger memory freshness check", () => {
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "dev-team-precommit-"));
     try {
       execFileSync("git", ["init"], { cwd: tmpDir, encoding: "utf-8" });

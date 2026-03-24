@@ -101,7 +101,7 @@ const QUALITY_HOOKS: HookDefinition[] = [
   {
     label: "Pre-commit gate",
     file: "dev-team-pre-commit-gate.js",
-    description: "Remind about reviews before committing",
+    description: "Memory freshness reminders before committing (advisory-only)",
   },
   {
     label: "Pre-commit lint",

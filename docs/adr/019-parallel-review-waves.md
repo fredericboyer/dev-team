@@ -23,19 +23,9 @@ Issues with file overlaps are grouped and executed sequentially within their gro
 ### Phase 1: Parallel implementation
 Drucker spawns one implementing agent per independent issue, each on its own branch (`feat/<issue>-<description>`). Agents work concurrently without awareness of each other. Each agent follows the standard implementation protocol from its agent definition.
 
-State is tracked in `.claude/dev-team-parallel.json`:
-```json
-{
-  "mode": "parallel",
-  "issues": [
-    { "issue": 42, "branch": "feat/42-add-auth", "agent": "dev-team-voss", "status": "implementing" },
-    { "issue": 43, "branch": "feat/43-fix-nav", "agent": "dev-team-mori", "status": "implementing" }
-  ],
-  "phase": "implementation",
-  "conflictGroups": [[42, 55]],
-  "reviewWave": null
-}
-```
+State is tracked in Drucker's conversation context (not on disk). The Agent tool's built-in completion notifications provide the synchronization barrier between phases.
+
+> **Historical note:** Prior to Issue #113, state was tracked in a `.claude/dev-team-parallel.json` file on disk. That file and its associated Stop hook were removed in favor of conversation-context tracking.
 
 ### Phase 2: Coordinated review wave
 Reviews do **not** start until **all** implementation agents have completed. This is the key coordination point. Once all implementations are done, Drucker spawns review agents (Szabo + Knuth, plus conditional reviewers) in parallel across all branches simultaneously.
@@ -52,7 +42,7 @@ Borges runs **once** across all branches after the final review wave clears. Thi
 The parallel task is complete when:
 1. All branches have zero `[DEFECT]` findings, OR the per-branch iteration limit (default: 10) is reached
 2. Borges has run across all branches
-3. `.claude/dev-team-parallel.json` is deleted
+3. Drucker confirms all branches are complete in conversation context (no external state file needed)
 
 ## Consequences
 - Independent issues execute in parallel, reducing wall-clock time roughly proportionally to the number of independent issues
@@ -61,5 +51,5 @@ The parallel task is complete when:
 - Borges runs once instead of N times, producing more coherent cross-issue recommendations
 - The iteration limit applies per-branch, not globally — one slow branch does not block others from completing
 - Sequential fallback: issues in the same conflict group still execute sequentially, preserving correctness
-- State file (`.claude/dev-team-parallel.json`) enables resumability if a session is interrupted
+- Conversation-context tracking eliminates disk I/O overhead; resumability depends on session continuity rather than a state file (acceptable trade-off per Issue #113)
 - Increases peak resource usage: N implementation agents + 2N review agents at wave time
