@@ -16,6 +16,7 @@
 - Always use `/dev-team:task` for implementation work — dogfood the agents.
 - Spawn review agents as `general-purpose` subagents with the actual agent definition loaded from `.dev-team/agents/dev-team-*.md`. Do NOT use `pr-review-toolkit:*` as proxies — they have different behavior.
 - Don't ask for approval to continue between tasks. Just do the work. Only pause for critical decisions.
+- **When creating a PR for a tracked issue, link it in the PR body** (e.g., `Closes #NNN`). This lets the platform auto-close the issue on merge. Agents should include this when they know the issue number.
 - Hooks over CLAUDE.md for enforcement (ADR-001). If agents keep flagging the same pattern, it should be a hook.
 - **Improvements must be project-agnostic and target `templates/`.** Never modify `.dev-team/` directly for improvements — those files get overwritten by `dev-team update`. All improvements go into `templates/` and ship in future versions. Project-specific conventions stay in local learnings only.
 - **Dogfooding is the product loop.** Using dev-team on dev-team surfaces friction → `/dev-team:assess` captures patterns → issues target `templates/` → next release improves the tool for everyone. Every session is a test run.
