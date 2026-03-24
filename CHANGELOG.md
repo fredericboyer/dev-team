@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-03-23
+
+### Added
+- Hamilton agent (`@dev-team-hamilton`) — new infrastructure implementing agent covering Dockerfiles, IaC, CI/CD, Kubernetes, deployment, health checks, and monitoring. Named after Margaret Hamilton. Replaces Voss's infrastructure scope.
+- `/dev-team:security-status` skill — proactive GitHub security signal monitoring (code scanning, Dependabot, secret scanning). 5 skills total.
+- NFR ownership codified — all 9 standard NFR dimensions mapped to explicit agent ownership: Mori (API compatibility), Voss (data compatibility), Deming (portability).
+- Dependabot enabled for npm and GitHub Actions version updates.
+- CodeQL explicit workflow permissions added to CI.
+- ADR-020: Brooks always-on for all code changes, evaluating quality attributes alongside structural review.
+- Tufte doc-drift detection — Tufte now triggers on significant implementation changes (not just doc file changes) to catch missing or stale documentation.
+- Parallel review wave enforcement (#93, ADR-019) — mechanical enforcement with state machine, sync barriers, and phase transition tracking.
+- Git context caching hardened (#94, ADR-018) — atomic temp+rename writes, symlink prevention via `lstatSync`, `0o600` file permissions.
+- Branch protection migrated to GitHub rulesets with required status checks.
+- 273 tests total (was 117).
+
+### Changed
+- Brooks is now always-on for all code changes (was architecture files only), evaluating performance, maintainability, and scalability. Design principle: "depth justifies separation, breadth justifies consolidation."
+- Voss scope narrowed to backend and application config; infrastructure scope transferred to Hamilton.
+- Reviewers always-on: Szabo (security, deep) + Knuth (correctness, deep) + Brooks (architecture + quality attributes, broad). Was 2, now 3.
+- Agents: 12 total (was 11). Added Hamilton.
+
 ## [0.5.0] - 2026-03-23
 
 ### Added
