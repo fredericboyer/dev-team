@@ -26,6 +26,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Addressed Copilot review findings from PR #120: improved error handling and code quality (#121).
 - Addressed Copilot findings from multiple v0.7 PRs: tightened types, removed dead code (#126).
 
+### Internal
+- Added process learning: link PRs to issues with `Closes #NNN` for auto-close on merge (#135).
+
 ### Dependencies
 - Bump `actions/checkout` from 4 to 6 (#108).
 - Bump `actions/setup-node` from 4 to 6 (#109).
