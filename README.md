@@ -232,13 +232,13 @@ Rules:
 Each agent maintains persistent memory that calibrates over time:
 
 ```
-.claude/
+.dev-team/
   agent-memory/
     dev-team-voss/MEMORY.md     # Voss's project-specific patterns
     dev-team-szabo/MEMORY.md    # Szabo's security findings
     dev-team-knuth/MEMORY.md    # Knuth's coverage observations
     ...
-  dev-team-learnings.md         # Shared team knowledge
+  learnings.md                  # Shared team knowledge
 ```
 
 Memory is loaded at session start (first 200 lines). Agents write learnings after each task. The pre-commit gate reminds you to update memory if code changed but learnings didn't.
@@ -247,7 +247,7 @@ Memory is loaded at session start (first 200 lines). Agents write learnings afte
 
 ### Edit agents
 
-Agent definitions live in `.claude/agents/`. Edit focus areas, challenge style, or philosophy to match your project.
+Agent definitions live in `.dev-team/agents/`. Edit focus areas, challenge style, or philosophy to match your project.
 
 ### Create custom agents
 
@@ -259,7 +259,7 @@ See [docs/custom-agents.md](docs/custom-agents.md) for the full authoring guide 
 
 ### Configure watch lists
 
-Add file-pattern-to-agent mappings in `.claude/dev-team.json`:
+Add file-pattern-to-agent mappings in `.dev-team/config.json`:
 
 ```json
 {
@@ -291,14 +291,15 @@ Updates agents, hooks, and skills to the latest templates. Preserves your agent 
 ## What gets installed
 
 ```
-.claude/
-  agents/              # 10 agent definitions (YAML frontmatter + prompt)
+.dev-team/
+  agents/              # 12 agent definitions (YAML frontmatter + prompt)
   hooks/               # 6 quality enforcement scripts
   skills/              # 4 skill definitions
   agent-memory/        # Per-agent persistent memory (never overwritten on update)
-  dev-team-learnings.md  # Shared team knowledge (never overwritten on update)
-  dev-team.json        # Installation preferences
-  settings.json        # Hook configuration (merged additively)
+  learnings.md         # Shared team knowledge (never overwritten on update)
+  config.json          # Installation preferences
+.claude/
+  settings.json        # Hook configuration (merged additively, stays in .claude/)
 CLAUDE.md              # Project instructions (dev-team section via markers)
 ```
 

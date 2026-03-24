@@ -239,7 +239,7 @@ for (const flag of flags) {
   console.log(`  → ${flag}`);
 }
 console.log(
-  `Use the Agent tool to spawn each as a general-purpose subagent with their agent definition from .claude/agents/.`,
+  `Use the Agent tool to spawn each as a general-purpose subagent with their agent definition from .dev-team/agents/.`,
 );
 
 process.exit(0);

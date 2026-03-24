@@ -22,5 +22,5 @@ Presets always install all hooks — hooks are cheap and universally applicable.
 ## Consequences
 - Faster onboarding for teams that fit a common archetype
 - `--all` and `--preset fullstack` are functionally equivalent
-- Teams can customize after installation by editing `.claude/agents/`
+- Teams can customize after installation by editing `.dev-team/agents/`
 - New presets can be added without changing the installer architecture

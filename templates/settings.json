@@ -6,15 +6,15 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node .claude/hooks/dev-team-post-change-review.js"
+            "command": "node .dev-team/hooks/dev-team-post-change-review.js"
           },
           {
             "type": "command",
-            "command": "node .claude/hooks/dev-team-tdd-enforce.js"
+            "command": "node .dev-team/hooks/dev-team-tdd-enforce.js"
           },
           {
             "type": "command",
-            "command": "node .claude/hooks/dev-team-watch-list.js"
+            "command": "node .dev-team/hooks/dev-team-watch-list.js"
           }
         ]
       }
@@ -25,11 +25,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node .claude/hooks/dev-team-safety-guard.js"
+            "command": "node .dev-team/hooks/dev-team-safety-guard.js"
           },
           {
             "type": "command",
-            "command": "node .claude/hooks/dev-team-pre-commit-lint.js"
+            "command": "node .dev-team/hooks/dev-team-pre-commit-lint.js"
           }
         ]
       }
@@ -39,7 +39,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node .claude/hooks/dev-team-pre-commit-gate.js"
+            "command": "node .dev-team/hooks/dev-team-pre-commit-gate.js"
           }
         ]
       }

@@ -967,7 +967,7 @@ describe("dev-team-pre-commit-gate", () => {
         timeout: 5000,
         cwd: tmpDir,
       });
-      assert.ok(stdout.includes("dev-team-learnings"), "should remind about learnings");
+      assert.ok(stdout.includes("learnings.md"), "should remind about learnings");
     } finally {
       fs.rmSync(tmpDir, { recursive: true, force: true });
     }
@@ -982,10 +982,10 @@ describe("dev-team-pre-commit-gate", () => {
         encoding: "utf-8",
       });
       execFileSync("git", ["config", "user.name", "Test"], { cwd: tmpDir, encoding: "utf-8" });
-      fs.mkdirSync(path.join(tmpDir, ".claude"), { recursive: true });
+      fs.mkdirSync(path.join(tmpDir, ".dev-team"), { recursive: true });
       fs.writeFileSync(path.join(tmpDir, "handler.js"), "module.exports = {}");
-      fs.writeFileSync(path.join(tmpDir, ".claude", "dev-team-learnings.md"), "# Updated");
-      execFileSync("git", ["add", "handler.js", ".claude/dev-team-learnings.md"], {
+      fs.writeFileSync(path.join(tmpDir, ".dev-team", "learnings.md"), "# Updated");
+      execFileSync("git", ["add", "handler.js", ".dev-team/learnings.md"], {
         cwd: tmpDir,
         encoding: "utf-8",
       });
@@ -996,7 +996,7 @@ describe("dev-team-pre-commit-gate", () => {
         cwd: tmpDir,
       });
       assert.ok(
-        !stdout.includes("dev-team-learnings"),
+        !stdout.includes("learnings.md"),
         "should not remind when learnings are staged",
       );
     } finally {
@@ -1013,15 +1013,15 @@ describe("dev-team-pre-commit-gate", () => {
         encoding: "utf-8",
       });
       execFileSync("git", ["config", "user.name", "Test"], { cwd: tmpDir, encoding: "utf-8" });
-      fs.mkdirSync(path.join(tmpDir, ".claude", "agent-memory", "dev-team-voss"), {
+      fs.mkdirSync(path.join(tmpDir, ".dev-team", "agent-memory", "dev-team-voss"), {
         recursive: true,
       });
       fs.writeFileSync(path.join(tmpDir, "handler.js"), "module.exports = {}");
       fs.writeFileSync(
-        path.join(tmpDir, ".claude", "agent-memory", "dev-team-voss", "MEMORY.md"),
+        path.join(tmpDir, ".dev-team", "agent-memory", "dev-team-voss", "MEMORY.md"),
         "# Updated",
       );
-      execFileSync("git", ["add", "handler.js", ".claude/agent-memory/dev-team-voss/MEMORY.md"], {
+      execFileSync("git", ["add", "handler.js", ".dev-team/agent-memory/dev-team-voss/MEMORY.md"], {
         cwd: tmpDir,
         encoding: "utf-8",
       });
@@ -1250,7 +1250,7 @@ describe("dev-team-watch-list", () => {
     tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "dev-team-watchlist-"));
     originalCwd = process.cwd();
     process.chdir(tmpDir);
-    fs.mkdirSync(path.join(tmpDir, ".claude"), { recursive: true });
+    fs.mkdirSync(path.join(tmpDir, ".dev-team"), { recursive: true });
   });
 
   afterEach(() => {
@@ -1274,7 +1274,7 @@ describe("dev-team-watch-list", () => {
         { pattern: "src/db/", agents: ["dev-team-codd"], reason: "database code changed" },
       ],
     };
-    fs.writeFileSync(path.join(tmpDir, ".claude", "dev-team.json"), JSON.stringify(prefs));
+    fs.writeFileSync(path.join(tmpDir, ".dev-team", "config.json"), JSON.stringify(prefs));
 
     const input = JSON.stringify({ tool_input: { file_path: "/app/src/db/schema.ts" } });
     const stdout = execFileSync(process.execPath, [path.join(HOOKS_DIR, hook), input], {
@@ -1292,7 +1292,7 @@ describe("dev-team-watch-list", () => {
         { pattern: "src/db/", agents: ["dev-team-codd"], reason: "database code changed" },
       ],
     };
-    fs.writeFileSync(path.join(tmpDir, ".claude", "dev-team.json"), JSON.stringify(prefs));
+    fs.writeFileSync(path.join(tmpDir, ".dev-team", "config.json"), JSON.stringify(prefs));
 
     const input = JSON.stringify({ tool_input: { file_path: "/app/src/ui/button.tsx" } });
     const stdout = execFileSync(process.execPath, [path.join(HOOKS_DIR, hook), input], {
@@ -1314,7 +1314,7 @@ describe("dev-team-watch-list", () => {
         { pattern: "src/db/", agents: ["dev-team-codd"], reason: "database code changed" },
       ],
     };
-    fs.writeFileSync(path.join(tmpDir, ".claude", "dev-team.json"), JSON.stringify(prefs));
+    fs.writeFileSync(path.join(tmpDir, ".dev-team", "config.json"), JSON.stringify(prefs));
 
     const input = JSON.stringify({ tool_input: { file_path: "/app/schema.graphql" } });
     const stdout = execFileSync(process.execPath, [path.join(HOOKS_DIR, hook), input], {
@@ -1328,7 +1328,7 @@ describe("dev-team-watch-list", () => {
 
   it("exits 0 with empty watchLists", () => {
     const prefs = { watchLists: [] };
-    fs.writeFileSync(path.join(tmpDir, ".claude", "dev-team.json"), JSON.stringify(prefs));
+    fs.writeFileSync(path.join(tmpDir, ".dev-team", "config.json"), JSON.stringify(prefs));
 
     const input = JSON.stringify({ tool_input: { file_path: "/app/src/index.ts" } });
     const stdout = execFileSync(process.execPath, [path.join(HOOKS_DIR, hook), input], {
@@ -1346,7 +1346,7 @@ describe("dev-team-watch-list", () => {
         { pattern: "src/api/", agents: ["dev-team-voss"], reason: "api changed" },
       ],
     };
-    fs.writeFileSync(path.join(tmpDir, ".claude", "dev-team.json"), JSON.stringify(prefs));
+    fs.writeFileSync(path.join(tmpDir, ".dev-team", "config.json"), JSON.stringify(prefs));
 
     const input = JSON.stringify({ tool_input: { file_path: "/app/src/db/schema.ts" } });
     const stdout = execFileSync(process.execPath, [path.join(HOOKS_DIR, hook), input], {
@@ -1365,7 +1365,7 @@ describe("dev-team-watch-list", () => {
         { pattern: "src/api/", agents: ["dev-team-voss"], reason: "api changed" },
       ],
     };
-    fs.writeFileSync(path.join(tmpDir, ".claude", "dev-team.json"), JSON.stringify(prefs));
+    fs.writeFileSync(path.join(tmpDir, ".dev-team", "config.json"), JSON.stringify(prefs));
 
     const input = JSON.stringify({ tool_input: { file_path: "/app/src/api/users.ts" } });
     const stdout = execFileSync(process.execPath, [path.join(HOOKS_DIR, hook), input], {

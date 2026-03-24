@@ -22,7 +22,7 @@ Run a comprehensive audit of: $ARGUMENTS
 1. Spawn all three agents as **parallel background subagents** using the Agent tool with `subagent_type: "general-purpose"`.
 
 2. Each agent's prompt must include:
-   - The agent's full definition (read from `.claude/agents/<agent>.md`)
+   - The agent's full definition (read from `.dev-team/agents/<agent>.md`)
    - The scope (directory/pattern or "full codebase")
    - Instruction to produce classified findings: `[DEFECT]`, `[RISK]`, `[QUESTION]`, `[SUGGESTION]`
    - Instruction to read the actual code and tests for full context

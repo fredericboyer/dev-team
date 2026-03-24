@@ -82,8 +82,8 @@ export function createAgent(targetDir: string, name: string): void {
   const displayName = safeName.replace(/^dev-team-/, "");
   const titleName = displayName.charAt(0).toUpperCase() + displayName.slice(1);
 
-  const agentPath = path.join(targetDir, ".claude", "agents", `${fullName}.md`);
-  const memoryPath = path.join(targetDir, ".claude", "agent-memory", fullName, "MEMORY.md");
+  const agentPath = path.join(targetDir, ".dev-team", "agents", `${fullName}.md`);
+  const memoryPath = path.join(targetDir, ".dev-team", "agent-memory", fullName, "MEMORY.md");
 
   if (fileExists(agentPath)) {
     console.error(`Agent already exists: ${agentPath}`);
