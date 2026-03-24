@@ -1,0 +1,169 @@
+{
+  "version": "1.0.0",
+  "description": "Curated allowlist of trusted Claude Code skill sources. Only official framework and tool maintainer skills are included.",
+  "trustedSources": [
+    "anthropic",
+    "vercel",
+    "microsoft",
+    "expo",
+    "prisma",
+    "supabase",
+    "playwright",
+    "vuejs",
+    "rust-lang"
+  ],
+  "ecosystems": {
+    "node": {
+      "detectFiles": ["package.json"],
+      "label": "Node.js / JavaScript / TypeScript"
+    },
+    "python": {
+      "detectFiles": ["requirements.txt", "pyproject.toml", "setup.py", "Pipfile", "setup.cfg"],
+      "label": "Python"
+    },
+    "ruby": {
+      "detectFiles": ["Gemfile"],
+      "label": "Ruby"
+    },
+    "go": {
+      "detectFiles": ["go.mod"],
+      "label": "Go"
+    },
+    "rust": {
+      "detectFiles": ["Cargo.toml"],
+      "label": "Rust"
+    },
+    "java": {
+      "detectFiles": ["pom.xml", "build.gradle", "build.gradle.kts"],
+      "label": "Java / Kotlin"
+    }
+  },
+  "skills": [
+    {
+      "id": "react",
+      "name": "React Documentation Lookup",
+      "description": "Search React documentation for components, hooks, and patterns",
+      "source": "vercel",
+      "detectDeps": ["react", "react-dom"],
+      "detectFiles": [],
+      "ecosystem": "node"
+    },
+    {
+      "id": "nextjs",
+      "name": "Next.js Documentation Lookup",
+      "description": "Search Next.js docs for routing, data fetching, and deployment",
+      "source": "vercel",
+      "detectDeps": ["next"],
+      "detectFiles": ["next.config.js", "next.config.mjs", "next.config.ts"],
+      "ecosystem": "node"
+    },
+    {
+      "id": "vue",
+      "name": "Vue.js Documentation Lookup",
+      "description": "Search Vue.js docs for components, composition API, and reactivity",
+      "source": "vuejs",
+      "detectDeps": ["vue"],
+      "detectFiles": ["vue.config.js", "vite.config.ts"],
+      "ecosystem": "node"
+    },
+    {
+      "id": "expo",
+      "name": "Expo Documentation Lookup",
+      "description": "Search Expo docs for React Native, EAS Build, and native modules",
+      "source": "expo",
+      "detectDeps": ["expo"],
+      "detectFiles": ["app.json", "app.config.js", "app.config.ts"],
+      "ecosystem": "node"
+    },
+    {
+      "id": "prisma",
+      "name": "Prisma Documentation Lookup",
+      "description": "Search Prisma docs for schema modeling, migrations, and client usage",
+      "source": "prisma",
+      "detectDeps": ["prisma", "@prisma/client"],
+      "detectFiles": ["prisma/schema.prisma"],
+      "ecosystem": "node"
+    },
+    {
+      "id": "supabase",
+      "name": "Supabase Documentation Lookup",
+      "description": "Search Supabase docs for auth, database, storage, and edge functions",
+      "source": "supabase",
+      "detectDeps": ["@supabase/supabase-js"],
+      "detectFiles": ["supabase/config.toml"],
+      "ecosystem": "node"
+    },
+    {
+      "id": "playwright",
+      "name": "Playwright Test Runner",
+      "description": "Search Playwright docs for browser automation, selectors, and test patterns",
+      "source": "microsoft",
+      "detectDeps": ["@playwright/test", "playwright"],
+      "detectFiles": ["playwright.config.ts", "playwright.config.js"],
+      "ecosystem": "node"
+    },
+    {
+      "id": "angular",
+      "name": "Angular Documentation Lookup",
+      "description": "Search Angular docs for components, services, and dependency injection",
+      "source": "microsoft",
+      "detectDeps": ["@angular/core"],
+      "detectFiles": ["angular.json"],
+      "ecosystem": "node"
+    },
+    {
+      "id": "django",
+      "name": "Django Documentation Lookup",
+      "description": "Search Django docs for models, views, templates, and ORM",
+      "source": "anthropic",
+      "detectDeps": ["django", "Django"],
+      "detectFiles": ["manage.py"],
+      "ecosystem": "python"
+    },
+    {
+      "id": "fastapi",
+      "name": "FastAPI Documentation Lookup",
+      "description": "Search FastAPI docs for endpoints, dependency injection, and async patterns",
+      "source": "anthropic",
+      "detectDeps": ["fastapi"],
+      "detectFiles": [],
+      "ecosystem": "python"
+    },
+    {
+      "id": "flask",
+      "name": "Flask Documentation Lookup",
+      "description": "Search Flask docs for routing, blueprints, and extensions",
+      "source": "anthropic",
+      "detectDeps": ["flask", "Flask"],
+      "detectFiles": [],
+      "ecosystem": "python"
+    },
+    {
+      "id": "rails",
+      "name": "Ruby on Rails Documentation Lookup",
+      "description": "Search Rails docs for ActiveRecord, controllers, and migrations",
+      "source": "anthropic",
+      "detectDeps": ["rails"],
+      "detectFiles": ["config/routes.rb", "bin/rails"],
+      "ecosystem": "ruby"
+    },
+    {
+      "id": "rust-analyzer",
+      "name": "Rust Documentation Lookup",
+      "description": "Search Rust docs for ownership, traits, async, and crate APIs",
+      "source": "rust-lang",
+      "detectDeps": [],
+      "detectFiles": ["Cargo.toml"],
+      "ecosystem": "rust"
+    },
+    {
+      "id": "spring-boot",
+      "name": "Spring Boot Documentation Lookup",
+      "description": "Search Spring Boot docs for auto-configuration, REST APIs, and data access",
+      "source": "anthropic",
+      "detectDeps": ["spring-boot-starter"],
+      "detectFiles": [],
+      "ecosystem": "java"
+    }
+  ]
+}
