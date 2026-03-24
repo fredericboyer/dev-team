@@ -10,6 +10,10 @@ coverage/
 .dev-team/task.json
 .dev-team/.memory-reviewed
 
+# Claude Code runtime artifacts
+.claude/hooks/
+.claude/worktrees/
+
 # npm
 npm-debug.log*
 .npm
