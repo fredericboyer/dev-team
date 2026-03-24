@@ -30,6 +30,11 @@ interface HookDefinition {
 const ALL_AGENTS: AgentDefinition[] = [
   { label: "Voss", file: "dev-team-voss.md", description: "Backend Engineer" },
   {
+    label: "Hamilton",
+    file: "dev-team-hamilton.md",
+    description: "Infrastructure Engineer",
+  },
+  {
     label: "Mori",
     file: "dev-team-mori.md",
     description: "Frontend/UI Engineer",
@@ -96,12 +101,7 @@ const QUALITY_HOOKS: HookDefinition[] = [
   {
     label: "Pre-commit gate",
     file: "dev-team-pre-commit-gate.js",
-    description: "Remind about reviews before committing",
-  },
-  {
-    label: "Task loop",
-    file: "dev-team-task-loop.js",
-    description: "Iterative task loop with adversarial review gates",
+    description: "Memory freshness reminders before committing (advisory-only)",
   },
   {
     label: "Pre-commit lint",
@@ -126,7 +126,18 @@ const PRESETS: Record<string, PresetDefinition> = {
   backend: {
     label: "backend",
     description: "Backend-heavy — API, security, architecture, quality",
-    agents: ["Voss", "Szabo", "Knuth", "Beck", "Deming", "Brooks", "Conway", "Drucker", "Borges"],
+    agents: [
+      "Voss",
+      "Hamilton",
+      "Szabo",
+      "Knuth",
+      "Beck",
+      "Deming",
+      "Brooks",
+      "Conway",
+      "Drucker",
+      "Borges",
+    ],
     hooks: QUALITY_HOOKS.map((h) => h.label),
   },
   fullstack: {
@@ -169,16 +180,17 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
 
   // Step 1: Detect existing state
   const claudeDir = path.join(targetDir, ".claude");
-  const agentsDir = path.join(claudeDir, "agents");
-  const hooksDir = path.join(claudeDir, "hooks");
-  const skillsDir = path.join(claudeDir, "skills");
-  const memoryDir = path.join(claudeDir, "agent-memory");
+  const devTeamDir = path.join(targetDir, ".dev-team");
+  const agentsDir = path.join(devTeamDir, "agents");
+  const hooksDir = path.join(devTeamDir, "hooks");
+  const skillsDir = path.join(devTeamDir, "skills");
+  const memoryDir = path.join(devTeamDir, "agent-memory");
   const settingsPath = path.join(claudeDir, "settings.json");
   const claudeMdPath = path.join(targetDir, "CLAUDE.md");
-  const prefsPath = path.join(claudeDir, "dev-team.json");
+  const prefsPath = path.join(devTeamDir, "config.json");
 
   console.log("Detected:");
-  console.log(`  .claude/ directory: ${dirExists(claudeDir) ? "exists" : "will be created"}`);
+  console.log(`  .dev-team/ directory: ${dirExists(devTeamDir) ? "exists" : "will be created"}`);
   console.log(
     `  CLAUDE.md: ${fileExists(claudeMdPath) ? "exists (will merge)" : "will be created"}`,
   );
@@ -280,7 +292,7 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
 
   // Step 8: Create shared team learnings
   const learningsSrc = path.join(templates, "dev-team-learnings.md");
-  const learningsDest = path.join(claudeDir, "dev-team-learnings.md");
+  const learningsDest = path.join(devTeamDir, "learnings.md");
   if (!fileExists(learningsDest)) {
     copyFile(learningsSrc, learningsDest);
   }
@@ -393,7 +405,7 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
   }
 
   console.log("Next steps:");
-  console.log("  1. Review installed agents in .claude/agents/");
+  console.log("  1. Review installed agents in .dev-team/agents/");
   console.log("  2. Customize agent personas and focus areas to fit your project");
   if (!runScan) {
     console.log("  3. Run @dev-team-deming to scan for additional tooling recommendations");

@@ -6,7 +6,7 @@ Status: accepted
 Claude Code hooks execute shell commands. Shell scripts (.sh) work on macOS and Linux but not on Windows. Dev-team targets engineering organizations regardless of their OS.
 
 ## Decision
-All hooks are Node.js scripts (.js) invoked with `node .claude/hooks/dev-team-*.js`. Since `npx` requires Node.js, this adds no new dependency for any platform.
+All hooks are Node.js scripts (.js) invoked with `node .dev-team/hooks/dev-team-*.js`. Since `npx` requires Node.js, this adds no new dependency for any platform.
 
 ## Consequences
 - Hooks work on macOS, Linux, and Windows without modification

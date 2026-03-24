@@ -5,7 +5,7 @@ Status: accepted
 ## Context
 Claude Code supports two distribution mechanisms:
 - **Plugins**: Installed via marketplace, cached in `~/.claude/plugins/cache/` (read-only), auto-namespaced, auto-updated
-- **CLI installer**: Copies files directly to `.claude/agents/`, `.claude/hooks/`, etc. (user-owned, editable)
+- **CLI installer**: Copies files directly to `.dev-team/agents/`, `.dev-team/hooks/`, etc. (user-owned, editable)
 
 Users need to be able to:
 - Edit agent personas (tweak obsessions, change tools, adjust personality)
