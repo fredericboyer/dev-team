@@ -152,6 +152,12 @@ Thresholds:
 - **Needs attention**: 0 defects, 3+ risks OR 1 defect
 - **Unhealthy**: 2+ defects
 
+## Completion
+
+After the health report is delivered:
+1. Spawn **@dev-team-borges** (Librarian) to review memory freshness and capture any learnings from the assessment findings. This is mandatory.
+2. Include Borges's recommendations in the final report.
+
 ## When to run
 
 - **Periodically** — monthly or after a burst of activity
