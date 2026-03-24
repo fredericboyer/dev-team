@@ -30,7 +30,8 @@ Based on the classification, select:
 **Implementing agent** (one):
 | Domain | Agent | When |
 |--------|-------|------|
-| Backend, API, data, infrastructure | @dev-team-voss | API design, data modeling, system architecture |
+| Backend, API, data | @dev-team-voss | API design, data modeling, system architecture |
+| Infrastructure, IaC, containers, deployment | @dev-team-hamilton | Dockerfiles, CI/CD, Terraform, Helm, k8s, health checks, monitoring |
 | Frontend, UI, components | @dev-team-mori | Components, accessibility, UX patterns |
 | Tests, TDD | @dev-team-beck | Writing tests, translating audit findings into test cases |
 | Tooling, CI/CD, hooks, config | @dev-team-deming | Linters, formatters, CI/CD, automation |

@@ -74,20 +74,14 @@ if (API_PATTERNS.some((p) => p.test(fullPath))) {
   flags.push("@dev-team-mori (API contract may affect UI)");
 }
 
-// Config/infra patterns → flag for Voss
-const INFRA_PATTERNS = [
-  /docker/,
-  /\.env/,
-  /config/,
-  /migration/,
-  /database/,
-  /\.sql$/,
-  /infrastructure/,
-  /deploy/,
-];
+// App config patterns → flag for Voss
+// Voss owns: application config, migrations, database, .env (app-specific)
+// Intentional overlap: Docker files trigger Hamilton below; .env files trigger
+// Voss here for app-config review. Both perspectives are valuable.
+const APP_CONFIG_PATTERNS = [/\.env/, /config/, /migration/, /database/, /\.sql$/];
 
-if (INFRA_PATTERNS.some((p) => p.test(fullPath))) {
-  flags.push("@dev-team-voss (architectural/config change)");
+if (APP_CONFIG_PATTERNS.some((p) => p.test(fullPath))) {
+  flags.push("@dev-team-voss (app config/data change)");
 }
 
 // Tooling patterns → flag for Deming

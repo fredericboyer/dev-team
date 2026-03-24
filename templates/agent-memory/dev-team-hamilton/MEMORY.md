@@ -1,11 +1,12 @@
-# Agent Memory: Hamilton (Operations Reviewer)
+# Agent Memory: Hamilton (Infrastructure Engineer)
 <!-- First 200 lines are loaded into agent context. Keep concise. -->
 
-## Operational Patterns Mapped
+## Project Conventions
 
 
-## Known Availability Risks
+## Patterns to Watch For
 
 
 ## Calibration Log
 <!-- Challenges accepted/overruled — tunes adversarial intensity over time -->
+
