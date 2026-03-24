@@ -10,10 +10,10 @@ import {
   mergeClaudeMd,
   listSubdirectories,
   getPackageVersion,
-} from "./files";
-import type { HookSettings, HookMatcher } from "./files";
-import * as prompts from "./prompts";
-import { scanProject, formatScanReport } from "./scan";
+} from "./files.js";
+import type { HookSettings, HookMatcher } from "./files.js";
+import * as prompts from "./prompts.js";
+import { scanProject, formatScanReport } from "./scan.js";
 
 interface AgentDefinition {
   label: string;
