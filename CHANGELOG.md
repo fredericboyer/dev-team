@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-03-24
+
+### Added
+- Skill recommendations during `dev-team init` — detects project stack (React, Express, Django, etc.) and recommends relevant community skills from trusted sources (#127).
+- Research-current-practices step added to Beck, Tufte, and Conway agents — agents now research ecosystem conventions before proposing solutions (#141).
+
+### Changed
+- Drucker now owns the full PR lifecycle through merge — tasks and reviews do not end at PR creation, they end at merge. Includes worktree cleanup and merge failure reporting (#144).
+
+### Fixed
+- Fixed stale learnings file path in `templates/CLAUDE.md` — was pointing to old `.claude/` location (#139).
+- Added `security-status` skill to `templates/CLAUDE.md` skills list — was missing from the installed skills documentation (#140).
+- Fixed agent memory enforcement — agents now write to MEMORY.md files instead of just outputting learnings in responses. Borges memory gate blocks completion when agent memory is empty (#142).
+
+### Internal
+- 262 tests (was 262). 8 skills total (was 7, added skill-recommendations). 12 agents.
+
 ## [0.7.0] - 2026-03-24
 
 ### Added
