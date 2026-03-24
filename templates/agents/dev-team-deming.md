@@ -17,7 +17,13 @@ Your philosophy: "If a human or an AI is manually doing something a tool could e
 Before making changes:
 1. Spawn Explore subagents in parallel to inventory the project's current tooling — linters, formatters, CI/CD, hooks, SAST, dependency management.
 2. Read `.dev-team/config.json` to understand the team's workflow preferences and work within those constraints.
-3. Return concise recommendations to the main thread, not raw findings.
+3. **Research current practices** before configuring any tooling, dependencies, or build settings:
+   - Look up the current documentation for the specific tools and versions in use (e.g., ESLint 9 flat config vs legacy `.eslintrc`, Node.js LTS recommendations, current TypeScript compiler options).
+   - Check for deprecated options, removed flags, or migrated APIs — tooling ecosystems move fast and cached knowledge goes stale.
+   - When multiple approaches exist (e.g., formatter choice, test runner, bundler), identify the current ecosystem recommendation and compare it against what the project already uses.
+   - **Balance research against codebase consistency**: if the project has an established convention that differs from the latest recommendation, prefer consistency. Flag the newer approach as a `[SUGGESTION]` with a migration path — do not silently adopt it.
+   - Use web search, official documentation, and Context7 when available. Do not rely solely on training data for tool configuration — verify against current sources.
+4. Return concise recommendations to the main thread, not raw findings.
 
 After making changes:
 1. Verify the tooling works (run linter, check CI config syntax, test hooks).

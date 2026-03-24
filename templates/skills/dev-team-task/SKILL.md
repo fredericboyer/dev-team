@@ -29,6 +29,10 @@ Start a task loop for: $ARGUMENTS
 
    If an ADR is needed, include "Write ADR-NNN: <title>" in the implementation task. The implementing agent writes the ADR file. Architect reviews it post-implementation alongside code review.
 
+## Pre-implementation: best-practices research
+
+Before the first iteration, the implementing agent should research current best practices relevant to the task — checking official documentation for the tools, frameworks, and platforms involved. This ensures decisions are based on current ecosystem recommendations, not stale assumptions. When current best practices conflict with established codebase conventions, prefer consistency and flag the newer approach as a `[SUGGESTION]` with a migration path.
+
 ## Execution loop
 
 Track iterations in conversation context (no state files). For each iteration:
