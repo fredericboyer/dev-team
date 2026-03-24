@@ -60,12 +60,22 @@ const MIGRATIONS: Migration[] = [
   },
 ];
 
+export function compareSemver(a: string, b: string): number {
+  const pa = a.split(".").map((n) => parseInt(n, 10));
+  const pb = b.split(".").map((n) => parseInt(n, 10));
+  for (let i = 0; i < 3; i++) {
+    const diff = (pa[i] || 0) - (pb[i] || 0);
+    if (diff !== 0) return diff;
+  }
+  return 0;
+}
+
 function runMigrations(prefs: Preferences, fromVersion: string, devTeamDir: string): string[] {
   const log: string[] = [];
 
   for (const migration of MIGRATIONS) {
     // Skip migrations for versions already applied
-    if (fromVersion >= migration.version) continue;
+    if (compareSemver(fromVersion, migration.version) >= 0) continue;
 
     if (migration.agentRenames) {
       for (const rename of migration.agentRenames) {
@@ -245,7 +255,7 @@ export async function update(targetDir: string): Promise<void> {
   const oldPrefsPath = path.join(claudeDir, "dev-team.json");
   const newPrefsPath = path.join(devTeamDir, "config.json");
 
-  const needsMigration = fileExists(oldPrefsPath) && !dirExists(devTeamDir);
+  const needsMigration = fileExists(oldPrefsPath) && !fileExists(newPrefsPath);
 
   if (needsMigration) {
     console.log("Migrating from .claude/ to .dev-team/ directory structure...\n");
