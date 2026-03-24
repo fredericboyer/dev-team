@@ -2,9 +2,9 @@
 
 /**
  * dev-team-pre-commit-gate.js
- * TaskCompleted hook.
+ * Pre-commit hook — memory freshness gate.
  *
- * When a task completes, checks whether memory files need updating.
+ * Runs before each commit. Checks whether memory files need updating.
  * Blocks (exit 1) when implementation files are staged without memory updates.
  * Override: create an empty `.dev-team/.memory-reviewed` file to acknowledge
  * that memory was reviewed and nothing needs updating.
@@ -98,8 +98,8 @@ if (hasImplFiles && !hasMemoryUpdates) {
   let hasOverride = false;
   try {
     const stat = fs.lstatSync(markerPath);
-    // Reject symlinks for safety
-    hasOverride = !stat.isSymbolicLink();
+    // Require regular file — reject symlinks, directories, FIFOs, etc.
+    hasOverride = stat.isFile() && !stat.isSymbolicLink();
   } catch {
     // No marker file
   }

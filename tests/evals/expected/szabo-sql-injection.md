@@ -15,7 +15,7 @@
 - **Fix**: Use parameterized queries with proper LIKE escaping
 
 ### [DEFECT] SQL injection via concatenation in deleteUser (two statements)
-- **Lines**: 33-34
+- **Lines**: 32-33
 - **Issue**: User-supplied `id` is concatenated into two DELETE statements without validation
 - **Attack**: `1 OR 1=1` deletes all users and sessions
 - **Fix**: Validate `id` is an integer, use parameterized queries

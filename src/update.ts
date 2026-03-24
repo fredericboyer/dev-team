@@ -170,13 +170,19 @@ function migrateFromClaude(targetDir: string): string[] {
     { from: path.join(claudeDir, "skills"), to: path.join(devTeamDir, "skills") },
   ];
 
+  // Protected files that must never be overwritten during migration
+  const protectedPatterns = ["learnings.md", "MEMORY.md"];
+
   for (const { from, to } of dirMappings) {
     if (dirExists(from)) {
       const files = listFilesRecursive(from);
       for (const filePath of files) {
         const relativePath = path.relative(from, filePath);
         const destPath = path.join(to, relativePath);
-        copyFile(filePath, destPath);
+        // Never overwrite existing files in .dev-team/ (partial migration safety)
+        if (!fileExists(destPath)) {
+          copyFile(filePath, destPath);
+        }
       }
       log.push(`Migrated ${path.basename(from)}/ → .dev-team/${path.basename(to)}/`);
     }
@@ -193,7 +199,11 @@ function migrateFromClaude(targetDir: string): string[] {
 
   for (const { from, to } of fileMappings) {
     if (fileExists(from)) {
-      copyFile(from, to);
+      const isProtected = protectedPatterns.some((p) => to.endsWith(p));
+      // Never overwrite protected files (learnings, memory)
+      if (!isProtected || !fileExists(to)) {
+        copyFile(from, to);
+      }
       log.push(`Migrated ${path.basename(from)} → .dev-team/${path.basename(to)}`);
     }
   }
