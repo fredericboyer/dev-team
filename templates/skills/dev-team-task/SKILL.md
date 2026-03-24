@@ -84,6 +84,7 @@ Before starting work, check for open security alerts: run `/dev-team:security-st
 When the loop exits:
 1. You MUST spawn **@dev-team-borges** (Librarian) as the final step to review memory freshness, cross-agent coherence, and system improvement opportunities. Do NOT skip this.
 2. If Borges was not spawned, the task is INCOMPLETE.
-3. Summarize what was accomplished across all iterations.
-4. Report any remaining `[RISK]` or `[SUGGESTION]` items, including Borges's recommendations.
-5. Write key learnings to agent MEMORY.md files.
+3. **Borges memory gate**: If Borges reports that any implementing agent's MEMORY.md is empty or contains only boilerplate after a task, this is a **[DEFECT]** that blocks task completion. The implementing agent must write substantive learnings before the task can be marked done. Empty agent memory after a task means the enforcement pipeline failed.
+4. Summarize what was accomplished across all iterations.
+5. Report any remaining `[RISK]` or `[SUGGESTION]` items, including Borges's recommendations.
+6. Write key learnings to agent MEMORY.md files.

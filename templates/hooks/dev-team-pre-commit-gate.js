@@ -88,9 +88,50 @@ const hasImplFiles = files.some(
   (f) => /\.(js|ts|jsx|tsx|py|rb|go|java|rs)$/.test(f) && !/\.(test|spec)\./.test(f),
 );
 
-const hasMemoryUpdates = files.some(
+const memoryFiles = files.filter(
   (f) => f.endsWith("learnings.md") || /agent-memory\/.*MEMORY\.md$/.test(f),
 );
+
+const hasMemoryUpdates = memoryFiles.length > 0;
+
+/**
+ * Check whether a memory file has substantive content beyond boilerplate.
+ * Returns true if the file contains at least one non-empty, non-header,
+ * non-boilerplate line.
+ */
+function hasSubstantiveContent(filePath) {
+  try {
+    const absPath = path.join(process.cwd(), filePath);
+    // Reject symlinks to avoid reading unintended files
+    const stat = fs.lstatSync(absPath);
+    if (stat.isSymbolicLink()) return false;
+
+    const content = fs.readFileSync(absPath, "utf-8");
+    const lines = content.split("\n");
+    const substantiveLines = lines.filter((line) => {
+      const trimmed = line.trim();
+      if (!trimmed) return false; // empty line
+      if (/^#+\s/.test(trimmed)) return false; // markdown header
+      if (trimmed === "---") return false; // horizontal rule / frontmatter delimiter
+      return true;
+    });
+    return substantiveLines.length > 0;
+  } catch {
+    return false; // file doesn't exist or can't be read — not substantive
+  }
+}
+
+// If memory files are staged, verify they have substantive content
+if (hasMemoryUpdates) {
+  const allSubstantive = memoryFiles.every((f) => hasSubstantiveContent(f));
+  if (!allSubstantive) {
+    console.error(
+      "[dev-team pre-commit] BLOCKED: Memory files were staged but contain only boilerplate (headers, empty lines). " +
+        "Add substantive content — patterns, conventions, calibration notes, or decisions learned from this work.",
+    );
+    process.exit(1);
+  }
+}
 
 if (hasImplFiles && !hasMemoryUpdates) {
   // Check for .memory-reviewed override marker

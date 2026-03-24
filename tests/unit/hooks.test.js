@@ -1059,7 +1059,10 @@ describe("dev-team-pre-commit-gate", () => {
       execFileSync("git", ["config", "user.name", "Test"], { cwd: tmpDir, encoding: "utf-8" });
       fs.mkdirSync(path.join(tmpDir, ".dev-team"), { recursive: true });
       fs.writeFileSync(path.join(tmpDir, "handler.js"), "module.exports = {}");
-      fs.writeFileSync(path.join(tmpDir, ".dev-team", "learnings.md"), "# Updated");
+      fs.writeFileSync(
+        path.join(tmpDir, ".dev-team", "learnings.md"),
+        "# Updated\nWe use PostgreSQL for persistence.",
+      );
       execFileSync("git", ["add", "handler.js", ".dev-team/learnings.md"], {
         cwd: tmpDir,
         encoding: "utf-8",
@@ -1091,7 +1094,7 @@ describe("dev-team-pre-commit-gate", () => {
       fs.writeFileSync(path.join(tmpDir, "handler.js"), "module.exports = {}");
       fs.writeFileSync(
         path.join(tmpDir, ".dev-team", "agent-memory", "dev-team-voss", "MEMORY.md"),
-        "# Updated",
+        "# Updated\nDiscovered that error handling uses custom Result type.",
       );
       execFileSync("git", ["add", "handler.js", ".dev-team/agent-memory/dev-team-voss/MEMORY.md"], {
         cwd: tmpDir,
@@ -1104,6 +1107,42 @@ describe("dev-team-pre-commit-gate", () => {
         cwd: tmpDir,
       });
       assert.equal(stdout, "", "should not block when agent memory is staged");
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  it("blocks when memory file has only boilerplate headers", () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "dev-team-precommit-"));
+    try {
+      execFileSync("git", ["init"], { cwd: tmpDir, encoding: "utf-8" });
+      execFileSync("git", ["config", "user.email", "test@test.com"], {
+        cwd: tmpDir,
+        encoding: "utf-8",
+      });
+      execFileSync("git", ["config", "user.name", "Test"], { cwd: tmpDir, encoding: "utf-8" });
+      fs.mkdirSync(path.join(tmpDir, ".dev-team", "agent-memory", "dev-team-voss"), {
+        recursive: true,
+      });
+      fs.writeFileSync(path.join(tmpDir, "handler.js"), "module.exports = {}");
+      fs.writeFileSync(
+        path.join(tmpDir, ".dev-team", "agent-memory", "dev-team-voss", "MEMORY.md"),
+        "# Voss Memory\n\n## Learnings\n\n",
+      );
+      execFileSync("git", ["add", "handler.js", ".dev-team/agent-memory/dev-team-voss/MEMORY.md"], {
+        cwd: tmpDir,
+        encoding: "utf-8",
+      });
+
+      execFileSync(process.execPath, [path.join(HOOKS_DIR, hook)], {
+        encoding: "utf-8",
+        timeout: 5000,
+        cwd: tmpDir,
+      });
+      assert.fail("Should exit 1 when memory file has only boilerplate");
+    } catch (err) {
+      assert.equal(err.status, 1, "should block with exit 1");
+      assert.ok(err.stderr.includes("boilerplate"), "should mention boilerplate in error");
     } finally {
       fs.rmSync(tmpDir, { recursive: true, force: true });
     }
