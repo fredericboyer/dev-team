@@ -2,7 +2,7 @@
 Date: 2026-03-22
 Status: superseded
 
-**Superseded by**: Issue #113 — the tracking file (`dev-team-review-pending.json`) was removed because it caused orphaned-file bugs that blocked commits. The post-change-review hook now relies solely on stateless stdout output and CLAUDE.md directives to enforce agent spawning. The pre-commit gate no longer checks for a tracking file.
+**Superseded by**: Issue #113 — the tracking file (`.dev-team/review-pending.json`) was removed because it caused orphaned-file bugs that blocked commits. The post-change-review hook now relies solely on stateless stdout output and CLAUDE.md directives to enforce agent spawning. The pre-commit gate no longer checks for a tracking file.
 
 ## Context
 Prior to this change, all review hooks were advisory — they printed "Flag for review: @dev-team-szabo" to stdout and exited 0. These messages scrolled past in hook output and were consistently ignored. The result: README went stale across 3 releases, Release agent never reviewed changelogs, Docs agent was never invoked.
