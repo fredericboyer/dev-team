@@ -10,12 +10,13 @@
 
 ## Process
 
-- **Security check at session start.** Run `/dev-team:security-status` at the beginning of every session to check code scanning, Dependabot, and secret scanning alerts. Also run before releases.
 - **Before merging a PR, ALWAYS check for Copilot review comments** (`gh api repos/{owner}/{repo}/pulls/{pr}/reviews` and `gh api repos/{owner}/{repo}/pulls/{pr}/comments`). Address any findings before merging.
 - Always use `/dev-team:task` for implementation work — dogfood the agents.
-- Spawn review agents as `general-purpose` subagents with the actual agent definition loaded from `.claude/agents/dev-team-*.md`. Do NOT use `pr-review-toolkit:*` as proxies — they have different behavior.
+- Spawn review agents as `general-purpose` subagents with the actual agent definition loaded from `.dev-team/agents/dev-team-*.md`. Do NOT use `pr-review-toolkit:*` as proxies — they have different behavior.
 - Don't ask for approval to continue between tasks. Just do the work. Only pause for critical decisions.
 - Hooks over CLAUDE.md for enforcement (ADR-001). If agents keep flagging the same pattern, it should be a hook.
+- Security check at session start is now enforced via skill preambles (task/review/audit). No longer needs manual reminder.
+- "Be vocal about learnings" is now enforced via mandatory Learnings Output section in all implementing agent definitions.
 
 ## Known Tech Debt
 
@@ -27,10 +28,16 @@
 - 273 tests total (was 117 at v0.3.0)
 - 12 agents: Voss, Mori, Szabo, Knuth, Beck, Deming, Tufte, Brooks, Conway, Drucker, Borges, Hamilton
 - 5 skills: challenge, task, review, audit, security-status
-- 6 hooks: TDD enforce, safety guard, post-change review, pre-commit gate, pre-commit lint, watch list
+- 6 hooks: TDD enforce, safety guard, post-change review, pre-commit gate (blocking), pre-commit lint, watch list
 - 3 always-on reviewers: Szabo (security), Knuth (correctness), Brooks (architecture + quality attributes)
 - CI: 3 OS x 3 Node versions + lint + format + agent validation + hook validation.
 - Always run `npm run format` before committing new `.ts` files — oxfmt formatting is checked in CI.
+
+### Learning capture metrics
+- Non-empty agent memory files: 0 of 12 (target: all agents should have calibration data after first few tasks)
+- Last Borges run: not tracked yet (Borges spawning is now enforced via skill definitions)
+- Pre-commit gate: blocks commits without memory updates (override via `.dev-team/.memory-reviewed`)
+- All 7 implementing agents have mandatory Learnings Output section
 
 ## Overruled Challenges
 <!-- When the human overrules an agent, record why — prevents re-flagging -->

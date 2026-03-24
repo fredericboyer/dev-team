@@ -67,8 +67,13 @@ Group by severity:
 
 State the verdict clearly. List what must be fixed for approval if requesting changes.
 
+### Security preamble
+
+Before starting the review, check for open security alerts: run `/dev-team:security-status` if available, or check `gh api repos/{owner}/{repo}/code-scanning/alerts?state=open` and `gh api repos/{owner}/{repo}/dependabot/alerts?state=open`. Flag any critical findings in the review report.
+
 ### Completion
 
 After the review report is delivered:
-1. Spawn **@dev-team-borges** (Librarian) to review memory freshness and capture any learnings from the review findings. This is mandatory.
-2. Include Borges's recommendations in the final report.
+1. You MUST spawn **@dev-team-borges** (Librarian) as the final step to review memory freshness and capture any learnings from the review findings. Do NOT skip this.
+2. If Borges was not spawned, the review is INCOMPLETE.
+3. Include Borges's recommendations in the final report.
