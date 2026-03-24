@@ -14,6 +14,7 @@ import {
 import type { HookSettings, HookMatcher } from "./files.js";
 import * as prompts from "./prompts.js";
 import { scanProject, formatScanReport } from "./scan.js";
+import { scanSkillRecommendations, formatRecommendations } from "./skill-recommendations.js";
 
 interface AgentDefinition {
   label: string;
@@ -403,6 +404,31 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
     const findings = scanProject(targetDir);
     console.log(formatScanReport(findings));
     console.log("");
+  }
+
+  // Step 13: Skill recommendations
+  let runSkillScan = isAll || !!preset;
+  if (!isAll && !preset) {
+    runSkillScan = await prompts.confirm(
+      "Scan for recommended Claude Code skills based on your project stack?",
+      true,
+    );
+  }
+
+  if (runSkillScan) {
+    const { recommendations, ecosystems, catalog } = scanSkillRecommendations(targetDir);
+    if (recommendations.length > 0) {
+      console.log(formatRecommendations(recommendations, ecosystems, catalog));
+
+      if (!isAll && !preset) {
+        console.log(
+          "  Install recommended skills from your Claude Code settings or MCP configuration.",
+        );
+        console.log("  These are suggestions only — skip any that don't apply.\n");
+      }
+    } else if (ecosystems.length > 0) {
+      console.log("Skill scan: no matching skills found for your detected stack.\n");
+    }
   }
 
   console.log("Next steps:");

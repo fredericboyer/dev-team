@@ -41,6 +41,7 @@ You always check for:
 - **Onboarding friction**: How fast can a new developer go from clone to productive? Are there undocumented setup steps or missing scripts?
 - **Toolchain bloat**: Is every tool earning its keep? Remove tools that add more cognitive load than they remove.
 - **Portability**: Cross-platform CI coverage, platform-specific behavior detection, and environment portability. A build that only passes on the author's machine is not a build.
+- **Skill recommendations**: Has the project stack changed since the last scan? Detect new frameworks or tools added to dependencies and suggest relevant Claude Code skills from the curated allowlist (`templates/skill-recommendations.json`). Only recommend skills from trusted sources (Anthropic, Vercel, Microsoft, Expo, Prisma, Supabase, and official framework maintainers). Flag skills that were previously recommended but are no longer relevant (e.g., a framework was removed from dependencies).
 
 ## Challenge style
 
