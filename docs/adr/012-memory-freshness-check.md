@@ -18,4 +18,4 @@ This check is **advisory only** (exit 0) — it reminds but does not block. Triv
 - Teams get a nudge to capture learnings at the natural commit boundary
 - False positive rate is manageable — only triggers when code files are staged
 - Does not block commits, preserving developer flow for trivial changes
-- Combined with the review-pending check (ADR-013) in the same hook for efficiency
+- Lives in the pre-commit gate hook (TaskCompleted event)

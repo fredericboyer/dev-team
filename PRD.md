@@ -71,8 +71,9 @@ Rules: concrete evidence required, one exchange before escalation, human decides
 | `dev-team-safety-guard.js` | PreToolUse (Bash) | Blocks rm -rf, force push, DROP TABLE, etc. |
 | `dev-team-tdd-enforce.js` | PostToolUse (Edit/Write) | Blocks impl changes without corresponding tests |
 | `dev-team-post-change-review.js` | PostToolUse (Edit/Write) | Flags which agents should review based on changed files |
-| `dev-team-pre-commit-gate.js` | TaskCompleted | Reminds about review agents before committing |
-| `dev-team-task-loop.js` | Stop | Iterative task loop with adversarial review gates |
+| `dev-team-pre-commit-gate.js` | TaskCompleted | Memory freshness check before committing |
+| `dev-team-pre-commit-lint.js` | PreToolUse (Bash) | Lint + format checks before git commit |
+| `dev-team-watch-list.js` | PostToolUse (Edit/Write) | Custom pattern-to-agent matching |
 
 All hooks are Node.js scripts — work on macOS, Linux, and Windows.
 

@@ -101,12 +101,7 @@ const QUALITY_HOOKS: HookDefinition[] = [
   {
     label: "Pre-commit gate",
     file: "dev-team-pre-commit-gate.js",
-    description: "Remind about reviews before committing",
-  },
-  {
-    label: "Task loop",
-    file: "dev-team-task-loop.js",
-    description: "Iterative task loop with adversarial review gates",
+    description: "Memory freshness reminders before committing (advisory-only)",
   },
   {
     label: "Pre-commit lint",
@@ -117,11 +112,6 @@ const QUALITY_HOOKS: HookDefinition[] = [
     label: "Watch list",
     file: "dev-team-watch-list.js",
     description: "Auto-spawn agents when file patterns match (configurable)",
-  },
-  {
-    label: "Parallel loop",
-    file: "dev-team-parallel-loop.js",
-    description: "Enforce parallel review wave protocol (ADR-019)",
   },
 ];
 

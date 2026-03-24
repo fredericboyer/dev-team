@@ -41,7 +41,6 @@ describe("fresh project installation", () => {
       fs.existsSync(path.join(tmpDir, ".claude", "hooks", "dev-team-post-change-review.js")),
     );
     assert.ok(fs.existsSync(path.join(tmpDir, ".claude", "hooks", "dev-team-pre-commit-gate.js")));
-    assert.ok(fs.existsSync(path.join(tmpDir, ".claude", "hooks", "dev-team-task-loop.js")));
 
     // Skills
     assert.ok(
@@ -92,7 +91,6 @@ describe("fresh project installation", () => {
     assert.ok(settings.hooks.PostToolUse, "should have PostToolUse hooks");
     assert.ok(settings.hooks.PreToolUse, "should have PreToolUse hooks");
     assert.ok(settings.hooks.TaskCompleted, "should have TaskCompleted hooks");
-    assert.ok(settings.hooks.Stop, "should have Stop hooks");
   });
 
   it("CLAUDE.md contains dev-team markers", async () => {

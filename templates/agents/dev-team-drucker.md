@@ -102,7 +102,7 @@ When working on multiple issues simultaneously (see ADR-019):
 
 1. **Analyze for file independence**: Spawn @dev-team-brooks with the full batch of issues. Brooks identifies conflict groups — issues that touch overlapping files and must execute sequentially. Independent issues can proceed in parallel.
 
-2. **Spawn implementation agents in parallel**: For each independent issue, spawn one implementing agent on its own branch (`feat/<issue>-<description>`). Each agent works without awareness of other parallel agents. Track state in `.claude/dev-team-parallel.json`.
+2. **Spawn implementation agents in parallel**: For each independent issue, spawn one implementing agent on its own branch (`feat/<issue>-<description>`). Each agent works without awareness of other parallel agents.
 
 3. **Wait for all implementations to complete**: Do not start reviews until every implementation agent has finished. This is the synchronization barrier.
 

@@ -38,9 +38,9 @@ graph TB
         H1["safety-guard\nBlocks dangerous commands"]
         H2["tdd-enforce\nBlocks code without tests"]
         H3["post-change-review\nFlags + spawns reviewers"]
-        H4["pre-commit-gate\nBlocks if reviews pending"]
+        H4["pre-commit-gate\nMemory freshness check"]
         H5["watch-list\nCustom pattern → agent"]
-        H6["task-loop\nIteration management"]
+        H6["pre-commit-lint\nLint + format checks"]
     end
 
     subgraph Mem["Persistent Memory"]

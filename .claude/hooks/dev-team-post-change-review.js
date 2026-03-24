@@ -233,30 +233,6 @@ if (flags.length === 0) {
   process.exit(0);
 }
 
-// Track which agents have been flagged this session (for pre-commit gate to verify)
-const fs = require("fs");
-const trackingPath = path.join(process.cwd(), ".claude", "dev-team-review-pending.json");
-let pending = [];
-try {
-  pending = JSON.parse(fs.readFileSync(trackingPath, "utf-8"));
-} catch {
-  // No tracking file yet
-}
-
-for (const flag of flags) {
-  const agent = flag.split(" ")[0]; // e.g. "@dev-team-szabo"
-  if (!pending.includes(agent)) {
-    pending.push(agent);
-  }
-}
-
-try {
-  fs.mkdirSync(path.dirname(trackingPath), { recursive: true });
-  fs.writeFileSync(trackingPath, JSON.stringify(pending, null, 2));
-} catch {
-  // Best effort — don't fail the hook over tracking
-}
-
 // Output as a DIRECTIVE, not a suggestion. CLAUDE.md instructs the LLM to act on this.
 console.log(`[dev-team] ACTION REQUIRED — spawn these agents as background reviewers:`);
 for (const flag of flags) {
