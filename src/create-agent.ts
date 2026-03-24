@@ -1,5 +1,5 @@
 import path from "path";
-import { fileExists, writeFile } from "./files";
+import { fileExists, writeFile } from "./files.js";
 
 const AGENT_TEMPLATE = `---
 name: FULLNAME

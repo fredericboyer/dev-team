@@ -11,10 +11,10 @@ import {
   listSubdirectories,
   listFilesRecursive,
   getPackageVersion,
-} from "./files";
-import type { HookSettings, HookMatcher } from "./files";
+} from "./files.js";
+import type { HookSettings, HookMatcher } from "./files.js";
 import fs from "fs";
-import { ALL_AGENTS, QUALITY_HOOKS } from "./init";
+import { ALL_AGENTS, QUALITY_HOOKS } from "./init.js";
 
 interface AgentRename {
   oldLabel: string;

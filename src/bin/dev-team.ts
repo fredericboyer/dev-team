@@ -1,9 +1,9 @@
-import { run } from "../init";
-import { update } from "../update";
-import { createAgent } from "../create-agent";
-import { doctor } from "../doctor";
-import { status } from "../status";
-import { getPackageVersion } from "../files";
+import { run } from "../init.js";
+import { update } from "../update.js";
+import { createAgent } from "../create-agent.js";
+import { doctor } from "../doctor.js";
+import { status } from "../status.js";
+import { getPackageVersion } from "../files.js";
 
 const args = process.argv.slice(2);
 const command = args[0];
