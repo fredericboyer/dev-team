@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.1] - 2026-03-24
+
+### Changed
+- Generalized Drucker's task completion from PR-merge-specific to deliverable-focused — work is done when the deliverable is delivered, not just when a PR is merged. Projects can still use `/dev-team:merge` if configured, but it is no longer hardcoded as the default (#149).
+- Review skill no longer auto-triggers merge on Approve verdict — reviews report verdicts, they don't take merge actions (#149).
+
+### Internal
+- 262 tests. 8 skills. 12 agents.
+
 ## [0.8.0] - 2026-03-24
 
 ### Added
