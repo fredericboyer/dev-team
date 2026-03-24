@@ -78,4 +78,3 @@ After the review report is delivered:
 2. If Borges was not spawned, the review is INCOMPLETE.
 3. **Borges memory gate**: If Borges reports that any participating agent's MEMORY.md is empty or contains only boilerplate, this is a **[DEFECT]** that blocks review completion. The agent must write substantive learnings before the review can be marked done.
 4. Include Borges's recommendations in the final report.
-5. **If the verdict is Approve** and this review is for a PR that is ready to merge, invoke `/dev-team:merge` to set auto-merge, monitor CI, and verify the merge completes. The PR lifecycle does not end at approval -- it ends at merge.

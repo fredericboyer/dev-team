@@ -77,4 +77,3 @@ After the review report is delivered:
 1. You MUST spawn **@dev-team-borges** (Librarian) as the final step to review memory freshness and capture any learnings from the review findings. Do NOT skip this.
 2. If Borges was not spawned, the review is INCOMPLETE.
 3. Include Borges's recommendations in the final report.
-4. **If the verdict is Approve** and this review is for a PR that is ready to merge, invoke `/dev-team:merge` to set auto-merge, monitor CI, and verify the merge completes. The PR lifecycle does not end at approval -- it ends at merge.
