@@ -927,42 +927,7 @@ describe("dev-team-pre-commit-gate", () => {
     assert.equal(result.code, 0);
   });
 
-  it("blocks (exit 2) when pending reviews exist", () => {
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "dev-team-precommit-"));
-    try {
-      execFileSync("git", ["init"], { cwd: tmpDir, encoding: "utf-8" });
-      execFileSync("git", ["config", "user.email", "test@test.com"], {
-        cwd: tmpDir,
-        encoding: "utf-8",
-      });
-      execFileSync("git", ["config", "user.name", "Test"], { cwd: tmpDir, encoding: "utf-8" });
-      fs.writeFileSync(path.join(tmpDir, "handler.js"), "module.exports = {}");
-      execFileSync("git", ["add", "handler.js"], { cwd: tmpDir, encoding: "utf-8" });
-
-      // Create pending review tracking file
-      fs.mkdirSync(path.join(tmpDir, ".claude"), { recursive: true });
-      fs.writeFileSync(
-        path.join(tmpDir, ".claude", "dev-team-review-pending.json"),
-        JSON.stringify(["@dev-team-szabo", "@dev-team-knuth"]),
-      );
-
-      try {
-        execFileSync(process.execPath, [path.join(HOOKS_DIR, hook)], {
-          encoding: "utf-8",
-          timeout: 5000,
-          cwd: tmpDir,
-        });
-        assert.fail("Should exit 2 when pending reviews exist");
-      } catch (err) {
-        assert.equal(err.status, 2, "should block with exit 2");
-        assert.ok(err.stderr.includes("@dev-team-szabo"), "should list pending agents");
-      }
-    } finally {
-      fs.rmSync(tmpDir, { recursive: true, force: true });
-    }
-  });
-
-  it("exits 0 when no pending reviews", () => {
+  it("exits 0 when no staged files trigger review", () => {
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "dev-team-precommit-"));
     try {
       execFileSync("git", ["init"], { cwd: tmpDir, encoding: "utf-8" });
@@ -1413,87 +1378,5 @@ describe("dev-team-watch-list", () => {
       stdout.includes("@dev-team-voss"),
       "should still match valid entries after invalid regex",
     );
-  });
-});
-
-// ─── Task Loop ───────────────────────────────────────────────────────────────
-
-describe("dev-team-task-loop", () => {
-  const hook = "dev-team-task-loop.js";
-  let tmpDir;
-  let originalCwd;
-
-  beforeEach(() => {
-    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "dev-team-taskloop-"));
-    originalCwd = process.cwd();
-    process.chdir(tmpDir);
-    fs.mkdirSync(path.join(tmpDir, ".claude"), { recursive: true });
-  });
-
-  afterEach(() => {
-    process.chdir(originalCwd);
-    fs.rmSync(tmpDir, { recursive: true, force: true });
-  });
-
-  it("exits 0 when no state file exists (no active loop)", () => {
-    const stdout = execFileSync(process.execPath, [path.join(HOOKS_DIR, hook)], {
-      encoding: "utf-8",
-      timeout: 5000,
-      cwd: tmpDir,
-    });
-    assert.equal(stdout, "");
-  });
-
-  it("increments iteration and outputs block decision when loop is active", () => {
-    const stateFile = path.join(tmpDir, ".claude", "dev-team-task.json");
-    fs.writeFileSync(
-      stateFile,
-      JSON.stringify({ prompt: "Fix bug", iteration: 1, maxIterations: 10 }),
-    );
-
-    const stdout = execFileSync(process.execPath, [path.join(HOOKS_DIR, hook)], {
-      encoding: "utf-8",
-      timeout: 5000,
-      cwd: tmpDir,
-    });
-
-    // Should output JSON with block decision
-    const output = JSON.parse(stdout.trim().split("\n").pop());
-    assert.equal(output.decision, "block");
-    assert.equal(output.reason, "Fix bug");
-
-    // Should have incremented iteration in state file
-    const updatedState = JSON.parse(fs.readFileSync(stateFile, "utf-8"));
-    assert.equal(updatedState.iteration, 2);
-  });
-
-  it("exits loop and deletes state file when max iterations reached", () => {
-    const stateFile = path.join(tmpDir, ".claude", "dev-team-task.json");
-    fs.writeFileSync(
-      stateFile,
-      JSON.stringify({ prompt: "Fix bug", iteration: 10, maxIterations: 10 }),
-    );
-
-    const stdout = execFileSync(process.execPath, [path.join(HOOKS_DIR, hook)], {
-      encoding: "utf-8",
-      timeout: 5000,
-      cwd: tmpDir,
-    });
-
-    assert.ok(stdout.includes("Max iterations"));
-    assert.ok(!fs.existsSync(stateFile), "State file should be deleted");
-  });
-
-  it("cleans up and exits 0 on corrupted state file", () => {
-    const stateFile = path.join(tmpDir, ".claude", "dev-team-task.json");
-    fs.writeFileSync(stateFile, "{ corrupt json");
-
-    execFileSync(process.execPath, [path.join(HOOKS_DIR, hook)], {
-      encoding: "utf-8",
-      timeout: 5000,
-      cwd: tmpDir,
-    });
-
-    assert.ok(!fs.existsSync(stateFile), "Corrupted state file should be deleted");
   });
 });

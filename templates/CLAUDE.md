@@ -58,9 +58,8 @@ When a dev-team hook outputs `ACTION REQUIRED — spawn these agents`, you MUST:
 1. Spawn each listed agent as a **background** subagent using the Agent tool with `subagent_type: "general-purpose"`
 2. Include the agent's full definition by reading from `.claude/agents/<agent>.md`
 3. Include the changed file path and instruction to produce classified findings
-4. After all reviews complete, delete `.claude/dev-team-review-pending.json`
 
-Do NOT skip this. Do NOT treat hook output as optional. The pre-commit gate will BLOCK commits if flagged agents were not spawned. If you believe a review is unnecessary for trivial changes, delete `.claude/dev-team-review-pending.json` and explain why to the user.
+Do NOT skip this. Do NOT treat hook output as optional. If you believe a review is unnecessary for trivial changes, explain why to the user.
 
 ### Skills
 

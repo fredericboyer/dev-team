@@ -87,16 +87,6 @@
           }
         ]
       }
-    ],
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node .claude/hooks/dev-team-task-loop.js"
-          }
-        ]
-      }
     ]
   }
 }

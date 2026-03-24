@@ -27,7 +27,7 @@
 - 273 tests total (was 117 at v0.3.0)
 - 12 agents: Voss, Mori, Szabo, Knuth, Beck, Deming, Tufte, Brooks, Conway, Drucker, Borges, Hamilton
 - 5 skills: challenge, task, review, audit, security-status
-- 6 hooks: TDD enforce, safety guard, post-change review, pre-commit gate, task loop, watch list
+- 6 hooks: TDD enforce, safety guard, post-change review, pre-commit gate, pre-commit lint, watch list
 - 3 always-on reviewers: Szabo (security), Knuth (correctness), Brooks (architecture + quality attributes)
 - CI: 3 OS x 3 Node versions + lint + format + agent validation + hook validation.
 - Always run `npm run format` before committing new `.ts` files — oxfmt formatting is checked in CI.

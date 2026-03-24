@@ -51,7 +51,6 @@ export function doctor(targetDir: string): void {
       "Safety guard": "dev-team-safety-guard.js",
       "Post-change review": "dev-team-post-change-review.js",
       "Pre-commit gate": "dev-team-pre-commit-gate.js",
-      "Task loop": "dev-team-task-loop.js",
       "Watch list": "dev-team-watch-list.js",
       "Pre-commit lint": "dev-team-pre-commit-lint.js",
     };
