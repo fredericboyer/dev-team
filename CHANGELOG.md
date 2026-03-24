@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-03-24
+
+### Added
+- `/dev-team:merge` skill — PR merge monitoring workflow with Copilot review handling, auto-merge, and CI status tracking (#122)
+- `/dev-team:assess` skill — knowledge base health auditing for learnings, agent memory, and CLAUDE.md (#129)
+- Agent eval framework spike — test samples and runner for evaluating agent behavior (#123)
+- Borges enforcement tightened — mandatory at end of every task/review/audit, blocks without memory updates (#124)
+
+### Changed
+- Migrated from `.claude/` to `.dev-team/` directory for all dev-team config, agents, hooks, skills, and memory (#120)
+- Removed stateful hooks, replaced with conversation context approach (#116)
+- Migrated to TypeScript 6.0 with node16 module resolution (#131)
+- Meta assess-learnings skill, learnings, and gitignore cleanup (#134)
+
+### Fixed
+- Copilot review findings from PR #120 addressed (#121)
+- Copilot findings from v0.7 PRs addressed (#126)
+
+### Dependencies
+- Bump actions/checkout from 4 to 6 (#108)
+- Bump actions/setup-node from 4 to 6 (#109)
+
 ## [0.6.0] - 2026-03-23
 
 ### Added
