@@ -68,6 +68,7 @@ Do NOT skip this. Do NOT treat hook output as optional. If you believe a review 
 - `/dev-team:review` — orchestrated multi-agent parallel review of changes
 - `/dev-team:audit` — full codebase security + quality + tooling audit
 - `/dev-team:merge` — merge a PR with Copilot review handling, auto-merge, CI monitoring, and post-merge actions
+- `/dev-team:security-status` — check code scanning, Dependabot, and secret scanning alerts
 - `/dev-team:assess` — audit knowledge base health (learnings, agent memory, CLAUDE.md)
 
 ### Learnings — where to write what
@@ -81,6 +82,6 @@ All project and process learnings MUST go to in-repo files, NOT to machine-local
 | Formal architecture decisions | `docs/adr/` | ADR format, not learnings |
 | User-specific preferences only | Machine-local memory | Personal style, name, role — things that vary per person, not per project |
 
-When the human gives feedback about process, coding style, or tool behavior: write it to `dev-team-learnings.md`. Only use machine-local memory for things that are truly personal and would not apply to another developer on the same project.
+When the human gives feedback about process, coding style, or tool behavior: write it to `.dev-team/learnings.md`. Only use machine-local memory for things that are truly personal and would not apply to another developer on the same project.
 
 <!-- dev-team:end -->
