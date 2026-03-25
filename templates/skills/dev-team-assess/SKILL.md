@@ -77,6 +77,7 @@ Check each agent's memory file for:
 - Examples of non-promotable entries: "I tend to over-flag SQL injection in parameterized queries" (agent-specific calibration), "coverage is weak in the parser module" (agent-specific observation)
 - Flag entries that would benefit other agents if promoted to `.dev-team/learnings.md`
 - Classify each as `[SUGGESTION]` with the specific entry text and recommended shared learning wording
+- After an entry is promoted to shared learnings, the original agent memory entry should be removed or replaced with a cross-reference to avoid the duplication that the Staleness check flags
 
 ## Phase 3: CLAUDE.md audit
 
