@@ -31,19 +31,19 @@
 
 ## Quality Benchmarks
 
-- 217 tests total (was 117 at v0.3.0, was 273 before TS6 migration consolidated some)
+- 308 tests total (was 117 at v0.3.0, was 273 before TS6 migration consolidated some)
 - 12 agents: Voss, Mori, Szabo, Knuth, Beck, Deming, Tufte, Brooks, Conway, Drucker, Borges, Hamilton
-- 7 skills: challenge, task, review, audit, security-status, merge, assess
+- 7 skills (5 framework + 2 project-specific): challenge, task, review, audit, assess (framework); security-status, merge (project-specific)
 - 6 hooks: TDD enforce, safety guard, post-change review, pre-commit gate (blocking), pre-commit lint, watch list
 - 3 always-on reviewers: Szabo (security), Knuth (correctness), Brooks (architecture + quality attributes)
 - CI: 3 OS (ubuntu, macos, windows) x Node 22 + lint + format + agent validation + hook validation.
 - Always run `npm run format` before committing new `.ts` files — oxfmt formatting is checked in CI.
 
 ### Learning capture metrics
-- Non-empty agent memory files: 12 of 12 active agents (16 memory dirs exist, 4 are legacy pre-rename: architect, docs, lead, release)
+- Non-empty agent memory files: 12 of 12 active agents (12 memory dirs, legacy dirs removed)
 - Last Borges run: not tracked yet (Borges spawning is now enforced via skill definitions)
 - Pre-commit gate: blocks commits without memory updates (override via `.dev-team/.memory-reviewed`)
-- All 7 implementing agents have mandatory Learnings Output section
+- All 10 implementing agents (Voss, Mori, Szabo, Knuth, Beck, Deming, Tufte, Brooks, Conway, Hamilton) have mandatory Learnings Output section
 
 ## Overruled Challenges
 <!-- When the human overrules an agent, record why — prevents re-flagging -->
