@@ -1,9 +1,9 @@
 # Agent Memory: Tufte (Documentation Engineer)
-<\!-- First 200 lines are loaded into agent context. Keep concise. -->
-<\!-- Entries use structured format: Borges extracts these automatically after each task. -->
+<!-- First 200 lines are loaded into agent context. Keep concise. -->
+<!-- Entries use structured format: Borges extracts these automatically after each task. -->
 
 ## Structured Entries
-<\!-- Format:
+<!-- Format:
 ### [YYYY-MM-DD] Finding summary
 - **Type**: DEFECT | RISK | SUGGESTION | OVERRULED | PATTERN | DECISION
 - **Source**: PR #NNN or task description
@@ -13,5 +13,5 @@
 -->
 
 ## Calibration Log
-<\!-- Challenges accepted/overruled — tunes adversarial intensity over time -->
+<!-- Challenges accepted/overruled — tunes adversarial intensity over time -->
 

@@ -241,11 +241,11 @@ function scoreComplexity(toolInput, filePath) {
   let score = 0;
 
   // Lines changed
-  const oldStr = toolInput.old_string || "";
-  const newStr = toolInput.new_string || toolInput.content || "";
+  const oldStr = toolInput.old_string ?? "";
+  const newStr = toolInput.new_string ?? toolInput.content ?? "";
   const oldLines = oldStr ? oldStr.split("\n").length : 0;
   const newLines = newStr ? newStr.split("\n").length : 0;
-  const linesChanged = Math.abs(newLines - oldLines) + Math.min(oldLines, newLines);
+  const linesChanged = oldLines + newLines;
   score += Math.min(linesChanged, 50); // Cap at 50 to avoid single large file dominating
 
   // Complexity indicators in the new content
