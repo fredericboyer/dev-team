@@ -94,8 +94,12 @@ Before starting work, check for open security alerts: run `/dev-team:security-st
 When the loop exits:
 1. **Deliver the work**: If changes are on a feature branch, create the PR (body must include `Closes #<issue>`). Ensure the PR is ready to merge: CI green, reviews passed, branch up to date. Then follow the project's merge workflow — use `/dev-team:merge` if the project has it configured, otherwise report readiness. If merge fails (CI failures, merge conflicts, branch protection), report the blocker to the human rather than leaving work unattended.
 2. **Clean up worktree**: If the work was done in a worktree, clean it up after the branch is pushed and the PR is created. Do not wait for merge to clean the worktree.
-3. You MUST spawn **@dev-team-borges** (Librarian) as the final step. Borges will:
+3. You MUST spawn **@dev-team-borges** (Librarian) as the final step. Pass Borges the **finding outcome log**: every finding with its classification, source agent, and outcome (accepted/overruled/ignored), including the human's reasoning for overrules. Borges will:
    - **Extract structured memory entries** from review findings and implementation decisions
+   - **Reinforce accepted patterns** in the reviewer's memory (calibration feedback)
+   - **Record overruled findings** with context so reviewers generate fewer false positives
+   - **Generate calibration rules** when 3+ findings on the same tag are overruled
+   - **Record metrics** to `.dev-team/metrics.md` (acceptance rates, rounds to convergence)
    - Write entries to each participating agent's MEMORY.md using the structured format
    - Update shared learnings in `.dev-team/learnings.md`
    - Check cross-agent coherence

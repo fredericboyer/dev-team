@@ -125,6 +125,20 @@ If the implementing agent disagrees with a reviewer:
 1. Each side presents their argument (one exchange).
 2. If still unresolved, **escalate to the human** with both perspectives. Do not auto-resolve disagreements.
 
+#### 5c-ii. Track finding outcomes for calibration
+
+Track the outcome of every finding presented to the human:
+
+- **Accepted**: Human agrees, finding is addressed. Record as `accepted` for Borges to reinforce the pattern in agent memory.
+- **Overruled**: Human disagrees and explains why. Record as `overruled` with the human's reasoning. Borges will write an OVERRULED entry to the reviewer's memory.
+- **Ignored**: Human does not address the finding (advisory items). Record as `ignored`.
+
+Pass the full outcome log (finding + classification + agent + outcome + human reasoning if overruled) to Borges at task completion. This is the raw data for calibration metrics and memory evolution. Borges uses it to:
+1. Reinforce accepted patterns in the reviewer's memory
+2. Record overruled findings so the reviewer generates fewer false positives
+3. Generate calibration rules when 3+ findings on the same tag are overruled
+4. Update acceptance rates in `.dev-team/metrics.md`
+
 #### 5d. Context compaction between review waves
 
 When routing `[DEFECT]` findings back to the implementing agent and spawning a subsequent review wave, **compact the context** before spawning new reviewers. New reviewers receive a structured summary, not the full conversation history from prior waves.
