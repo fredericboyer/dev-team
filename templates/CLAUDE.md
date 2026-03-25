@@ -74,6 +74,20 @@ Do NOT skip this. Do NOT treat hook output as optional. If you believe a review 
 - `/dev-team:audit` — full codebase security + quality + tooling audit
 - `/dev-team:assess` — audit knowledge base health (learnings, agent memory, CLAUDE.md)
 
+### Project-specific customization
+
+`.dev-team/` is managed by dev-team and updated by `dev-team update`. Do not add project-specific files here.
+
+Project-specific customization belongs in `.claude/`:
+
+| What | Where |
+|------|-------|
+| Custom hooks (linting, workflow enforcement) | `.claude/hooks/` |
+| Project-specific skills (merge, deploy, etc.) | `.claude/skills/` |
+| Claude Code settings and hook wiring | `.claude/settings.json` |
+
+`.claude/` is not touched by `dev-team update` — your customizations are safe.
+
 ### Memory architecture (two-tier)
 
 All project and process learnings MUST go to in-repo files, NOT to machine-local memory (`~/.claude/projects/`). Machine-local memory is invisible to other developers, agents, and sessions.
