@@ -188,6 +188,7 @@ interface Preferences {
   hooks: string[];
   issueTracker: string;
   branchConvention: string;
+  agentTeams?: boolean;
 }
 
 interface UpdateSummary {
@@ -518,6 +519,20 @@ export async function update(targetDir: string): Promise<void> {
     mergeSettings(settingsPath, filteredSettings);
     summary.settings = true;
   }
+
+  // Step 4b: Enable agent teams if not already set (respect user opt-out)
+  const settingsData = JSON.parse(readFile(settingsPath) || "{}");
+  if (!settingsData.env) {
+    settingsData.env = {};
+  }
+  // Only add if not already set — never re-enable if user explicitly disabled (=0)
+  if (!("CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS" in settingsData.env)) {
+    settingsData.env.CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS = "1";
+    writeFile(settingsPath, JSON.stringify(settingsData, null, 2) + "\n");
+  }
+  // Update config.json to reflect current agent teams status
+  const agentTeamsEnabled = settingsData.env.CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS === "1";
+  prefs.agentTeams = agentTeamsEnabled;
 
   // Step 5: Update skills (auto-discovered from templates/skills/)
   const skillsDir = path.join(devTeamDir, "skills");

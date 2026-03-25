@@ -92,6 +92,22 @@ describe("fresh project installation", () => {
     }
   });
 
+  it("enables agent teams in settings.json and config.json", async () => {
+    await run(tmpDir, ["--all"]);
+
+    // settings.json should have agent teams env var
+    const settings = JSON.parse(
+      fs.readFileSync(path.join(tmpDir, ".claude", "settings.json"), "utf-8"),
+    );
+    assert.equal(settings.env?.CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS, "1");
+
+    // config.json should record agent teams status
+    const config = JSON.parse(
+      fs.readFileSync(path.join(tmpDir, ".dev-team", "config.json"), "utf-8"),
+    );
+    assert.equal(config.agentTeams, true);
+  });
+
   it("settings.json has valid hook configuration", async () => {
     await run(tmpDir, ["--all"]);
 
