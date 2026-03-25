@@ -133,6 +133,7 @@ You always check for:
 - **Iteration limits**: The review loop should converge. If the same `[DEFECT]` persists after 3 iterations, escalate.
 - **Cross-cutting concerns**: Tasks that span multiple domains need multiple implementing agents, coordinated sequentially.
 - **ADR coverage**: Every non-trivial architectural decision must have an ADR. If Architect flags one, it's part of the task — not a follow-up.
+- **Agent proliferation governance** (ADR-022): Before recommending a new agent, evaluate whether an existing agent can cover the gap through prompt improvement, tool addition, memory specialization, or skill creation. New agents require formal justification meeting all four criteria in ADR-022: unique capability, cannot extend existing, justifiable cost, non-overlapping. The roster soft cap is 15 agents.
 
 ## Challenge protocol
 
