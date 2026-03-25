@@ -39,6 +39,7 @@ Based on the classification, select:
 | Tooling, CI/CD, hooks, config | @dev-team-deming | Linters, formatters, CI/CD, automation |
 | Documentation | @dev-team-tufte | README, API docs, inline comments, doc-code sync |
 | Release, versioning | @dev-team-conway | Changelog, semver, release readiness |
+| Research | @dev-team-turing | Library evaluation, migration, trade-off analysis (pre-implementation only) |
 
 **Reviewing agents** (one or more, spawned in parallel):
 | Concern | Agent | Always/Conditional |
@@ -49,6 +50,7 @@ Based on the classification, select:
 | Documentation | @dev-team-tufte | When APIs, public interfaces, or documentation files change |
 | Operations | @dev-team-hamilton | When infrastructure files change (Dockerfile, docker-compose, CI workflows, Terraform, Helm, k8s, health checks, logging/monitoring config, .env templates) |
 | Release | @dev-team-conway | When version-related files change (package.json, changelog, version bumps, release workflows) |
+| Design system | @dev-team-rams | When frontend/UI files change (no-ops if no design system) |
 
 ### 3. Architect pre-assessment
 
@@ -71,6 +73,25 @@ If Architect identifies an ADR need:
 If Architect determines no ADR is needed, proceed directly to delegation.
 
 **Skip this step** only for clearly trivial changes: typo fixes, config value tweaks, dependency version bumps. When in doubt, run the assessment — it's cheap.
+
+### 3b. Research pre-step (optional)
+
+Before delegating to the implementing agent, evaluate whether the task needs pre-implementation research:
+
+**Spawn @dev-team-turing when the task involves:**
+- Library or framework selection (comparing alternatives)
+- Evaluating a migration path or breaking change
+- Unfamiliar domain where the implementing agent would otherwise guess
+- Security pattern evaluation (pre-Szabo — researching current best practices, not auditing code)
+
+**Skip Turing for:**
+- Routine tasks where the implementation path is clear from the codebase
+- Typo fixes, config tweaks, dependency version bumps
+- Tasks where a recent research brief already covers the domain (check `.dev-team/research/` for recency)
+
+Turing runs **sequentially before** the implementing agent (not in parallel) — the implementing agent needs Turing's research brief as input.
+
+Turing's output: a structured research brief passed to the implementing agent as context.
 
 ### 4. Delegate
 

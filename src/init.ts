@@ -81,6 +81,16 @@ const ALL_AGENTS: AgentDefinition[] = [
     file: "dev-team-borges.md",
     description: "Librarian (end-of-task knowledge review)",
   },
+  {
+    label: "Turing",
+    file: "dev-team-turing.md",
+    description: "Pre-implementation Researcher",
+  },
+  {
+    label: "Rams",
+    file: "dev-team-rams.md",
+    description: "Design System Reviewer",
+  },
 ];
 
 const QUALITY_HOOKS: HookDefinition[] = [

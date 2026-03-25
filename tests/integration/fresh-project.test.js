@@ -165,7 +165,7 @@ describe("fresh project installation", () => {
       fs.readFileSync(path.join(tmpDir, ".dev-team", "config.json"), "utf-8"),
     );
     assert.equal(prefs.preset, "fullstack");
-    assert.equal(prefs.agents.length, 12);
+    assert.equal(prefs.agents.length, 14);
   });
 
   it("--preset data installs data pipeline agents", async () => {

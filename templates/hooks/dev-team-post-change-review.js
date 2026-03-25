@@ -74,6 +74,24 @@ if (API_PATTERNS.some((p) => p.test(fullPath))) {
   flags.push("@dev-team-mori (API contract may affect UI)");
 }
 
+// Frontend/UI component patterns → flag for Rams (design system review)
+const FRONTEND_PATTERNS = [
+  /\/components?\//,
+  /\/pages?\//,
+  /\/views?\//,
+  /\/layouts?\//,
+  /\/ui\//,
+  /\.(css|scss|sass|less|styl)$/,
+  /\.(jsx|tsx)$/,
+  /tailwind/,
+  /styled/,
+  /\.module\.(css|scss)$/,
+];
+
+if (FRONTEND_PATTERNS.some((p) => p.test(fullPath))) {
+  flags.push("@dev-team-rams (design system compliance review)");
+}
+
 // App config patterns → flag for Voss
 // Voss owns: application config, migrations, database, .env (app-specific)
 // Intentional overlap: Docker files trigger Hamilton below; .env files trigger

@@ -51,7 +51,7 @@ describe("Node.js project scenario", () => {
 
     // Agents installed in .dev-team/
     const agents = fs.readdirSync(path.join(tmpDir, ".dev-team", "agents"));
-    assert.equal(agents.length, 12);
+    assert.equal(agents.length, 14);
     assert.ok(agents.includes("dev-team-voss.md"));
 
     // Hooks installed in .dev-team/
