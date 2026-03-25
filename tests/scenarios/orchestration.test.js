@@ -189,6 +189,7 @@ describe("Orchestration scenario: happy path agent selection", () => {
 
   it("produces no output for non-code, non-config files", () => {
     const result = runReviewHook("assets/logo.png");
+    assert.equal(result.exitCode, 0, "Hook should exit 0 for non-code, non-config files");
     assert.equal(result.flags.length, 0, "Should not flag any agent for image files");
   });
 });
