@@ -155,29 +155,7 @@ const PRESETS: Record<string, PresetDefinition> = {
   },
 };
 
-interface WorkflowSkill {
-  label: string;
-  dir: string;
-  description: string;
-  platform: string; // which platform this applies to
-}
-
-const WORKFLOW_SKILLS: WorkflowSkill[] = [
-  {
-    label: "dev-team:merge",
-    dir: "dev-team-merge",
-    description: "PR merge automation with auto-merge, CI monitoring, and post-merge actions",
-    platform: "github",
-  },
-  {
-    label: "dev-team:security-status",
-    dir: "dev-team-security-status",
-    description: "GitHub security signal monitoring (CodeQL, Dependabot, secret scanning)",
-    platform: "github",
-  },
-];
-
-export { PRESETS, ALL_AGENTS, QUALITY_HOOKS, WORKFLOW_SKILLS };
+export { PRESETS, ALL_AGENTS, QUALITY_HOOKS };
 
 /**
  * Main init flow.
@@ -396,38 +374,6 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
     }
   }
 
-  // Step 9b: Offer optional workflow skills based on detected platform
-  const workflowSkillsDir = path.join(claudeDir, "skills");
-  const detectedPlatform = dirExists(path.join(targetDir, ".github")) ? "github" : "unknown";
-  const availableWorkflowSkills = WORKFLOW_SKILLS.filter((s) => s.platform === detectedPlatform);
-  const installedWorkflowSkills: string[] = [];
-
-  if (availableWorkflowSkills.length > 0) {
-    let selectedWorkflowSkills: string[];
-    if (isAll || preset) {
-      selectedWorkflowSkills = availableWorkflowSkills.map((s) => s.label);
-    } else {
-      selectedWorkflowSkills = await prompts.checkbox(
-        `Detected ${detectedPlatform} platform. Install workflow-specific skills?`,
-        availableWorkflowSkills.map((s) => ({
-          label: s.label,
-          description: s.description,
-          defaultSelected: true,
-        })),
-      );
-    }
-
-    for (const skill of availableWorkflowSkills) {
-      if (!selectedWorkflowSkills.includes(skill.label)) continue;
-      const src = path.join(templates, "workflow-skills", skill.dir, "SKILL.md");
-      const dest = path.join(workflowSkillsDir, skill.dir, "SKILL.md");
-      if (!fileExists(dest) || isAll) {
-        copyFile(src, dest);
-        installedWorkflowSkills.push(skill.label);
-      }
-    }
-  }
-
   // Step 10: Merge CLAUDE.md
   const claudeMdTemplate = readFile(path.join(templates, "CLAUDE.md"));
   if (!claudeMdTemplate) {
@@ -456,11 +402,6 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
   console.log(`  Hooks:     ${selectedHooks.join(", ")} (${hookCount} files)`);
   const frameworkSkillNames = skillDirs.map((d) => d.replace("dev-team-", "")).join(", ");
   console.log(`  Skills:    ${frameworkSkillNames} (framework)`);
-  if (installedWorkflowSkills.length > 0) {
-    console.log(
-      `  Workflow:  ${installedWorkflowSkills.join(", ")} (optional, in .claude/skills/)`,
-    );
-  }
   console.log(
     `  Memory:    ${selectedAgents.length} agent memories + shared learnings + metrics log`,
   );

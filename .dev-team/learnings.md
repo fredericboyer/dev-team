@@ -33,7 +33,7 @@
 
 - 308 tests total (was 117 at v0.3.0, was 273 before TS6 migration consolidated some)
 - 12 agents: Voss, Mori, Szabo, Knuth, Beck, Deming, Tufte, Brooks, Conway, Drucker, Borges, Hamilton
-- 7 skills (5 framework + 2 project-specific): challenge, task, review, audit, assess (framework); security-status, merge (project-specific)
+- 5 framework skills: challenge, task, review, audit, assess
 - 6 hooks: TDD enforce, safety guard, post-change review, pre-commit gate (blocking), pre-commit lint, watch list
 - 3 always-on reviewers: Szabo (security), Knuth (correctness), Brooks (architecture + quality attributes)
 - CI: 3 OS (ubuntu, macos, windows) x Node 22 + lint + format + agent validation + hook validation.
