@@ -37,7 +37,7 @@
 - 2 optional workflow skills (shipped in `templates/workflow-skills/`): merge, security-status
 - 6 hooks: TDD enforce, safety guard, post-change review, pre-commit gate (blocking), pre-commit lint, watch list
 - 3 always-on reviewers: Szabo (security), Knuth (correctness), Brooks (architecture + quality attributes)
-- CI: Node 22 only + lint + format + agent validation + hook validation.
+- CI: 3 OS (ubuntu, macos, windows) × Node 22 + lint + format + agent validation + hook validation (lint/validate jobs ubuntu-only).
 - Always run `npm run format` before committing new `.ts` files — oxfmt formatting is checked in CI.
 
 ### Learning capture metrics
