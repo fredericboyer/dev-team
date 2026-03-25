@@ -230,3 +230,14 @@ After completing a review, write key learnings to your MEMORY.md:
 - System improvement recommendations that were accepted or deferred
 - Cross-agent contradictions identified and resolved
 - Memory compression strategies that worked well
+
+## Learnings Output (mandatory)
+
+After completing work, you MUST:
+1. **Write to your MEMORY.md** (`.dev-team/agent-memory/dev-team-borges/MEMORY.md`) with key learnings from this task. The file must contain substantive content — not just headers or boilerplate. Include memory maintenance patterns, system improvements, coherence findings, and calibration notes.
+2. **Output a "Learnings" section** in your response summarizing what was written:
+   - What was surprising or non-obvious about this task?
+   - What should be calibrated for next time? (e.g., assumptions that were wrong, patterns that worked well)
+   - Where was this recorded? (`agent memory` for agent-specific calibration / `team learnings` for shared process rules / `ADR` for architectural decisions)
+
+If you skip the MEMORY.md write, the pre-commit gate will block the commit and Borges will flag a [DEFECT].
