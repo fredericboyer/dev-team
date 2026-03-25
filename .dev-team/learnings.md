@@ -10,9 +10,8 @@
 
 ## Process
 
-- **Before merging a PR, ALWAYS check for Copilot review comments** (`gh api repos/{owner}/{repo}/pulls/{pr}/reviews` and `gh api repos/{owner}/{repo}/pulls/{pr}/comments`). Address any findings before merging.
+- **Use `/dev-team:merge` to merge PRs.** It handles Copilot check run monitoring, auto-merge, CI monitoring, and post-merge actions automatically. Do not manually run `gh pr merge` or check Copilot comments separately.
 - **Security check at session start.** Run `/dev-team:security-status` at the beginning of every session to check code scanning, Dependabot, and secret scanning alerts. Also run before releases.
-- **Use `/dev-team:merge` to merge PRs.** It handles Copilot review comments, auto-merge, CI monitoring, and post-merge actions automatically. Do not manually run `gh pr merge` or check Copilot comments separately.
 - Always use `/dev-team:task` for implementation work — dogfood the agents.
 - Spawn review agents as `general-purpose` subagents with the actual agent definition loaded from `.dev-team/agents/dev-team-*.md`. Do NOT use `pr-review-toolkit:*` as proxies — they have different behavior.
 - Don't ask for approval to continue between tasks. Just do the work. Only pause for critical decisions.
@@ -21,8 +20,6 @@
 - Hooks over CLAUDE.md for enforcement (ADR-001). If agents keep flagging the same pattern, it should be a hook.
 - **Improvements must be project-agnostic and target `templates/`.** Never modify `.dev-team/` directly for improvements — those files get overwritten by `dev-team update`. All improvements go into `templates/` and ship in future versions. Project-specific conventions stay in local learnings only.
 - **Dogfooding is the product loop.** Using dev-team on dev-team surfaces friction → `/dev-team:assess` captures patterns → issues target `templates/` → next release improves the tool for everyone. Every session is a test run.
-- Security check at session start is now enforced via skill preambles (task/review/audit). No longer needs manual reminder.
-- "Be vocal about learnings" is now enforced via mandatory Learnings Output section in all implementing agent definitions.
 
 ## Known Tech Debt
 
@@ -42,7 +39,7 @@
 - Non-empty agent memory files: all active agents have memory dirs
 - Last Borges run: not tracked yet (Borges spawning is now enforced via skill definitions)
 - Pre-commit gate: blocks commits without memory updates (override via `.dev-team/.memory-reviewed`)
-- All 10 implementing agents (Voss, Mori, Szabo, Knuth, Beck, Deming, Tufte, Brooks, Conway, Hamilton) have mandatory Learnings Output section
+- All implementing agents have mandatory Learnings Output section in their definitions
 
 ## Overruled Challenges
 <!-- When the human overrules an agent, record why — prevents re-flagging -->
