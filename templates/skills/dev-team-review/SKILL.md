@@ -27,6 +27,12 @@ Run a multi-agent parallel review of: $ARGUMENTS
 
 3. Always include @dev-team-szabo and @dev-team-knuth — they review all code changes.
 
+## Pre-review validation
+
+Before spawning reviewers, verify the changes are reviewable:
+1. **Non-empty diff**: The diff contains actual changes to review. If empty, report "nothing to review" and stop.
+2. **Tests pass**: If the project has a test command, confirm tests pass. Flag test failures in the review report header.
+
 ## Execution
 
 1. Spawn each selected agent as a **parallel background subagent** using the Agent tool with `subagent_type: "general-purpose"`.
