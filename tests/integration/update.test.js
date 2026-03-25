@@ -464,12 +464,12 @@ describe("cleanupLegacyMemoryDirs", () => {
   it("merges substantive legacy content into current agent memory", async () => {
     await run(tmpDir, ["--all"]);
 
-    // Create legacy directory with substantive content (more than 5 lines)
+    // Create legacy directory with substantive content (structured entries)
     const legacyDir = path.join(tmpDir, ".dev-team", "agent-memory", "dev-team-architect");
     fs.mkdirSync(legacyDir, { recursive: true });
     fs.writeFileSync(
       path.join(legacyDir, "MEMORY.md"),
-      "# Architect Memory\n## Patterns\n- Pattern 1\n- Pattern 2\n- Pattern 3\n- Pattern 4\n",
+      "# Architect Memory\n## Structured Entries\n### [2026-01-15] Pattern 1 discovered\n- **Type**: PATTERN\n- **Tags**: architecture\n- **Context**: Found coupling issue\n",
     );
 
     const log = cleanupLegacyMemoryDirs(path.join(tmpDir, ".dev-team"));
@@ -486,7 +486,7 @@ describe("cleanupLegacyMemoryDirs", () => {
       brooksMemory.includes("Migrated from dev-team-architect"),
       "should contain migration marker",
     );
-    assert.ok(brooksMemory.includes("Pattern 1"), "should contain merged content");
+    assert.ok(brooksMemory.includes("Pattern 1 discovered"), "should contain merged content");
   });
 
   it("moves legacy content when current agent memory does not exist", async () => {

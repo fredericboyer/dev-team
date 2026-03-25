@@ -57,6 +57,12 @@ describe("fresh project installation", () => {
       !fs.existsSync(path.join(tmpDir, ".dev-team", "skills", "dev-team-merge", "SKILL.md")),
       "merge skill should not be in .dev-team/skills/ (moved to workflow-skills)",
     );
+    assert.ok(
+      !fs.existsSync(
+        path.join(tmpDir, ".dev-team", "skills", "dev-team-security-status", "SKILL.md"),
+      ),
+      "security-status skill should not be in .dev-team/skills/ (moved to workflow-skills)",
+    );
 
     // Memory
     assert.ok(

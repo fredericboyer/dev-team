@@ -1,5 +1,4 @@
 import path from "path";
-import fs from "fs";
 import { fileExists, readFile, listSubdirectories } from "./files.js";
 
 export function status(targetDir: string): void {
@@ -57,9 +56,10 @@ export function status(targetDir: string): void {
     const memPath = path.join(memoryDir, dirName, "MEMORY.md");
     if (fileExists(memPath)) {
       try {
-        const stat = fs.statSync(memPath);
-        const hasContent = stat.size > 200; // Template is ~200 bytes
-        console.log(`    ${label}: ${hasContent ? "has learnings" : "empty (template only)"}`);
+        const content = readFile(memPath) || "";
+        // Detect actual structured entries rather than relying on file size
+        const hasEntries = /### \[\d{4}-\d{2}-\d{2}\]/.test(content);
+        console.log(`    ${label}: ${hasEntries ? "has learnings" : "empty (template only)"}`);
       } catch {
         console.log(`    ${label}: unknown`);
       }
@@ -72,8 +72,16 @@ export function status(targetDir: string): void {
   const learningsPath = path.join(devTeamDir, "learnings.md");
   if (fileExists(learningsPath)) {
     try {
-      const stat = fs.statSync(learningsPath);
-      console.log(`    Shared learnings: ${stat.size > 300 ? "has content" : "template only"}`);
+      const content = readFile(learningsPath) || "";
+      // Check for content under section headers (not just the headers themselves)
+      const sections = content.split(/^## /m).slice(1);
+      const hasContent = sections.some((s) =>
+        s
+          .split("\n")
+          .slice(1)
+          .some((l) => l.trim() !== "" && !l.startsWith("<!--")),
+      );
+      console.log(`    Shared learnings: ${hasContent ? "has content" : "template only"}`);
     } catch {
       console.log(`    Shared learnings: unknown`);
     }
