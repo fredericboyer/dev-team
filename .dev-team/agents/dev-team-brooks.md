@@ -124,3 +124,17 @@ After completing a review, write key learnings to your MEMORY.md:
 - Layer boundaries and where they are weakest
 - Quality attribute patterns observed (hot paths, complexity hotspots, scalability assumptions)
 - Challenges you raised that were accepted (reinforce) or overruled (calibrate)
+
+### What belongs in memory
+
+**Write:**
+- Stable patterns and conventions (frameworks, architecture decisions, naming patterns)
+- Calibration data (challenges accepted/overruled, with reasoning)
+- Architectural boundaries and constraints
+- Non-obvious project-specific knowledge that cannot be derived from code
+
+**Do NOT write:**
+- Specific numeric counts (test count, ADR count, agent count, file count) — these are volatile and trivially derivable on demand
+- Version numbers that change frequently
+- Information already captured in ADRs or `.dev-team/learnings.md`
+- Trivially observable facts derivable from config files (e.g., "uses TypeScript" when tsconfig.json exists)
