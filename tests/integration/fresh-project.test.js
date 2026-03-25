@@ -44,16 +44,18 @@ describe("fresh project installation", () => {
       fs.existsSync(path.join(tmpDir, ".dev-team", "hooks", "dev-team-pre-commit-gate.js")),
     );
 
-    // Skills
+    // Framework skills (always installed to .dev-team/skills/)
     assert.ok(
       fs.existsSync(path.join(tmpDir, ".dev-team", "skills", "dev-team-challenge", "SKILL.md")),
     );
     assert.ok(fs.existsSync(path.join(tmpDir, ".dev-team", "skills", "dev-team-task", "SKILL.md")));
     assert.ok(
-      fs.existsSync(path.join(tmpDir, ".dev-team", "skills", "dev-team-merge", "SKILL.md")),
-    );
-    assert.ok(
       fs.existsSync(path.join(tmpDir, ".dev-team", "skills", "dev-team-assess", "SKILL.md")),
+    );
+    // Workflow skills (merge, security-status) are NOT installed to .dev-team/skills/ anymore
+    assert.ok(
+      !fs.existsSync(path.join(tmpDir, ".dev-team", "skills", "dev-team-merge", "SKILL.md")),
+      "merge skill should not be in .dev-team/skills/ (moved to workflow-skills)",
     );
 
     // Memory
@@ -153,6 +155,33 @@ describe("fresh project installation", () => {
     );
     assert.equal(prefs.preset, "fullstack");
     assert.equal(prefs.agents.length, 12);
+  });
+
+  it("installs workflow skills to .claude/skills/ when .github/ exists", async () => {
+    // Simulate a GitHub project
+    fs.mkdirSync(path.join(tmpDir, ".github"), { recursive: true });
+
+    await run(tmpDir, ["--all"]);
+
+    // Workflow skills should be in .claude/skills/
+    assert.ok(
+      fs.existsSync(path.join(tmpDir, ".claude", "skills", "dev-team-merge", "SKILL.md")),
+      "merge skill should be in .claude/skills/ for GitHub projects",
+    );
+    assert.ok(
+      fs.existsSync(path.join(tmpDir, ".claude", "skills", "dev-team-security-status", "SKILL.md")),
+      "security-status skill should be in .claude/skills/ for GitHub projects",
+    );
+  });
+
+  it("does not install workflow skills when .github/ is absent", async () => {
+    await run(tmpDir, ["--all"]);
+
+    // No .github/ directory, so no GitHub workflow skills
+    assert.ok(
+      !fs.existsSync(path.join(tmpDir, ".claude", "skills", "dev-team-merge", "SKILL.md")),
+      "merge skill should not be installed without .github/",
+    );
   });
 
   it("--preset data installs data pipeline agents", async () => {

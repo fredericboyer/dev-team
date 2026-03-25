@@ -543,6 +543,29 @@ export async function update(targetDir: string): Promise<void> {
     }
   }
 
+  // Step 5b: Remove framework skills no longer in templates (moved to workflow-skills)
+  const installedSkills = listSubdirectories(skillsDir);
+  for (const installed of installedSkills) {
+    if (!discoveredSkills.includes(installed)) {
+      // This skill was removed from templates — check if it's a known workflow skill
+      const workflowSrc = path.join(templates, "workflow-skills", installed, "SKILL.md");
+      if (fileExists(workflowSrc)) {
+        // Migrate to .claude/skills/ if not already there
+        const claudeSkillDest = path.join(targetDir, ".claude", "skills", installed, "SKILL.md");
+        if (!fileExists(claudeSkillDest)) {
+          copyFile(workflowSrc, claudeSkillDest);
+          summary.skills.added.push(installed.replace("dev-team-", "") + " (→ .claude/skills/)");
+        }
+        // Remove from .dev-team/skills/
+        try {
+          fs.rmSync(path.join(skillsDir, installed), { recursive: true });
+        } catch {
+          // best effort
+        }
+      }
+    }
+  }
+
   // Step 6: Update CLAUDE.md (preserves user content outside markers)
   const claudeMdPath = path.join(targetDir, "CLAUDE.md");
   const claudeMdTemplate = readFile(path.join(templates, "CLAUDE.md"));

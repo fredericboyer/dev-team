@@ -83,7 +83,7 @@ Parallel mode is complete when:
 
 ## Security preamble
 
-Before starting work, check for open security alerts: run `/dev-team:security-status` if available, or check `gh api repos/{owner}/{repo}/code-scanning/alerts?state=open` and `gh api repos/{owner}/{repo}/dependabot/alerts?state=open`. Flag any critical findings before proceeding.
+Before starting work, check for open security alerts: run `/dev-team:security-status` if available, or use the project's security monitoring tools. Flag any critical findings before proceeding.
 
 ## Completion
 
