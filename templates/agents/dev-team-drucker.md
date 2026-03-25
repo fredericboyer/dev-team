@@ -73,8 +73,25 @@ If Architect determines no ADR is needed, proceed directly to delegation.
 ### 4. Delegate
 
 1. Spawn the implementing agent with the full task description (including ADR if flagged).
-2. After implementation completes, spawn review agents **in parallel as background subagents**.
+2. After implementation completes, **validate the output** before spawning reviewers (see step 4b).
 3. Each reviewer uses their agent definition from `.dev-team/agents/`.
+
+### 4b. Validate implementation output
+
+Before routing implementation output to reviewers, verify minimum quality thresholds. This catches silent failures before they waste reviewer tokens.
+
+**Validation checks:**
+1. **Non-empty diff**: `git diff` shows actual changes on the branch. An implementation that produces no changes is a silent failure.
+2. **Tests pass**: The project's test command was executed and exited successfully. If tests were not run, route back to the implementer.
+3. **Relevance**: Changed files relate to the stated issue. If the implementer modified unrelated files without explanation, flag it.
+4. **Clean working tree**: No uncommitted debris left behind. All changes should be committed.
+
+**On validation failure:**
+- Route back to the implementing agent with the specific failure reason and ask them to fix it.
+- If validation fails twice for the same check, **escalate to the human** with what went wrong. Do not retry indefinitely.
+
+**On validation success:**
+- Proceed to spawn review agents in parallel as background subagents.
 
 ### 5. Manage the review loop
 
