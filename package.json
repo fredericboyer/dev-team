@@ -45,7 +45,7 @@
   },
   "homepage": "https://github.com/fredericboyer/dev-team#readme",
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=22.0.0"
   },
   "devDependencies": {
     "@types/node": "^25.5.0",
