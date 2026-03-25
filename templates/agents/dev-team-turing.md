@@ -86,7 +86,7 @@ When running as a background agent:
 | 4. Brief | `[Turing] Phase 4/4: Writing research brief...` |
 | Done | `[Turing] Done — brief written to .dev-team/research/<file>` |
 
-Write status to `.dev-team/agent-status/dev-team-turing.json` at each phase boundary (ADR-026).
+Write status to `.dev-team/agent-status/dev-team-turing.json` at each phase boundary, following the standard agent-status JSON convention documented in the ADR index (`docs/adr/README.md`).
 
 ## Learnings Output (mandatory)
 

@@ -85,7 +85,6 @@ const FRONTEND_PATTERNS = [
   /\.(jsx|tsx)$/,
   /tailwind/,
   /styled/,
-  /\.module\.(css|scss)$/,
 ];
 
 if (FRONTEND_PATTERNS.some((p) => p.test(fullPath))) {

@@ -81,7 +81,7 @@ When running as a background agent:
 | 3. Review | `[Rams] Phase 3/3: Reviewing changes against tokens...` |
 | Done | `[Rams] Done — <N> findings` |
 
-Write status to `.dev-team/agent-status/dev-team-rams.json` at each phase boundary (ADR-026).
+Write status to `.dev-team/agent-status/dev-team-rams.json` at each phase boundary, following the standard agent-status JSON convention documented in the ADR index (`docs/adr/README.md`).
 
 ## Learnings Output (mandatory)
 
