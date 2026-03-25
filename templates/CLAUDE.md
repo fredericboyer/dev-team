@@ -52,7 +52,7 @@ Agents challenge each other using classified findings:
 
 ### Parallel execution
 
-When working on multiple independent issues, use parallel agents on separate branches. Drucker coordinates the review wave after all implementations complete.
+When working on multiple independent issues, use agent teams or worktree subagents to run parallel agents on separate branches. The main conversation loop acts as Drucker (team lead) — do not spawn a separate Drucker subagent. Drucker coordinates the review wave after all implementations complete.
 
 ### Hook directives are MANDATORY
 

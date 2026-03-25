@@ -17,7 +17,10 @@ Adversarial AI agent team for any project. Installs Claude Code agents, hooks, a
 - Branch naming: `feat/123-description` or `fix/456-description`
 - Commits reference issues: `fixes #123` or `refs #123`
 - All merges via PR. No direct pushes to main.
-- **Aggressively parallelize with git worktrees.** When multiple issues touch independent files, work them simultaneously in separate worktrees. Do NOT work sequentially on issues that can be parallelized. Use the Agent tool with `isolation: "worktree"` to spawn parallel workstreams. Only sequence issues that have file conflicts.
+- **Aggressively parallelize independent work.** When multiple issues touch independent files, work them simultaneously — do NOT work sequentially on issues that can be parallelized. Only sequence issues that have file conflicts.
+  - **Agent teams** (preferred for multi-issue batches): The main conversation loop acts as Drucker (team lead). Spawn implementation teammates via agent teams, each on its own branch. Never delegate to a Drucker subagent — the main loop IS Drucker.
+  - **Worktree subagents** (fallback when agent teams are unavailable): Use the Agent tool with `isolation: "worktree"` to spawn parallel workstreams in separate worktrees.
+  - The main loop must stay interactive at all times. All implementation happens via background teammates or subagents.
 
 ## Development
 
@@ -83,7 +86,7 @@ Agents challenge each other using classified findings:
 
 ### Parallel execution
 
-When working on multiple independent issues, use parallel agents on separate branches. Drucker coordinates the review wave after all implementations complete.
+When working on multiple independent issues, use agent teams or worktree subagents to run parallel agents on separate branches. The main conversation loop acts as Drucker (team lead) — do not spawn a separate Drucker subagent. Drucker coordinates the review wave after all implementations complete.
 
 ### Hook directives are MANDATORY
 
