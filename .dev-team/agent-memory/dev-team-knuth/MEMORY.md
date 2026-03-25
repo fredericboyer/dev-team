@@ -9,7 +9,7 @@
 - **Tags**: testing, coverage, test-runner
 - **Outcome**: pending-verification
 - **Last-verified**: 2026-03-24
-- **Context**: 6 unit test files, 3 integration test files, 4 scenario test files. Node.js `node --test` runner, no third-party test framework. Tests are pre-compiled JS (not TS). Actual test-case count is 217 (tracked in .dev-team/learnings.md).
+- **Context**: 6 unit test files, 3 integration test files, 4 scenario test files. Node.js `node --test` runner, no third-party test framework. Tests are pre-compiled JS (not TS). Actual test-case count is 306 (tracked in .dev-team/learnings.md).
 
 ### [2026-03-24] Test directory structure: tests/unit + tests/integration + tests/scenarios
 - **Type**: PATTERN [bootstrapped]
