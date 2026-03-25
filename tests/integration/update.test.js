@@ -7,7 +7,7 @@ const path = require("path");
 const os = require("os");
 
 const { run } = require("../../dist/init");
-const { update, compareSemver } = require("../../dist/update");
+const { update, compareSemver, cleanupLegacyMemoryDirs } = require("../../dist/update");
 
 let tmpDir;
 let originalCwd;
@@ -414,6 +414,114 @@ describe("dev-team update", () => {
       fs.existsSync(path.join(tmpDir, ".dev-team", "config.json")),
       "config.json should exist after partial migration",
     );
+  });
+});
+
+describe("cleanupLegacyMemoryDirs", () => {
+  it("removes empty legacy memory directories", async () => {
+    await run(tmpDir, ["--all"]);
+
+    // Create legacy directories with boilerplate content
+    const legacyDir = path.join(tmpDir, ".dev-team", "agent-memory", "dev-team-architect");
+    fs.mkdirSync(legacyDir, { recursive: true });
+    fs.writeFileSync(path.join(legacyDir, "MEMORY.md"), "# Agent Memory\n<!-- boilerplate -->\n");
+
+    const log = cleanupLegacyMemoryDirs(path.join(tmpDir, ".dev-team"));
+
+    assert.ok(!fs.existsSync(legacyDir), "legacy directory should be removed");
+    assert.ok(
+      log.some((l) => l.includes("dev-team-architect")),
+      "should log cleanup",
+    );
+  });
+
+  it("merges substantive legacy content into current agent memory", async () => {
+    await run(tmpDir, ["--all"]);
+
+    // Create legacy directory with substantive content (more than 5 lines)
+    const legacyDir = path.join(tmpDir, ".dev-team", "agent-memory", "dev-team-architect");
+    fs.mkdirSync(legacyDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(legacyDir, "MEMORY.md"),
+      "# Architect Memory\n## Patterns\n- Pattern 1\n- Pattern 2\n- Pattern 3\n- Pattern 4\n",
+    );
+
+    const log = cleanupLegacyMemoryDirs(path.join(tmpDir, ".dev-team"));
+
+    // Legacy dir should be removed
+    assert.ok(!fs.existsSync(legacyDir), "legacy directory should be removed");
+
+    // Content should be merged into Brooks (new name for Architect)
+    const brooksMemory = fs.readFileSync(
+      path.join(tmpDir, ".dev-team", "agent-memory", "dev-team-brooks", "MEMORY.md"),
+      "utf-8",
+    );
+    assert.ok(
+      brooksMemory.includes("Migrated from dev-team-architect"),
+      "should contain migration marker",
+    );
+    assert.ok(brooksMemory.includes("Pattern 1"), "should contain merged content");
+  });
+
+  it("moves legacy content when current agent memory does not exist", async () => {
+    await run(tmpDir, ["--all"]);
+
+    // Delete the current Brooks memory and create a legacy architect one
+    const brooksDir = path.join(tmpDir, ".dev-team", "agent-memory", "dev-team-brooks");
+    fs.rmSync(brooksDir, { recursive: true });
+
+    const legacyDir = path.join(tmpDir, ".dev-team", "agent-memory", "dev-team-architect");
+    fs.mkdirSync(legacyDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(legacyDir, "MEMORY.md"),
+      "# Architect Memory\nImportant learnings here.\n",
+    );
+
+    const log = cleanupLegacyMemoryDirs(path.join(tmpDir, ".dev-team"));
+
+    assert.ok(!fs.existsSync(legacyDir), "legacy directory should be removed");
+    assert.ok(fs.existsSync(path.join(brooksDir, "MEMORY.md")), "memory should be moved to Brooks");
+    const content = fs.readFileSync(path.join(brooksDir, "MEMORY.md"), "utf-8");
+    assert.ok(content.includes("Important learnings"), "content should be preserved");
+  });
+
+  it("handles all four known legacy renames", async () => {
+    await run(tmpDir, ["--all"]);
+
+    const legacyNames = [
+      "dev-team-architect",
+      "dev-team-docs",
+      "dev-team-lead",
+      "dev-team-release",
+    ];
+
+    for (const name of legacyNames) {
+      const dir = path.join(tmpDir, ".dev-team", "agent-memory", name);
+      fs.mkdirSync(dir, { recursive: true });
+      fs.writeFileSync(path.join(dir, "MEMORY.md"), "# Legacy\nBoilerplate\n");
+    }
+
+    cleanupLegacyMemoryDirs(path.join(tmpDir, ".dev-team"));
+
+    for (const name of legacyNames) {
+      assert.ok(
+        !fs.existsSync(path.join(tmpDir, ".dev-team", "agent-memory", name)),
+        `${name} should be removed`,
+      );
+    }
+  });
+
+  it("runs during update automatically", async () => {
+    await run(tmpDir, ["--all"]);
+
+    // Create a legacy directory
+    const legacyDir = path.join(tmpDir, ".dev-team", "agent-memory", "dev-team-architect");
+    fs.mkdirSync(legacyDir, { recursive: true });
+    fs.writeFileSync(path.join(legacyDir, "MEMORY.md"), "# Legacy\nBoilerplate\n");
+
+    await update(tmpDir);
+
+    assert.ok(!fs.existsSync(legacyDir), "legacy directory should be cleaned up during update");
   });
 });
 

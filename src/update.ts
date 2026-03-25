@@ -60,6 +60,66 @@ const MIGRATIONS: Migration[] = [
   },
 ];
 
+/**
+ * Known legacy agent memory directory names from pre-rename agents.
+ * Maps old directory name to the current agent directory name.
+ */
+const LEGACY_MEMORY_DIRS: Record<string, string> = {
+  "dev-team-architect": "dev-team-brooks",
+  "dev-team-docs": "dev-team-tufte",
+  "dev-team-lead": "dev-team-drucker",
+  "dev-team-release": "dev-team-conway",
+};
+
+/**
+ * Cleans up legacy agent memory directories from pre-rename agents.
+ * Merges any content from legacy dirs into the new agent's memory,
+ * then removes the legacy directories.
+ */
+export function cleanupLegacyMemoryDirs(devTeamDir: string): string[] {
+  const log: string[] = [];
+  const memoryDir = path.join(devTeamDir, "agent-memory");
+
+  if (!dirExists(memoryDir)) return log;
+
+  for (const [legacyDir, currentDir] of Object.entries(LEGACY_MEMORY_DIRS)) {
+    const legacyPath = path.join(memoryDir, legacyDir);
+    if (!dirExists(legacyPath)) continue;
+
+    const legacyMemoryPath = path.join(legacyPath, "MEMORY.md");
+    const currentMemoryPath = path.join(memoryDir, currentDir, "MEMORY.md");
+
+    // If legacy dir has content and current dir exists, merge content
+    if (fileExists(legacyMemoryPath) && fileExists(currentMemoryPath)) {
+      const legacyContent = readFile(legacyMemoryPath);
+      const currentContent = readFile(currentMemoryPath);
+
+      // Only merge if legacy has substantive content (not just boilerplate)
+      if (legacyContent && legacyContent.trim().split("\n").length > 5) {
+        const mergedContent =
+          (currentContent || "") + "\n\n## Migrated from " + legacyDir + "\n\n" + legacyContent;
+        writeFile(currentMemoryPath, mergedContent);
+        log.push(`Merged memory: ${legacyDir} → ${currentDir}`);
+      }
+    } else if (fileExists(legacyMemoryPath) && !fileExists(currentMemoryPath)) {
+      // Move legacy content to current location
+      fs.mkdirSync(path.join(memoryDir, currentDir), { recursive: true });
+      fs.renameSync(legacyMemoryPath, currentMemoryPath);
+      log.push(`Moved memory: ${legacyDir} → ${currentDir}`);
+    }
+
+    // Remove the legacy directory
+    try {
+      fs.rmSync(legacyPath, { recursive: true });
+      log.push(`Removed legacy directory: ${legacyDir}/`);
+    } catch {
+      // Best effort
+    }
+  }
+
+  return log;
+}
+
 export function compareSemver(a: string, b: string): number {
   const pa = a.split(".").map((n) => parseInt(n, 10));
   const pb = b.split(".").map((n) => parseInt(n, 10));
@@ -314,6 +374,16 @@ export async function update(targetDir: string): Promise<void> {
   if (agentMigrationLog.length > 0) {
     console.log("Migrations:");
     for (const entry of agentMigrationLog) {
+      console.log(`  ${entry}`);
+    }
+    console.log("");
+  }
+
+  // Clean up legacy agent memory directories from pre-rename agents
+  const legacyCleanupLog = cleanupLegacyMemoryDirs(devTeamDir);
+  if (legacyCleanupLog.length > 0) {
+    console.log("Legacy cleanup:");
+    for (const entry of legacyCleanupLog) {
       console.log(`  ${entry}`);
     }
     console.log("");
