@@ -6,6 +6,13 @@ user_invocable: true
 
 Merge a pull request with full monitoring: $ARGUMENTS
 
+## Release PRs
+
+**Conway/release PRs MUST use this merge skill.** Release PRs (version bumps, changelog updates, release branches) require the same Copilot review handling and CI verification as any other PR — do not bypass this process for releases. When merging a release PR, pay extra attention to:
+- Changelog completeness (all PRs since last release are documented)
+- Version bump correctness (semver compliance)
+- No draft or WIP markers left in release notes
+
 ## Setup
 
 1. Determine the PR number:
@@ -40,8 +47,8 @@ gh api --paginate repos/{owner}/{repo}/pulls/{number}/reviews --jq '[.[] | selec
 ### 1b. Address Copilot findings
 
 ```bash
-# Inline comments
-gh api --paginate repos/{owner}/{repo}/pulls/{number}/comments --jq '.[] | select(.user.login == "Copilot") | {id: .id, path: .path, line: .line, body: .body}'
+# Inline comments (include node_id for thread resolution)
+gh api --paginate repos/{owner}/{repo}/pulls/{number}/comments --jq '.[] | select(.user.login == "Copilot") | {id: .id, node_id: .node_id, path: .path, line: .line, body: .body}'
 
 # Summary reviews
 gh api --paginate repos/{owner}/{repo}/pulls/{number}/reviews --jq '.[] | select(.user.login == "Copilot") | {id: .id, state: .state, body: .body}'
@@ -51,7 +58,19 @@ For each Copilot comment:
 1. Read the finding and assess: is it actionable?
 2. **Actionable** (bug, ambiguity, missing logic): fix in code, commit, push
 3. **Style/minor**: acknowledge but skip if not substantive
-4. After addressing all actionable findings, re-push and wait for CI to restart
+4. **Reply to the Copilot thread** explaining what was fixed (or why it was skipped). Use the inline comment reply API:
+   ```bash
+   gh api repos/{owner}/{repo}/pulls/{number}/comments/{comment_id}/replies -f body="Fixed: <brief explanation of the change>"
+   ```
+   Then resolve the thread so it no longer shows as outstanding:
+   ```bash
+   gh api graphql -f query='mutation { minimizeComment(input: {subjectId: "<node_id>", classifier: RESOLVED}) { minimizedComment { isMinimized } } }'
+   ```
+   To get the `node_id` for a comment, include it in the initial fetch:
+   ```bash
+   gh api --paginate repos/{owner}/{repo}/pulls/{number}/comments --jq '.[] | select(.user.login == "Copilot") | {id: .id, node_id: .node_id, path: .path, line: .line, body: .body}'
+   ```
+5. After addressing all actionable findings, re-push and wait for CI to restart
 
 ### 1c. Verify no new Copilot comments after push
 
