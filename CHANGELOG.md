@@ -7,6 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-03-24
+
+### Added
+- **Two-tier memory architecture** -- Tier 1 shared learnings + Tier 2 agent calibration memory with documented purposes (#157).
+- **Memory evolution** -- Borges deduplicates entries, supersedes contradictions, and auto-generates calibration rules after 3+ overrules on same tag (#157).
+- **Temporal decay** -- Memory entries track `Last-verified` dates; Borges flags stale (30d) and archives old (90d) entries (#157).
+- **Cold start seed memories** -- Borges generates domain-appropriate seed entries from project config on first run (#158).
+- **Role-aware memory loading** -- Each agent loads only relevant cross-agent memory entries by tag (#158).
+- **Context compaction** -- Structured summaries between review waves prevent context window exhaustion (#163).
+- **Calibration metrics tracking** -- Per-task metrics in `.dev-team/metrics.md`: agents, findings, acceptance rates, convergence rounds (#164).
+- **Review calibration feedback loop** -- Finding outcomes (accepted/overruled) feed back into agent memory and calibration rules (#165).
+- **Agent teams support** -- Drucker operates as team lead with peer-to-peer communication for milestone-level batches (#173).
+- **Agent teams onboarding** -- `dev-team init` enables agent teams by default with graceful degradation (#177).
+- **npm caching in CI** -- All setup-node steps cache ~/.npm for faster installs (#197).
+
+### Changed
+- CI matrix reduced from 9 to 3 build-and-test jobs (Node 22 only) (#171).
+- Minimum Node.js version bumped to >=22.0.0 (#171).
+- Memory heuristics use structured entry detection instead of file size (#183, #185).
+- `create-agent` scaffolding uses new two-tier MEMORY.md format (#186).
+- Security-status skill name aligned with invocation convention (#188).
+
+### Fixed
+- Legacy MEMORY.md merge heuristic no longer misclassifies template boilerplate as substantive (#183).
+- Status command correctly detects empty vs populated memory files (#185).
+- Missing test assertion for security-status workflow skill (#187).
+
+### Internal
+- 276 tests (was 274). 5 framework skills + 2 optional workflow skills. 12 agents. ADR-019 amended for agent teams.
+
 ## [0.9.0] - 2026-03-25
 
 ### Added
