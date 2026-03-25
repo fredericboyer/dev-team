@@ -46,6 +46,7 @@ For each agent memory file:
 - Is it stale? → Flag for update
 - Does it contradict learnings.md? → Flag inconsistency
 - Does it contain calibration that could improve the agent definition? → Capture as a finding and recommend an agent template update in the report
+- Does it contain entries that describe project-wide patterns rather than agent-specific calibration? → Flag as promotion opportunity. Include the entry text and recommended `.dev-team/learnings.md` wording in the report under "Promotion opportunities"
 
 ### 4. Assess CLAUDE.md (template AND project)
 
