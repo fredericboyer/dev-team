@@ -40,7 +40,7 @@
 - Always run `npm run format` before committing new `.ts` files — oxfmt formatting is checked in CI.
 
 ### Learning capture metrics
-- Non-empty agent memory files: 0 of 12 active agents (16 memory dirs exist, 4 are legacy pre-rename: architect, docs, lead, release)
+- Non-empty agent memory files: 12 of 12 active agents (16 memory dirs exist, 4 are legacy pre-rename: architect, docs, lead, release)
 - Last Borges run: not tracked yet (Borges spawning is now enforced via skill definitions)
 - Pre-commit gate: blocks commits without memory updates (override via `.dev-team/.memory-reviewed`)
 - All 7 implementing agents have mandatory Learnings Output section
