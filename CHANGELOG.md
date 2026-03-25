@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.1] - 2026-03-25
+
+### Fixed
+- Ghost hook/agent entries (e.g., "Task loop") in config.json are now cleaned up during `dev-team update` (#260).
+- Framework skills (`/dev-team:task`, `/dev-team:review`, etc.) now discoverable via symlinks from `.claude/skills/` to `.dev-team/skills/` (#262).
+- Merge skill now detects Copilot as a pending reviewer (not just check run) and waits for review before merging (#268).
+- Symlink guard preserves any non-symlink path in `.claude/skills/`, not just directories containing SKILL.md (#269).
+- `Object.hasOwn()` used instead of `in` operator for ghost entry filtering to avoid prototype pollution (#269).
+- Windows compatibility: junction fallback when symlink creation fails with EPERM/EACCES (#269).
+- Windows CI: fixed flaky `blocks commit when format:check fails independently` test (#269).
+- Broken symlink test now creates junctions correctly on Windows (#269).
+
 ## [1.1.0] - 2026-03-25
 
 ### Added
