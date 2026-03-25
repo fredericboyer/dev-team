@@ -40,6 +40,7 @@ Write entries to the appropriate agent's MEMORY.md using the structured format:
 - **Source**: PR #NNN or task description
 - **Tags**: comma-separated relevant tags (auth, sql, boundary-condition, etc.)
 - **Outcome**: accepted | overruled | deferred | fixed
+- **Last-verified**: YYYY-MM-DD
 - **Context**: One-sentence explanation of what happened and why it matters
 ```
 
@@ -48,6 +49,15 @@ Write entries to the appropriate agent's MEMORY.md using the structured format:
 - Every overruled finding becomes an OVERRULED entry for the reviewer (calibration)
 - Every significant implementation decision becomes a DECISION entry for the implementer
 - Recurring patterns across tasks become PATTERN entries
+
+### 1b. Memory evolution
+
+When writing a new entry, check for related existing entries (matched by tags):
+
+1. **Deduplication**: If a new entry matches an existing one (same tags + similar context), increment a counter annotation on the existing entry (`Seen: N times`) rather than creating a duplicate.
+2. **Supersession**: When an accepted finding contradicts an existing entry, mark the old one as superseded: `**Superseded by**: [YYYY-MM-DD] entry summary`.
+3. **Calibration rules**: When 3+ findings on the same tag are overruled, generate a calibration rule in the agent's "Calibration Rules" section: `Reduce severity for [tag] findings — overruled N times (reason summary)`.
+4. **Last-verified update**: When a finding on the same tag is produced and accepted, update the `Last-verified` date on related existing entries.
 
 ### 2. Update shared learnings (you write this)
 
@@ -65,6 +75,15 @@ For each agent that participated in the task:
 3. Flag stale entries (patterns that changed, challenges that were overruled, outdated benchmarks)
 4. Flag if approaching the 200-line cap — compress older entries into summaries
 5. Remove entries that duplicate what is already in `.dev-team/learnings.md`
+
+### 3b. Temporal decay
+
+Entries have `Last-verified` dates that track when they were last confirmed relevant:
+
+1. **Flag stale entries (30+ days)**: Entries not verified in 30+ days get flagged as `[RISK]` in your report. These need re-verification — the underlying code or pattern may have changed.
+2. **Archive old entries (90+ days)**: Entries over 90 days without verification are moved to the `## Archive` section at the bottom of the agent's MEMORY.md. Archived entries are preserved for reference but not loaded into agent context (only the first 200 lines are loaded).
+3. **Verification happens naturally**: When a finding on the same tag is produced and accepted, it verifies related existing entries. You update their `Last-verified` date during extraction (step 1).
+4. **Never delete**: Entries are archived, not deleted. The archive is the historical record.
 
 ### 4. System improvement
 
@@ -85,7 +104,8 @@ Check for contradictions between agent memories:
 
 You always check for:
 - **Memory formation**: Every task must produce at least one structured memory entry per participating agent. Empty memory is a system failure.
-- **Memory freshness**: Every fact in memory should be verifiable in the current codebase
+- **Memory freshness**: Every fact in memory should be verifiable in the current codebase. Flag entries with `Last-verified` dates older than 30 days.
+- **Temporal decay**: Archive entries older than 90 days without verification. Move to `## Archive` section.
 - **Benchmark accuracy**: Test counts, agent counts, hook counts — these change frequently
 - **Guideline-to-hook promotion**: If a guideline was ignored, it should be a hook (ADR-001)
 - **Knowledge gaps**: What did the team learn that isn't captured anywhere?
