@@ -390,8 +390,14 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
   for (const skillDir of skillDirs) {
     const symlinkPath = path.join(claudeSkillsDir, skillDir);
     const symlinkTarget = path.relative(claudeSkillsDir, path.join(skillsDir, skillDir));
-    if (!fileExists(path.join(symlinkPath, "SKILL.md"))) {
-      // Only create symlink if not already a real directory with a SKILL.md
+    // Skip if path exists and is NOT a symlink (user's real directory — preserve it)
+    let isNonSymlink = false;
+    try {
+      isNonSymlink = fs.existsSync(symlinkPath) && !fs.lstatSync(symlinkPath).isSymbolicLink();
+    } catch {
+      // ENOENT — path doesn't exist, proceed to create symlink
+    }
+    if (!isNonSymlink) {
       try {
         fs.mkdirSync(path.dirname(symlinkPath), { recursive: true });
         // Remove existing symlink (broken or stale) — only unlink symlinks, not real files/dirs
@@ -404,9 +410,24 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
         }
         fs.symlinkSync(symlinkTarget, symlinkPath);
       } catch (err) {
-        console.warn(
-          `  Warning: could not create skill symlink for ${skillDir}: ${(err as Error).message}`,
-        );
+        // On Windows, non-admin users get EPERM/EACCES for symlinks — fall back to junction
+        if (
+          process.platform === "win32" &&
+          ((err as NodeJS.ErrnoException).code === "EPERM" ||
+            (err as NodeJS.ErrnoException).code === "EACCES")
+        ) {
+          try {
+            fs.symlinkSync(symlinkTarget, symlinkPath, "junction");
+          } catch (junctionErr) {
+            console.warn(
+              `  Warning: could not create skill symlink for ${skillDir}: ${(junctionErr as Error).message}`,
+            );
+          }
+        } else {
+          console.warn(
+            `  Warning: could not create skill symlink for ${skillDir}: ${(err as Error).message}`,
+          );
+        }
       }
     }
   }

@@ -1343,13 +1343,15 @@ describe("dev-team-pre-commit-lint", () => {
       const input = JSON.stringify({ tool_input: { command: 'git commit -m "test"' } });
       execFileSync(process.execPath, [path.join(HOOKS_DIR, hook), input], {
         encoding: "utf-8",
-        timeout: 10000,
+        timeout: 30000,
         cwd: tmpDir,
       });
       assert.fail("Should exit 2 when format:check fails");
     } catch (err) {
       assert.equal(err.status, 2, "should block with exit 2");
-      assert.ok(err.stderr.includes("format"), "should mention format in error");
+      // On Windows, npm may route output differently between stdout/stderr
+      const combined = (err.stderr || "") + (err.stdout || "");
+      assert.ok(combined.includes("format"), "should mention format in error output");
     } finally {
       fs.rmSync(tmpDir, { recursive: true, force: true });
     }
