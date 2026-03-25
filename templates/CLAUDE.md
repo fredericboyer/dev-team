@@ -86,7 +86,7 @@ Project-specific customization belongs in `.claude/`:
 | Project-specific skills (merge, deploy, etc.) | `.claude/skills/` |
 | Claude Code settings and hook wiring | `.claude/settings.json` |
 
-`.claude/` is not touched by `dev-team update` — your customizations are safe.
+`.claude/hooks/` and `.claude/skills/` are not overwritten by `dev-team update` — your project-specific customizations are safe. Only `.claude/settings.json` is merged additively (new product hooks are added, but user-added entries are never removed).
 
 ### Memory architecture (two-tier)
 

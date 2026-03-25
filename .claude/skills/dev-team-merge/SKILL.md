@@ -62,10 +62,7 @@ For each Copilot comment:
    ```bash
    gh api repos/{owner}/{repo}/pulls/{number}/comments/{comment_id}/replies -f body="Fixed: <brief explanation of the change>"
    ```
-   Then resolve the thread so it no longer shows as outstanding:
-   ```bash
-   gh api graphql -f query='mutation { minimizeComment(input: {subjectId: "<node_id>", classifier: RESOLVED}) { minimizedComment { isMinimized } } }'
-   ```
+   Note: GitHub's API does not support programmatically resolving review threads. The `minimizeComment` mutation only hides comments (collapses them), it does not mark threads as resolved. Threads must be resolved manually in the GitHub UI, or will be resolved when the PR is merged. Replying with the fix explanation is sufficient.
    To get the `node_id` for a comment, include it in the initial fetch (already updated above).
 5. After addressing all actionable findings, re-push and wait for CI to restart
 

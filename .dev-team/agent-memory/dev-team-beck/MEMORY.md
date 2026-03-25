@@ -19,13 +19,13 @@
 - **Last-verified**: 2026-03-24
 - **Context**: tests/unit/ covers individual modules (files, hooks, scan, skill-recommendations, create-agent, cli). tests/integration/ covers full install flows (fresh-project, idempotency, update). tests/scenarios/ covers end-to-end project types and orchestration.
 
-### [2026-03-24] 217 tests across 13 test files — test script lists files explicitly
-- **Type**: PATTERN [bootstrapped]
+### [2026-03-25] 306 tests across 13 test files — test script lists files explicitly
+- **Type**: PATTERN [verified]
 - **Source**: npm test output + .dev-team/learnings.md
 - **Tags**: testing, count, ci
-- **Outcome**: pending-verification
-- **Last-verified**: 2026-03-24
-- **Context**: 217 test cases (per learnings.md benchmark). Tests run in ~9 seconds. New test files must be added to the explicit list in package.json scripts.test. CI runs tests on 3 OS (ubuntu, macos, windows) with Node 22.
+- **Outcome**: verified
+- **Last-verified**: 2026-03-25
+- **Context**: 306 test cases (per learnings.md benchmark). Tests run in ~9 seconds. New test files must be added to the explicit list in package.json scripts.test. CI runs tests on 3 OS (ubuntu, macos, windows) with Node 22.
 
 ### [2026-03-24] TDD enforced via hook — dev-team-tdd-enforce.js
 - **Type**: PATTERN [bootstrapped]

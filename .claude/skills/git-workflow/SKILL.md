@@ -1,7 +1,7 @@
 ---
 name: git-workflow
 description: Safe parallel git workflow — worktree isolation, branch naming, and cleanup for team work.
-user_invocable: false
+user_invocable: true
 ---
 
 # Git Workflow for Parallel Team Work
@@ -31,7 +31,7 @@ Examples: `feat/168-cross-model-validation`, `fix/209-stale-quality-benchmarks`
 4. **Create PR** with `Closes #<issue>` in body
 5. **Clean up** after push:
    ```bash
-   cd /Users/fredericboyer/Projects/dev-team
+   cd <repo-root>
    git worktree remove $TMPDIR/worktree-<task-number>
    ```
 
