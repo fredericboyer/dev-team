@@ -25,11 +25,33 @@ Merge a pull request with full monitoring: $ARGUMENTS
 
 ## Step 1: Wait for and address Copilot review
 
-Before proceeding with merge, **wait for Copilot review to appear** — it takes 30-120 seconds after PR creation.
+Before proceeding with merge, **wait for Copilot review to complete** by monitoring the Copilot check run.
 
-### 1a. Wait for Copilot review
+### 1a. Wait for Copilot review via check run monitoring
 
-Poll up to 4 times (30s intervals, ~2 minutes total). Check both inline comments AND summary reviews — Copilot can leave either:
+Get the HEAD commit SHA for the PR, then look up the Copilot check run:
+
+```bash
+# Get the PR's HEAD commit SHA
+PR_SHA=$(gh pr view {number} --json headRefOid --jq .headRefOid)
+
+# Look up the Copilot check run
+gh api repos/{owner}/{repo}/commits/${PR_SHA}/check-runs \
+  --jq '.check_runs[] | select(.app.slug == "copilot-pull-request-reviewer" or .name == "Copilot") | {name, status, conclusion}'
+```
+
+**If a Copilot check run exists:**
+- If status is `queued` or `in_progress`: poll every 15 seconds until `completed` (max 12 polls, ~3 minutes). If after the final (12th) poll the status is still `queued` or `in_progress`, **treat this as a timeout**: surface a clear error, do **not** proceed to comment reading or merge, and stop the workflow without setting auto-merge.
+- Once status is `completed` within the polling limit: proceed to check for comments (1a-read below)
+- Do NOT set auto-merge before this step completes
+
+**If no Copilot check run exists** (not all repos have it configured):
+- Fall back to a single 30-second wait, then check comments once
+- This maintains backward compatibility for repos without the Copilot check run
+
+### 1a-read. Read Copilot comments
+
+Once the check run is completed (or after the fallback wait), read comments once:
 
 ```bash
 # Inline review comments
@@ -39,9 +61,8 @@ gh api --paginate repos/{owner}/{repo}/pulls/{number}/comments --jq '[.[] | sele
 gh api --paginate repos/{owner}/{repo}/pulls/{number}/reviews --jq '[.[] | select(.user.login == "Copilot")] | length'
 ```
 
-- If either count > 0: Copilot review has arrived, proceed to 1b
-- If both counts == 0 after 4 polls: Copilot review is absent (may not be configured), proceed to Step 2
-- Do NOT set auto-merge before this step completes
+- If either count > 0: Copilot review has findings, proceed to 1b
+- If both counts == 0: no Copilot comments were detected. If a Copilot check run was observed and completed, treat this as a clean review; if no Copilot check run exists, this likely means Copilot review is not configured or did not run. Then proceed to Step 2.
 - Use `--paginate` on all API calls to avoid missing results on PRs with many comments
 
 ### 1b. Address Copilot findings
@@ -68,12 +89,7 @@ For each Copilot comment:
 
 ### 1c. Verify no new Copilot comments after push
 
-If you pushed fixes, Copilot may review again. Check once more after CI restarts:
-
-```bash
-gh api --paginate repos/{owner}/{repo}/pulls/{number}/comments --jq '[.[] | select(.user.login == "Copilot")] | length'
-gh api --paginate repos/{owner}/{repo}/pulls/{number}/reviews --jq '[.[] | select(.user.login == "Copilot")] | length'
-```
+If you pushed fixes, Copilot may re-review. Re-run the check run monitoring from 1a (get the new HEAD SHA, wait for the Copilot check run to complete, then read comments once).
 
 If new comments appeared, repeat 1b. Otherwise proceed to Step 2.
 
