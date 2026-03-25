@@ -21,6 +21,24 @@
 
 ## System Improvement Log
 
+### [2026-03-25] First metrics entry recorded — v1.2.0 (4 parallel branches, 17 findings)
+- **Type**: MILESTONE [verified]
+- **Source**: v1.2.0 release task
+- **Tags**: metrics, calibration, baseline
+- **Outcome**: verified
+- **Last-verified**: 2026-03-25
+- **Context**: First real entry in `.dev-team/metrics.md`. Establishes baseline: 0% overrule rate, 100% DEFECT fix rate, 50% advisory defer rate. Future `/dev-team:assess` runs can now trend these numbers. Knuth was sole reviewer across all 4 branches; Deming sole implementer.
+
+### [2026-03-25] Vocabulary alignment is a cross-agent coherence risk
+- **Type**: PATTERN [verified]
+- **Source**: v1.2.0 Branch A finding #1
+- **Tags**: coherence, vocabulary, cross-agent
+- **Outcome**: verified
+- **Last-verified**: 2026-03-25
+- **Context**: When skill definitions produce structured output (Finding Outcome Log), the vocabulary must match what consuming agents (Borges) expect. The task skill was updated to use Borges-standard outcomes. Future skill additions should be checked for vocabulary alignment during review.
 
 ## Calibration Log
 <!-- Recommendations accepted/deferred — tunes what to flag over time -->
+
+### [2026-03-25] v1.2.0 extraction — high defer rate on advisory findings
+- Knuth's 50% advisory defer rate (7/14) is not a quality problem — deferred items were legitimate follow-ups outside the PR scope. But it signals that `/dev-team:assess` should track defer-to-issue conversion (are deferred findings actually becoming issues?).
