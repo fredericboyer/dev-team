@@ -138,11 +138,11 @@ When the human gives feedback about process, coding style, or tool behavior: wri
 
 **Always use `/dev-team:merge` to merge PRs.** Do not use raw `gh pr merge`.
 
-Before merging any PR, you MUST wait for and address GitHub Copilot review comments:
+Before merging any PR, you MUST wait for and address GitHub Copilot review feedback:
 1. After creating a PR, wait up to 2 minutes for Copilot review to appear
-2. Check: `gh api repos/fredericboyer/dev-team/pulls/{number}/comments --jq '[.[] | select(.user.login == "Copilot")] | length'`
-3. If Copilot has comments, read and address them before merging
-4. Only proceed with merge after Copilot feedback is resolved or confirmed absent
+2. Check for inline review comments: `gh api --paginate repos/fredericboyer/dev-team/pulls/{number}/comments --jq '[.[] | select(.user.login == "Copilot")] | length'`
+3. Check for summary reviews: `gh api --paginate repos/fredericboyer/dev-team/pulls/{number}/reviews --jq '[.[] | select(.user.login == "Copilot")] | length'`
+4. If Copilot has any comments or reviews, read and address them before merging. Only proceed with merge after all Copilot feedback is resolved or both counts are zero.
 
 This applies to all PRs — including those created by background agents.
 

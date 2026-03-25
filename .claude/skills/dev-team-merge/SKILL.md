@@ -22,20 +22,29 @@ Before proceeding with merge, **wait for Copilot review to appear** — it takes
 
 ### 1a. Wait for Copilot review
 
-Poll up to 4 times (30s intervals, ~2 minutes total):
+Poll up to 4 times (30s intervals, ~2 minutes total). Check both inline comments AND summary reviews — Copilot can leave either:
 
 ```bash
-gh api repos/{owner}/{repo}/pulls/{number}/comments --jq '[.[] | select(.user.login == "Copilot")] | length'
+# Inline review comments
+gh api --paginate repos/{owner}/{repo}/pulls/{number}/comments --jq '[.[] | select(.user.login == "Copilot")] | length'
+
+# Summary reviews (may exist without inline comments)
+gh api --paginate repos/{owner}/{repo}/pulls/{number}/reviews --jq '[.[] | select(.user.login == "Copilot")] | length'
 ```
 
-- If count > 0: Copilot review has arrived, proceed to 1b
-- If count == 0 after 4 polls: Copilot review is absent (may not be configured), proceed to Step 2
+- If either count > 0: Copilot review has arrived, proceed to 1b
+- If both counts == 0 after 4 polls: Copilot review is absent (may not be configured), proceed to Step 2
 - Do NOT set auto-merge before this step completes
+- Use `--paginate` on all API calls to avoid missing results on PRs with many comments
 
 ### 1b. Address Copilot findings
 
 ```bash
-gh api repos/{owner}/{repo}/pulls/{number}/comments --jq '.[] | select(.user.login == "Copilot") | {id: .id, path: .path, line: .line, body: .body}'
+# Inline comments
+gh api --paginate repos/{owner}/{repo}/pulls/{number}/comments --jq '.[] | select(.user.login == "Copilot") | {id: .id, path: .path, line: .line, body: .body}'
+
+# Summary reviews
+gh api --paginate repos/{owner}/{repo}/pulls/{number}/reviews --jq '.[] | select(.user.login == "Copilot") | {id: .id, state: .state, body: .body}'
 ```
 
 For each Copilot comment:
@@ -49,7 +58,8 @@ For each Copilot comment:
 If you pushed fixes, Copilot may review again. Check once more after CI restarts:
 
 ```bash
-gh api repos/{owner}/{repo}/pulls/{number}/comments --jq '[.[] | select(.user.login == "Copilot")] | length'
+gh api --paginate repos/{owner}/{repo}/pulls/{number}/comments --jq '[.[] | select(.user.login == "Copilot")] | length'
+gh api --paginate repos/{owner}/{repo}/pulls/{number}/reviews --jq '[.[] | select(.user.login == "Copilot")] | length'
 ```
 
 If new comments appeared, repeat 1b. Otherwise proceed to Step 2.
