@@ -47,3 +47,4 @@ What becomes easier or more difficult?
 | [020](020-quality-attribute-assessment.md) | Quality attribute assessment via expanded Brooks agent | accepted |
 | [021](021-typescript-6-module-resolution.md) | TypeScript 6.0 with nodenext module resolution | accepted |
 | [022](022-agent-proliferation-governance.md) | Agent proliferation governance | accepted |
+| [023](023-cross-model-reviewer-assignment.md) | Cross-model reviewer assignment for high-risk changes | proposed |
