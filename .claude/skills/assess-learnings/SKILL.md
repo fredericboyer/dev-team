@@ -1,6 +1,6 @@
 ---
 name: assess-learnings
-description: Audit team learnings, agent memories, and CLAUDE.md template to identify project-agnostic improvements to dev-team templates. Creates GitHub issues for actionable items. Local to this repo — not shipped to users.
+description: Audit team learnings, agent memories, and CLAUDE.md template to identify project-agnostic improvements to dev-team templates. Reports findings for human/orchestrator triage. Local to this repo — not shipped to users.
 user_invocable: true
 ---
 
@@ -45,7 +45,7 @@ For each agent memory file:
 - Is it empty? → Flag as gap (Borges should have populated this)
 - Is it stale? → Flag for update
 - Does it contradict learnings.md? → Flag inconsistency
-- Does it contain calibration that could improve the agent definition? → Create issue to update the agent template
+- Does it contain calibration that could improve the agent definition? → Capture as a finding and recommend an agent template update in the report
 
 ### 4. Assess CLAUDE.md (template AND project)
 
