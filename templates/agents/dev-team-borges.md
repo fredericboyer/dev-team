@@ -66,6 +66,11 @@ Write entries to the appropriate agent's MEMORY.md using the structured format:
 - **Context**: One-sentence explanation of what happened and why it matters
 ```
 
+**Extraction filter — skip these:**
+- Entries that record specific numeric metrics derivable from the codebase (test counts, file counts, line counts)
+- Entries that merely restate what is in `package.json`, `tsconfig.json`, or other config files
+- Entries that duplicate existing ADRs or `.dev-team/learnings.md` entries
+
 **Extraction rules:**
 - Every accepted DEFECT becomes a memory entry for the reviewer who found it (reinforcement)
 - Every overruled finding becomes an OVERRULED entry for the reviewer (calibration)
@@ -102,6 +107,12 @@ When agent memory files are empty (only contain the template boilerplate), gener
 - **Beck**: test framework, test directory structure, coverage tools
 - **Conway**: version scheme, release workflow, changelog format
 - **Mori**: UI framework, component directories, accessibility tools
+
+**Seed content rules:**
+- Describe **patterns and conventions**, not counts or specific numbers
+- Do NOT include specific numeric metrics (test counts, ADR counts, agent counts) — these are volatile and create memory churn when they change
+- Focus on stable structural knowledge: framework choices, architectural patterns, security boundaries, naming conventions
+- If a fact can be derived by running a command or reading a config file, it does not belong in memory
 
 **Seed entries are marked** with `[bootstrapped]` in their Type field so agents know to verify and refine them:
 ```markdown
