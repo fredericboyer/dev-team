@@ -52,7 +52,9 @@ Agents challenge each other using classified findings:
 
 ### Parallel execution
 
-When working on multiple independent issues, use agent teams or worktree subagents to run parallel agents on separate branches. The main conversation loop acts as Drucker (team lead) — do not spawn a separate Drucker subagent. Drucker coordinates the review wave after all implementations complete.
+When working on multiple independent issues, use agent teams or worktree subagents to run parallel agents on separate branches. Drucker coordinates the review wave after all implementations complete.
+
+> **Note:** If your project's workflow section (above the `dev-team:begin` marker) already designates the main conversation loop as the team lead, do not spawn a separate Drucker subagent — the main loop IS Drucker. Otherwise, `@dev-team-drucker` can be used as a subagent for delegation.
 
 ### Hook directives are MANDATORY
 
