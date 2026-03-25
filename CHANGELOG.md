@@ -51,7 +51,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Internal
 - 276 tests (was 274). 5 framework skills + 2 optional workflow skills. 12 agents. ADR-019 amended for agent teams.
 
-## [0.9.0] - 2026-03-25
+## [0.9.0] - 2026-03-24
 
 ### Added
 - **Automated memory formation** -- Borges extracts structured memory entries automatically (#156).
