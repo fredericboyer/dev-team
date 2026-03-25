@@ -29,22 +29,38 @@ Start a task loop for: $ARGUMENTS
 
    If an ADR is needed, include "Write ADR-NNN: <title>" in the implementation task. The implementing agent writes the ADR file. Architect reviews it post-implementation alongside code review.
 
+## Pre-implementation: best-practices research
+
+Before the first iteration, the implementing agent should research current best practices relevant to the task — checking official documentation for the tools, frameworks, and platforms involved. This ensures decisions are based on current ecosystem recommendations, not stale assumptions. When current best practices conflict with established codebase conventions, prefer consistency and flag the newer approach as a `[SUGGESTION]` with a migration path.
+
 ## Execution loop
 
 Track iterations in conversation context (no state files). For each iteration:
 
 1. The implementing agent works on the task.
-2. After implementation, spawn review agents in parallel as background tasks.
-3. Collect classified challenges from reviewers.
-4. If any `[DEFECT]` challenges exist, address them in the next iteration.
-5. If no `[DEFECT]` remains, output DONE to exit the loop.
-6. If max iterations reached without convergence, report remaining defects and exit.
+2. **Validate implementation output** before spawning reviewers:
+   - Non-empty diff: `git diff` shows actual changes
+   - Tests pass: test command executed with exit code 0
+   - Relevance: changed files relate to the stated issue
+   - Clean working tree: no uncommitted debris
+   - If validation fails, route back to implementer with specific failure reason. If it fails twice, escalate to human.
+3. After validation passes, spawn review agents in parallel as background tasks.
+4. Collect classified challenges from reviewers.
+5. If any `[DEFECT]` challenges exist, **compact the context** before the next iteration:
+   - Produce a structured summary: DEFECTs found (agent, file, status), files changed, outstanding items
+   - New reviewers in subsequent waves receive: current diff + compact summary + agent definition
+   - They do NOT receive raw conversation history from prior waves
+6. Address defects in the next iteration.
+7. If no `[DEFECT]` remains, output DONE to exit the loop.
+8. If max iterations reached without convergence, report remaining defects and exit.
 
 The convergence check happens in conversation context: count iterations, check for `[DEFECT]` findings, and decide whether to continue or exit.
 
 ## Parallel mode
 
 When multiple issues are being addressed in a single session, the task loop switches to parallel orchestration (see ADR-019). Drucker coordinates all phases in conversation context.
+
+**Mode selection:** If agent teams are enabled (check `.dev-team/config.json` for `"agentTeams": true`), use team lead mode for batches of 3+ issues. Otherwise, use standard worktree subagent mode. For single issues, always use standard mode.
 
 ### Phase 0: Brooks pre-assessment (batch)
 Spawn @dev-team-brooks once with all issues. Brooks identifies:
@@ -61,7 +77,7 @@ Drucker spawns one implementing agent per independent issue, each on its own bra
 Reviews do **not** start until **all** implementation agents have completed (Agent tool provides completion notifications as the sync barrier). Once all are done, spawn review agents (Szabo + Knuth, plus conditional reviewers) in parallel across all branches simultaneously. Each reviewer receives the diff for one specific branch and produces classified findings scoped to that branch.
 
 ### Phase 3: Defect routing
-Collect all findings. Route `[DEFECT]` items back to the original implementing agent for each branch. Agents fix defects on their own branch. After fixes, another review wave runs. Continue until no `[DEFECT]` findings remain or the per-branch iteration limit is reached.
+Collect all findings. Route `[DEFECT]` items back to the original implementing agent for each branch. Agents fix defects on their own branch. Before spawning the next review wave, **compact context**: produce a structured summary of prior findings, their status (fixed/disputed/pending), and files changed. New reviewers receive current diff + compact summary only — not full conversation history from prior waves. Continue until no `[DEFECT]` findings remain or the per-branch iteration limit is reached.
 
 ### Phase 4: Borges completion
 Borges runs **once** across all branches after the final review wave clears. This ensures cross-branch coherence: memory files are consistent, learnings are not duplicated, and system improvement recommendations consider the full batch.
@@ -73,15 +89,24 @@ Parallel mode is complete when:
 
 ## Security preamble
 
-Before starting work, check for open security alerts: run `/dev-team:security-status` if available, or check `gh api repos/{owner}/{repo}/code-scanning/alerts?state=open` and `gh api repos/{owner}/{repo}/dependabot/alerts?state=open`. Flag any critical findings before proceeding.
+Before starting work, check for open security alerts: run `/dev-team:security-status` if available, or use the project's security monitoring tools. Flag any critical findings before proceeding.
 
 ## Completion
 
 When the loop exits:
 1. **Deliver the work**: If changes are on a feature branch, create the PR (body must include `Closes #<issue>`). Ensure the PR is ready to merge: CI green, reviews passed, branch up to date. Then follow the project's merge workflow — use `/dev-team:merge` if the project has it configured, otherwise report readiness. If merge fails (CI failures, merge conflicts, branch protection), report the blocker to the human rather than leaving work unattended.
 2. **Clean up worktree**: If the work was done in a worktree, clean it up after the branch is pushed and the PR is created. Do not wait for merge to clean the worktree.
-3. You MUST spawn **@dev-team-borges** (Librarian) as the final step to review memory freshness, cross-agent coherence, and system improvement opportunities. Do NOT skip this.
+3. You MUST spawn **@dev-team-borges** (Librarian) as the final step. Pass Borges the **finding outcome log**: every finding with its classification, source agent, and outcome (accepted/overruled/ignored), including the human's reasoning for overrules. Borges will:
+   - **Extract structured memory entries** from review findings and implementation decisions
+   - **Reinforce accepted patterns** in the reviewer's memory (calibration feedback)
+   - **Record overruled findings** with context so reviewers generate fewer false positives
+   - **Generate calibration rules** when 3+ findings on the same tag are overruled
+   - **Record metrics** to `.dev-team/metrics.md` (acceptance rates, rounds to convergence)
+   - Write entries to each participating agent's MEMORY.md using the structured format
+   - Update shared learnings in `.dev-team/learnings.md`
+   - Check cross-agent coherence
+   - Report system improvement opportunities
 4. If Borges was not spawned, the task is INCOMPLETE.
-5. Summarize what was accomplished across all iterations.
-6. Report any remaining `[RISK]` or `[SUGGESTION]` items, including Borges's recommendations.
-7. Write key learnings to agent MEMORY.md files.
+5. **Memory formation gate**: After Borges runs, verify that each participating agent's MEMORY.md contains at least one new structured entry from this task. Empty agent memory after a completed task is a system failure — Borges prevents this by automating extraction.
+6. Summarize what was accomplished across all iterations.
+7. Report any remaining `[RISK]` or `[SUGGESTION]` items, including Borges's recommendations.
