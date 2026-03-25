@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-03-25
+
+### Added
+- **ADR-026: Agent progress reporting and heartbeat protocol** — file-based status in `.dev-team/agent-status/`, JSON format, escalation via `action_required` (#250).
+- **ADR-027: Turing pre-implementation researcher agent** — on-demand opus agent for library evaluation, migration paths, trade-off analysis (#251).
+- **ADR-028: Rams design system reviewer agent** — read-only sonnet agent for design token compliance (#249).
+- **New agent: dev-team-turing** — pre-implementation researcher, roster now 14 agents (#251).
+- **New agent: dev-team-rams** — design system reviewer, graceful no-op when no design system detected (#249).
+- **Progress reporting** sections added to Conway, Drucker, Borges, Brooks agent definitions (#244).
+- **Escalation points** added to Conway and Drucker for blocked background agents (#248).
+- **Phase milestone checkpoints** added to `/dev-team:task` skill for both single-issue and parallel modes (#245).
+- **Heartbeat mechanism** — background agents write status to `.dev-team/agent-status/{agent}.json` for visibility (#246).
+- **"What belongs in memory" guidance** in all implementing agent definitions — agents record patterns/calibration, not derivable counts (#256).
+- **Borges extraction filter** — skips volatile numeric metrics and config-derivable facts (#256).
+- Frontend file patterns in post-change-review hook trigger Rams for design system compliance review.
+
+### Changed
+- Merge skill now uses Copilot check run monitoring instead of comment-count polling — faster (15s polls vs 30s), more reliable, handles race conditions after fix pushes (#252).
+- Drucker delegation table includes Turing (research pre-step) and Rams (conditional UI reviewer).
+- Quality Benchmarks in learnings.md replaced with convention references — no more volatile numeric counts.
+- Agent memory seed content guidance updated to filter out counts and config-derivable facts.
+
+### Fixed
+- Config.json ghost hook "Task loop" removed (was not a real hook).
+- ADR counts updated in agent memories (was 22, now 25+).
+
 ## [1.0.0] - 2026-03-25
 
 ### Added
