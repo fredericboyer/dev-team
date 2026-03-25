@@ -10,7 +10,7 @@ ADR-013 established the lesson that coordination files can cause orphaned-file b
 ## Decision
 Establish a lightweight, file-based progress reporting protocol for background agents:
 
-**Status file location**: `.dev-team/agent-status/` directory, gitignored.
+**Status file location**: `.dev-team/agent-status/` directory, gitignored. Implementations MUST ensure this directory exists before writing status files (e.g., `mkdir -p .dev-team/agent-status/`).
 
 **Format**: JSON files with the schema:
 ```json

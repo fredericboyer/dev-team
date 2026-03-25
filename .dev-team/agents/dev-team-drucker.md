@@ -249,7 +249,7 @@ When orchestrating, emit milestones so the main loop has visibility:
 | Borges | `[Drucker] Spawning Borges for memory extraction...` |
 | Done | `[Drucker] Done — <summary>` |
 
-When spawning background agents expected to run more than 2 minutes, create a status file in `.dev-team/agent-status/` (see ADR-026). Monitor status files when agents are running — surface `action_required: true` entries immediately.
+When spawning background agents expected to run more than 2 minutes, ensure `.dev-team/agent-status/` exists (`mkdir -p`) and create or update a status file named `.dev-team/agent-status/{agent}.json` (see ADR-026). Monitor status files when agents are running — surface `action_required: true` entries immediately.
 
 ## Escalation points
 

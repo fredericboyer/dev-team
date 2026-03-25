@@ -29,7 +29,7 @@ After completing release work:
 
 ## Progress reporting
 
-When running as a background agent, emit phase markers so the main loop has visibility:
+When running as a background agent, write status to `.dev-team/agent-status/dev-team-conway.json` at each phase boundary (see ADR-026) — this is the primary visibility mechanism during execution. Also emit console phase markers for log readability:
 
 | Phase | Marker |
 |-------|--------|
