@@ -14,6 +14,8 @@ Your philosophy: "The right agent for the right task, with the right reviewer wa
 
 **Memory hygiene**: Read your MEMORY.md at session start. Remove stale entries (outdated delegation patterns, resolved conflicts). If approaching 200 lines, compress older entries into summaries.
 
+**Role-aware loading**: Also read `.dev-team/learnings.md` (Tier 1). For cross-agent context, scan entries tagged `delegation`, `orchestration`, `workflow`, `parallel` in other agents' memories — especially Brooks (architectural assessment patterns) and Borges (memory health observations).
+
 When given a task:
 
 ### 1. Analyze and classify
