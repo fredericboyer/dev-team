@@ -27,38 +27,58 @@ Merge a pull request with full monitoring: $ARGUMENTS
 
 Before proceeding with merge, **wait for Copilot review to complete** by monitoring the Copilot check run.
 
-### 1a. Wait for Copilot review via check run monitoring
+### 1a. Wait for Copilot review via multi-signal detection
 
-Get the HEAD commit SHA for the PR, then look up the Copilot check run:
+Copilot can appear as a check run, a requested reviewer, or both. Detect all signals before deciding how to wait.
+
+Get the HEAD commit SHA for the PR, then probe all three signals **in parallel**:
 
 ```bash
 # Get the PR's HEAD commit SHA
 PR_SHA=$(gh pr view {number} --json headRefOid --jq .headRefOid)
 
-# Look up the Copilot check run
+# Signal 1: Check runs API
 gh api repos/{owner}/{repo}/commits/${PR_SHA}/check-runs \
   --jq '.check_runs[] | select(.app.slug == "copilot-pull-request-reviewer" or .name == "Copilot") | {name, status, conclusion}'
+
+# Signal 2: Requested reviewers API (Copilot pending as reviewer)
+gh api repos/{owner}/{repo}/pulls/{number}/requested_reviewers \
+  --jq '[.users[] | select(.login == "Copilot" or .login == "copilot-pull-request-reviewer")] | length'
+
+# Signal 3: Reviews API (Copilot already submitted a review)
+gh api repos/{owner}/{repo}/pulls/{number}/reviews \
+  --jq '[.[] | select(.user.login == "Copilot" or .user.login == "copilot-pull-request-reviewer")] | length'
 ```
 
-**If a Copilot check run exists:**
-- If status is `queued` or `in_progress`: poll every 15 seconds until `completed` (max 12 polls, ~3 minutes). If after the final (12th) poll the status is still `queued` or `in_progress`, **treat this as a timeout**: surface a clear error, do **not** proceed to comment reading or merge, and stop the workflow without setting auto-merge.
-- Once status is `completed` within the polling limit: proceed to check for comments (1a-read below)
-- Do NOT set auto-merge before this step completes
+**Decision logic (evaluate in order):**
 
-**If no Copilot check run exists** (not all repos have it configured):
-- Fall back to a single 30-second wait, then check comments once
-- This maintains backward compatibility for repos without the Copilot check run
+1. **If a Copilot check run exists AND status is `queued` or `in_progress`:** poll the check-runs API every 15 seconds until `completed` (max 12 polls, ~3 minutes). If after the final (12th) poll the status is still `queued` or `in_progress`, **treat this as a timeout**: surface a clear error, do **not** proceed to comment reading or merge, and stop the workflow without setting auto-merge.
+   - Once status is `completed` within the polling limit: proceed to 1a-read below.
+
+2. **If Copilot is in requested_reviewers (Signal 2 count > 0):** Copilot has been requested but hasn't submitted a review yet. Poll the reviews API every 15 seconds until a review from Copilot appears with state `APPROVED`, `CHANGES_REQUESTED`, or `COMMENTED` (max 12 polls, ~3 minutes):
+   ```bash
+   gh api repos/{owner}/{repo}/pulls/{number}/reviews \
+     --jq '[.[] | select((.user.login == "Copilot" or .user.login == "copilot-pull-request-reviewer") and (.state == "APPROVED" or .state == "CHANGES_REQUESTED" or .state == "COMMENTED"))] | length'
+   ```
+   - If a completed review appears within the polling limit: proceed to 1a-read below.
+   - If after the final (12th) poll no completed review exists, **treat this as a timeout**: surface a clear error, do **not** proceed to comment reading or merge, and stop the workflow without setting auto-merge.
+
+3. **If Copilot already submitted a review (Signal 3 count > 0, but not in requested_reviewers and no check run):** review is already done. Proceed directly to 1a-read below.
+
+4. **If none of the three signals detect Copilot:** fall back to a single 30-second wait, then check comments once. This maintains backward compatibility for repos without Copilot configured.
+
+- Do NOT set auto-merge before this step completes.
 
 ### 1a-read. Read Copilot comments
 
 Once the check run is completed (or after the fallback wait), read comments once:
 
 ```bash
-# Inline review comments
-gh api --paginate repos/{owner}/{repo}/pulls/{number}/comments --jq '[.[] | select(.user.login == "Copilot")] | length'
+# Inline review comments (check both Copilot logins)
+gh api --paginate repos/{owner}/{repo}/pulls/{number}/comments --jq '[.[] | select(.user.login == "Copilot" or .user.login == "copilot-pull-request-reviewer")] | length'
 
-# Summary reviews (may exist without inline comments)
-gh api --paginate repos/{owner}/{repo}/pulls/{number}/reviews --jq '[.[] | select(.user.login == "Copilot")] | length'
+# Summary reviews (check both Copilot logins)
+gh api --paginate repos/{owner}/{repo}/pulls/{number}/reviews --jq '[.[] | select(.user.login == "Copilot" or .user.login == "copilot-pull-request-reviewer")] | length'
 ```
 
 - If either count > 0: Copilot review has findings, proceed to 1b
@@ -68,11 +88,11 @@ gh api --paginate repos/{owner}/{repo}/pulls/{number}/reviews --jq '[.[] | selec
 ### 1b. Address Copilot findings
 
 ```bash
-# Inline comments (include node_id for thread resolution)
-gh api --paginate repos/{owner}/{repo}/pulls/{number}/comments --jq '.[] | select(.user.login == "Copilot") | {id: .id, node_id: .node_id, path: .path, line: .line, body: .body}'
+# Inline comments (include node_id for thread resolution, check both Copilot logins)
+gh api --paginate repos/{owner}/{repo}/pulls/{number}/comments --jq '.[] | select(.user.login == "Copilot" or .user.login == "copilot-pull-request-reviewer") | {id: .id, node_id: .node_id, path: .path, line: .line, body: .body}'
 
-# Summary reviews
-gh api --paginate repos/{owner}/{repo}/pulls/{number}/reviews --jq '.[] | select(.user.login == "Copilot") | {id: .id, state: .state, body: .body}'
+# Summary reviews (check both Copilot logins)
+gh api --paginate repos/{owner}/{repo}/pulls/{number}/reviews --jq '.[] | select(.user.login == "Copilot" or .user.login == "copilot-pull-request-reviewer") | {id: .id, state: .state, body: .body}'
 ```
 
 For each Copilot comment:
