@@ -596,12 +596,20 @@ export async function update(targetDir: string): Promise<void> {
       // Create symlink if target doesn't exist as a real directory, or repair existing symlink
       try {
         fs.mkdirSync(path.dirname(symlinkPath), { recursive: true });
-        // Remove existing symlink if present (broken or stale)
+        // Remove existing symlink (broken or stale) — only unlink symlinks, not real files/dirs
         try {
-          fs.unlinkSync(symlinkPath);
-        } catch {}
+          if (fs.lstatSync(symlinkPath).isSymbolicLink()) {
+            fs.unlinkSync(symlinkPath);
+          }
+        } catch {
+          // ENOENT is expected when no prior symlink exists
+        }
         fs.symlinkSync(symlinkTarget, symlinkPath);
-      } catch {}
+      } catch (err) {
+        console.warn(
+          `  Warning: could not create skill symlink for ${skillDir}: ${(err as Error).message}`,
+        );
+      }
     }
   }
 
