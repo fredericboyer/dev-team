@@ -284,4 +284,4 @@ The `main` branch should be protected with:
 - No force pushes
 - No deletions
 
-These are enforced by GitHub branch protection AND locally by `dev-team-issue-pr-enforce.js` hook.
+These are enforced by GitHub branch protection AND locally by `issue-pr-enforce.js` hook (`.claude/hooks/`).

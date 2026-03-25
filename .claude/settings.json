@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node .dev-team/hooks/dev-team-issue-pr-enforce.js"
+            "command": "node .claude/hooks/issue-pr-enforce.js"
           }
         ]
       },
@@ -33,7 +33,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node .dev-team/hooks/dev-team-precommit-lint-format.js"
+            "command": "node .claude/hooks/precommit-lint-format.js"
           }
         ]
       },
@@ -65,7 +65,7 @@
           },
           {
             "type": "command",
-            "command": "node .dev-team/hooks/dev-team-lint-format.js"
+            "command": "node .claude/hooks/lint-format.js"
           }
         ]
       },

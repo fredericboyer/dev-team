@@ -11,8 +11,10 @@ coverage/
 .dev-team/.memory-reviewed
 
 # Claude Code runtime artifacts
-.claude/hooks/
 .claude/worktrees/
+
+# Project-specific hooks are tracked (not ignored)
+# .claude/hooks/ is NOT ignored — these are project customizations
 
 # npm
 npm-debug.log*
