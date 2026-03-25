@@ -38,10 +38,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Stale quality benchmarks updated in learnings.md (#231).
 - Improved assess-learnings skill with deeper assessment coverage (#217).
 - Addressed unresolved Copilot review feedback from v0.11 PRs (#214, #229).
-- `cross_model` field set to `false` (boolean) instead of YAML null in agent defs (#226).
 - Workflow skills listed explicitly in template CLAUDE.md (#221).
 - Merge skill replies directed to Copilot threads, enforced on release PRs (#228).
-- git-workflow skill clarified with `cross_model` comment (#227).
 
 ### Internal
 - 306 tests. 12 agents. 5 framework skills. 6 hooks. 25 ADRs.

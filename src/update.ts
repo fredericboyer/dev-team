@@ -190,7 +190,7 @@ function runMigrations(prefs: Preferences, fromVersion: string, devTeamDir: stri
         const skillDir = path.join(skillsDir, skillName);
         if (dirExists(skillDir)) {
           try {
-            fs.rmSync(skillDir, { recursive: true });
+            fs.rmSync(skillDir, { recursive: true, force: true });
             log.push(`Removed legacy workflow skill: ${skillName}`);
           } catch {
             // Best effort — skill dir may already be gone
