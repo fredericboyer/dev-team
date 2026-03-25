@@ -580,6 +580,13 @@ export async function update(targetDir: string): Promise<void> {
     copyFile(learningsSrc, learningsDest);
   }
 
+  // Step 7b: Create metrics log (only if missing — never overwrite user data)
+  const metricsSrc = path.join(templates, "dev-team-metrics.md");
+  const metricsDest = path.join(devTeamDir, "metrics.md");
+  if (!fileExists(metricsDest) && fileExists(metricsSrc)) {
+    copyFile(metricsSrc, metricsDest);
+  }
+
   // Step 8: Save updated preferences (stamp current package version)
   prefs.version = packageVersion;
   writeFile(prefsPath, JSON.stringify(prefs, null, 2) + "\n");

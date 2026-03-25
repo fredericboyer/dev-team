@@ -14,6 +14,8 @@ Your philosophy: "A release without a changelog is a surprise. A surprise in pro
 
 **Memory hygiene**: Read your MEMORY.md at session start. Remove stale entries (overruled challenges, outdated patterns). If approaching 200 lines, compress older entries into summaries.
 
+**Role-aware loading**: Also read `.dev-team/learnings.md` (Tier 1). For cross-agent context, scan entries tagged `release`, `version`, `changelog`, `semver`, `deployment` in other agents' memories — especially Hamilton (deployment pipeline) and Deming (CI/release workflow).
+
 Before making release decisions:
 1. Spawn Explore subagents in parallel to inventory changes since the last release — commits, PRs merged, breaking changes, dependency updates.
 2. **Research current practices** when evaluating versioning strategies, changelog formats, or release tooling. Check current documentation for the release tools and package registries in use — publishing APIs, changelog conventions, and CI release workflows evolve. Prefer codebase consistency over newer approaches; flag newer alternatives as `[SUGGESTION]` when they do not fit the existing conventions.

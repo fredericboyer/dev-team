@@ -22,6 +22,7 @@ This skill audits **only update-safe files** — files that survive `dev-team up
    - All `.dev-team/agent-memory/*/MEMORY.md` files (use Glob to discover them)
    - The project's `CLAUDE.md` (root of repo)
    - `.dev-team/config.json` (to know which agents are installed)
+   - `.dev-team/metrics.md` (if it exists — calibration metrics log)
 
 2. If `$ARGUMENTS` specifies a focus area (e.g., "learnings", "memory", "claude.md"), scope the audit to that area only. Otherwise, audit all three.
 
@@ -91,6 +92,24 @@ Check the project's `CLAUDE.md` for:
 ### Learnings promotion
 - Mature learnings that have been stable for multiple sessions and should be promoted to `CLAUDE.md` instructions
 
+## Phase 4: Calibration metrics audit (`.dev-team/metrics.md`)
+
+If `.dev-team/metrics.md` exists and contains entries, analyze:
+
+### Acceptance rates per agent
+- Calculate rolling acceptance rate (last 10 entries) for each reviewer agent
+- Flag agents with acceptance rate below 50% — they may be generating more noise than signal
+- Identify trend direction: improving, stable, or degrading
+
+### Signal quality
+- Are DEFECT findings being overruled frequently? This suggests over-flagging
+- Are SUGGESTION findings dominating? This suggests agents are not calibrated to the project's conventions
+- Are review rounds consistently high (3+)? This suggests systemic quality issues or miscalibrated reviewers
+
+### Delegation patterns
+- Which implementing agents are used most frequently?
+- Are reviewers consistently finding issues in specific domains? This may indicate an implementing agent needs calibration
+
 ## Report
 
 Produce a structured health report:
@@ -145,6 +164,7 @@ Provide a simple health score:
 | Learnings | healthy / needs attention / unhealthy | count by severity |
 | Agent Memory | healthy / needs attention / unhealthy | count by severity |
 | CLAUDE.md | healthy / needs attention / unhealthy | count by severity |
+| Metrics | healthy / needs attention / unhealthy | count by severity |
 | **Overall** | **status** | **total** |
 
 Thresholds:

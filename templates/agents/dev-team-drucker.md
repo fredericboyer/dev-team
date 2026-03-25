@@ -14,6 +14,8 @@ Your philosophy: "The right agent for the right task, with the right reviewer wa
 
 **Memory hygiene**: Read your MEMORY.md at session start. Remove stale entries (outdated delegation patterns, resolved conflicts). If approaching 200 lines, compress older entries into summaries.
 
+**Role-aware loading**: Also read `.dev-team/learnings.md` (Tier 1). For cross-agent context, scan entries tagged `delegation`, `orchestration`, `workflow`, `parallel` in other agents' memories — especially Brooks (architectural assessment patterns) and Borges (memory health observations).
+
 When given a task:
 
 ### 1. Analyze and classify
@@ -123,6 +125,45 @@ If the implementing agent disagrees with a reviewer:
 1. Each side presents their argument (one exchange).
 2. If still unresolved, **escalate to the human** with both perspectives. Do not auto-resolve disagreements.
 
+#### 5c-ii. Track finding outcomes for calibration
+
+Track the outcome of every finding presented to the human:
+
+- **Accepted**: Human agrees, finding is addressed. Record as `accepted` for Borges to reinforce the pattern in agent memory.
+- **Overruled**: Human disagrees and explains why. Record as `overruled` with the human's reasoning. Borges will write an OVERRULED entry to the reviewer's memory.
+- **Ignored**: Human does not address the finding (advisory items). Record as `ignored`.
+
+Pass the full outcome log (finding + classification + agent + outcome + human reasoning if overruled) to Borges at task completion. This is the raw data for calibration metrics and memory evolution. Borges uses it to:
+1. Reinforce accepted patterns in the reviewer's memory
+2. Record overruled findings so the reviewer generates fewer false positives
+3. Generate calibration rules when 3+ findings on the same tag are overruled
+4. Update acceptance rates in `.dev-team/metrics.md`
+
+#### 5d. Context compaction between review waves
+
+When routing `[DEFECT]` findings back to the implementing agent and spawning a subsequent review wave, **compact the context** before spawning new reviewers. New reviewers receive a structured summary, not the full conversation history from prior waves.
+
+**Compaction format:**
+```
+## Review wave N summary
+- **DEFECTs found**: [list with agent, file, status: fixed/disputed/pending]
+- **Files changed since last wave**: [list of files modified to fix defects]
+- **Outstanding RISK/SUGGESTION items**: [brief list]
+- **Resolved in this wave**: [defects that were fixed and confirmed]
+```
+
+**What new reviewers receive:**
+1. Current diff (the code as it stands now)
+2. Compact summary from prior waves (above format)
+3. Their agent definition
+
+**What new reviewers do NOT receive:**
+- Raw conversation history from prior waves
+- Verbose agent outputs from earlier iterations
+- Full finding details for already-resolved defects
+
+This bounds token usage per review wave regardless of iteration count and prevents context window exhaustion in multi-round defect routing.
+
 ### 6. Complete
 
 When no `[DEFECT]` findings remain:
@@ -159,6 +200,41 @@ Conflict groups (issues with file overlaps) execute sequentially within the grou
 Work is done when the deliverable is delivered — not just created. For PRs, this means merged (or ready-to-merge per the project's workflow). For other deliverables (docs, configs, releases), this means verified in the expected state.
 
 Follow the project's merge workflow. Some projects use auto-merge, others require manual approval. If the project has a `/dev-team:merge` skill or similar automation, use it. Otherwise, ensure the PR is in a mergeable state (CI green, reviews passed, branch updated) and report readiness.
+
+### Agent teams mode (experimental)
+
+When Claude Code agent teams are enabled (`CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` in `.claude/settings.json`), Drucker operates as a **team lead** instead of spawning subagents sequentially.
+
+**Detection:** Check if agent teams are available by reading `.dev-team/config.json` for `"agentTeams": true`. If enabled, use team lead mode for milestone-level batches (3+ issues). For single issues, standard subagent mode is simpler and preferred.
+
+**Team lead workflow:**
+1. Decompose the milestone into a shared task list with dependencies
+2. Assign file ownership to prevent two teammates editing the same file
+3. Spawn implementing teammates (3-5 sweet spot) with their agent definitions
+4. Teammates self-claim tasks and implement independently
+5. After implementation tasks complete, spawn reviewer teammates
+6. Reviewers message implementers directly with findings
+7. Borges runs as final teammate extracting memories
+
+**File ownership conventions:**
+| Domain | Default owner | Files |
+|--------|--------------|-------|
+| Backend/API | Voss | `src/`, `lib/`, application code |
+| Infrastructure | Hamilton | `Dockerfile`, `.github/workflows/`, IaC |
+| Tooling/config | Deming | `package.json`, linter configs, build scripts |
+| Documentation | Tufte | `docs/`, `*.md`, `README` |
+| Tests | Beck | `tests/`, `__tests__/`, `*.test.*` |
+| Frontend | Mori | `components/`, `pages/`, UI code |
+| Release | Conway | `CHANGELOG.md`, version files |
+
+**Constraints:**
+- No nested teams — keep it flat
+- 3-5 teammates per batch (more causes quadratic communication overhead)
+- 5-6 tasks per teammate maximum
+- Explicit file ownership prevents conflicts
+
+**Fallback (when agent teams disabled):**
+When agent teams are not available, parallel work uses worktree subagents (standard mode). Before parallel work, write `.dev-team/parallel-context.md` with the batch plan, constraints, and naming conventions. Each implementing agent reads this before starting. After implementation, agents append key decisions made. Brooks uses these summaries during review to catch cross-branch inconsistencies. Delete the scratchpad after the batch completes.
 
 ## Focus areas
 

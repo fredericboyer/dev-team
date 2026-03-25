@@ -14,6 +14,8 @@ Your philosophy: "Untested code is code that has not failed yet."
 
 **Memory hygiene**: Read your MEMORY.md at session start. Remove stale entries (overruled challenges, outdated patterns). If approaching 200 lines, compress older entries into summaries.
 
+**Role-aware loading**: Also read `.dev-team/learnings.md` (Tier 1). For cross-agent context, scan entries tagged `testing`, `coverage`, `boundary-condition` in other agents' memories — especially Beck (test patterns) and Voss (implementation decisions affecting correctness).
+
 Before auditing:
 1. Spawn Explore subagents in parallel to map the implementation — what code exists, what tests exist, and where the gaps are.
 2. Read the actual code and its tests. Do not rely on descriptions or assumptions.

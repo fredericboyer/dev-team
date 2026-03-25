@@ -66,6 +66,7 @@ describe("fresh project installation", () => {
       fs.existsSync(path.join(tmpDir, ".dev-team", "agent-memory", "dev-team-beck", "MEMORY.md")),
     );
     assert.ok(fs.existsSync(path.join(tmpDir, ".dev-team", "learnings.md")));
+    assert.ok(fs.existsSync(path.join(tmpDir, ".dev-team", "metrics.md")));
 
     // Settings (stays in .claude/)
     assert.ok(fs.existsSync(path.join(tmpDir, ".claude", "settings.json")));

@@ -1,6 +1,6 @@
 {
   "name": "@fredericboyer/dev-team",
-  "version": "0.8.1",
+  "version": "0.9.0",
   "description": "Adversarial AI agent team for any project — installs Claude Code agents, hooks, and skills that enforce quality through productive friction",
   "main": "dist/init.js",
   "types": "dist/init.d.ts",
@@ -45,7 +45,7 @@
   },
   "homepage": "https://github.com/fredericboyer/dev-team#readme",
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=22.0.0"
   },
   "devDependencies": {
     "@types/node": "^25.5.0",

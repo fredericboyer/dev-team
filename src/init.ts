@@ -320,6 +320,13 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
     copyFile(learningsSrc, learningsDest);
   }
 
+  // Step 8b: Create metrics log
+  const metricsSrc = path.join(templates, "dev-team-metrics.md");
+  const metricsDest = path.join(devTeamDir, "metrics.md");
+  if (!fileExists(metricsDest)) {
+    copyFile(metricsSrc, metricsDest);
+  }
+
   // Step 7: Copy hooks
   let hookCount = 0;
 
@@ -442,7 +449,9 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
       `  Workflow:  ${installedWorkflowSkills.join(", ")} (optional, in .claude/skills/)`,
     );
   }
-  console.log(`  Memory:    ${selectedAgents.length} agent memories + shared learnings`);
+  console.log(
+    `  Memory:    ${selectedAgents.length} agent memories + shared learnings + metrics log`,
+  );
   console.log(`  CLAUDE.md: ${claudeResult}`);
   console.log(`  Settings:  ${settingsPath}`);
   console.log(
