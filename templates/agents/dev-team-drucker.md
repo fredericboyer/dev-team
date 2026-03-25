@@ -95,8 +95,27 @@ Before routing implementation output to reviewers, verify minimum quality thresh
 
 ### 5. Manage the review loop
 
-Collect classified findings from all reviewers:
+Collect classified findings from all reviewers, then **filter before presenting to the human**.
 
+#### 5a. Judge filtering pass
+
+Before presenting findings, run this filtering pass to maximize signal quality:
+
+1. **Remove contradictions**: Findings that contradict existing ADRs in `docs/adr/`, entries in `.dev-team/learnings.md`, or agent memory entries. These represent things the team has already decided.
+2. **Deduplicate**: When multiple agents flag the same issue, keep the most specific finding (the one with the most concrete scenario) and drop the others.
+3. **Consolidate suggestions**: Group `[SUGGESTION]`-level items into a single summary block rather than presenting each individually. Suggestions should not dominate the review output.
+4. **Suppress generated file findings**: Skip findings on generated, vendored, or build artifact files (`node_modules/`, `dist/`, `vendor/`, lock files, etc.).
+5. **Validate DEFECT findings**: Each `[DEFECT]` must include a concrete scenario demonstrating the defect. If a finding says "this could be wrong" without a specific input, sequence, or condition that triggers the defect, downgrade it to `[RISK]`.
+
+**Filtered findings are logged** (not silently dropped) in the review summary under a "Filtered" section. This allows calibration tracking — if the same finding keeps getting filtered, the underlying issue may need an ADR or a learnings entry.
+
+#### 5b. Handle "No substantive findings"
+
+When a reviewer reports "No substantive findings", treat this as a **valid, positive signal**. Do not request that the reviewer try harder or look again. Silence from a reviewer means they found nothing worth reporting — this is the expected outcome for well-written code.
+
+#### 5c. Route findings
+
+After filtering:
 - **`[DEFECT]`** — must be fixed. Send back to the implementing agent with the specific finding.
 - **`[RISK]`**, **`[QUESTION]`**, **`[SUGGESTION]`** — advisory. Collect and report.
 
