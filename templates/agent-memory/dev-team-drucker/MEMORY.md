@@ -1,12 +1,17 @@
 # Agent Memory: Drucker (Orchestrator)
-<!-- First 200 lines are loaded into agent context. Keep concise. -->
+<\!-- First 200 lines are loaded into agent context. Keep concise. -->
+<\!-- Entries use structured format: Borges extracts these automatically after each task. -->
 
-## Delegation Patterns
-
-
-## Conflict Resolution Log
-
+## Structured Entries
+<\!-- Format:
+### [YYYY-MM-DD] Finding summary
+- **Type**: DEFECT | RISK | SUGGESTION | OVERRULED | PATTERN | DECISION
+- **Source**: PR #NNN or task description
+- **Tags**: comma-separated relevant tags
+- **Outcome**: accepted | overruled | deferred | fixed
+- **Context**: One-sentence explanation
+-->
 
 ## Calibration Log
-<!-- Delegation decisions that worked well or poorly — tunes routing over time -->
+<\!-- Challenges accepted/overruled — tunes adversarial intensity over time -->
 

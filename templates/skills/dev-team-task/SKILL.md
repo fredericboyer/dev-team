@@ -90,9 +90,13 @@ Before starting work, check for open security alerts: run `/dev-team:security-st
 When the loop exits:
 1. **Deliver the work**: If changes are on a feature branch, create the PR (body must include `Closes #<issue>`). Ensure the PR is ready to merge: CI green, reviews passed, branch up to date. Then follow the project's merge workflow — use `/dev-team:merge` if the project has it configured, otherwise report readiness. If merge fails (CI failures, merge conflicts, branch protection), report the blocker to the human rather than leaving work unattended.
 2. **Clean up worktree**: If the work was done in a worktree, clean it up after the branch is pushed and the PR is created. Do not wait for merge to clean the worktree.
-3. You MUST spawn **@dev-team-borges** (Librarian) as the final step to review memory freshness, cross-agent coherence, and system improvement opportunities. Do NOT skip this.
+3. You MUST spawn **@dev-team-borges** (Librarian) as the final step. Borges will:
+   - **Extract structured memory entries** from review findings and implementation decisions
+   - Write entries to each participating agent's MEMORY.md using the structured format
+   - Update shared learnings in `.dev-team/learnings.md`
+   - Check cross-agent coherence
+   - Report system improvement opportunities
 4. If Borges was not spawned, the task is INCOMPLETE.
-5. **Borges memory gate**: If Borges reports that any implementing agent's MEMORY.md is empty or contains only boilerplate after a task, this is a **[DEFECT]** that blocks task completion. The implementing agent must write substantive learnings before the task can be marked done. Empty agent memory after a task means the enforcement pipeline failed.
+5. **Memory formation gate**: After Borges runs, verify that each participating agent's MEMORY.md contains at least one new structured entry from this task. Empty agent memory after a completed task is a system failure — Borges prevents this by automating extraction.
 6. Summarize what was accomplished across all iterations.
 7. Report any remaining `[RISK]` or `[SUGGESTION]` items, including Borges's recommendations.
-8. Write key learnings to agent MEMORY.md files.
