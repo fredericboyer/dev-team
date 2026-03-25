@@ -1,5 +1,5 @@
 ---
-name: security-status
+name: dev-team:security-status
 description: Check GitHub security signals — code scanning, Dependabot, secret scanning, and compliance status. Use at session start and before releases.
 user_invocable: true
 ---

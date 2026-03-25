@@ -94,8 +94,9 @@ export function cleanupLegacyMemoryDirs(devTeamDir: string): string[] {
       const legacyContent = readFile(legacyMemoryPath);
       const currentContent = readFile(currentMemoryPath);
 
-      // Only merge if legacy has substantive content (not just boilerplate)
-      if (legacyContent && legacyContent.trim().split("\n").length > 5) {
+      // Only merge if legacy has actual structured entries (not just template boilerplate)
+      const hasStructuredEntries = legacyContent && /### \[\d{4}-\d{2}-\d{2}\]/.test(legacyContent);
+      if (hasStructuredEntries) {
         const mergedContent =
           (currentContent || "") + "\n\n## Migrated from " + legacyDir + "\n\n" + legacyContent;
         writeFile(currentMemoryPath, mergedContent);
