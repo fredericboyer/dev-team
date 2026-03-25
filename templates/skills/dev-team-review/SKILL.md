@@ -92,8 +92,11 @@ Before starting the review, check for open security alerts: run `/dev-team:secur
 ### Completion
 
 After the review report is delivered:
-1. You MUST spawn **@dev-team-borges** (Librarian) as the final step. Borges will:
+1. You MUST spawn **@dev-team-borges** (Librarian) as the final step. Pass Borges the **finding outcome log**: every finding with its classification, source agent, and outcome (accepted/overruled/ignored), including reasoning for overrules. Borges will:
    - **Extract structured memory entries** from the review findings (each classified finding becomes a memory entry for the reviewer who produced it)
+   - **Reinforce accepted patterns** and **record overruled findings** for reviewer calibration
+   - **Generate calibration rules** when 3+ findings on the same tag are overruled
+   - **Record metrics** to `.dev-team/metrics.md`
    - Write entries to each participating agent's MEMORY.md using the structured format
    - Update shared learnings in `.dev-team/learnings.md`
    - Check cross-agent coherence
