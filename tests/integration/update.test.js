@@ -485,13 +485,19 @@ describe("dev-team update", () => {
     const testSkill = skillDirs[0];
     const symlinkPath = path.join(claudeSkillsDir, testSkill);
 
-    // Create a broken symlink: remove target, recreate symlink pointing to nonexistent path
+    // Create a broken symlink: point to a real directory first, then remove the target.
+    // On Windows, junctions require the target to exist at creation time, so we cannot
+    // create a junction directly to a nonexistent path.
     fs.unlinkSync(symlinkPath);
+    const tempTarget = path.join(tmpDir, "temp-symlink-target", testSkill);
+    fs.mkdirSync(tempTarget, { recursive: true });
     fs.symlinkSync(
-      "../nonexistent-target/" + testSkill,
+      path.relative(claudeSkillsDir, tempTarget),
       symlinkPath,
       process.platform === "win32" ? "junction" : "dir",
     );
+    // Now break the symlink by removing the target directory
+    fs.rmSync(path.join(tmpDir, "temp-symlink-target"), { recursive: true, force: true });
 
     // Verify it's broken (lstat succeeds but existsSync follows symlink and fails)
     assert.ok(fs.lstatSync(symlinkPath).isSymbolicLink(), "should be a symlink");
