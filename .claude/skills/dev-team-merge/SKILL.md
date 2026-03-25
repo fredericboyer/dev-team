@@ -25,13 +25,13 @@ Merge a pull request with full monitoring: $ARGUMENTS
 
 ## Step 1: Wait for and address Copilot review
 
-Before proceeding with merge, **wait for Copilot review to complete** by monitoring the Copilot check run.
+Before proceeding with merge, **wait for Copilot review to complete** using multi-signal detection (check run, requested reviewers, and submitted reviews).
 
 ### 1a. Wait for Copilot review via multi-signal detection
 
 Copilot can appear as a check run, a requested reviewer, or both. Detect all signals before deciding how to wait.
 
-Get the HEAD commit SHA for the PR, then probe all three signals **in parallel**:
+Get the HEAD commit SHA for the PR, then probe all three signals sequentially:
 
 ```bash
 # Get the PR's HEAD commit SHA
@@ -45,9 +45,9 @@ gh api repos/{owner}/{repo}/commits/${PR_SHA}/check-runs \
 gh api repos/{owner}/{repo}/pulls/{number}/requested_reviewers \
   --jq '[.users[] | select(.login == "Copilot" or .login == "copilot-pull-request-reviewer")] | length'
 
-# Signal 3: Reviews API (Copilot already submitted a review)
-gh api repos/{owner}/{repo}/pulls/{number}/reviews \
-  --jq '[.[] | select(.user.login == "Copilot" or .user.login == "copilot-pull-request-reviewer")] | length'
+# Signal 3: Reviews API (Copilot already submitted a review — terminal states only)
+gh api --paginate repos/{owner}/{repo}/pulls/{number}/reviews \
+  --jq '[.[] | select((.user.login == "Copilot" or .user.login == "copilot-pull-request-reviewer") and (.state == "APPROVED" or .state == "CHANGES_REQUESTED" or .state == "COMMENTED"))] | length'
 ```
 
 **Decision logic (evaluate in order):**
@@ -57,7 +57,7 @@ gh api repos/{owner}/{repo}/pulls/{number}/reviews \
 
 2. **If Copilot is in requested_reviewers (Signal 2 count > 0):** Copilot has been requested but hasn't submitted a review yet. Poll the reviews API every 15 seconds until a review from Copilot appears with state `APPROVED`, `CHANGES_REQUESTED`, or `COMMENTED` (max 12 polls, ~3 minutes):
    ```bash
-   gh api repos/{owner}/{repo}/pulls/{number}/reviews \
+   gh api --paginate repos/{owner}/{repo}/pulls/{number}/reviews \
      --jq '[.[] | select((.user.login == "Copilot" or .user.login == "copilot-pull-request-reviewer") and (.state == "APPROVED" or .state == "CHANGES_REQUESTED" or .state == "COMMENTED"))] | length'
    ```
    - If a completed review appears within the polling limit: proceed to 1a-read below.
