@@ -298,6 +298,47 @@ describe("dev-team update", () => {
     );
   });
 
+  it("removes ghost hook and agent entries from config.json on update", async () => {
+    await run(tmpDir, ["--all"]);
+
+    // Inject ghost entries into config.json
+    const prefsPath = path.join(tmpDir, ".dev-team", "config.json");
+    const prefs = JSON.parse(fs.readFileSync(prefsPath, "utf-8"));
+    prefs.hooks.push("Task loop"); // ghost hook from older version
+    prefs.agents.push("Phantom"); // ghost agent from older version
+    fs.writeFileSync(prefsPath, JSON.stringify(prefs, null, 2));
+
+    await update(tmpDir);
+
+    const updated = JSON.parse(fs.readFileSync(prefsPath, "utf-8"));
+    assert.ok(!updated.hooks.includes("Task loop"), "ghost hook should be removed");
+    assert.ok(!updated.agents.includes("Phantom"), "ghost agent should be removed");
+    // Real entries should still be there
+    assert.ok(updated.hooks.includes("Safety guard"), "real hook should remain");
+    assert.ok(updated.agents.includes("Voss"), "real agent should remain");
+  });
+
+  it("handles config where all entries are ghosts (empty arrays after filter)", async () => {
+    await run(tmpDir, ["--all"]);
+
+    // Replace all hooks and agents with ghost entries
+    const prefsPath = path.join(tmpDir, ".dev-team", "config.json");
+    const prefs = JSON.parse(fs.readFileSync(prefsPath, "utf-8"));
+    prefs.hooks = ["Ghost hook 1", "Ghost hook 2"];
+    prefs.agents = ["Phantom1", "Phantom2"];
+    fs.writeFileSync(prefsPath, JSON.stringify(prefs, null, 2));
+
+    await update(tmpDir);
+
+    const updated = JSON.parse(fs.readFileSync(prefsPath, "utf-8"));
+    // Ghost entries should be removed; real entries auto-discovered
+    assert.ok(!updated.hooks.includes("Ghost hook 1"), "ghost hook 1 should be removed");
+    assert.ok(!updated.agents.includes("Phantom1"), "ghost agent should be removed");
+    // Auto-discovery should repopulate with real entries
+    assert.ok(updated.hooks.length > 0, "hooks should be repopulated via auto-discovery");
+    assert.ok(updated.agents.length > 0, "agents should be repopulated via auto-discovery");
+  });
+
   it("migrates from .claude/ to .dev-team/ on update", async () => {
     // Simulate a pre-migration install (files in .claude/)
     fs.mkdirSync(path.join(tmpDir, ".claude", "agents"), { recursive: true });
@@ -410,6 +451,56 @@ describe("dev-team update", () => {
     assert.ok(
       fs.existsSync(path.join(tmpDir, ".claude", "settings.json")),
       "settings.json should remain in .claude/",
+    );
+  });
+
+  it("creates skill symlinks in .claude/skills/ during update", async () => {
+    await run(tmpDir, ["--all"]);
+
+    // Remove .claude/skills/ symlinks to simulate pre-symlink install
+    const claudeSkillsDir = path.join(tmpDir, ".claude", "skills");
+    if (fs.existsSync(claudeSkillsDir)) {
+      fs.rmSync(claudeSkillsDir, { recursive: true });
+    }
+
+    await update(tmpDir);
+
+    // Symlinks should be recreated
+    const devTeamSkillsDir = path.join(tmpDir, ".dev-team", "skills");
+    const skillDirs = fs.readdirSync(devTeamSkillsDir);
+    for (const skillDir of skillDirs) {
+      const symlinkPath = path.join(claudeSkillsDir, skillDir);
+      assert.ok(fs.existsSync(symlinkPath), `symlink should exist for ${skillDir}`);
+      const stat = fs.lstatSync(symlinkPath);
+      assert.ok(stat.isSymbolicLink(), `${skillDir} should be a symlink`);
+    }
+  });
+
+  it("repairs broken symlinks in .claude/skills/ during update", async () => {
+    await run(tmpDir, ["--all"]);
+
+    const claudeSkillsDir = path.join(tmpDir, ".claude", "skills");
+    const devTeamSkillsDir = path.join(tmpDir, ".dev-team", "skills");
+    const skillDirs = fs.readdirSync(devTeamSkillsDir);
+    const testSkill = skillDirs[0];
+    const symlinkPath = path.join(claudeSkillsDir, testSkill);
+
+    // Create a broken symlink: remove target, recreate symlink pointing to nonexistent path
+    fs.unlinkSync(symlinkPath);
+    fs.symlinkSync("../nonexistent-target/" + testSkill, symlinkPath);
+
+    // Verify it's broken (lstat succeeds but existsSync follows symlink and fails)
+    assert.ok(fs.lstatSync(symlinkPath).isSymbolicLink(), "should be a symlink");
+    assert.ok(!fs.existsSync(symlinkPath), "symlink target should not exist (broken)");
+
+    await update(tmpDir);
+
+    // Symlink should be repaired — valid and pointing to the right place
+    assert.ok(fs.existsSync(symlinkPath), `symlink should be repaired for ${testSkill}`);
+    assert.ok(fs.lstatSync(symlinkPath).isSymbolicLink(), `${testSkill} should still be a symlink`);
+    assert.ok(
+      fs.existsSync(path.join(symlinkPath, "SKILL.md")),
+      `repaired symlink should resolve to SKILL.md`,
     );
   });
 
