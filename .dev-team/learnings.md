@@ -14,7 +14,7 @@
 - **Security check at session start.** Run `/dev-team:security-status` at the beginning of every session to check code scanning, Dependabot, and secret scanning alerts. Also run before releases.
 - **Use `/dev-team:merge` to merge PRs.** It handles Copilot review comments, auto-merge, CI monitoring, and post-merge actions automatically. Do not manually run `gh pr merge` or check Copilot comments separately.
 - Always use `/dev-team:task` for implementation work — dogfood the agents.
-- Spawn review agents as `general-purpose` subagents with the actual agent definition loaded from `.dev-team/agents/dev-team-*.md`. In agent team mode, reviews are coordinated through teammate messaging instead. Do NOT use `pr-review-toolkit:*` as proxies — they have different behavior.
+- Spawn review agents as `general-purpose` subagents with the actual agent definition loaded from `.dev-team/agents/dev-team-*.md`. In **team lead mode**, instead spawn reviewer **teammates** and have them message implementers directly — team lead mode changes *how* reviews are coordinated (via teammate messaging), not whether reviewers are spawned. Do NOT use `pr-review-toolkit:*` as proxies — they have different behavior.
 - Don't ask for approval to continue between tasks. Just do the work. Only pause for critical decisions.
 - **Follow through to completion without prompting.** When auto-merge is set or CI is pending, monitor and complete the next step (tag, release, cleanup) without waiting for the user to ask "is it done yet?"
 - **When creating a PR for a tracked issue, link it in the PR body** (e.g., `Closes #NNN`). This lets the platform auto-close the issue on merge. Agents should include this when they know the issue number.
