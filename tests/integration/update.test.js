@@ -126,6 +126,32 @@ describe("dev-team update", () => {
     assert.ok(alreadyMsg, "should report already at latest version when versions match");
   });
 
+  it("respects user agent teams opt-out during update", async () => {
+    await run(tmpDir, ["--all"]);
+
+    // User explicitly disables agent teams
+    const settingsPath = path.join(tmpDir, ".claude", "settings.json");
+    const settings = JSON.parse(fs.readFileSync(settingsPath, "utf-8"));
+    settings.env.CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS = "0";
+    fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2));
+
+    await update(tmpDir);
+
+    // Should NOT re-enable agent teams
+    const updatedSettings = JSON.parse(fs.readFileSync(settingsPath, "utf-8"));
+    assert.equal(
+      updatedSettings.env.CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS,
+      "0",
+      "should respect user opt-out",
+    );
+
+    // config.json should reflect disabled state
+    const config = JSON.parse(
+      fs.readFileSync(path.join(tmpDir, ".dev-team", "config.json"), "utf-8"),
+    );
+    assert.equal(config.agentTeams, false, "config should reflect disabled state");
+  });
+
   it("preserves shared team learnings", async () => {
     await run(tmpDir, ["--all"]);
 

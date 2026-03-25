@@ -375,6 +375,16 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
 
   mergeSettings(settingsPath, filteredSettings);
 
+  // Step 8c: Enable agent teams (experimental)
+  const settingsData = JSON.parse(readFile(settingsPath) || "{}");
+  if (!settingsData.env) {
+    settingsData.env = {};
+  }
+  if (!("CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS" in settingsData.env)) {
+    settingsData.env.CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS = "1";
+  }
+  writeFile(settingsPath, JSON.stringify(settingsData, null, 2) + "\n");
+
   // Step 9: Copy framework skills (auto-discovered from templates/skills/)
   const skillsSrcDir = path.join(templates, "skills");
   const skillDirs = listSubdirectories(skillsSrcDir);
@@ -426,12 +436,14 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
   const claudeResult = mergeClaudeMd(claudeMdPath, claudeMdTemplate);
 
   // Save preferences
+  const agentTeamsEnabled = settingsData.env?.CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS === "1";
   const prefs: Record<string, unknown> = {
     version: getPackageVersion(),
     agents: selectedAgents,
     hooks: selectedHooks,
     issueTracker,
     branchConvention,
+    agentTeams: agentTeamsEnabled,
   };
   if (preset) {
     prefs.preset = preset.label;
@@ -457,6 +469,11 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
   console.log(
     `  Workflow:  ${issueTracker}${branchConvention !== "None" ? `, branches: ${branchConvention}` : ""}`,
   );
+  if (agentTeamsEnabled) {
+    console.log(
+      "  Agent teams: enabled (experimental — disable with CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=0 if issues arise)",
+    );
+  }
   console.log("");
 
   // Step 12: Optional Deming tooling scan
