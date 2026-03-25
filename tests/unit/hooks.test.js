@@ -467,6 +467,87 @@ describe("dev-team-post-change-review", () => {
     assert.equal(result.code, 0);
     assert.ok(result.stdout.includes("@dev-team-hamilton"), "should flag Hamilton for otel.yaml");
   });
+
+  // ─── Complexity-based review depth triage ─────────────────────────────
+
+  it("outputs review depth LIGHT for trivial changes", () => {
+    // Small edit: just a typo fix (few characters changed)
+    const result = runHook(hook, {
+      file_path: "/app/src/utils/helpers.ts",
+      old_string: "const x = 1;",
+      new_string: "const y = 1;",
+    });
+    assert.equal(result.code, 0);
+    assert.ok(result.stdout.includes("Review depth: LIGHT"), "should be LIGHT for trivial change");
+    assert.ok(
+      result.stdout.includes("advisory only"),
+      "should include advisory-only instruction for LIGHT",
+    );
+  });
+
+  it("outputs review depth STANDARD for moderate changes", () => {
+    // Moderate edit with some control flow
+    const newCode = Array(15)
+      .fill("const x = 1;")
+      .concat(["function foo() { if (a) { return b; } else { return c; } }"])
+      .join("\n");
+    const result = runHook(hook, {
+      file_path: "/app/src/utils/helpers.ts",
+      old_string: "const x = 1;",
+      new_string: newCode,
+    });
+    assert.equal(result.code, 0);
+    assert.ok(
+      result.stdout.includes("Review depth: STANDARD"),
+      "should be STANDARD for moderate change",
+    );
+  });
+
+  it("outputs review depth DEEP for complex changes", () => {
+    // Large change with many complexity indicators
+    const complexCode = Array(30)
+      .fill("export async function handler() { try { await fetch(); } catch (e) { throw e; } }")
+      .join("\n");
+    const result = runHook(hook, {
+      file_path: "/app/src/utils/helpers.ts",
+      old_string: "",
+      new_string: complexCode,
+    });
+    assert.equal(result.code, 0);
+    assert.ok(result.stdout.includes("Review depth: DEEP"), "should be DEEP for complex change");
+    assert.ok(
+      result.stdout.includes("thorough analysis"),
+      "should request thorough analysis for DEEP",
+    );
+  });
+
+  it("boosts complexity score for security-sensitive files", () => {
+    // Same small change but in a security file — should be elevated
+    const result = runHook(hook, {
+      file_path: "/app/src/auth/login.ts",
+      old_string: "const x = 1;\nconst y = 2;\nconst z = 3;",
+      new_string: "const x = 2;\nconst y = 3;\nconst z = 4;",
+    });
+    assert.equal(result.code, 0);
+    // Security boost of 20 should push even a small change above LIGHT threshold
+    assert.ok(
+      !result.stdout.includes("Review depth: LIGHT"),
+      "security files should not get LIGHT review",
+    );
+  });
+
+  it("includes complexity score in output", () => {
+    const result = runHook(hook, {
+      file_path: "/app/src/utils/helpers.ts",
+      old_string: "x",
+      new_string: "y",
+    });
+    assert.equal(result.code, 0);
+    assert.ok(
+      result.stdout.includes("complexity score:"),
+      "should include complexity score in output",
+    );
+  });
 });
 
 // ─── TDD Enforce ─────────────────────────────────────────────────────────────
