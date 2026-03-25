@@ -41,8 +41,8 @@ gh api repos/{owner}/{repo}/commits/${PR_SHA}/check-runs \
 ```
 
 **If a Copilot check run exists:**
-- If status is `queued` or `in_progress`: poll every 15 seconds until `completed` (max 12 polls, ~3 minutes)
-- Once status is `completed`: proceed to check for comments (1a-read below)
+- If status is `queued` or `in_progress`: poll every 15 seconds until `completed` (max 12 polls, ~3 minutes). If after the final (12th) poll the status is still `queued` or `in_progress`, **treat this as a timeout**: surface a clear error, do **not** proceed to comment reading or merge, and stop the workflow without setting auto-merge.
+- Once status is `completed` within the polling limit: proceed to check for comments (1a-read below)
 - Do NOT set auto-merge before this step completes
 
 **If no Copilot check run exists** (not all repos have it configured):
@@ -62,7 +62,7 @@ gh api --paginate repos/{owner}/{repo}/pulls/{number}/reviews --jq '[.[] | selec
 ```
 
 - If either count > 0: Copilot review has findings, proceed to 1b
-- If both counts == 0: Copilot review is clean, proceed to Step 2
+- If both counts == 0: no Copilot comments were detected. If a Copilot check run was observed and completed, treat this as a clean review; if no Copilot check run exists, this likely means Copilot review is not configured or did not run. Then proceed to Step 2.
 - Use `--paginate` on all API calls to avoid missing results on PRs with many comments
 
 ### 1b. Address Copilot findings
