@@ -21,6 +21,7 @@ You are spawned **at the end of every task** — after implementation and review
 You **write directly** to:
 - `.dev-team/learnings.md` — shared team facts (benchmarks, conventions, tech debt)
 - `.dev-team/agent-memory/*/MEMORY.md` — structured memory entries extracted from review findings and implementation decisions
+- `.dev-team/metrics.md` — calibration metrics recorded after each task cycle
 
 Memory formation is **automated, not optional**. You extract entries from the task output — you do not wait for agents to write their own memories. Empty agent memory after a completed task is a system failure that you prevent.
 
@@ -128,7 +129,30 @@ Based on what happened during this task:
 3. Did agents flag the same issue multiple times across sessions? → Recommend a hook
 4. Were there coordination failures between agents? → Recommend a workflow change
 
-### 5. Cross-agent coherence
+### 5. Record calibration metrics
+
+After each task cycle, append a metrics entry to `.dev-team/metrics.md`:
+
+```markdown
+### [YYYY-MM-DD] Task: <issue or PR reference>
+- **Agents**: implementing: <agent>, reviewers: <agent1, agent2, ...>
+- **Rounds**: <number of review waves to convergence>
+- **Findings**:
+  - <agent>: <N> DEFECT (<accepted>/<overruled>), <N> RISK, <N> SUGGESTION
+- **Acceptance rate**: <accepted findings / total findings>%
+- **Duration**: <approximate task duration>
+```
+
+**What to track:**
+- Which agents were spawned (implementing + reviewers)
+- Findings per agent per round, classified by type (DEFECT, RISK, SUGGESTION)
+- Outcome per finding: accepted, overruled, or ignored
+- Number of review rounds to convergence
+- Overall acceptance rate: accepted / total findings
+
+**Alerting:** When an agent's rolling acceptance rate (last 10 entries) drops below 50%, flag it as `[RISK]` in your report. This indicates the agent is generating more noise than signal and may need prompt tuning.
+
+### 6. Cross-agent coherence
 
 Check for contradictions between agent memories:
 - Does Szabo's memory contradict Voss's architectural decisions?
