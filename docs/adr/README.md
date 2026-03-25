@@ -32,4 +32,18 @@ What becomes easier or more difficult?
 | [005](005-adversarial-agents.md) | Devil's advocate agent culture | accepted |
 | [006](006-cli-over-plugin.md) | CLI installer first, plugin later | accepted |
 | [007](007-typescript-oxc-tooling.md) | TypeScript migration with oxlint/oxfmt | accepted |
+| [008](008-agent-model-assignment.md) | Agent model assignment strategy (opus vs sonnet) | accepted |
+| [009](009-idempotent-update.md) | Idempotent update command with auto-discovery | accepted |
+| [010](010-preset-bundles.md) | Preset bundles for quick onboarding | accepted |
+| [011](011-watch-lists.md) | Configurable watch lists (file pattern to agent mapping) | accepted |
+| [012](012-memory-freshness-check.md) | Memory freshness check in pre-commit gate | accepted |
+| [013](013-active-hook-spawning.md) | Active hook spawning via tracking file | accepted |
+| [014](014-runtime-auto-discovery.md) | Runtime auto-discovery of skills and hooks | accepted |
+| [015](015-orchestrator-agent.md) | Orchestrator agent (Lead) with delegation | accepted |
+| [016](016-custom-agent-scaffolding.md) | Custom agent scaffolding via create-agent command | accepted |
+| [017](017-role-based-tool-assignment.md) | Role-based tool assignment (read-only auditors vs implementers) | accepted |
+| [018](018-shared-git-context.md) | Shared git context via temp file cache | accepted |
+| [019](019-parallel-review-waves.md) | Parallel review waves for headless multi-issue execution | accepted |
+| [020](020-quality-attribute-assessment.md) | Quality attribute assessment via expanded Brooks agent | accepted |
+| [021](021-typescript-6-module-resolution.md) | TypeScript 6.0 with nodenext module resolution | accepted |
 | [022](022-agent-proliferation-governance.md) | Agent proliferation governance | accepted |
