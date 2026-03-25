@@ -26,7 +26,7 @@
 
 ## Known Tech Debt
 
-- `readFile()` in `src/files.ts` has broad catch — treats permission errors same as missing file (Szabo finding, tracked).
+- `readFile()` in `src/files.ts` distinguishes ENOENT from EACCES/EPERM and logs a warning on permission errors, but still returns null in both cases — can mask security-relevant permission errors (Szabo finding, tracked).
 - `mergeClaudeMd` append-on-missing-END-marker can produce duplicate BEGIN markers on subsequent runs (Knuth finding, edge case).
 
 ## Quality Benchmarks
@@ -36,7 +36,7 @@
 - 7 skills: challenge, task, review, audit, security-status, merge, assess
 - 6 hooks: TDD enforce, safety guard, post-change review, pre-commit gate (blocking), pre-commit lint, watch list
 - 3 always-on reviewers: Szabo (security), Knuth (correctness), Brooks (architecture + quality attributes)
-- CI: 3 OS x 3 Node versions + lint + format + agent validation + hook validation.
+- CI: 3 OS (ubuntu, macos, windows) x Node 22 + lint + format + agent validation + hook validation.
 - Always run `npm run format` before committing new `.ts` files — oxfmt formatting is checked in CI.
 
 ### Learning capture metrics

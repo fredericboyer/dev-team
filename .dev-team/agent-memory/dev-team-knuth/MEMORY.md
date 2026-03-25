@@ -3,13 +3,13 @@
 
 ## Coverage Gaps Identified
 
-### [2026-03-24] 308 tests using Node.js built-in test runner across 3 tiers
+### [2026-03-24] 13 test files using Node.js built-in test runner across 3 tiers
 - **Type**: PATTERN [bootstrapped]
-- **Source**: package.json analysis
+- **Source**: package.json + project structure analysis
 - **Tags**: testing, coverage, test-runner
 - **Outcome**: pending-verification
 - **Last-verified**: 2026-03-24
-- **Context**: 6 unit tests, 3 integration tests, 4 scenario tests. Node.js `node --test` runner, no third-party test framework. Tests are pre-compiled JS (not TS).
+- **Context**: 6 unit test files, 3 integration test files, 4 scenario test files. Node.js `node --test` runner, no third-party test framework. Tests are pre-compiled JS (not TS). Actual test-case count is 217 (tracked in .dev-team/learnings.md).
 
 ### [2026-03-24] Test directory structure: tests/unit + tests/integration + tests/scenarios
 - **Type**: PATTERN [bootstrapped]
