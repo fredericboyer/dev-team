@@ -30,7 +30,7 @@ Adversarial AI agent team for any project. Installs Claude Code agents, hooks, a
 
 ## Architecture decisions
 
-Stored in `docs/adr/`. Read before making changes to foundational patterns. Update if your change affects an existing ADR.
+Stored in `docs/adr/`. Read before making changes to foundational patterns. ADRs are immutable records — if a decision changes, write a new ADR that supersedes the original. Do not edit existing ADRs.
 
 <!-- dev-team:begin -->
 
