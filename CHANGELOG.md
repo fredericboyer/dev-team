@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-03-24
+
+### Added
+- **Agent proliferation governance (ADR-022)** -- Formal policy requiring justification for new agents with 4 decision criteria and soft cap of 15 agents (#166).
+- **Scenario-level orchestration integration tests** -- 32 tests covering agent selection, multi-domain routing, complexity triage, configurable thresholds, edge cases, and parallel file independence (#167).
+
+### Changed
+- Drucker evaluates extending existing agents before recommending new ones (ADR-022).
+- Brooks flags new agent additions during architectural review (ADR-022).
+- ADR index updated to include all 22 ADRs (was missing 008-021).
+
+### Internal
+- 308 tests (was 276). 12 agents. ADR-022 added.
+
 ## [0.10.0] - 2026-03-24
 
 ### Added
