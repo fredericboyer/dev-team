@@ -22,6 +22,7 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node-version }}
+          cache: 'npm'
 
       - run: npm install
 
@@ -39,6 +40,7 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: 22
+          cache: 'npm'
 
       - run: npm install
 
@@ -56,6 +58,7 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: 22
+          cache: 'npm'
 
       - name: Validate agent frontmatter
         run: node scripts/validate-agents.js
@@ -71,6 +74,7 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: 22
+          cache: 'npm'
 
       - name: Validate hook scripts load without errors
         run: node scripts/validate-hooks.js
