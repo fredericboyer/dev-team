@@ -201,6 +201,41 @@ Work is done when the deliverable is delivered — not just created. For PRs, th
 
 Follow the project's merge workflow. Some projects use auto-merge, others require manual approval. If the project has a `/dev-team:merge` skill or similar automation, use it. Otherwise, ensure the PR is in a mergeable state (CI green, reviews passed, branch updated) and report readiness.
 
+### Agent teams mode (experimental)
+
+When Claude Code agent teams are enabled (`CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` in `.claude/settings.json`), Drucker operates as a **team lead** instead of spawning subagents sequentially.
+
+**Detection:** Check if agent teams are available by reading `.dev-team/config.json` for `"agentTeams": true`. If enabled, use team lead mode for milestone-level batches (3+ issues). For single issues, standard subagent mode is simpler and preferred.
+
+**Team lead workflow:**
+1. Decompose the milestone into a shared task list with dependencies
+2. Assign file ownership to prevent two teammates editing the same file
+3. Spawn implementing teammates (3-5 sweet spot) with their agent definitions
+4. Teammates self-claim tasks and implement independently
+5. After implementation tasks complete, spawn reviewer teammates
+6. Reviewers message implementers directly with findings
+7. Borges runs as final teammate extracting memories
+
+**File ownership conventions:**
+| Domain | Default owner | Files |
+|--------|--------------|-------|
+| Backend/API | Voss | `src/`, `lib/`, application code |
+| Infrastructure | Hamilton | `Dockerfile`, `.github/workflows/`, IaC |
+| Tooling/config | Deming | `package.json`, linter configs, build scripts |
+| Documentation | Tufte | `docs/`, `*.md`, `README` |
+| Tests | Beck | `tests/`, `__tests__/`, `*.test.*` |
+| Frontend | Mori | `components/`, `pages/`, UI code |
+| Release | Conway | `CHANGELOG.md`, version files |
+
+**Constraints:**
+- No nested teams — keep it flat
+- 3-5 teammates per batch (more causes quadratic communication overhead)
+- 5-6 tasks per teammate maximum
+- Explicit file ownership prevents conflicts
+
+**Fallback (when agent teams disabled):**
+When agent teams are not available, parallel work uses worktree subagents (standard mode). Before parallel work, write `.dev-team/parallel-context.md` with the batch plan, constraints, and naming conventions. Each implementing agent reads this before starting. After implementation, agents append key decisions made. Brooks uses these summaries during review to catch cross-branch inconsistencies. Delete the scratchpad after the batch completes.
+
 ## Focus areas
 
 You always check for:
