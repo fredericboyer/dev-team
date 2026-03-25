@@ -16,24 +16,43 @@ Merge a pull request with full monitoring: $ARGUMENTS
 2. Capture repo context:
    - `gh repo view --json nameWithOwner --jq .nameWithOwner` to get {owner}/{repo}
 
-## Step 1: Check for Copilot review comments
+## Step 1: Wait for and address Copilot review
 
-Before proceeding with merge, check for Copilot (and other automated) review comments:
+Before proceeding with merge, **wait for Copilot review to appear** — it takes 30-120 seconds after PR creation.
 
+### 1a. Wait for Copilot review
+
+Poll up to 4 times (30s intervals, ~2 minutes total):
+
+```bash
+gh api repos/{owner}/{repo}/pulls/{number}/comments --jq '[.[] | select(.user.login == "Copilot")] | length'
 ```
-gh api repos/{owner}/{repo}/pulls/{number}/reviews
-gh api repos/{owner}/{repo}/pulls/{number}/comments
+
+- If count > 0: Copilot review has arrived, proceed to 1b
+- If count == 0 after 4 polls: Copilot review is absent (may not be configured), proceed to Step 2
+- Do NOT set auto-merge before this step completes
+
+### 1b. Address Copilot findings
+
+```bash
+gh api repos/{owner}/{repo}/pulls/{number}/comments --jq '.[] | select(.user.login == "Copilot") | {id: .id, path: .path, line: .line, body: .body}'
 ```
 
-Filter for reviews/comments from bot accounts (especially `copilot` and `github-actions`).
+For each Copilot comment:
+1. Read the finding and assess: is it actionable?
+2. **Actionable** (bug, ambiguity, missing logic): fix in code, commit, push
+3. **Style/minor**: acknowledge but skip if not substantive
+4. After addressing all actionable findings, re-push and wait for CI to restart
 
-- If Copilot has left comments or suggestions:
-  1. Display each finding with file, line, and comment body
-  2. For actionable suggestions: apply the fix in code, commit, and push
-  3. For each comment thread: reply acknowledging the finding and resolve the thread using `gh api repos/{owner}/{repo}/pulls/{number}/comments/{id}/replies`
-  4. After addressing all findings, re-push and wait for CI to restart
+### 1c. Verify no new Copilot comments after push
 
-- If no Copilot comments: proceed to Step 2
+If you pushed fixes, Copilot may review again. Check once more after CI restarts:
+
+```bash
+gh api repos/{owner}/{repo}/pulls/{number}/comments --jq '[.[] | select(.user.login == "Copilot")] | length'
+```
+
+If new comments appeared, repeat 1b. Otherwise proceed to Step 2.
 
 ## Step 2: Set auto-merge
 
