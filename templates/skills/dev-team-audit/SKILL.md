@@ -86,7 +86,7 @@ Numbered list of concrete actions, ordered by priority. Each action should refer
 
 ### Security preamble
 
-Before starting the audit, check for open security alerts: run `/dev-team:security-status` if available, or check `gh api repos/{owner}/{repo}/code-scanning/alerts?state=open` and `gh api repos/{owner}/{repo}/dependabot/alerts?state=open`. Include these in the audit scope.
+Before starting the audit, check for open security alerts: run `/dev-team:security-status` if available, or use the project's security monitoring tools. Include these in the audit scope.
 
 ### Completion
 
