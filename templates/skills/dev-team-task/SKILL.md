@@ -60,6 +60,8 @@ The convergence check happens in conversation context: count iterations, check f
 
 When multiple issues are being addressed in a single session, the task loop switches to parallel orchestration (see ADR-019). Drucker coordinates all phases in conversation context.
 
+**Mode selection:** If agent teams are enabled (check `.dev-team/config.json` for `"agentTeams": true`), use team lead mode for batches of 3+ issues. Otherwise, use standard worktree subagent mode. For single issues, always use standard mode.
+
 ### Phase 0: Brooks pre-assessment (batch)
 Spawn @dev-team-brooks once with all issues. Brooks identifies:
 - **File independence**: which issues touch overlapping files (conflict groups that must run sequentially)

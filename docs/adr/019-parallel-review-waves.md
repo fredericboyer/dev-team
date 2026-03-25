@@ -44,6 +44,19 @@ The parallel task is complete when:
 2. Borges has run across all branches
 3. Drucker confirms all branches are complete in conversation context (no external state file needed)
 
+## Agent Teams Enhancement (v0.10)
+
+When Claude Code agent teams are enabled (`CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`), the parallel model is enhanced with native peer-to-peer communication:
+
+- **Team lead mode**: Drucker operates as team lead, decomposing work into a shared task list
+- **Peer communication**: Teammates (implementing agents) communicate directly via mailbox, not through Drucker
+- **Shared task list**: Native dependency tracking and self-claiming replace conversation-context tracking
+- **File ownership**: Explicit per-domain file ownership prevents editing conflicts
+
+The fundamental phases (0-4) remain the same. Agent teams provide a more efficient execution substrate but do not change the orchestration model.
+
+**Fallback**: When agent teams are disabled, the standard worktree subagent model (described above) is used. A shared context scratchpad (`.dev-team/parallel-context.md`) provides cross-agent context in fallback mode.
+
 ## Consequences
 - Independent issues execute in parallel, reducing wall-clock time roughly proportionally to the number of independent issues
 - Reviews are batched, which reduces context-switch overhead for the human reviewing the results
