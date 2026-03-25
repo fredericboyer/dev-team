@@ -18,11 +18,12 @@ Run a multi-agent parallel review of: $ARGUMENTS
 |---|---|---|
 | `auth`, `login`, `password`, `token`, `session`, `crypto`, `secret`, `permission`, `oauth`, `jwt`, `cors`, `csrf` | @dev-team-szabo | Security surface |
 | `/api/`, `/routes/`, `schema`, `.graphql`, `.proto`, `openapi` | @dev-team-mori | API/UI contract |
-| `docker`, `.env`, `config`, `migration`, `database`, `.sql`, `deploy` | @dev-team-voss | Infrastructure |
+| `docker`, `Dockerfile`, `docker-compose`, `.env.example`, `.env.template`, `deploy`, `terraform`, `helm`, `k8s`, `kubernetes`, `health-check`, `monitoring`, `.github/workflows` | @dev-team-hamilton | Infrastructure |
+| `.env`, `config`, `migration`, `database`, `.sql`, `data-model` | @dev-team-voss | Backend/data layer |
 | `.github/workflows`, `.dev-team/`, `tsconfig`, `eslint`, `prettier`, `package.json` | @dev-team-deming | Tooling |
 | `readme`, `changelog`, `.md`, `/docs/` | @dev-team-tufte | Documentation |
 | `/adr/`, `architecture`, `/core/`, `/domain/` | @dev-team-brooks | Architecture |
-| `package.json`, `version`, `changelog`, release workflows | @dev-team-conway | Release artifacts |
+| `package.json`, `version`, `changelog`, `release-workflows` | @dev-team-conway | Release artifacts |
 | Any `.js`, `.ts`, `.py`, `.go`, `.java`, `.rs` (non-test) | @dev-team-knuth | Quality/coverage |
 
 3. Always include @dev-team-szabo and @dev-team-knuth — they review all code changes.
