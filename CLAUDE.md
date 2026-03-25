@@ -104,7 +104,9 @@ Do NOT skip this. Do NOT treat hook output as optional. If you believe a review 
 - `/dev-team:assess` — audit knowledge base health (learnings, agent memory, CLAUDE.md)
 
 **Optional workflow skills** (installed to `.claude/skills/` during init, not overwritten on update):
-- Check `.claude/skills/` for project-specific workflow skills (merge automation, security monitoring, etc.)
+- `/dev-team:merge` — merge a PR with Copilot review checking, auto-merge, and CI monitoring
+- `/dev-team:security-status` — check code scanning, Dependabot, and secret scanning alerts
+- Check `.claude/skills/` for any additional project-specific workflow skills
 
 ### Memory architecture (two-tier)
 
