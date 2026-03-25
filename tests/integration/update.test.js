@@ -487,7 +487,11 @@ describe("dev-team update", () => {
 
     // Create a broken symlink: remove target, recreate symlink pointing to nonexistent path
     fs.unlinkSync(symlinkPath);
-    fs.symlinkSync("../nonexistent-target/" + testSkill, symlinkPath);
+    fs.symlinkSync(
+      "../nonexistent-target/" + testSkill,
+      symlinkPath,
+      process.platform === "win32" ? "junction" : "dir",
+    );
 
     // Verify it's broken (lstat succeeds but existsSync follows symlink and fails)
     assert.ok(fs.lstatSync(symlinkPath).isSymbolicLink(), "should be a symlink");

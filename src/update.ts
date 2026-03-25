@@ -584,16 +584,15 @@ export async function update(targetDir: string): Promise<void> {
   for (const skillDir of discoveredSkills) {
     const symlinkPath = path.join(claudeSkillsDir, skillDir);
     const symlinkTarget = path.relative(claudeSkillsDir, path.join(skillsDir, skillDir));
-    // Check if it's already a real directory (not a symlink) with a SKILL.md
-    let isRealDir = false;
+    // Skip if path exists and is NOT a symlink (user's real directory — preserve it)
+    let isNonSymlink = false;
     try {
-      isRealDir =
-        fs.existsSync(symlinkPath) &&
-        !fs.lstatSync(symlinkPath).isSymbolicLink() &&
-        fileExists(path.join(symlinkPath, "SKILL.md"));
-    } catch {}
-    if (!isRealDir) {
-      // Create symlink if target doesn't exist as a real directory, or repair existing symlink
+      isNonSymlink = fs.existsSync(symlinkPath) && !fs.lstatSync(symlinkPath).isSymbolicLink();
+    } catch {
+      // ENOENT — path doesn't exist, proceed to create symlink
+    }
+    if (!isNonSymlink) {
+      // Create symlink if target doesn't exist, or repair existing symlink
       try {
         fs.mkdirSync(path.dirname(symlinkPath), { recursive: true });
         // Remove existing symlink (broken or stale) — only unlink symlinks, not real files/dirs
@@ -606,9 +605,24 @@ export async function update(targetDir: string): Promise<void> {
         }
         fs.symlinkSync(symlinkTarget, symlinkPath);
       } catch (err) {
-        console.warn(
-          `  Warning: could not create skill symlink for ${skillDir}: ${(err as Error).message}`,
-        );
+        // On Windows, non-admin users get EPERM/EACCES for symlinks — fall back to junction
+        if (
+          process.platform === "win32" &&
+          ((err as NodeJS.ErrnoException).code === "EPERM" ||
+            (err as NodeJS.ErrnoException).code === "EACCES")
+        ) {
+          try {
+            fs.symlinkSync(symlinkTarget, symlinkPath, "junction");
+          } catch (junctionErr) {
+            console.warn(
+              `  Warning: could not create skill symlink for ${skillDir}: ${(junctionErr as Error).message}`,
+            );
+          }
+        } else {
+          console.warn(
+            `  Warning: could not create skill symlink for ${skillDir}: ${(err as Error).message}`,
+          );
+        }
       }
     }
   }
@@ -635,8 +649,8 @@ export async function update(targetDir: string): Promise<void> {
   }
 
   // Clean up ghost entries (labels from removed hooks/agents)
-  prefs.hooks = prefs.hooks.filter((label) => label in HOOK_FILES);
-  prefs.agents = prefs.agents.filter((label) => label in AGENT_FILES);
+  prefs.hooks = prefs.hooks.filter((label) => Object.hasOwn(HOOK_FILES, label));
+  prefs.agents = prefs.agents.filter((label) => Object.hasOwn(AGENT_FILES, label));
 
   // Step 8: Save updated preferences (stamp current package version)
   prefs.version = packageVersion;
