@@ -1,5 +1,5 @@
 {
-  "version": "0.5.0",
+  "version": "0.11.0",
   "agents": [
     "Voss",
     "Mori",
@@ -11,7 +11,8 @@
     "Brooks",
     "Conway",
     "Drucker",
-    "Borges"
+    "Borges",
+    "Hamilton"
   ],
   "hooks": [
     "TDD enforcement",
@@ -21,5 +22,6 @@
     "Task loop",
     "Watch list",
     "Pre-commit lint"
-  ]
+  ],
+  "agentTeams": true
 }
