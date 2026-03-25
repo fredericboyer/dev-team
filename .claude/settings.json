@@ -24,6 +24,15 @@
         "hooks": [
           {
             "type": "command",
+            "command": "node .claude/hooks/copilot-merge-gate.js"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
             "command": "node .dev-team/hooks/dev-team-precommit-lint-format.js"
           }
         ]
