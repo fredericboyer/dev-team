@@ -27,6 +27,12 @@ Run a multi-agent parallel review of: $ARGUMENTS
 
 3. Always include @dev-team-szabo and @dev-team-knuth — they review all code changes.
 
+## Pre-review validation
+
+Before spawning reviewers, verify the changes are reviewable:
+1. **Non-empty diff**: The diff contains actual changes to review. If empty, report "nothing to review" and stop.
+2. **Tests pass**: If the project has a test command, confirm tests pass. Flag test failures in the review report header.
+
 ## Execution
 
 1. Spawn each selected agent as a **parallel background subagent** using the Agent tool with `subagent_type: "general-purpose"`.
@@ -38,6 +44,18 @@ Run a multi-agent parallel review of: $ARGUMENTS
    - Instruction to read the actual code — not just the diff — for full context
 
 3. Wait for all agents to complete.
+
+## Filter findings (judge pass)
+
+Before producing the report, filter raw findings to maximize signal quality:
+1. **Remove contradictions**: Drop findings that contradict existing ADRs (`docs/adr/`), learnings (`.dev-team/learnings.md`), or agent memory (`.dev-team/agent-memory/*/MEMORY.md`)
+2. **Deduplicate**: When multiple agents flag the same issue, keep the most specific finding
+3. **Consolidate suggestions**: Group `[SUGGESTION]`-level items into a single summary block
+4. **Suppress generated file findings**: Skip findings on generated, vendored, or build artifacts
+5. **Validate DEFECTs**: Each `[DEFECT]` must include a concrete scenario — downgrade to `[RISK]` if not
+6. **Accept silence**: "No substantive findings" from a reviewer is a valid positive signal — do not request re-review
+
+Log filtered findings in a "Filtered" section for calibration tracking.
 
 ## Report
 
@@ -60,6 +78,14 @@ Group by severity:
 - **[QUESTION]** — decisions needing justification
 - **[SUGGESTION]** — specific improvements
 
+### Filtered
+
+List findings removed during the judge pass, with the reason for filtering:
+```
+**Filtered** @agent-name — reason (contradicts ADR-NNN / duplicate of above / no concrete scenario / generated file)
+Original finding summary.
+```
+
 ### Verdict
 
 - **Approve** — No `[DEFECT]` findings. Advisory items noted.
@@ -69,11 +95,19 @@ State the verdict clearly. List what must be fixed for approval if requesting ch
 
 ### Security preamble
 
-Before starting the review, check for open security alerts: run `/dev-team:security-status` if available, or check `gh api repos/{owner}/{repo}/code-scanning/alerts?state=open` and `gh api repos/{owner}/{repo}/dependabot/alerts?state=open`. Flag any critical findings in the review report.
+Before starting the review, check for open security alerts: run `/dev-team:security-status` if available, or use the project's security monitoring tools. Flag any critical findings in the review report.
 
 ### Completion
 
 After the review report is delivered:
-1. You MUST spawn **@dev-team-borges** (Librarian) as the final step to review memory freshness and capture any learnings from the review findings. Do NOT skip this.
+1. You MUST spawn **@dev-team-borges** (Librarian) as the final step. Pass Borges the **finding outcome log**: every finding with its classification, source agent, and outcome (accepted/overruled/ignored), including reasoning for overrules. Borges will:
+   - **Extract structured memory entries** from the review findings (each classified finding becomes a memory entry for the reviewer who produced it)
+   - **Reinforce accepted patterns** and **record overruled findings** for reviewer calibration
+   - **Generate calibration rules** when 3+ findings on the same tag are overruled
+   - **Record metrics** to `.dev-team/metrics.md`
+   - Write entries to each participating agent's MEMORY.md using the structured format
+   - Update shared learnings in `.dev-team/learnings.md`
+   - Check cross-agent coherence
 2. If Borges was not spawned, the review is INCOMPLETE.
-3. Include Borges's recommendations in the final report.
+3. **Memory formation gate**: After Borges runs, verify that each participating reviewer's MEMORY.md contains at least one new structured entry from this review.
+4. Include Borges's recommendations in the final report.
