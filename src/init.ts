@@ -155,14 +155,14 @@ const PRESETS: Record<string, PresetDefinition> = {
   },
 };
 
-interface WorkflowSkill {
+interface ProjectSkill {
   label: string;
   dir: string;
   description: string;
   platform: string; // which platform this applies to
 }
 
-const WORKFLOW_SKILLS: WorkflowSkill[] = [
+const PROJECT_SKILLS: ProjectSkill[] = [
   {
     label: "dev-team:merge",
     dir: "dev-team-merge",
@@ -177,7 +177,7 @@ const WORKFLOW_SKILLS: WorkflowSkill[] = [
   },
 ];
 
-export { PRESETS, ALL_AGENTS, QUALITY_HOOKS, WORKFLOW_SKILLS };
+export { PRESETS, ALL_AGENTS, QUALITY_HOOKS, PROJECT_SKILLS };
 
 /**
  * Main init flow.
@@ -396,20 +396,20 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
     }
   }
 
-  // Step 9b: Offer optional workflow skills based on detected platform
-  const workflowSkillsDir = path.join(claudeDir, "skills");
+  // Step 9b: Offer project-specific skills based on detected platform
+  const projectSkillsDir = path.join(claudeDir, "skills");
   const detectedPlatform = dirExists(path.join(targetDir, ".github")) ? "github" : "unknown";
-  const availableWorkflowSkills = WORKFLOW_SKILLS.filter((s) => s.platform === detectedPlatform);
-  const installedWorkflowSkills: string[] = [];
+  const availableProjectSkills = PROJECT_SKILLS.filter((s) => s.platform === detectedPlatform);
+  const installedProjectSkills: string[] = [];
 
-  if (availableWorkflowSkills.length > 0) {
-    let selectedWorkflowSkills: string[];
+  if (availableProjectSkills.length > 0) {
+    let selectedProjectSkills: string[];
     if (isAll || preset) {
-      selectedWorkflowSkills = availableWorkflowSkills.map((s) => s.label);
+      selectedProjectSkills = availableProjectSkills.map((s) => s.label);
     } else {
-      selectedWorkflowSkills = await prompts.checkbox(
-        `Detected ${detectedPlatform} platform. Install workflow-specific skills?`,
-        availableWorkflowSkills.map((s) => ({
+      selectedProjectSkills = await prompts.checkbox(
+        `Detected ${detectedPlatform} platform. Install project-specific skills?`,
+        availableProjectSkills.map((s) => ({
           label: s.label,
           description: s.description,
           defaultSelected: true,
@@ -417,13 +417,13 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
       );
     }
 
-    for (const skill of availableWorkflowSkills) {
-      if (!selectedWorkflowSkills.includes(skill.label)) continue;
-      const src = path.join(templates, "workflow-skills", skill.dir, "SKILL.md");
-      const dest = path.join(workflowSkillsDir, skill.dir, "SKILL.md");
+    for (const skill of availableProjectSkills) {
+      if (!selectedProjectSkills.includes(skill.label)) continue;
+      const src = path.join(templates, "project-skills", skill.dir, "SKILL.md");
+      const dest = path.join(projectSkillsDir, skill.dir, "SKILL.md");
       if (!fileExists(dest) || isAll) {
         copyFile(src, dest);
-        installedWorkflowSkills.push(skill.label);
+        installedProjectSkills.push(skill.label);
       }
     }
   }
@@ -456,9 +456,9 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
   console.log(`  Hooks:     ${selectedHooks.join(", ")} (${hookCount} files)`);
   const frameworkSkillNames = skillDirs.map((d) => d.replace("dev-team-", "")).join(", ");
   console.log(`  Skills:    ${frameworkSkillNames} (framework)`);
-  if (installedWorkflowSkills.length > 0) {
+  if (installedProjectSkills.length > 0) {
     console.log(
-      `  Workflow:  ${installedWorkflowSkills.join(", ")} (optional, in .claude/skills/)`,
+      `  Project:   ${installedProjectSkills.join(", ")} (project-specific, in .claude/skills/)`,
     );
   }
   console.log(

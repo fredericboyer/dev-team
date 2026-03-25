@@ -559,17 +559,17 @@ export async function update(targetDir: string): Promise<void> {
     }
   }
 
-  // Step 5b: Remove framework skills no longer in templates (moved to workflow-skills)
+  // Step 5b: Remove framework skills no longer in templates (moved to project-skills)
   const installedSkills = listSubdirectories(skillsDir);
   for (const installed of installedSkills) {
     if (!discoveredSkills.includes(installed)) {
-      // This skill was removed from templates — check if it's a known workflow skill
-      const workflowSrc = path.join(templates, "workflow-skills", installed, "SKILL.md");
-      if (fileExists(workflowSrc)) {
+      // This skill was removed from templates — check if it's a known project-specific skill
+      const projectSrc = path.join(templates, "project-skills", installed, "SKILL.md");
+      if (fileExists(projectSrc)) {
         // Migrate to .claude/skills/ if not already there
         const claudeSkillDest = path.join(targetDir, ".claude", "skills", installed, "SKILL.md");
         if (!fileExists(claudeSkillDest)) {
-          copyFile(workflowSrc, claudeSkillDest);
+          copyFile(projectSrc, claudeSkillDest);
           summary.skills.added.push(installed.replace("dev-team-", "") + " (→ .claude/skills/)");
         }
         // Remove from .dev-team/skills/

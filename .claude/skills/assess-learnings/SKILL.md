@@ -95,7 +95,7 @@ For each skill in `templates/skills/` AND `.claude/skills/`:
 
 **Integration:**
 - Does the skill integrate properly with other skills in the workflow?
-- For workflow skills (`.claude/skills/`): does the skill match the project's actual workflow as documented in project CLAUDE.md?
+- For project-specific skills (`.claude/skills/`): does the skill match the project's actual workflow as documented in project CLAUDE.md?
 - Are there steps the skill documents but doesn't fully implement? (e.g., does it instruct the agent to complete all parts of an interaction, or only some?)
 
 **Completeness:**
