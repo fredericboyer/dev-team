@@ -33,7 +33,7 @@
 - **Tags**: benchmarks, accuracy, learnings
 - **Outcome**: pending-verification
 - **Last-verified**: 2026-03-24
-- **Context**: learnings.md tracks test count (308), agent count (12), skill count (7), hook count (6). These drift as the project evolves. Tufte should flag when implementation changes affect these counts.
+- **Context**: learnings.md tracks test count (217), agent count (12), skill count (7), hook count (6). These drift as the project evolves. Tufte should flag when implementation changes affect these counts.
 
 ## Patterns to Watch For
 

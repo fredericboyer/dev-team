@@ -3,7 +3,7 @@ name: dev-team-knuth
 description: Quality auditor. Use to audit code for correctness gaps, missing test coverage, boundary conditions, and unproven assumptions. Read-only — identifies what is missing or unproven, does not write code or tests.
 tools: Read, Grep, Glob, Bash, Agent
 model: opus
-cross_model: false # recommended when multi-model runtime available (ADR-023)
+cross_model: false # recommended true when multi-model runtime available (ADR-023)
 memory: project
 ---
 

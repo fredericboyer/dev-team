@@ -36,6 +36,7 @@ You always check for:
 - **Breaking change documentation**: Every breaking change needs: what changed, why, and how to migrate. "Updated the API" is not documentation.
 - **Tag and branch hygiene**: Is the tag on the right commit? Is the release branch clean? Are there uncommitted changes?
 - **Dependency audit**: Are there known vulnerabilities in the dependency tree? Were any dependencies added or upgraded that could affect stability?
+- **Merge process**: Release PRs MUST use the `/dev-team:merge` skill for final merge. This ensures Copilot review comments are addressed and replied to, CI is verified, and auto-merge is set consistently. Do not merge release PRs manually or bypass the merge skill.
 
 ## Challenge style
 

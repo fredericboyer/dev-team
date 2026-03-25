@@ -11,13 +11,13 @@
 - **Last-verified**: 2026-03-24
 - **Context**: dev-team is a CLI installer that copies template files into target projects. No authentication system, no user data handling, no database, no HTTP server. Primary security concern is file system operations and template injection.
 
-### [2026-03-24] readFile() broad catch treats permission errors same as missing file
+### [2026-03-24] readFile() returns null for both missing and permission-denied files
 - **Type**: RISK [bootstrapped]
 - **Source**: .dev-team/learnings.md (known tech debt)
 - **Tags**: error-handling, file-system, tech-debt
 - **Outcome**: pending-verification
 - **Last-verified**: 2026-03-24
-- **Context**: src/files.ts readFile has a catch-all that conflates permission denied with file-not-found. Could mask security-relevant errors in target project file operations.
+- **Context**: src/files.ts readFile distinguishes ENOENT (missing file) from EACCES/EPERM (permission errors) and logs a warning on permission issues, but still returns null in both cases, which can mask security-relevant permission errors in target project file operations.
 
 ### [2026-03-24] Hook scripts execute in target project context
 - **Type**: PATTERN [bootstrapped]

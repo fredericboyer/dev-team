@@ -11,7 +11,7 @@
 - **Last-verified**: 2026-03-24
 - **Context**: Key ADRs: 001 (hooks over CLAUDE.md), 002 (zero deps), 005 (adversarial agents), 007 (oxc tooling), 019 (parallel review waves), 022 (agent proliferation governance with 15-agent soft cap). TypeScript 6 with NodeNext module resolution (ADR-021).
 
-### [2026-03-24] Module structure: src/ (8 modules) to dist/ with templates/ shipped separately
+### [2026-03-24] Module structure: src/ (9 modules) to dist/ with templates/ shipped separately
 - **Type**: PATTERN [bootstrapped]
 - **Source**: project structure analysis
 - **Tags**: architecture, modules, build
