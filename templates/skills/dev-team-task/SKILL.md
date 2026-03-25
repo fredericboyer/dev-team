@@ -38,11 +38,17 @@ Before the first iteration, the implementing agent should research current best 
 Track iterations in conversation context (no state files). For each iteration:
 
 1. The implementing agent works on the task.
-2. After implementation, spawn review agents in parallel as background tasks.
-3. Collect classified challenges from reviewers.
-4. If any `[DEFECT]` challenges exist, address them in the next iteration.
-5. If no `[DEFECT]` remains, output DONE to exit the loop.
-6. If max iterations reached without convergence, report remaining defects and exit.
+2. **Validate implementation output** before spawning reviewers:
+   - Non-empty diff: `git diff` shows actual changes
+   - Tests pass: test command executed with exit code 0
+   - Relevance: changed files relate to the stated issue
+   - Clean working tree: no uncommitted debris
+   - If validation fails, route back to implementer with specific failure reason. If it fails twice, escalate to human.
+3. After validation passes, spawn review agents in parallel as background tasks.
+4. Collect classified challenges from reviewers.
+5. If any `[DEFECT]` challenges exist, address them in the next iteration.
+6. If no `[DEFECT]` remains, output DONE to exit the loop.
+7. If max iterations reached without convergence, report remaining defects and exit.
 
 The convergence check happens in conversation context: count iterations, check for `[DEFECT]` findings, and decide whether to continue or exit.
 
