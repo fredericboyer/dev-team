@@ -48,7 +48,7 @@ Before spawning reviewers, verify the changes are reviewable:
 ## Filter findings (judge pass)
 
 Before producing the report, filter raw findings to maximize signal quality:
-1. **Remove contradictions**: Drop findings that contradict existing ADRs, learnings, or agent memory
+1. **Remove contradictions**: Drop findings that contradict existing ADRs (`docs/adr/`), learnings (`.dev-team/learnings.md`), or agent memory (`.dev-team/agent-memory/*/MEMORY.md`)
 2. **Deduplicate**: When multiple agents flag the same issue, keep the most specific finding
 3. **Consolidate suggestions**: Group `[SUGGESTION]`-level items into a single summary block
 4. **Suppress generated file findings**: Skip findings on generated, vendored, or build artifacts
@@ -77,6 +77,14 @@ Group by severity:
 - **[RISK]** — likely failure modes
 - **[QUESTION]** — decisions needing justification
 - **[SUGGESTION]** — specific improvements
+
+### Filtered
+
+List findings removed during the judge pass, with the reason for filtering:
+```
+**Filtered** @agent-name — reason (contradicts ADR-NNN / duplicate of above / no concrete scenario / generated file)
+Original finding summary.
+```
 
 ### Verdict
 

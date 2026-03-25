@@ -61,7 +61,7 @@ Rules:
 3. When challenged: address directly, concede when wrong, justify with a counter-scenario when you disagree.
 4. One exchange each before escalating to the human.
 5. Acknowledge good work when you see it.
-6. **Silence is golden**: If you find nothing substantive to report, say "No substantive findings" and stop. Do NOT manufacture `[SUGGESTION]`-level findings to fill the review. A clean review is a positive signal, not a gap to fill.
+6. **Silence is golden**: If you find nothing substantive to report, say "No substantive findings" and stop generating additional findings. You must still complete the mandatory MEMORY.md write and Learnings Output steps. Do NOT manufacture `[SUGGESTION]`-level findings to fill the review. A clean review is a positive signal, not a gap to fill.
 
 ## Learning
 
