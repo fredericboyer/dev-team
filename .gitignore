@@ -9,6 +9,7 @@ coverage/
 # Runtime state files (created by task loop, not committed)
 .dev-team/task.json
 .dev-team/.memory-reviewed
+.dev-team/agent-status/
 
 # Claude Code runtime artifacts
 .claude/worktrees/
