@@ -51,3 +51,5 @@ What becomes easier or more difficult?
 | [024](024-remove-workflow-skills-from-templates.md) | Remove workflow-skills from templates | accepted |
 | [025](025-project-specific-customization-in-claude.md) | Project-specific customization in .claude/ | accepted |
 | [026](026-agent-progress-reporting.md) | Agent progress reporting and heartbeat protocol | accepted |
+| [027](027-turing-researcher-agent.md) | Turing pre-implementation researcher agent | accepted |
+| [028](028-rams-design-reviewer-agent.md) | Rams design system reviewer agent | accepted |

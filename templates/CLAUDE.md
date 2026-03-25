@@ -19,6 +19,8 @@ This project uses [dev-team](https://github.com/dev-team) — adversarial AI age
 | `@dev-team-brooks` | Architect & Quality Reviewer | Architectural review, coupling, ADR compliance, quality attributes (performance, maintainability, scalability) |
 | `@dev-team-conway` | Release Manager | Versioning, changelog, release readiness, semver validation |
 | `@dev-team-drucker` | Team Lead / Orchestrator | Auto-delegates to specialists, manages review loops, resolves conflicts |
+| `@dev-team-turing` | Pre-implementation Researcher | Library evaluation, migration paths, trade-off analysis, security pattern research |
+| `@dev-team-rams` | Design System Reviewer | Token compliance, spacing consistency, component API usage, design-code alignment |
 | `@dev-team-borges` | Librarian | End-of-task memory extraction, cross-agent coherence, system improvement |
 
 ### Capabilities
@@ -37,6 +39,8 @@ For non-trivial work: explore the area first, then implement, then review.
 - **Tufte** — auto-flagged when documentation files change (.md, /docs/, README, etc.) AND when significant implementation files change to detect doc-code drift
 - **Brooks** — auto-flagged when any non-test implementation code changes (quality attributes) and when architectural boundaries are touched (/adr/, /core/, /domain/, /lib/, build config, etc.)
 - **Conway** — auto-flagged when release artifacts change (package.json, changelog, version files, release/publish/deploy workflows, etc.)
+- **Turing** — on-demand only. Spawned by Drucker when task involves library selection, migration, or unfamiliar domain. Not auto-triggered by hooks.
+- **Rams** — auto-flagged when frontend/UI component files change (same trigger as Mori). Gracefully no-ops when no design system is detected.
 
 **End-of-workflow agents:**
 - **Borges** — mandatory at end of every `/dev-team:task`, `/dev-team:review`, `/dev-team:audit`, and `/dev-team:assess`. Extracts structured memory entries, reviews cross-agent coherence, and identifies system improvement opportunities.
