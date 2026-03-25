@@ -19,9 +19,9 @@ This project uses [dev-team](https://github.com/dev-team) — adversarial AI age
 | `@dev-team-brooks` | Architect & Quality Reviewer | Architectural review, coupling, ADR compliance, quality attributes (performance, maintainability, scalability) |
 | `@dev-team-conway` | Release Manager | Versioning, changelog, release readiness, semver validation |
 | `@dev-team-drucker` | Team Lead / Orchestrator | Auto-delegates to specialists, manages review loops, resolves conflicts |
-| `@dev-team-borges` | Librarian | End-of-task/review/audit memory review, cross-agent coherence, system improvement |
+| `@dev-team-borges` | Librarian | End-of-task memory extraction, cross-agent coherence, system improvement |
 
-### Workflow
+### Capabilities
 
 For automatic delegation, use `@dev-team-drucker` — it analyzes the task and routes to the right specialist.
 
@@ -34,15 +34,17 @@ For non-trivial work: explore the area first, then implement, then review.
 - **Hamilton** — auto-flagged when infrastructure/operations files change (Dockerfile, docker-compose, CI workflows, Terraform, Helm, k8s, health checks, monitoring config, .env templates, etc.)
 - **Voss** — auto-flagged when app config/data files change (.env, config, migrations, database, etc.)
 - **Deming** — auto-flagged when tooling files change (eslint, CI workflows, package.json, etc.)
-- **Tufte** — auto-flagged when documentation files change (.md, /docs/, README, etc.) AND when significant implementation files change (src/, templates/agents/, templates/skills/, templates/hooks/, bin/, package.json) to detect doc-code drift
+- **Tufte** — auto-flagged when documentation files change (.md, /docs/, README, etc.) AND when significant implementation files change to detect doc-code drift
 - **Brooks** — auto-flagged when any non-test implementation code changes (quality attributes) and when architectural boundaries are touched (/adr/, /core/, /domain/, /lib/, build config, etc.)
 - **Conway** — auto-flagged when release artifacts change (package.json, changelog, version files, release/publish/deploy workflows, etc.)
 
 **End-of-workflow agents:**
-- **Borges** — mandatory at end of every `/dev-team:task`, `/dev-team:review`, `/dev-team:audit`, and `/dev-team:assess`. Reviews memory freshness, cross-agent coherence, and system improvement opportunities.
+- **Borges** — mandatory at end of every `/dev-team:task`, `/dev-team:review`, `/dev-team:audit`, and `/dev-team:assess`. Extracts structured memory entries, reviews cross-agent coherence, and identifies system improvement opportunities.
 
 **Orchestration:**
-- **Drucker** — delegates tasks to the right implementing agent and spawns reviewers. Szabo, Knuth, and Brooks review all code changes. Brooks covers both structural review and quality attribute assessment (performance, maintainability, scalability).
+- **Drucker** — delegates tasks to the right implementing agent and spawns reviewers. Szabo, Knuth, and Brooks review all code changes.
+
+**CRITICAL: Always run agents in the background.** When spawning Drucker or any agent for tasks that take more than a few seconds, use `run_in_background: true`. The main conversation loop must remain interactive.
 
 Agents challenge each other using classified findings:
 - `[DEFECT]` blocks progress. `[RISK]`, `[QUESTION]`, `[SUGGESTION]` are advisory.
@@ -50,7 +52,7 @@ Agents challenge each other using classified findings:
 
 ### Parallel execution
 
-When working on multiple independent issues, use parallel agents on separate branches. Drucker coordinates the review wave after all implementations complete. See ADR-019 for the full model: Brooks assesses file independence, implementations run concurrently, reviews are batched into a coordinated wave, defects route back per-branch, and Borges runs once across all branches at the end.
+When working on multiple independent issues, use parallel agents on separate branches. Drucker coordinates the review wave after all implementations complete.
 
 ### Hook directives are MANDATORY
 
@@ -63,13 +65,15 @@ Do NOT skip this. Do NOT treat hook output as optional. If you believe a review 
 
 ### Skills
 
+**Framework skills** (installed automatically, updated with `dev-team update`):
 - `/dev-team:challenge` — critically examine a proposal or implementation
 - `/dev-team:task` — start an iterative task loop with adversarial review gates
 - `/dev-team:review` — orchestrated multi-agent parallel review of changes
 - `/dev-team:audit` — full codebase security + quality + tooling audit
-- `/dev-team:merge` — merge a PR with Copilot review handling, auto-merge, CI monitoring, and post-merge actions
-- `/dev-team:security-status` — check code scanning, Dependabot, and secret scanning alerts
 - `/dev-team:assess` — audit knowledge base health (learnings, agent memory, CLAUDE.md)
+
+**Optional workflow skills** (installed to `.claude/skills/` during init, not overwritten on update):
+- Check `.claude/skills/` for project-specific workflow skills (merge automation, security monitoring, etc.)
 
 ### Learnings — where to write what
 
