@@ -92,7 +92,11 @@ Before starting the review, check for open security alerts: run `/dev-team:secur
 ### Completion
 
 After the review report is delivered:
-1. You MUST spawn **@dev-team-borges** (Librarian) as the final step to review memory freshness and capture any learnings from the review findings. Do NOT skip this.
+1. You MUST spawn **@dev-team-borges** (Librarian) as the final step. Borges will:
+   - **Extract structured memory entries** from the review findings (each classified finding becomes a memory entry for the reviewer who produced it)
+   - Write entries to each participating agent's MEMORY.md using the structured format
+   - Update shared learnings in `.dev-team/learnings.md`
+   - Check cross-agent coherence
 2. If Borges was not spawned, the review is INCOMPLETE.
-3. **Borges memory gate**: If Borges reports that any participating agent's MEMORY.md is empty or contains only boilerplate, this is a **[DEFECT]** that blocks review completion. The agent must write substantive learnings before the review can be marked done.
+3. **Memory formation gate**: After Borges runs, verify that each participating reviewer's MEMORY.md contains at least one new structured entry from this review.
 4. Include Borges's recommendations in the final report.
