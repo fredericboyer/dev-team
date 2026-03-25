@@ -125,6 +125,31 @@ If the implementing agent disagrees with a reviewer:
 1. Each side presents their argument (one exchange).
 2. If still unresolved, **escalate to the human** with both perspectives. Do not auto-resolve disagreements.
 
+#### 5d. Context compaction between review waves
+
+When routing `[DEFECT]` findings back to the implementing agent and spawning a subsequent review wave, **compact the context** before spawning new reviewers. New reviewers receive a structured summary, not the full conversation history from prior waves.
+
+**Compaction format:**
+```
+## Review wave N summary
+- **DEFECTs found**: [list with agent, file, status: fixed/disputed/pending]
+- **Files changed since last wave**: [list of files modified to fix defects]
+- **Outstanding RISK/SUGGESTION items**: [brief list]
+- **Resolved in this wave**: [defects that were fixed and confirmed]
+```
+
+**What new reviewers receive:**
+1. Current diff (the code as it stands now)
+2. Compact summary from prior waves (above format)
+3. Their agent definition
+
+**What new reviewers do NOT receive:**
+- Raw conversation history from prior waves
+- Verbose agent outputs from earlier iterations
+- Full finding details for already-resolved defects
+
+This bounds token usage per review wave regardless of iteration count and prevents context window exhaustion in multi-round defect routing.
+
 ### 6. Complete
 
 When no `[DEFECT]` findings remain:

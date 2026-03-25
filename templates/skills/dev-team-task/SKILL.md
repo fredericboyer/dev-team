@@ -46,9 +46,13 @@ Track iterations in conversation context (no state files). For each iteration:
    - If validation fails, route back to implementer with specific failure reason. If it fails twice, escalate to human.
 3. After validation passes, spawn review agents in parallel as background tasks.
 4. Collect classified challenges from reviewers.
-5. If any `[DEFECT]` challenges exist, address them in the next iteration.
-6. If no `[DEFECT]` remains, output DONE to exit the loop.
-7. If max iterations reached without convergence, report remaining defects and exit.
+5. If any `[DEFECT]` challenges exist, **compact the context** before the next iteration:
+   - Produce a structured summary: DEFECTs found (agent, file, status), files changed, outstanding items
+   - New reviewers in subsequent waves receive: current diff + compact summary + agent definition
+   - They do NOT receive raw conversation history from prior waves
+6. Address defects in the next iteration.
+7. If no `[DEFECT]` remains, output DONE to exit the loop.
+8. If max iterations reached without convergence, report remaining defects and exit.
 
 The convergence check happens in conversation context: count iterations, check for `[DEFECT]` findings, and decide whether to continue or exit.
 
@@ -71,7 +75,7 @@ Drucker spawns one implementing agent per independent issue, each on its own bra
 Reviews do **not** start until **all** implementation agents have completed (Agent tool provides completion notifications as the sync barrier). Once all are done, spawn review agents (Szabo + Knuth, plus conditional reviewers) in parallel across all branches simultaneously. Each reviewer receives the diff for one specific branch and produces classified findings scoped to that branch.
 
 ### Phase 3: Defect routing
-Collect all findings. Route `[DEFECT]` items back to the original implementing agent for each branch. Agents fix defects on their own branch. After fixes, another review wave runs. Continue until no `[DEFECT]` findings remain or the per-branch iteration limit is reached.
+Collect all findings. Route `[DEFECT]` items back to the original implementing agent for each branch. Agents fix defects on their own branch. Before spawning the next review wave, **compact context**: produce a structured summary of prior findings, their status (fixed/disputed/pending), and files changed. New reviewers receive current diff + compact summary only — not full conversation history from prior waves. Continue until no `[DEFECT]` findings remain or the per-branch iteration limit is reached.
 
 ### Phase 4: Borges completion
 Borges runs **once** across all branches after the final review wave clears. This ensures cross-branch coherence: memory files are consistent, learnings are not duplicated, and system improvement recommendations consider the full batch.
