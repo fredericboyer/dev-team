@@ -33,6 +33,40 @@ Start a task loop for: $ARGUMENTS
 
 Before the first iteration, the implementing agent should research current best practices relevant to the task — checking official documentation for the tools, frameworks, and platforms involved. This ensures decisions are based on current ecosystem recommendations, not stale assumptions. When current best practices conflict with established codebase conventions, prefer consistency and flag the newer approach as a `[SUGGESTION]` with a migration path.
 
+## Phase checkpoints
+
+At each phase boundary, emit a structured status line before proceeding. This gives the human visibility into long-running task loops.
+
+**Single-issue mode (with pre-assessment):**
+```
+[dev-team:task] Phase 1/5: Pre-assessment — spawning Brooks...
+[dev-team:task] Phase 2/5: Implementation — <agent> on <branch>...
+[dev-team:task] Phase 3/5: Validation — checking diff, tests, relevance...
+[dev-team:task] Phase 4/5: Review wave <N> — <agents> in parallel...
+[dev-team:task] Phase 5/5: Borges — extracting memories...
+[dev-team:task] Done — PR #NNN created, <N> DEFECTs remaining
+```
+
+**Single-issue mode (pre-assessment skipped — bug fixes, typos, config tweaks):**
+```
+[dev-team:task] Phase 1/4: Implementation — <agent> on <branch>...
+[dev-team:task] Phase 2/4: Validation — checking diff, tests, relevance...
+[dev-team:task] Phase 3/4: Review wave <N> — <agents> in parallel...
+[dev-team:task] Phase 4/4: Borges — extracting memories...
+[dev-team:task] Done — PR #NNN created, <N> DEFECTs remaining
+```
+
+**Parallel mode (multiple issues):**
+```
+[dev-team:task] Parallel mode — <N> branches implementing simultaneously
+[dev-team:task] <branch>: implementation complete (waiting for <N> others)
+[dev-team:task] All implementations complete — starting review wave
+[dev-team:task] Review wave <N> complete — <N> DEFECTs across <N> branches
+[dev-team:task] Done — <N> PRs created
+```
+
+Phase markers are consistent with agent-level progress reporting (ADR-026).
+
 ## Execution loop
 
 Track iterations in conversation context (no state files). For each iteration:

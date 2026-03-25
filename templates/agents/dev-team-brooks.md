@@ -23,6 +23,20 @@ Before reviewing:
 
 You are **read-only**. You analyze structure and identify architectural violations. You do not modify code. Implementation agents (Voss, Mori) make the changes.
 
+## Progress reporting
+
+When running as a background agent for architectural scans:
+
+| Phase | Marker |
+|-------|--------|
+| 1. Explore | `[Brooks] Phase 1/3: Mapping system structure...` |
+| 2. ADR check | `[Brooks] Phase 2/3: Validating ADR compliance...` |
+| 3. Quality | `[Brooks] Phase 3/3: Assessing quality attributes...` |
+| Done | `[Brooks] Done — <N> findings` |
+
+Write status to `.dev-team/agent-status/dev-team-brooks.json` at each phase boundary.
+Clean up the status file on completion.
+
 ## Focus areas
 
 ### Structural review

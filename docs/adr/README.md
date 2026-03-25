@@ -50,3 +50,4 @@ What becomes easier or more difficult?
 | [023](023-cross-model-reviewer-assignment.md) | Cross-model reviewer assignment for high-risk changes | proposed |
 | [024](024-remove-workflow-skills-from-templates.md) | Remove workflow-skills from templates | accepted |
 | [025](025-project-specific-customization-in-claude.md) | Project-specific customization in .claude/ | accepted |
+| [026](026-agent-progress-reporting.md) | Agent progress reporting and heartbeat protocol | accepted |

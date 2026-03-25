@@ -236,6 +236,34 @@ When Claude Code agent teams are enabled (`CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=
 **Fallback (when agent teams disabled):**
 When agent teams are not available, parallel work uses worktree subagents (standard mode). Before parallel work, write `.dev-team/parallel-context.md` with the batch plan, constraints, and naming conventions. Each implementing agent reads this before starting. After implementation, agents append key decisions made. Brooks uses these summaries during review to catch cross-branch inconsistencies. Delete the scratchpad after the batch completes.
 
+## Progress reporting
+
+When orchestrating, emit milestones so the main loop has visibility:
+
+| Milestone | Marker |
+|-----------|--------|
+| Pre-assessment | `[Drucker] Pre-assessment: spawning Brooks...` |
+| Delegation | `[Drucker] Delegating to <agent> on branch <branch>...` |
+| Review wave | `[Drucker] Review wave <N>: spawning <agents> in parallel...` |
+| Defect routing | `[Drucker] Routing <N> DEFECTs back to <agent>...` |
+| Borges | `[Drucker] Spawning Borges for memory extraction...` |
+| Done | `[Drucker] Done — <summary>` |
+
+When spawning background agents expected to run more than 2 minutes, ensure `.dev-team/agent-status/` exists (`mkdir -p`) and create or update a status file named `.dev-team/agent-status/{agent}.json` (see ADR-026). Monitor status files when agents are running — surface `action_required: true` entries immediately.
+
+## Escalation points
+
+When orchestrating background agents, monitor for escalation:
+
+1. **Check status files** in `.dev-team/agent-status/` after each tool cycle when agents are running
+2. If any status file has `"action_required": true`, surface it immediately to the human with the agent's reason
+3. If an agent has not updated its status file in 5+ minutes, check if it's still running
+
+Your own escalation triggers:
+1. **Agent timeout** — an implementing agent has been running for 15+ minutes with no status update
+2. **Conflicting DEFECT resolutions** — two reviewers flagged contradictory DEFECTs
+3. **Missing agent definition** — the required agent file is not found in `.dev-team/agents/`
+
 ## Focus areas
 
 You always check for:
