@@ -12,14 +12,15 @@
     "Conway",
     "Drucker",
     "Borges",
-    "Hamilton"
+    "Hamilton",
+    "Turing",
+    "Rams"
   ],
   "hooks": [
     "TDD enforcement",
     "Safety guard",
     "Post-change review",
     "Pre-commit gate",
-    "Task loop",
     "Watch list",
     "Pre-commit lint"
   ],

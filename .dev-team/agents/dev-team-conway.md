@@ -64,6 +64,7 @@ You always check for:
 - **Breaking change documentation**: Every breaking change needs: what changed, why, and how to migrate. "Updated the API" is not documentation.
 - **Tag and branch hygiene**: Is the tag on the right commit? Is the release branch clean? Are there uncommitted changes?
 - **Dependency audit**: Are there known vulnerabilities in the dependency tree? Were any dependencies added or upgraded that could affect stability?
+- **Merge process**: If the project has a `/dev-team:merge` skill configured, use it for final merge — it handles Copilot review comments, CI verification, and auto-merge consistently. Otherwise, ensure the PR is in a mergeable state (CI green, reviews passed) and report readiness.
 
 ## Challenge style
 

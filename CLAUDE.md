@@ -54,6 +54,8 @@ This project uses [dev-team](https://github.com/dev-team) — adversarial AI age
 | `@dev-team-brooks` | Architect & Quality Reviewer | Architectural review, coupling, ADR compliance, quality attributes (performance, maintainability, scalability) |
 | `@dev-team-conway` | Release Manager | Versioning, changelog, release readiness, semver validation |
 | `@dev-team-drucker` | Team Lead / Orchestrator | Auto-delegates to specialists, manages review loops, resolves conflicts |
+| `@dev-team-turing` | Pre-implementation Researcher | Library evaluation, migration paths, trade-off analysis, security pattern research |
+| `@dev-team-rams` | Design System Reviewer | Token compliance, spacing consistency, component API usage, design-code alignment |
 | `@dev-team-borges` | Librarian | End-of-task memory extraction, cross-agent coherence, system improvement |
 
 ### Capabilities
@@ -72,6 +74,8 @@ For non-trivial work: explore the area first, then implement, then review.
 - **Tufte** — auto-flagged when documentation files change (.md, /docs/, README, etc.) AND when significant implementation files change to detect doc-code drift
 - **Brooks** — auto-flagged when any non-test implementation code changes (quality attributes) and when architectural boundaries are touched (/adr/, /core/, /domain/, /lib/, build config, etc.)
 - **Conway** — auto-flagged when release artifacts change (package.json, changelog, version files, release/publish/deploy workflows, etc.)
+- **Turing** — on-demand only. Spawned by Drucker when task involves library selection, migration, or unfamiliar domain. Not auto-triggered by hooks.
+- **Rams** — auto-flagged when frontend/UI component files change (same trigger as Mori). Gracefully no-ops when no design system is detected.
 
 **End-of-workflow agents:**
 - **Borges** — mandatory at end of every `/dev-team:task`, `/dev-team:review`, `/dev-team:audit`, and `/dev-team:assess`. Extracts structured memory entries, reviews cross-agent coherence, and identifies system improvement opportunities.
@@ -87,10 +91,9 @@ Agents challenge each other using classified findings:
 
 ### Parallel execution
 
-When working on multiple independent issues:
-- Use agent teams or worktree subagents to run parallel agents on separate branches.
-- The main conversation loop acts as Drucker (team lead) — do not spawn a separate Drucker subagent.
-- Drucker coordinates the review wave after all implementations complete.
+When working on multiple independent issues, use agent teams or worktree subagents to run parallel agents on separate branches. Drucker coordinates the review wave after all implementations complete.
+
+> **Note:** If your project's workflow section (above the `dev-team:begin` marker) already designates the main conversation loop as the team lead, do not spawn a separate Drucker subagent — the main loop IS Drucker. Otherwise, `@dev-team-drucker` can be used as a subagent for delegation.
 
 ### Hook directives are MANDATORY
 
@@ -122,7 +125,7 @@ Project-specific customization belongs in `.claude/`:
 | Project-specific skills (merge, deploy, etc.) | `.claude/skills/` |
 | Claude Code settings and hook wiring | `.claude/settings.json` |
 
-`.claude/` is not touched by `dev-team update` — your customizations are safe.
+`.claude/hooks/` and `.claude/skills/` are not overwritten by `dev-team update` — your project-specific customizations are safe. Only `.claude/settings.json` is merged additively (new product hooks are added, but user-added entries are never removed).
 
 ### Memory architecture (two-tier)
 
@@ -152,19 +155,14 @@ When the human gives feedback about process, coding style, or tool behavior: wri
 
 
 
+
 ## Project-Specific Workflow
 
 ### Merging PRs
 
 **Always use `/dev-team:merge` to merge PRs.** Do not use raw `gh pr merge`.
 
-Before merging any PR, you MUST wait for and address GitHub Copilot review feedback:
-1. After creating a PR, wait up to 2 minutes for Copilot review to appear
-2. Check for inline review comments: `gh api --paginate repos/fredericboyer/dev-team/pulls/{number}/comments --jq '[.[] | select(.user.login == "Copilot")] | length'`
-3. Check for summary reviews: `gh api --paginate repos/fredericboyer/dev-team/pulls/{number}/reviews --jq '[.[] | select(.user.login == "Copilot")] | length'`
-4. If Copilot has any comments or reviews, read and address them before merging. Only proceed with merge after all Copilot feedback is resolved or both counts are zero.
-
-This applies to all PRs — including those created by background agents.
+The merge skill handles Copilot check run monitoring, auto-merge, CI verification, and post-merge actions automatically. This applies to all PRs — including those created by background agents.
 
 
 

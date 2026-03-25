@@ -4,9 +4,9 @@
 ## Research Patterns
 
 ### [2026-03-25] First install — no research history yet
-- **Type**: PATTERN [bootstrapped]
+- **Type**: PATTERN [verified]
 - **Source**: initial setup
 - **Tags**: research, setup
-- **Outcome**: pending-verification
+- **Outcome**: verified
 - **Last-verified**: 2026-03-25
 - **Context**: Turing was added in v1.1. Research briefs will be written to .dev-team/research/. Borges manages temporal decay (90-day archive).

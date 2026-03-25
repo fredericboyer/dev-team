@@ -3,29 +3,21 @@
 
 ## Memory Health Status
 
-### [2026-03-24] Cold start seed generation completed for all 12 agents
-- **Type**: DECISION [bootstrapped]
+### [2026-03-25] Cold start seed generation completed for all agents
+- **Type**: DECISION [verified]
 - **Source**: Issue #212 — cold start seed generation
 - **Tags**: memory, cold-start, seeding
-- **Outcome**: pending-verification
-- **Last-verified**: 2026-03-24
-- **Context**: All 12 agent MEMORY.md files populated with 3-5 bootstrapped seed entries derived from package.json, tsconfig.json, CI config, ADRs, and project structure. Seeds marked [bootstrapped] with outcome pending-verification.
-
-### [2026-03-24] Memory architecture: Tier 1 shared learnings + Tier 2 agent calibration
-- **Type**: PATTERN [bootstrapped]
-- **Source**: CLAUDE.md + .dev-team/learnings.md analysis
-- **Tags**: memory, architecture, tiers
-- **Outcome**: pending-verification
-- **Last-verified**: 2026-03-24
-- **Context**: Tier 1 is .dev-team/learnings.md (shared facts, benchmarks, conventions). Tier 2 is .dev-team/agent-memory/*/MEMORY.md (agent-specific calibration). First 200 lines loaded into context. Formal decisions go to docs/adr/.
-
-### [2026-03-25] Quality benchmarks in learnings.md: 306 tests, 12 agents, 5 skills, 6 hooks
-- **Type**: PATTERN [verified]
-- **Source**: .dev-team/learnings.md analysis
-- **Tags**: benchmarks, accuracy
 - **Outcome**: verified
 - **Last-verified**: 2026-03-25
-- **Context**: These benchmarks drift frequently. Borges should verify and update them at end of each task cycle. Treat learnings.md as the source of truth for numeric benchmarks — avoid copying counts into agent memories without re-reading that file.
+- **Context**: All agent MEMORY.md files populated with bootstrapped seed entries derived from package.json, tsconfig.json, CI config, ADRs, and project structure. Seeds marked [bootstrapped] with outcome pending-verification, then verified through usage.
+
+### [2026-03-25] Memory architecture: Tier 1 shared learnings + Tier 2 agent calibration
+- **Type**: PATTERN [verified]
+- **Source**: CLAUDE.md + .dev-team/learnings.md analysis
+- **Tags**: memory, architecture, tiers
+- **Outcome**: verified
+- **Last-verified**: 2026-03-25
+- **Context**: Tier 1 is .dev-team/learnings.md (shared facts, conventions). Tier 2 is .dev-team/agent-memory/*/MEMORY.md (agent-specific calibration). First 200 lines loaded into context. Formal decisions go to docs/adr/. Avoid copying volatile counts into agent memories — derive from source.
 
 ## System Improvement Log
 

@@ -3,36 +3,28 @@
 
 ## Coverage Gaps Identified
 
-### [2026-03-24] 13 test files using Node.js built-in test runner across 3 tiers
-- **Type**: PATTERN [bootstrapped]
+### [2026-03-25] Three-tier test structure using Node.js built-in test runner
+- **Type**: PATTERN [verified]
 - **Source**: package.json + project structure analysis
 - **Tags**: testing, coverage, test-runner
-- **Outcome**: pending-verification
-- **Last-verified**: 2026-03-24
-- **Context**: 6 unit test files, 3 integration test files, 4 scenario test files. Node.js `node --test` runner, no third-party test framework. Tests are pre-compiled JS (not TS). Actual test-case count is 306 (tracked in .dev-team/learnings.md).
+- **Outcome**: verified
+- **Last-verified**: 2026-03-25
+- **Context**: Node.js `node --test` runner, no third-party test framework. Tests are pre-compiled JS (not TS). Three tiers: unit (individual modules), integration (install flows), scenarios (end-to-end project types).
 
-### [2026-03-24] Test directory structure: tests/unit + tests/integration + tests/scenarios
-- **Type**: PATTERN [bootstrapped]
-- **Source**: project structure analysis
-- **Tags**: testing, structure
-- **Outcome**: pending-verification
-- **Last-verified**: 2026-03-24
-- **Context**: Unit tests cover files, hooks, scan, skill-recommendations, create-agent, cli. Integration tests cover fresh-project, idempotency, update. Scenario tests cover node-project, python-project, upgrade-path, orchestration.
-
-### [2026-03-24] No coverage tool configured — coverage is not measured
-- **Type**: PATTERN [bootstrapped]
+### [2026-03-25] No coverage tool configured — coverage is not measured
+- **Type**: PATTERN [verified]
 - **Source**: package.json analysis
 - **Tags**: testing, coverage
-- **Outcome**: pending-verification
-- **Last-verified**: 2026-03-24
+- **Outcome**: verified
+- **Last-verified**: 2026-03-25
 - **Context**: No c8, istanbul, or similar coverage tool in devDependencies or scripts. Coverage gaps must be identified by code review, not metrics.
 
-### [2026-03-24] mergeClaudeMd append-on-missing-END-marker duplicate BEGIN edge case
-- **Type**: RISK [bootstrapped]
+### [2026-03-25] mergeClaudeMd append-on-missing-END-marker duplicate BEGIN edge case
+- **Type**: RISK [verified]
 - **Source**: .dev-team/learnings.md (known tech debt)
 - **Tags**: boundary-condition, merge-logic
-- **Outcome**: pending-verification
-- **Last-verified**: 2026-03-24
+- **Outcome**: verified
+- **Last-verified**: 2026-03-25
 - **Context**: Known edge case where subsequent runs can produce duplicate BEGIN markers if END marker is missing. Tracked in shared learnings.
 
 ## Recurring Boundary Conditions

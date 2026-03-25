@@ -37,13 +37,13 @@
 
 ## Patterns to Watch For
 
-### [2026-03-25] Test count drift — learnings.md vs actual
+### [2026-03-25] Test count drift — always verify actual counts before release
 - **Type**: PATTERN [verified]
 - **Source**: v1.0.0 release — learnings said 308, actual was 306
 - **Tags**: accuracy, benchmarks, release-readiness
 - **Outcome**: verified
 - **Last-verified**: 2026-03-25
-- **Context**: Always run `npm test` and compare the actual test count against what learnings.md and agent memories claim. Benchmarks drift when tests are removed or consolidated. Corrected 308->306 in v1.0.0 release.
+- **Context**: Always run `npm test` and compare the actual test count against claims in docs and agent memories. Benchmarks drift when tests are removed or consolidated. Do not trust cached counts — derive from source.
 
 ### [2026-03-25] Copilot comments accumulate across PRs — batch-fix in releases
 - **Type**: PATTERN [verified]
