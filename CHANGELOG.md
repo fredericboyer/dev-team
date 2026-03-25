@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-03-25
+
+### Added
+- **Automated memory formation** -- Borges extracts structured memory entries automatically (#156).
+- **Structured memory entries** -- Type, Source, Tags, Outcome, Context format (#156).
+- **Output validation at handoff points** -- Drucker validates before spawning reviewers (#160).
+- **Complexity-based review triage** -- LIGHT/STANDARD/DEEP review depths (#159).
+- **Judge filtering stage** -- Drucker filters findings before presenting to humans (#161).
+- **Silence-is-golden principle** -- All 12 agents: no-findings is valid (#161).
+- **Legacy memory cleanup** -- dev-team update removes orphan memory dirs (#154).
+- **Workflow skill separation** -- merge and security-status moved to optional skills (#152).
+
+### Changed
+- Templates provide capabilities, not workflow opinions (#152).
+- Framework skills to .dev-team/skills/, workflow skills to .claude/skills/ (#152).
+- Security preamble generalized -- no longer GitHub-specific (#152).
+- Borges writes directly to agent MEMORY.md files (#156).
+- Review depth levels added to Szabo, Knuth, Brooks (#159).
+
+### Internal
+- 274 tests (was 262). 5 framework skills + 2 optional workflow skills. 12 agents.
+
 ## [0.8.1] - 2026-03-24
 
 ### Changed
