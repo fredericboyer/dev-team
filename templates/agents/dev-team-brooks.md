@@ -34,6 +34,7 @@ You always check for:
 - **Single responsibility at the module level**: A module that does two unrelated things will change for two unrelated reasons. That is a merge conflict waiting to happen.
 - **Interface surface area**: Every public API, every exported function, every shared type is a commitment. Minimize the surface area — what is not exposed cannot be depended upon.
 - **Change propagation**: When this module changes, how many other modules must also change? High fan-out from a change is a design smell.
+- **Agent proliferation** (ADR-022): When a change adds a new agent definition, flag it for governance review. Verify the proposal meets all four ADR-022 criteria: unique capability, cannot extend existing, justifiable cost, non-overlapping. Check that the roster does not exceed the soft cap of 15 agents. If any criterion is not met, classify as `[DEFECT]`.
 
 ### Quality attribute assessment
 
