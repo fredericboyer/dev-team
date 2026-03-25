@@ -233,8 +233,79 @@ if (flags.length === 0) {
   process.exit(0);
 }
 
+// ─── Complexity-based triage ─────────────────────────────────────────────────
+// Score the change to determine review depth: LIGHT, STANDARD, or DEEP.
+// Uses available tool_input data (old_string/new_string for Edit, content for Write).
+
+function scoreComplexity(toolInput, filePath) {
+  let score = 0;
+
+  // Lines changed
+  const oldStr = toolInput.old_string || "";
+  const newStr = toolInput.new_string || toolInput.content || "";
+  const oldLines = oldStr ? oldStr.split("\n").length : 0;
+  const newLines = newStr ? newStr.split("\n").length : 0;
+  const linesChanged = Math.abs(newLines - oldLines) + Math.min(oldLines, newLines);
+  score += Math.min(linesChanged, 50); // Cap at 50 to avoid single large file dominating
+
+  // Complexity indicators in the new content
+  const complexityPatterns = [
+    /\bfunction\b/g, // new functions
+    /\bclass\b/g, // new classes
+    /\bif\b.*\belse\b/g, // control flow
+    /\bcatch\b/g, // error handling
+    /\bthrow\b/g, // error throwing
+    /\basync\b/g, // async operations
+    /\bawait\b/g, // async operations
+    /\bexport\b/g, // API surface changes
+  ];
+
+  for (const pattern of complexityPatterns) {
+    const matches = newStr.match(pattern);
+    if (matches) score += matches.length * 2;
+  }
+
+  // Security-sensitive files get a boost
+  if (SECURITY_PATTERNS.some((p) => p.test(filePath))) {
+    score += 20;
+  }
+
+  return score;
+}
+
+// Read configurable thresholds from config.json, or use defaults
+let lightThreshold = 10;
+let deepThreshold = 40;
+try {
+  const fs = require("fs");
+  const configPath = path.join(process.cwd(), ".dev-team", "config.json");
+  const config = JSON.parse(fs.readFileSync(configPath, "utf-8"));
+  if (config.reviewThresholds) {
+    lightThreshold = config.reviewThresholds.light || lightThreshold;
+    deepThreshold = config.reviewThresholds.deep || deepThreshold;
+  }
+} catch {
+  // Use defaults
+}
+
+const complexityScore = scoreComplexity(input.tool_input || {}, fullPath);
+let reviewDepth = "STANDARD";
+if (complexityScore < lightThreshold) {
+  reviewDepth = "LIGHT";
+} else if (complexityScore >= deepThreshold) {
+  reviewDepth = "DEEP";
+}
+
 // Output as a DIRECTIVE, not a suggestion. CLAUDE.md instructs the LLM to act on this.
 console.log(`[dev-team] ACTION REQUIRED — spawn these agents as background reviewers:`);
+console.log(`[dev-team] Review depth: ${reviewDepth} (complexity score: ${complexityScore})`);
+if (reviewDepth === "LIGHT") {
+  console.log(`[dev-team] LIGHT review: findings are advisory only — do not classify as [DEFECT].`);
+} else if (reviewDepth === "DEEP") {
+  console.log(
+    `[dev-team] DEEP review: high complexity — request thorough analysis from all reviewers.`,
+  );
+}
 for (const flag of flags) {
   console.log(`  → ${flag}`);
 }
