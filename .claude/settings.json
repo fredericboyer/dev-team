@@ -24,7 +24,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node .dev-team/hooks/dev-team-copilot-merge-gate.js"
+            "command": "node .claude/hooks/copilot-merge-gate.js"
           }
         ]
       },
