@@ -579,6 +579,32 @@ export async function update(targetDir: string): Promise<void> {
     }
   }
 
+  // Step 5b: Create/repair symlinks in .claude/skills/ for framework skill discovery
+  const claudeSkillsDir = path.join(claudeDir, "skills");
+  for (const skillDir of discoveredSkills) {
+    const symlinkPath = path.join(claudeSkillsDir, skillDir);
+    const symlinkTarget = path.relative(claudeSkillsDir, path.join(skillsDir, skillDir));
+    // Check if it's already a real directory (not a symlink) with a SKILL.md
+    let isRealDir = false;
+    try {
+      isRealDir =
+        fs.existsSync(symlinkPath) &&
+        !fs.lstatSync(symlinkPath).isSymbolicLink() &&
+        fileExists(path.join(symlinkPath, "SKILL.md"));
+    } catch {}
+    if (!isRealDir) {
+      // Create symlink if target doesn't exist as a real directory, or repair existing symlink
+      try {
+        fs.mkdirSync(path.dirname(symlinkPath), { recursive: true });
+        // Remove existing symlink if present (broken or stale)
+        try {
+          fs.unlinkSync(symlinkPath);
+        } catch {}
+        fs.symlinkSync(symlinkTarget, symlinkPath);
+      } catch {}
+    }
+  }
+
   // Step 6: Update CLAUDE.md (preserves user content outside markers)
   const claudeMdPath = path.join(targetDir, "CLAUDE.md");
   const claudeMdTemplate = readFile(path.join(templates, "CLAUDE.md"));
@@ -599,6 +625,10 @@ export async function update(targetDir: string): Promise<void> {
   if (!fileExists(metricsDest) && fileExists(metricsSrc)) {
     copyFile(metricsSrc, metricsDest);
   }
+
+  // Clean up ghost entries (labels from removed hooks/agents)
+  prefs.hooks = prefs.hooks.filter((label) => label in HOOK_FILES);
+  prefs.agents = prefs.agents.filter((label) => label in AGENT_FILES);
 
   // Step 8: Save updated preferences (stamp current package version)
   prefs.version = packageVersion;

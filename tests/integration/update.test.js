@@ -298,6 +298,26 @@ describe("dev-team update", () => {
     );
   });
 
+  it("removes ghost hook and agent entries from config.json on update", async () => {
+    await run(tmpDir, ["--all"]);
+
+    // Inject ghost entries into config.json
+    const prefsPath = path.join(tmpDir, ".dev-team", "config.json");
+    const prefs = JSON.parse(fs.readFileSync(prefsPath, "utf-8"));
+    prefs.hooks.push("Task loop"); // ghost hook from older version
+    prefs.agents.push("Phantom"); // ghost agent from older version
+    fs.writeFileSync(prefsPath, JSON.stringify(prefs, null, 2));
+
+    await update(tmpDir);
+
+    const updated = JSON.parse(fs.readFileSync(prefsPath, "utf-8"));
+    assert.ok(!updated.hooks.includes("Task loop"), "ghost hook should be removed");
+    assert.ok(!updated.agents.includes("Phantom"), "ghost agent should be removed");
+    // Real entries should still be there
+    assert.ok(updated.hooks.includes("Safety guard"), "real hook should remain");
+    assert.ok(updated.agents.includes("Voss"), "real agent should remain");
+  });
+
   it("migrates from .claude/ to .dev-team/ on update", async () => {
     // Simulate a pre-migration install (files in .claude/)
     fs.mkdirSync(path.join(tmpDir, ".claude", "agents"), { recursive: true });
@@ -411,6 +431,28 @@ describe("dev-team update", () => {
       fs.existsSync(path.join(tmpDir, ".claude", "settings.json")),
       "settings.json should remain in .claude/",
     );
+  });
+
+  it("creates skill symlinks in .claude/skills/ during update", async () => {
+    await run(tmpDir, ["--all"]);
+
+    // Remove .claude/skills/ symlinks to simulate pre-symlink install
+    const claudeSkillsDir = path.join(tmpDir, ".claude", "skills");
+    if (fs.existsSync(claudeSkillsDir)) {
+      fs.rmSync(claudeSkillsDir, { recursive: true });
+    }
+
+    await update(tmpDir);
+
+    // Symlinks should be recreated
+    const devTeamSkillsDir = path.join(tmpDir, ".dev-team", "skills");
+    const skillDirs = fs.readdirSync(devTeamSkillsDir);
+    for (const skillDir of skillDirs) {
+      const symlinkPath = path.join(claudeSkillsDir, skillDir);
+      assert.ok(fs.existsSync(symlinkPath), `symlink should exist for ${skillDir}`);
+      const stat = fs.lstatSync(symlinkPath);
+      assert.ok(stat.isSymbolicLink(), `${skillDir} should be a symlink`);
+    }
   });
 
   it("migrates when .dev-team/ exists but config.json is missing (partial migration)", async () => {

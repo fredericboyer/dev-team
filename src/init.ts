@@ -1,4 +1,5 @@
 import path from "path";
+import fs from "fs";
 import {
   templateDir,
   copyFile,
@@ -381,6 +382,24 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
     const dest = path.join(skillsDir, skillDir, "SKILL.md");
     if (!fileExists(dest) || isAll) {
       copyFile(src, dest);
+    }
+  }
+
+  // Step 9b: Create symlinks in .claude/skills/ so Claude Code can discover framework skills
+  const claudeSkillsDir = path.join(claudeDir, "skills");
+  for (const skillDir of skillDirs) {
+    const symlinkPath = path.join(claudeSkillsDir, skillDir);
+    const symlinkTarget = path.relative(claudeSkillsDir, path.join(skillsDir, skillDir));
+    if (!fileExists(path.join(symlinkPath, "SKILL.md"))) {
+      // Only create symlink if not already a real directory with a SKILL.md
+      try {
+        fs.mkdirSync(path.dirname(symlinkPath), { recursive: true });
+        // Remove existing symlink if broken
+        try {
+          fs.unlinkSync(symlinkPath);
+        } catch {}
+        fs.symlinkSync(symlinkTarget, symlinkPath);
+      } catch {}
     }
   }
 

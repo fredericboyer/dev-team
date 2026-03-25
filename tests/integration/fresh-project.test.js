@@ -138,6 +138,53 @@ describe("fresh project installation", () => {
     assert.equal(prefs.branchConvention, "feat/123-description");
   });
 
+  it("creates symlinks in .claude/skills/ pointing to .dev-team/skills/", async () => {
+    await run(tmpDir, ["--all"]);
+
+    const claudeSkillsDir = path.join(tmpDir, ".claude", "skills");
+    const devTeamSkillsDir = path.join(tmpDir, ".dev-team", "skills");
+
+    // Framework skills should exist in .dev-team/skills/
+    const skillDirs = fs.readdirSync(devTeamSkillsDir);
+    assert.ok(skillDirs.length > 0, "should have framework skills installed");
+
+    // Each framework skill should have a symlink in .claude/skills/
+    for (const skillDir of skillDirs) {
+      const symlinkPath = path.join(claudeSkillsDir, skillDir);
+      assert.ok(fs.existsSync(symlinkPath), `symlink should exist for ${skillDir}`);
+      const stat = fs.lstatSync(symlinkPath);
+      assert.ok(stat.isSymbolicLink(), `${skillDir} should be a symlink`);
+
+      // Symlink target should be relative
+      const target = fs.readlinkSync(symlinkPath);
+      assert.ok(!path.isAbsolute(target), `symlink target should be relative, got: ${target}`);
+
+      // Should resolve to the actual SKILL.md
+      assert.ok(
+        fs.existsSync(path.join(symlinkPath, "SKILL.md")),
+        `symlink for ${skillDir} should resolve to a directory with SKILL.md`,
+      );
+    }
+  });
+
+  it("does not overwrite real directories in .claude/skills/ with symlinks", async () => {
+    // Create a real directory in .claude/skills/ before init
+    const realSkillDir = path.join(tmpDir, ".claude", "skills", "dev-team-challenge");
+    fs.mkdirSync(realSkillDir, { recursive: true });
+    fs.writeFileSync(path.join(realSkillDir, "SKILL.md"), "# Custom skill override");
+
+    await run(tmpDir, ["--all"]);
+
+    // The real directory should NOT be replaced by a symlink
+    const stat = fs.lstatSync(realSkillDir);
+    assert.ok(!stat.isSymbolicLink(), "should not replace real directory with symlink");
+    const content = fs.readFileSync(path.join(realSkillDir, "SKILL.md"), "utf-8");
+    assert.ok(
+      content.includes("Custom skill override"),
+      "real directory content should be preserved",
+    );
+  });
+
   it("--preset backend installs only backend agents", async () => {
     await run(tmpDir, ["--preset", "backend"]);
 
