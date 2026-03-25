@@ -17,7 +17,7 @@ Adversarial AI agent team for any project. Installs Claude Code agents, hooks, a
 - Branch naming: `feat/123-description` or `fix/456-description`
 - Commits reference issues: `fixes #123` or `refs #123`
 - All merges via PR. No direct pushes to main.
-- **Aggressively parallelize with git worktrees.** When multiple issues touch independent files, work them simultaneously in separate worktrees. Do NOT work sequentially on issues that can be parallelized. Use the Agent tool with `isolation: "worktree"` to spawn parallel workstreams. Only sequence issues that have file conflicts.
+- **Aggressively parallelize.** When multiple issues touch independent files, work them simultaneously. Do NOT work sequentially on issues that can be parallelized. In agent team mode, assign issues to teammates on separate branches. In solo mode, use the Agent tool with `isolation: "worktree"` to spawn parallel workstreams. Only sequence issues that have file conflicts.
 
 ## Development
 
