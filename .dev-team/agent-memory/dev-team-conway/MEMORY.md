@@ -69,5 +69,21 @@
 - **Last-verified**: 2026-03-25
 - **Context**: The MIGRATIONS array in update.ts supports agentRenames (v0.4.0) and skillRemovals (v1.0.0). When `dev-team update` detects the user's installed version is older, it runs all applicable migrations. Added skillRemovals to clean up legacy workflow skill dirs.
 
+### [2026-03-25] Close milestone after release PR creation
+- **Type**: PATTERN [verified]
+- **Source**: v1.1.1 release — team learnings require milestone closure as part of release process
+- **Tags**: release, milestone, process
+- **Outcome**: verified
+- **Last-verified**: 2026-03-25
+- **Context**: After creating the release PR, close the corresponding GitHub milestone (e.g., v1.1.1). Use `gh api repos/{owner}/{repo}/milestones/{number} -X PATCH -f state=closed`. This is part of the standard release checklist.
+
+### [2026-03-25] Patch release process — streamlined for bug-fix-only releases
+- **Type**: PATTERN [verified]
+- **Source**: v1.1.1 release execution
+- **Tags**: release, patch, process
+- **Outcome**: verified
+- **Last-verified**: 2026-03-25
+- **Context**: Patch releases: verify all PRs merged, create branch `chore/release-v{x.y.z}`, add CHANGELOG section under [Unreleased] with `### Fixed` only, `npm version {x.y.z} --no-git-tag-version`, commit, push, create PR, close milestone. Do NOT merge — wait for human. After merge: tag and release workflow handles npm publish.
+
 ## Calibration Log
 <!-- Challenges accepted/overruled — tunes adversarial intensity over time -->
