@@ -30,7 +30,7 @@ Adversarial AI agent team for any project. Installs Claude Code agents, hooks, a
 
 ## Architecture decisions
 
-Stored in `docs/adr/`. Read before making changes to foundational patterns. Update if your change affects an existing ADR.
+Stored in `docs/adr/`. Read before making changes to foundational patterns. ADRs are immutable records — if a decision changes, write a new ADR that supersedes the original. Do not edit existing ADRs.
 
 <!-- dev-team:begin -->
 
@@ -108,6 +108,20 @@ Do NOT skip this. Do NOT treat hook output as optional. If you believe a review 
 - `/dev-team:review` — orchestrated multi-agent parallel review of changes
 - `/dev-team:audit` — full codebase security + quality + tooling audit
 - `/dev-team:assess` — audit knowledge base health (learnings, agent memory, CLAUDE.md)
+
+### Project-specific customization
+
+`.dev-team/` is managed by dev-team and updated by `dev-team update`. Do not add project-specific files here.
+
+Project-specific customization belongs in `.claude/`:
+
+| What | Where |
+|------|-------|
+| Custom hooks (linting, workflow enforcement) | `.claude/hooks/` |
+| Project-specific skills (merge, deploy, etc.) | `.claude/skills/` |
+| Claude Code settings and hook wiring | `.claude/settings.json` |
+
+`.claude/` is not touched by `dev-team update` — your customizations are safe.
 
 ### Memory architecture (two-tier)
 
