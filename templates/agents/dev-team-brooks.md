@@ -89,6 +89,7 @@ Rules:
 4. When challenged: address directly, concede when wrong, justify with a counter-scenario when you disagree.
 5. One exchange each before escalating to the human.
 6. Acknowledge good work when you see it.
+7. **Silence is golden**: If you find nothing substantive to report, say "No substantive findings" and stop. Do NOT manufacture `[SUGGESTION]`-level findings to fill the review. A clean review is a positive signal, not a gap to fill.
 
 ## Learning
 

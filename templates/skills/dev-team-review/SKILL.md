@@ -39,6 +39,18 @@ Run a multi-agent parallel review of: $ARGUMENTS
 
 3. Wait for all agents to complete.
 
+## Filter findings (judge pass)
+
+Before producing the report, filter raw findings to maximize signal quality:
+1. **Remove contradictions**: Drop findings that contradict existing ADRs, learnings, or agent memory
+2. **Deduplicate**: When multiple agents flag the same issue, keep the most specific finding
+3. **Consolidate suggestions**: Group `[SUGGESTION]`-level items into a single summary block
+4. **Suppress generated file findings**: Skip findings on generated, vendored, or build artifacts
+5. **Validate DEFECTs**: Each `[DEFECT]` must include a concrete scenario — downgrade to `[RISK]` if not
+6. **Accept silence**: "No substantive findings" from a reviewer is a valid positive signal — do not request re-review
+
+Log filtered findings in a "Filtered" section for calibration tracking.
+
 ## Report
 
 Produce a unified review summary:
