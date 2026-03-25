@@ -80,13 +80,18 @@ Track iterations in conversation context (no state files). For each iteration:
    - If validation fails, route back to implementer with specific failure reason. If it fails twice, escalate to human.
 3. After validation passes, spawn review agents in parallel as background tasks.
 4. Collect classified challenges from reviewers.
-5. If any `[DEFECT]` challenges exist, **compact the context** before the next iteration:
-   - Produce a structured summary: DEFECTs found (agent, file, status), files changed, outstanding items
+5. Route **all classified findings** to the implementing agent — not just `[DEFECT]`s. The implementer must explicitly acknowledge each finding:
+   - **Address**: fix or incorporate the finding in the next iteration
+   - **Defer**: accept the finding but defer to a follow-up issue (must state reason)
+   - **Dispute**: disagree with the finding (triggers one-round escalation — reviewer responds, then human decides)
+   Only `[DEFECT]` findings block progress. `[RISK]`, `[QUESTION]`, and `[SUGGESTION]` are advisory — they must be acknowledged but do not prevent the loop from exiting.
+6. If any `[DEFECT]` challenges exist, **compact the context** before the next iteration:
+   - Produce a structured summary: all findings (agent, classification, file, status/outcome), files changed, outstanding items
    - New reviewers in subsequent waves receive: current diff + compact summary + agent definition
    - They do NOT receive raw conversation history from prior waves
-6. Address defects in the next iteration.
-7. If no `[DEFECT]` remains, output DONE to exit the loop.
-8. If max iterations reached without convergence, report remaining defects and exit.
+7. Address defects in the next iteration.
+8. If no `[DEFECT]` remains, output DONE to exit the loop.
+9. If max iterations reached without convergence, report remaining defects and exit.
 
 The convergence check happens in conversation context: count iterations, check for `[DEFECT]` findings, and decide whether to continue or exit.
 
@@ -110,11 +115,11 @@ Drucker spawns one implementing agent per independent issue, each on its own bra
 ### Phase 2: Review wave
 Reviews do **not** start until **all** implementation agents have completed (Agent tool provides completion notifications as the sync barrier). Once all are done, spawn review agents (Szabo + Knuth, plus conditional reviewers) in parallel across all branches simultaneously. Each reviewer receives the diff for one specific branch and produces classified findings scoped to that branch.
 
-### Phase 3: Defect routing
-Collect all findings. Route `[DEFECT]` items back to the original implementing agent for each branch. Agents fix defects on their own branch. Before spawning the next review wave, **compact context**: produce a structured summary of prior findings, their status (fixed/disputed/pending), and files changed. New reviewers receive current diff + compact summary only — not full conversation history from prior waves. Continue until no `[DEFECT]` findings remain or the per-branch iteration limit is reached.
+### Phase 3: Finding routing
+Collect all findings across all branches. Route **all classified findings** — `[DEFECT]`, `[RISK]`, `[QUESTION]`, `[SUGGESTION]` — back to the original implementing agent for each branch. Each agent must acknowledge every finding (address/defer/dispute). Only `[DEFECT]` findings block progress. Agents fix defects on their own branch. Before spawning the next review wave, **compact context**: produce a structured summary of all findings, their classification, and outcome (fixed/deferred/disputed/pending), plus files changed. New reviewers receive current diff + compact summary only — not full conversation history from prior waves. Continue until no `[DEFECT]` findings remain or the per-branch iteration limit is reached.
 
 ### Phase 4: Borges completion
-Borges runs **once** across all branches after the final review wave clears. This ensures cross-branch coherence: memory files are consistent, learnings are not duplicated, and system improvement recommendations consider the full batch.
+Borges runs **once** across all branches after the final review wave clears. Pass Borges the **finding outcome log** (see Completion step 3 for format) covering all branches. This ensures cross-branch coherence: memory files are consistent, learnings are not duplicated, metrics are recorded, and system improvement recommendations consider the full batch.
 
 ### Convergence criteria
 Parallel mode is complete when:
@@ -130,12 +135,36 @@ Before starting work, check for open security alerts: run `/dev-team:security-st
 When the loop exits:
 1. **Deliver the work**: If changes are on a feature branch, create the PR (body must include `Closes #<issue>`). Ensure the PR is ready to merge: CI green, reviews passed, branch up to date. Then follow the project's merge workflow — use `/dev-team:merge` if the project has it configured, otherwise report readiness. If merge fails (CI failures, merge conflicts, branch protection), report the blocker to the human rather than leaving work unattended.
 2. **Clean up worktree**: If the work was done in a worktree, clean it up after the branch is pushed and the PR is created. Do not wait for merge to clean the worktree.
-3. You MUST spawn **@dev-team-borges** (Librarian) as the final step. Pass Borges the **finding outcome log**: every finding with its classification, source agent, and outcome (accepted/overruled/ignored), including the human's reasoning for overrules. Borges will:
+3. You MUST spawn **@dev-team-borges** (Librarian) as the final step. Format and pass Borges the **finding outcome log** using this structured format:
+
+   ```
+   ## Finding Outcome Log
+   Task: <issue number and title>
+   Branch: <branch name>
+   Review rounds: <N>
+   Agents involved: <comma-separated list of all participating agents>
+
+   ### Findings
+   | # | Agent | Classification | File | Finding summary | Outcome | Reason |
+   |---|-------|---------------|------|-----------------|---------|--------|
+   | 1 | szabo | [DEFECT] | src/auth.ts | Missing input validation | addressed | Fixed in round 2 |
+   | 2 | knuth | [RISK] | src/parser.ts | No boundary check for empty input | deferred | Tracked in #999 |
+   | 3 | brooks | [SUGGESTION] | src/core.ts | Extract to shared utility | addressed | Refactored |
+   | 4 | knuth | [QUESTION] | src/config.ts | Why not use env vars? | addressed | Added explanation in comments |
+
+   ### Summary
+   - Total findings: <N>
+   - DEFECTs: <N> addressed, <N> disputed
+   - Advisory (RISK/QUESTION/SUGGESTION): <N> addressed, <N> deferred, <N> disputed
+   - Rounds to convergence: <N>
+   ```
+
+   This log enables Borges to record calibration metrics. Borges will:
    - **Extract structured memory entries** from review findings and implementation decisions
    - **Reinforce accepted patterns** in the reviewer's memory (calibration feedback)
    - **Record overruled findings** with context so reviewers generate fewer false positives
    - **Generate calibration rules** when 3+ findings on the same tag are overruled
-   - **Record metrics** to `.dev-team/metrics.md` (acceptance rates, rounds to convergence)
+   - **Record metrics** to `.dev-team/metrics.md` (acceptance rates, rounds to convergence, per-agent stats)
    - Write entries to each participating agent's MEMORY.md using the structured format
    - Update shared learnings in `.dev-team/learnings.md`
    - Check cross-agent coherence
