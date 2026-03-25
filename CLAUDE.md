@@ -109,11 +109,6 @@ Do NOT skip this. Do NOT treat hook output as optional. If you believe a review 
 - `/dev-team:audit` — full codebase security + quality + tooling audit
 - `/dev-team:assess` — audit knowledge base health (learnings, agent memory, CLAUDE.md)
 
-**Optional workflow skills** (installed to `.claude/skills/` during init, not overwritten on update):
-- `/dev-team:merge` — merge a PR with Copilot review checking, auto-merge, and CI monitoring
-- `/dev-team:security-status` — check code scanning, Dependabot, and secret scanning alerts
-- Check `.claude/skills/` for any additional project-specific workflow skills
-
 ### Memory architecture (two-tier)
 
 All project and process learnings MUST go to in-repo files, NOT to machine-local memory (`~/.claude/projects/`). Machine-local memory is invisible to other developers, agents, and sessions.

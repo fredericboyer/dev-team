@@ -46,10 +46,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Legacy MEMORY.md merge heuristic no longer misclassifies template boilerplate as substantive (#183).
 - Status command correctly detects empty vs populated memory files (#185).
-- Missing test assertion for security-status workflow skill (#187).
+- Missing test assertion for security-status skill (#187).
 
 ### Internal
-- 276 tests (was 274). 5 framework skills + 2 optional workflow skills. 12 agents. ADR-019 amended for agent teams.
+- 276 tests (was 274). 5 framework skills. 12 agents. ADR-019 amended for agent teams.
 
 ## [0.9.0] - 2026-03-24
 
@@ -61,17 +61,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Judge filtering stage** -- Drucker filters findings before presenting to humans (#161).
 - **Silence-is-golden principle** -- All 12 agents: no-findings is valid (#161).
 - **Legacy memory cleanup** -- dev-team update removes orphan memory dirs (#154).
-- **Workflow skill separation** -- merge and security-status moved to optional skills (#152).
+- **Skill separation** -- merge and security-status identified as project-specific (#152).
 
 ### Changed
 - Templates provide capabilities, not workflow opinions (#152).
-- Framework skills to .dev-team/skills/, workflow skills to .claude/skills/ (#152).
+- Framework skills to .dev-team/skills/ (#152).
 - Security preamble generalized -- no longer GitHub-specific (#152).
 - Borges writes directly to agent MEMORY.md files (#156).
 - Review depth levels added to Szabo, Knuth, Brooks (#159).
 
 ### Internal
-- 274 tests (was 262). 5 framework skills + 2 optional workflow skills. 12 agents.
+- 274 tests (was 262). 5 framework skills. 12 agents.
 
 ## [0.8.1] - 2026-03-24
 
