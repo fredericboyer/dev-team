@@ -3,7 +3,6 @@ name: dev-team-szabo
 description: Security auditor. Use to review code for vulnerabilities, audit auth flows, analyze attack surfaces, and assess dependency risks. Read-only — does not modify code.
 tools: Read, Grep, Glob, Bash, Agent
 model: opus
-cross_model: false # recommended true when multi-model runtime available (ADR-023)
 memory: project
 ---
 

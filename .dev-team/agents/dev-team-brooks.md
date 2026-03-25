@@ -3,7 +3,6 @@ name: dev-team-brooks
 description: Architect and quality attribute reviewer. Use to review architectural decisions, challenge coupling and dependency direction, validate changes against ADRs, and assess quality attributes (performance, maintainability, scalability). Always-on for all non-test code changes. Read-only — does not modify code.
 tools: Read, Grep, Glob, Bash, Agent
 model: opus
-cross_model: false # recommended true when multi-model runtime available (ADR-023)
 memory: project
 ---
 

@@ -7,6 +7,47 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-03-25
+
+### Added
+- **ADR-024: Remove workflow-skills from templates** -- Workflow skills (merge, security-status) are no longer shipped in templates; they are project-specific customizations in `.claude/skills/` (fixes #243).
+- **ADR-025: Project-specific customization in .claude/** -- Clear two-directory convention: `.dev-team/` = product install, `.claude/` = project customization (fixes #243).
+- **Project-specific customization guidance in template CLAUDE.md** -- Documents `.dev-team/` vs `.claude/` separation for all installed projects (#241).
+- **Copilot merge gate hook** -- Project-specific hook in `.claude/hooks/` enforcing Copilot review before merge (#234).
+- **Cross-model reviewer assignment (ADR-023)** -- Architecture for running reviewers on alternative models for cross-validation (#223).
+- **Cold start seed entries** for all 12 agent memories -- New installations start with bootstrapped domain-appropriate memory entries (#225).
+- **`/dev-team:assess` skill** added to README documentation.
+- **Legacy workflow skill cleanup migration** -- `dev-team update` from pre-1.0 versions removes leftover `dev-team-merge` and `dev-team-security-status` dirs from `.dev-team/skills/`.
+
+### Changed
+- **BREAKING: Minimum Node.js version bumped to 22+** (was 18+) (#230).
+- **BREAKING: Workflow skills removed from templates** -- `/dev-team:merge` and `/dev-team:security-status` are no longer installed by `dev-team init`. Projects that need them should add them to `.claude/skills/` (#237).
+- **Project-specific hooks moved from `.dev-team/hooks/` to `.claude/hooks/`** -- Survives `dev-team update` without overwrite (#240).
+- Parallelization guidance reconciled -- agent teams and worktrees documented as complementary approaches (#232).
+- Drucker main loop pattern enforced for this repo (#232).
+- README.md updated: agent names corrected (drucker/tufte/brooks/conway), Hamilton and Borges added to diagram, Node.js 22+, 5 skills, 12 agents.
+- Docs restructured: PRD.md moved to `docs/`, guides to `docs/guides/`, research to `docs/research/`.
+- `cross_model: false` removed from agent definitions -- field is omitted until multi-model runtime is available (per ADR-023).
+- Conway template merge process made conditional on `/dev-team:merge` availability.
+- Template CLAUDE.md wording clarified: `.claude/hooks/` and `.claude/skills/` are not overwritten by update (not the entire `.claude/` directory).
+- Merge skill `minimizeComment` documented as hiding comments only (GitHub API limitation, does not resolve threads).
+- Agent memory test counts corrected from 217 to 306 in Beck and Borges memories.
+- git-workflow skill: `user_invocable` set to `true`, hardcoded path replaced with generic placeholder.
+
+### Fixed
+- Stale quality benchmarks updated in learnings.md (#231).
+- Improved assess-learnings skill with deeper assessment coverage (#217).
+- Addressed unresolved Copilot review feedback from v0.11 PRs (#214, #229).
+- `cross_model` field set to `false` (boolean) instead of YAML null in agent defs (#226).
+- Workflow skills listed explicitly in template CLAUDE.md (#221).
+- Merge skill replies directed to Copilot threads, enforced on release PRs (#228).
+- git-workflow skill clarified with `cross_model` comment (#227).
+
+### Internal
+- 306 tests. 12 agents. 5 framework skills. 6 hooks. 25 ADRs.
+- ADR immutability convention: decision content is immutable, only the Status field changes as a lifecycle marker.
+- Docs restructured: `docs/guides/`, `docs/research/`, `docs/adr/`, `docs/design-notes/`.
+
 ## [0.11.0] - 2026-03-24
 
 ### Added

@@ -31,7 +31,7 @@
 
 ## Quality Benchmarks
 
-- 308 tests total (was 117 at v0.3.0, was 273 before TS6 migration consolidated some)
+- 306 tests total (was 117 at v0.3.0, was 273 before TS6 migration consolidated some)
 - 12 agents: Voss, Mori, Szabo, Knuth, Beck, Deming, Tufte, Brooks, Conway, Drucker, Borges, Hamilton
 - 5 framework skills: challenge, task, review, audit, assess
 - 6 hooks: TDD enforce, safety guard, post-change review, pre-commit gate (blocking), pre-commit lint, watch list

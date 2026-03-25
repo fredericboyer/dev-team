@@ -26,6 +26,7 @@ interface AgentRename {
 interface Migration {
   version: string;
   agentRenames?: AgentRename[];
+  skillRemovals?: string[];
 }
 
 const MIGRATIONS: Migration[] = [
@@ -57,6 +58,10 @@ const MIGRATIONS: Migration[] = [
         newFile: "dev-team-drucker.md",
       },
     ],
+  },
+  {
+    version: "1.0.0",
+    skillRemovals: ["dev-team-merge", "dev-team-security-status"],
   },
 ];
 
@@ -175,6 +180,21 @@ function runMigrations(prefs: Preferences, fromVersion: string, devTeamDir: stri
         const idx = prefs.agents.indexOf(rename.oldLabel);
         if (idx !== -1) {
           prefs.agents[idx] = rename.newLabel;
+        }
+      }
+    }
+
+    if (migration.skillRemovals) {
+      const skillsDir = path.join(devTeamDir, "skills");
+      for (const skillName of migration.skillRemovals) {
+        const skillDir = path.join(skillsDir, skillName);
+        if (dirExists(skillDir)) {
+          try {
+            fs.rmSync(skillDir, { recursive: true });
+            log.push(`Removed legacy workflow skill: ${skillName}`);
+          } catch {
+            // Best effort — skill dir may already be gone
+          }
         }
       }
     }

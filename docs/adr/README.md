@@ -48,3 +48,5 @@ What becomes easier or more difficult?
 | [021](021-typescript-6-module-resolution.md) | TypeScript 6.0 with nodenext module resolution | accepted |
 | [022](022-agent-proliferation-governance.md) | Agent proliferation governance | accepted |
 | [023](023-cross-model-reviewer-assignment.md) | Cross-model reviewer assignment for high-risk changes | proposed |
+| [024](024-remove-workflow-skills-from-templates.md) | Remove workflow-skills from templates | accepted |
+| [025](025-project-specific-customization-in-claude.md) | Project-specific customization in .claude/ | accepted |

@@ -2,7 +2,7 @@
 
 Adversarial AI agent team for any project. Installs [Claude Code](https://claude.ai/claude-code) agents, hooks, and skills that enforce quality through productive friction.
 
-Instead of an AI that agrees with everything, dev-team gives you ten opinionated specialists that challenge each other — and you. Hooks enforce the process deterministically. Agents can't skip reviews. Commits are blocked until the team signs off.
+Instead of an AI that agrees with everything, dev-team gives you twelve opinionated specialists that challenge each other — and you. Hooks enforce the process deterministically. Agents can't skip reviews. Commits are blocked until the team signs off.
 
 ## How the system works
 
@@ -13,25 +13,31 @@ graph TB
         S2["/dev-team:review"]
         S3["/dev-team:audit"]
         S4["/dev-team:challenge"]
+        S5["/dev-team:assess"]
     end
 
     subgraph Lead["Orchestrator"]
-        L["@dev-team-lead\nAnalyzes task → selects agents\nManages review loop"]
+        L["@dev-team-drucker\nAnalyzes task → selects agents\nManages review loop"]
     end
 
     subgraph Impl["Implementation Agents (sonnet)"]
         Voss["@dev-team-voss\nBackend"]
         Mori["@dev-team-mori\nFrontend"]
+        Hamilton["@dev-team-hamilton\nInfrastructure"]
         Beck["@dev-team-beck\nTests"]
         Deming["@dev-team-deming\nTooling"]
-        Docs["@dev-team-docs\nDocumentation"]
-        Release["@dev-team-release\nRelease Manager"]
+        Tufte["@dev-team-tufte\nDocumentation"]
+        Conway["@dev-team-conway\nRelease Manager"]
     end
 
     subgraph Rev["Review Agents (opus, read-only)"]
         Szabo["@dev-team-szabo\nSecurity"]
         Knuth["@dev-team-knuth\nQuality"]
-        Architect["@dev-team-architect\nArchitecture"]
+        Brooks["@dev-team-brooks\nArchitecture"]
+    end
+
+    subgraph End["End-of-workflow"]
+        Borges["@dev-team-borges\nLibrarian / Memory"]
     end
 
     subgraph Hooks["Hooks (deterministic enforcement)"]
@@ -45,7 +51,7 @@ graph TB
 
     subgraph Mem["Persistent Memory"]
         M1["agent-memory/\nPer-agent calibration"]
-        M2["dev-team-learnings.md\nShared knowledge"]
+        M2["learnings.md\nShared knowledge"]
     end
 
     S1 --> L
@@ -53,6 +59,7 @@ graph TB
     S3 -->|spawns Szabo+Knuth+Deming| Rev
     S3 -->|spawns| Deming
     S4 -->|structured review| Rev
+    S5 -->|knowledge base audit| End
     L -->|delegates| Impl
     L -->|spawns parallel| Rev
     Impl -->|writes code| Hooks
@@ -62,12 +69,13 @@ graph TB
     H4 -.->|blocks commit| L
     Impl & Rev -->|write| Mem
     Mem -->|loaded at start| Impl & Rev
+    L -->|end of workflow| End
 ```
 
 ### The flow
 
-1. **You give a task** → `@dev-team-lead` or `/dev-team:task`
-2. **Lead delegates** → picks the right implementer (Voss for backend, Mori for frontend, etc.)
+1. **You give a task** → `@dev-team-drucker` or `/dev-team:task`
+2. **Drucker delegates** → picks the right implementer (Voss for backend, Mori for frontend, etc.)
 3. **Implementer writes code** → hooks fire automatically on every edit
 4. **Hooks flag reviewers** → `ACTION REQUIRED` directive + tracking file written
 5. **Reviewers spawn in parallel** → produce classified findings (`[DEFECT]`, `[RISK]`, etc.)
@@ -87,7 +95,7 @@ npx @fredericboyer/dev-team init --preset fullstack  # All agents
 npx @fredericboyer/dev-team init --preset data       # Data pipeline bundle
 ```
 
-Requires Node.js 18+ and Claude Code.
+Requires Node.js 22+ and Claude Code.
 
 ### After installation
 
@@ -98,22 +106,24 @@ npx @fredericboyer/dev-team create-agent <name>     # Scaffold a custom agent
 
 ## What you get
 
-### Agents (10)
+### Agents (12)
 
 | Agent | Role | Model | When to use |
 |-------|------|-------|-------------|
-| `@dev-team-lead` | **Orchestrator** | opus | Auto-delegates to specialists, manages review loops |
+| `@dev-team-drucker` | **Orchestrator** | opus | Auto-delegates to specialists, manages review loops |
 | `@dev-team-voss` | Backend Engineer | sonnet | API design, data modeling, system architecture |
 | `@dev-team-mori` | Frontend Engineer | sonnet | Components, accessibility, UX patterns |
+| `@dev-team-hamilton` | Infrastructure Engineer | sonnet | Dockerfiles, IaC, CI/CD, k8s, deployment, monitoring |
 | `@dev-team-szabo` | Security Auditor | opus | Vulnerability review, auth flows, attack surfaces |
 | `@dev-team-knuth` | Quality Auditor | opus | Coverage gaps, boundary conditions, correctness |
 | `@dev-team-beck` | Test Implementer | sonnet | Writing tests, TDD cycles |
 | `@dev-team-deming` | Tooling Optimizer | sonnet | Linters, formatters, CI/CD, hooks, automation |
-| `@dev-team-docs` | Documentation Engineer | sonnet | Doc accuracy, stale docs, doc-code sync |
-| `@dev-team-architect` | Architect | opus | Coupling, dependency direction, ADR compliance |
-| `@dev-team-release` | Release Manager | sonnet | Versioning, changelog, semver validation |
+| `@dev-team-tufte` | Documentation Engineer | sonnet | Doc accuracy, stale docs, doc-code sync |
+| `@dev-team-brooks` | Architect & Quality Reviewer | opus | Coupling, ADR compliance, quality attributes |
+| `@dev-team-conway` | Release Manager | sonnet | Versioning, changelog, semver validation |
+| `@dev-team-borges` | Librarian | sonnet | Memory extraction, cross-agent coherence, system improvement |
 
-**Opus** agents do deep analysis — Szabo, Knuth, and Architect are read-only reviewers; Lead uses opus for orchestration with full access. **Sonnet** agents implement (faster, full write access).
+**Opus** agents do deep analysis — Szabo, Knuth, and Brooks are read-only reviewers; Drucker uses opus for orchestration with full access. **Sonnet** agents implement (faster, full write access). Borges runs at end-of-workflow for memory consolidation.
 
 ### Hooks (6)
 
@@ -128,7 +138,7 @@ npx @fredericboyer/dev-team create-agent <name>     # Scaffold a custom agent
 
 All hooks are Node.js scripts — work on macOS, Linux, and Windows.
 
-### Skills (4)
+### Skills (5)
 
 | Skill | What it does |
 |-------|-------------|
@@ -136,13 +146,14 @@ All hooks are Node.js scripts — work on macOS, Linux, and Windows.
 | `/dev-team:review` | Parallel multi-agent review — spawns agents based on changed file patterns |
 | `/dev-team:audit` | Full codebase scan — Szabo (security) + Knuth (quality) + Deming (tooling) |
 | `/dev-team:challenge` | Critical examination of a proposal or design decision |
+| `/dev-team:assess` | Audit knowledge base health — learnings, agent memory, CLAUDE.md accuracy |
 
 ## Step-by-step usage guide
 
 ### 1. Start a task
 
 ```
-@dev-team-lead Add rate limiting to the API endpoints
+@dev-team-drucker Add rate limiting to the API endpoints
 ```
 
 Or use the task loop for automatic iteration:
@@ -151,7 +162,7 @@ Or use the task loop for automatic iteration:
 /dev-team:task Add rate limiting to the API endpoints
 ```
 
-Lead analyzes the task, picks Voss (backend), and spawns Szabo + Knuth as reviewers.
+Drucker analyzes the task, picks Voss (backend), and spawns Szabo + Knuth + Brooks as reviewers.
 
 ### 2. Let the agents work
 
@@ -255,7 +266,7 @@ Agent definitions live in `.dev-team/agents/`. Edit focus areas, challenge style
 npx @fredericboyer/dev-team create-agent codd    # Scaffold a new agent
 ```
 
-See [docs/custom-agents.md](docs/custom-agents.md) for the full authoring guide with format reference, blank template, and a worked example.
+See [docs/guides/custom-agents.md](docs/guides/custom-agents.md) for the full authoring guide with format reference, blank template, and a worked example.
 
 ### Configure watch lists
 
@@ -274,11 +285,11 @@ Add file-pattern-to-agent mappings in `.dev-team/config.json`:
 
 | Preset | Agents included |
 |--------|----------------|
-| `backend` | Voss, Szabo, Knuth, Beck, Deming, Architect, Release |
-| `fullstack` | All 10 agents |
-| `data` | Voss, Szabo, Knuth, Beck, Deming, Docs |
+| `backend` | Voss, Hamilton, Szabo, Knuth, Beck, Deming, Brooks, Conway |
+| `fullstack` | All 12 agents |
+| `data` | Voss, Szabo, Knuth, Beck, Deming, Tufte |
 
-`@dev-team-lead` is included in `fullstack` only. For other presets, invoke Lead manually with `@dev-team-lead` when you want automatic delegation.
+Drucker (orchestrator) and Borges (librarian) are included in all presets. For non-fullstack presets, invoke Drucker with `@dev-team-drucker` for automatic delegation.
 
 ### Update
 
@@ -294,12 +305,14 @@ Updates agents, hooks, and skills to the latest templates. Preserves your agent 
 .dev-team/
   agents/              # 12 agent definitions (YAML frontmatter + prompt)
   hooks/               # 6 quality enforcement scripts
-  skills/              # 4 skill definitions
+  skills/              # 5 skill definitions
   agent-memory/        # Per-agent persistent memory (never overwritten on update)
   learnings.md         # Shared team knowledge (never overwritten on update)
   config.json          # Installation preferences
 .claude/
-  settings.json        # Hook configuration (merged additively, stays in .claude/)
+  settings.json        # Hook configuration (merged additively)
+  hooks/               # Project-specific hooks (not overwritten on update)
+  skills/              # Project-specific workflow skills (not overwritten on update)
 CLAUDE.md              # Project instructions (dev-team section via markers)
 ```
 

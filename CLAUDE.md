@@ -27,6 +27,7 @@ Adversarial AI agent team for any project. Installs Claude Code agents, hooks, a
 - `npm test` — run all tests
 - `node bin/dev-team.js init --all` — test the installer locally
 - TypeScript source, compiled to CommonJS. Node.js 22+, zero runtime dependencies.
+- Version bumps: use `npm version <version> --no-git-tag-version` to update both `package.json` and `package-lock.json` atomically. Do not edit `package-lock.json` manually.
 
 ## Architecture decisions
 
