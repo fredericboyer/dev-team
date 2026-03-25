@@ -75,16 +75,26 @@ Do NOT skip this. Do NOT treat hook output as optional. If you believe a review 
 **Optional workflow skills** (installed to `.claude/skills/` during init, not overwritten on update):
 - Check `.claude/skills/` for project-specific workflow skills (merge automation, security monitoring, etc.)
 
-### Learnings — where to write what
+### Memory architecture (two-tier)
 
 All project and process learnings MUST go to in-repo files, NOT to machine-local memory (`~/.claude/projects/`). Machine-local memory is invisible to other developers, agents, and sessions.
 
+**Tier 1 — Shared team memory** (`.dev-team/learnings.md`):
+Project facts, overruled challenges, cross-agent decisions, process rules. All agents read this at session start.
+
+**Tier 2 — Agent calibration memory** (`.dev-team/agent-memory/<agent>/MEMORY.md`):
+Domain-specific findings, known patterns, active watch lists. Each agent owns its own file. Entries include `Last-verified` dates for temporal decay.
+
 | What | Where | Examples |
 |------|-------|---------|
-| Project patterns, process rules, tech debt, overruled challenges | `.dev-team/learnings.md` | "We use PostgreSQL", "Hooks over guidelines", "Knuth's finding X was overruled because Y" |
-| Agent-specific calibration | `.dev-team/agent-memory/<agent>/MEMORY.md` | Szabo: "Auth uses JWT not sessions", Knuth: "Coverage weak in parsers" |
+| Project patterns, process rules, tech debt, overruled challenges | `.dev-team/learnings.md` (Tier 1) | "We use PostgreSQL", "Hooks over guidelines", "Knuth's finding X was overruled because Y" |
+| Agent-specific calibration | `.dev-team/agent-memory/<agent>/MEMORY.md` (Tier 2) | Szabo: "Auth uses JWT not sessions", Knuth: "Coverage weak in parsers" |
 | Formal architecture decisions | `docs/adr/` | ADR format, not learnings |
 | User-specific preferences only | Machine-local memory | Personal style, name, role — things that vary per person, not per project |
+
+**Memory evolution:** New entries trigger re-evaluation of related existing entries. Duplicates are merged, contradictions are superseded, and 3+ overrules on the same tag generate calibration rules.
+
+**Temporal decay:** Entries have `Last-verified` dates. Borges flags entries not verified in 30+ days and archives entries over 90 days to the `## Archive` section.
 
 When the human gives feedback about process, coding style, or tool behavior: write it to `.dev-team/learnings.md`. Only use machine-local memory for things that are truly personal and would not apply to another developer on the same project.
 
