@@ -156,9 +156,6 @@ When the human gives feedback about process, coding style, or tool behavior: wri
 
 
 
-
-
-
 ## Project-Specific Workflow
 
 ### Merging PRs
@@ -166,7 +163,4 @@ When the human gives feedback about process, coding style, or tool behavior: wri
 **Always use `/merge` to merge PRs.** Do not use raw `gh pr merge` or check Copilot comments separately.
 
 The merge skill handles Copilot check run monitoring, auto-merge, CI verification, and post-merge actions automatically. This applies to all PRs — including those created by background agents.
-
-
-
 

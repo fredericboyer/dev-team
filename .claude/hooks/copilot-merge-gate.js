@@ -5,7 +5,7 @@
  * PreToolUse hook on Bash.
  *
  * Blocks direct PR merge commands that bypass Copilot review verification.
- * Forces all merges through the /dev-team:merge skill which enforces
+ * Forces all merges through the /merge skill which enforces
  * the Copilot review wait-and-address protocol.
  *
  * Exit 2 = block, exit 0 = allow.
@@ -28,17 +28,17 @@ const MERGE_PATTERNS = [
     pattern: /\bgh\s+pr\s+merge\b/,
     allow: /--auto\b/,
     reason:
-      "Direct `gh pr merge` without `--auto` bypasses Copilot review verification. Use the /dev-team:merge skill instead, which enforces the Copilot wait-and-address protocol.",
+      "Direct `gh pr merge` without `--auto` bypasses Copilot review verification. Use the /merge skill instead, which enforces the Copilot wait-and-address protocol.",
   },
   {
     pattern: /pulls\/\d+\/merge/,
     reason:
-      "Direct API merge bypasses Copilot review verification. Use the /dev-team:merge skill instead, which enforces the Copilot wait-and-address protocol.",
+      "Direct API merge bypasses Copilot review verification. Use the /merge skill instead, which enforces the Copilot wait-and-address protocol.",
   },
   {
     pattern: /\bmergePullRequest\b/,
     reason:
-      "GraphQL `mergePullRequest` mutation bypasses Copilot review verification. Use the /dev-team:merge skill instead, which enforces the Copilot wait-and-address protocol.",
+      "GraphQL `mergePullRequest` mutation bypasses Copilot review verification. Use the /merge skill instead, which enforces the Copilot wait-and-address protocol.",
   },
 ];
 
