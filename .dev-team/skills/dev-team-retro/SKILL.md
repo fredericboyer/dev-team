@@ -114,6 +114,18 @@ If `.dev-team/metrics.md` exists and contains entries, analyze:
 - Are SUGGESTION findings dominating? This suggests agents are not calibrated to the project's conventions
 - Are review rounds consistently high (3+)? This suggests systemic quality issues or miscalibrated reviewers
 
+### Deferred findings follow-through
+- Scan all entries for findings with outcome `deferred` — these are findings accepted but deferred to a follow-up issue
+- For each deferred finding, extract the tracking reference from the Reason column (e.g., "Tracked in #999")
+- If the Reason column contains an issue number, verify the issue exists using `gh issue view <number>` (a 404/error means the issue was never created)
+- If the Reason column does NOT contain an issue number, search for a matching issue using `gh issue list --search "<finding summary>"` and check if any open issue corresponds to the deferred finding
+- Flag each deferred finding with no corresponding issue as:
+  ```
+  **[RISK]** Metrics — Deferred finding has no tracking issue: "<finding summary>" (from <agent>, <date>)
+  The review process accepted this deferral on the promise of a follow-up issue, but none was created. The finding is untracked.
+  ```
+- Report the conversion rate in the executive summary: "N/M deferred findings have tracking issues"
+
 ### Delegation patterns
 - Which implementing agents are used most frequently?
 - Are reviewers consistently finding issues in specific domains? This may indicate an implementing agent needs calibration
