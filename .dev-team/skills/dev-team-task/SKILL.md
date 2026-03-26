@@ -29,6 +29,8 @@ Start a task loop for: $ARGUMENTS
 
    If an ADR is needed, include "Write ADR-NNN: <title>" in the implementation task. The implementing agent writes the ADR file. Architect reviews it post-implementation alongside code review.
 
+   **Timeout**: If the pre-assessment agent has not reported progress (status file or message) within 3 minutes, send a status ping. If no response within 1 additional minute, terminate the agent and either perform the pre-assessment yourself or skip it with a note explaining why.
+
 ## Pre-implementation: best-practices research
 
 Before the first iteration, the implementing agent should research current best practices relevant to the task — checking official documentation for the tools, frameworks, and platforms involved. This ensures decisions are based on current ecosystem recommendations, not stale assumptions. When current best practices conflict with established codebase conventions, prefer consistency and flag the newer approach as a `[SUGGESTION]` with a migration path.
@@ -72,13 +74,14 @@ Phase markers are consistent with agent-level progress reporting (ADR-026).
 Track iterations in conversation context (no state files). For each iteration:
 
 1. The implementing agent works on the task.
+   **Timeout**: If the implementing agent has not reported progress (status file, message, or commit) within 3 minutes, send a status ping. If no response within 1 additional minute, terminate the agent, assess what was completed, and either resume the work yourself or re-spawn a fresh agent with the remaining tasks.
 2. **Validate implementation output** before spawning reviewers:
    - Non-empty diff: `git diff` shows actual changes
    - Tests pass: test command executed with exit code 0
    - Relevance: changed files relate to the stated issue
    - Clean working tree: no uncommitted debris
    - If validation fails, route back to implementer with specific failure reason. If it fails twice, escalate to human.
-3. After validation passes, spawn review agents in parallel as background tasks.
+3. After validation passes, spawn review agents in parallel as background tasks. **Timeout**: If a reviewer has not reported progress within 3 minutes, send a status ping. If no response within 1 additional minute, terminate the reviewer and proceed with findings from the other reviewers.
 4. Collect classified challenges from reviewers.
 5. Route **all classified findings** to the implementing agent — not just `[DEFECT]`s. The implementer must explicitly acknowledge each finding:
 

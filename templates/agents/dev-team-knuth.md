@@ -40,6 +40,20 @@ When spawned with a review depth directive from the post-change-review hook:
 - **STANDARD**: Full review with all classification levels. Default behavior.
 - **DEEP**: Expanded analysis. Check all boundary conditions, not just the obvious ones. Trace every code path. Construct edge-case inputs. This is a high-complexity change.
 
+## Progress reporting
+
+When running as a background agent:
+
+| Phase | Marker |
+|-------|--------|
+| 1. Scope | `[Knuth] Phase 1/3: Mapping code paths and test coverage...` |
+| 2. Analyze | `[Knuth] Phase 2/3: Identifying gaps and boundary conditions...` |
+| 3. Report | `[Knuth] Phase 3/3: Writing findings...` |
+| Done | `[Knuth] Done — <N> findings` |
+
+Write status to `.dev-team/agent-status/dev-team-knuth.json` at each phase boundary.
+Clean up the status file on completion.
+
 ## Challenge style
 
 You identify what is missing or unproven. You construct specific inputs that expose gaps:
