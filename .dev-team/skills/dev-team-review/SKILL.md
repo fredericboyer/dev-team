@@ -18,7 +18,7 @@ Run a multi-agent parallel review of: $ARGUMENTS
 |---|---|---|
 | `auth`, `login`, `password`, `token`, `session`, `crypto`, `encrypt`, `decrypt`, `secret`, `permission`, `rbac`, `acl`, `oauth`, `jwt`, `cors`, `csrf`, `sanitiz`, `escap` | @dev-team-szabo | Security surface |
 | `/api/`, `/route/`, `/routes/`, `/endpoint/`, `/endpoints/`, `schema`, `.graphql`, `.proto`, `openapi`, `swagger` | @dev-team-mori | API/UI contract |
-| `docker`, `Dockerfile`, `docker-compose`, `.dockerignore`, `.env.example`, `env.template`, `deploy`, `terraform/`, `.tf`, `.tfvars`, `pulumi/`, `cloudformation/`, `helm`, `k8s`, `kubernetes`, `health-check`, `monitoring.yml`, `monitoring.yaml`, `monitoring.json`, `observability`, `otel`, `alerting.yml`, `alerting.yaml`, `alerting.json`, `logging.yml`, `logging.yaml`, `logging.json`, `.github/workflows`, `.gitlab-ci`, `jenkinsfile` | @dev-team-hamilton | Infrastructure |
+| `docker`, `Dockerfile`, `docker-compose`, `.dockerignore`, `.env.example`, `env.template`, `deploy`, `terraform/`, `.tf`, `.tfvars`, `pulumi/`, `cloudformation/`, `helm`, `k8s`, `kubernetes`, `health-check`, `healthcheck`, `monitoring.yml`, `monitoring.yaml`, `monitoring.json`, `observability`, `otel`, `alerting.yml`, `alerting.yaml`, `alerting.json`, `logging.yml`, `logging.yaml`, `logging.json`, `.github/workflows`, `.gitlab-ci`, `jenkinsfile` | @dev-team-hamilton | Infrastructure |
 | `.env`, `config`, `migration`, `database`, `.sql` | @dev-team-voss | Backend/data layer |
 | `.github/workflows`, `.claude/`, `tsconfig`, `eslint`, `prettier`, `jest.config`, `vitest`, `.husky`, `package.json` | @dev-team-deming | Tooling |
 | `readme`, `changelog`, `.md`, `.mdx`, `/docs/`, `api-doc`, `jsdoc`, `typedoc` | @dev-team-tufte | Documentation |
@@ -98,7 +98,7 @@ State the verdict clearly. List what must be fixed for approval if requesting ch
 
 ### Security preamble
 
-Before starting the review, check for open security alerts: run `/dev-team:security-status` if available, or use the project's security monitoring tools. Flag any critical findings in the review report.
+Before starting the review, check for open security alerts using the project's security monitoring process (e.g., a `/security-status` skill or CLAUDE.md guidance). If no such process or tooling is available, note this explicitly in the review report and proceed with a manual review of security-sensitive changes. Flag any critical findings in the review report.
 
 ### Completion
 
