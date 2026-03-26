@@ -2,12 +2,15 @@
 
 /**
  * dev-team-pre-commit-gate.js
- * Pre-commit hook — memory freshness gate.
+ * Pre-commit hook — memory freshness gate + Borges completion warning.
  *
  * Runs before each commit. Checks whether memory files need updating.
  * Blocks (exit 1) when implementation files are staged without memory updates.
  * Override: create an empty `.dev-team/.memory-reviewed` file to acknowledge
  * that memory was reviewed and nothing needs updating.
+ *
+ * On task branches (feat/*, fix/*), warns (non-blocking) if metrics.md is not
+ * in staged changes — a reminder to run Borges before considering a task complete.
  */
 
 "use strict";
@@ -133,6 +136,7 @@ if (hasMemoryUpdates) {
   }
 }
 
+let memoryGatePassed = false;
 if (hasImplFiles && !hasMemoryUpdates) {
   // Check for .memory-reviewed override marker
   const markerPath = path.join(process.cwd(), ".dev-team", ".memory-reviewed");
@@ -152,34 +156,62 @@ if (hasImplFiles && !hasMemoryUpdates) {
     } catch {
       // Best effort — don't fail the hook over cleanup
     }
-    process.exit(0);
+    // Don't exit yet — still run the Borges completion warning below
+    memoryGatePassed = true;
   }
 
-  let unstagedMemory = false;
-  try {
-    const unstaged = cachedGitDiff(["diff", "--name-only"], 2000);
-    unstagedMemory = unstaged
-      .split("\n")
-      .map((f) => f.split("\\").join("/"))
-      .some((f) => f.endsWith("learnings.md") || /agent-memory\/.*MEMORY\.md$/.test(f));
-  } catch {
-    // Ignore — best effort
-  }
+  if (!memoryGatePassed) {
+    let unstagedMemory = false;
+    try {
+      const unstaged = cachedGitDiff(["diff", "--name-only"], 2000);
+      unstagedMemory = unstaged
+        .split("\n")
+        .map((f) => f.split("\\").join("/"))
+        .some((f) => f.endsWith("learnings.md") || /agent-memory\/.*MEMORY\.md$/.test(f));
+    } catch {
+      // Ignore — best effort
+    }
 
-  if (unstagedMemory) {
-    console.error(
-      "[dev-team pre-commit] BLOCKED: Memory files were updated but not staged. " +
-        "Run `git add .dev-team/learnings.md .dev-team/agent-memory/` to include learnings, " +
-        "or create an empty `.dev-team/.memory-reviewed` file to acknowledge that memory was reviewed.",
-    );
-  } else {
-    console.error(
-      "[dev-team pre-commit] BLOCKED: Implementation files staged without memory updates. " +
-        "Update .dev-team/learnings.md or agent memory with any patterns, conventions, or decisions from this work. " +
-        "If no learnings apply, create an empty `.dev-team/.memory-reviewed` file to acknowledge.",
+    if (unstagedMemory) {
+      console.error(
+        "[dev-team pre-commit] BLOCKED: Memory files were updated but not staged. " +
+          "Run `git add .dev-team/learnings.md .dev-team/agent-memory/` to include learnings, " +
+          "or create an empty `.dev-team/.memory-reviewed` file to acknowledge that memory was reviewed.",
+      );
+    } else {
+      console.error(
+        "[dev-team pre-commit] BLOCKED: Implementation files staged without memory updates. " +
+          "Update .dev-team/learnings.md or agent memory with any patterns, conventions, or decisions from this work. " +
+          "If no learnings apply, create an empty `.dev-team/.memory-reviewed` file to acknowledge.",
+      );
+    }
+    process.exit(1);
+  }
+}
+
+// Borges completion warning (soft gate — warns but does not block)
+// On task branches (feat/*, fix/*), remind the user to run Borges if metrics.md
+// is not in the staged changes. Not every commit is the final one, so this is
+// advisory only — it nudges teams to run Borges before closing out a task.
+let currentBranch = "";
+try {
+  currentBranch = execFileSync("git", ["rev-parse", "--abbrev-ref", "HEAD"], {
+    encoding: "utf-8",
+    timeout: 2000,
+  }).trim();
+} catch {
+  // Ignore — best effort
+}
+
+if (/^(feat|fix)\//.test(currentBranch)) {
+  const hasMetricsUpdate = files.some((f) => f.endsWith(".dev-team/metrics.md"));
+  if (!hasMetricsUpdate) {
+    console.warn(
+      "[dev-team pre-commit] WARNING: Committing on a task branch without metrics.md updates. " +
+        "Remember to run Borges before considering this task complete — " +
+        "Borges extracts learnings, updates metrics, and ensures cross-agent coherence.",
     );
   }
-  process.exit(1);
 }
 
 process.exit(0);
