@@ -80,12 +80,13 @@ Track iterations in conversation context (no state files). For each iteration:
    - If validation fails, route back to implementer with specific failure reason. If it fails twice, escalate to human.
 3. After validation passes, spawn review agents in parallel as background tasks.
 4. Collect classified challenges from reviewers.
-5. Route **all classified findings** to the implementing agent — not just `[DEFECT]`s. The implementer must explicitly acknowledge each finding:
+5. Route **all classified findings** to the implementing agent — not just `[DEFECT]`s. The implementer must explicitly acknowledge each finding with one of these outcomes:
    - **Address**: fix or incorporate the finding in the next iteration
    - **Defer**: accept the finding but defer to a follow-up issue (must state reason)
    - **Dispute**: disagree with the finding (triggers one-round escalation — reviewer responds, then human decides)
+   - **Ignore**: explicitly decline to act on the finding (must state reason — e.g., out of scope, not applicable)
    Only `[DEFECT]` findings block progress. `[RISK]`, `[QUESTION]`, and `[SUGGESTION]` are advisory — they must be acknowledged but do not prevent the loop from exiting.
-   The orchestrator verifies that all findings have been acknowledged before proceeding to step 8 (exit check). Unacknowledged advisory findings are logged as `ignored` in the finding outcome log.
+   The orchestrator verifies that **all** findings have an explicit outcome before proceeding to step 8 (exit check). Findings without an explicit outcome block the exit check — there is no automatic fallback.
 6. After the implementer has acknowledged all findings, **compact the context** before the next iteration:
    - Produce a structured summary: all findings (agent, classification, file, status/outcome), files changed, outstanding items
    - New reviewers in subsequent waves receive: current diff + compact summary + agent definition
@@ -138,6 +139,7 @@ When the loop exits:
 2. **Clean up worktree**: If the work was done in a worktree, clean it up after the branch is pushed and the PR is created. Do not wait for merge to clean the worktree.
 3. You MUST spawn **@dev-team-borges** (Librarian) as the final step. Format and pass Borges the **finding outcome log** using this structured format:
 
+   **Single-branch format:**
    ```
    ## Finding Outcome Log
    Task: <issue number and title>
@@ -151,13 +153,35 @@ When the loop exits:
    | 1 | szabo | [DEFECT] | src/auth.ts | Missing input validation | fixed | Fixed in round 2 |
    | 2 | knuth | [RISK] | src/parser.ts | No boundary check for empty input | deferred | Tracked in #999 |
    | 3 | brooks | [SUGGESTION] | src/core.ts | Extract to shared utility | accepted | Refactored |
-   | 4 | knuth | [QUESTION] | src/config.ts | Why not use env vars? | accepted | Added explanation |
+   | 4 | knuth | [QUESTION] | src/config.ts | Why not use env vars? | ignored | Out of scope for this task |
 
    ### Summary
    - Total findings: <N>
    - DEFECTs: <N> fixed, <N> overruled
-   - Advisory (RISK/QUESTION/SUGGESTION): <N> accepted, <N> deferred, <N> overruled
+   - Advisory (RISK/QUESTION/SUGGESTION): <N> accepted, <N> deferred, <N> ignored
    - Rounds to convergence: <N>
+   ```
+
+   **Multi-branch format** (parallel mode):
+   ```
+   ## Finding Outcome Log
+   Tasks: <comma-separated issue numbers and titles>
+   Branches:
+   - <branch-1>: <N> review rounds
+   - <branch-2>: <N> review rounds
+   Agents involved: <comma-separated list of all participating agents>
+
+   ### Findings
+   | # | Branch | Agent | Classification | File | Finding summary | Outcome | Reason |
+   |---|--------|-------|---------------|------|-----------------|---------|--------|
+   | 1 | feat/123-auth | szabo | [DEFECT] | src/auth.ts | Missing input validation | fixed | Fixed in round 2 |
+   | 2 | feat/456-parser | knuth | [RISK] | src/parser.ts | No boundary check | deferred | Tracked in #999 |
+
+   ### Summary
+   - Total findings: <N> across <N> branches
+   - DEFECTs: <N> fixed, <N> overruled
+   - Advisory (RISK/QUESTION/SUGGESTION): <N> accepted, <N> deferred, <N> ignored
+   - Rounds to convergence: <per-branch breakdown or max>
    ```
 
    This log enables Borges to record calibration metrics. Borges will:
