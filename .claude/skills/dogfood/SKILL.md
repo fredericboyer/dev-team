@@ -53,14 +53,14 @@ For each agent memory file:
 #### 4a. Template CLAUDE.md (`templates/CLAUDE.md`)
 
 The primary instruction surface shipped to all projects. Check:
-- Are workflow instructions accurate? (agent table, hook triggers, skill list)
+- Are workflow instructions accurate? (agent list, hook triggers, skill list)
 - Are there learnings that should be baked into CLAUDE.md as permanent instructions?
 - Are there stale instructions that no longer match current behavior?
 - Are there missing sections? (e.g., new skills added but not listed, new agents without hook descriptions)
 - Does the "Hook directives are MANDATORY" section reflect current enforcement mechanisms?
-- Is the "Learnings — where to write what" table still accurate?
+- Is the memory architecture table still accurate?
 - Does the skills list match what's actually in `templates/skills/`?
-- Are agent descriptions consistent with their actual definitions in `templates/agents/`?
+- **Template bloat audit:** Does `templates/CLAUDE.md` contain information discoverable from a fresh project install? Count lines in the managed section — flag if over 100. Check for content that duplicates what agents can find by reading `.dev-team/agents/`, `.dev-team/hooks/`, or config files.
 
 #### 4b. Project CLAUDE.md — section OUTSIDE dev-team markers
 

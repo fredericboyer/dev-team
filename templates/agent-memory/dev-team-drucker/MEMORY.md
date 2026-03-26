@@ -2,6 +2,8 @@
 <!-- Tier 2: Agent calibration memory. Domain-specific findings, patterns, and watch lists. -->
 <!-- First 200 lines are loaded into agent context. Keep concise. -->
 <!-- Borges extracts structured entries automatically after each task. -->
+<!-- Discoverability filter: before writing an entry, verify it cannot be discovered -->
+<!-- by reading code or config files. Memory is for calibration and non-obvious knowledge. -->
 
 ## Structured Entries
 <!-- Format:
