@@ -3,6 +3,10 @@
 <!-- Read by ALL agents at session start. Keep under 200 lines. -->
 <!-- For formal decisions, use ADRs instead. This file captures organic learnings. -->
 
+## What NOT to write here
+
+Before writing an entry, ask: "Can an agent discover this by reading the code or config files?" If yes, don't write it. Learnings are for process rules, overruled challenges, and non-obvious conventions — not documentation of project structure, tech stack, or framework choices.
+
 ## Coding Conventions
 
 

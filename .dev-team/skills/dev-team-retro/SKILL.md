@@ -100,6 +100,11 @@ Check the project's `CLAUDE.md` for:
 ### Learnings promotion
 - Mature learnings that have been stable for multiple sessions and should be promoted to `CLAUDE.md` instructions
 
+### Instruction surface health
+- Count lines in the CLAUDE.md managed section (between `<!-- dev-team:begin -->` and `<!-- dev-team:end -->` markers) — flag as `[RISK]` if over 100 lines
+- Scan `.dev-team/learnings.md` for entries that describe information discoverable from code or config files (e.g., tech stack, project structure, framework choices) — flag each for removal
+- Report a "discoverable content ratio": number of flagged entries / total entries
+
 ## Phase 4: Calibration metrics audit (`.dev-team/metrics.md`)
 
 If `.dev-team/metrics.md` exists and contains entries, analyze:

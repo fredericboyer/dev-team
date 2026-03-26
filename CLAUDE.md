@@ -41,22 +41,7 @@ This project uses [dev-team](https://github.com/dev-team) — adversarial AI age
 
 ### Agents
 
-| Agent | Role | When to use |
-|-------|------|-------------|
-| `@dev-team-voss` | Backend Engineer | API design, data modeling, system architecture, error handling |
-| `@dev-team-hamilton` | Infrastructure Engineer | Dockerfiles, IaC, CI/CD, k8s, deployment, health checks, monitoring |
-| `@dev-team-mori` | Frontend/UI Engineer | Components, accessibility, UX patterns, state management |
-| `@dev-team-szabo` | Security Auditor | Vulnerability review, auth flows, attack surface analysis |
-| `@dev-team-knuth` | Quality Auditor | Coverage gaps, boundary conditions, correctness verification |
-| `@dev-team-beck` | Test Implementer | Writing tests, TDD cycles, translating audit findings into test cases |
-| `@dev-team-deming` | Tooling Optimizer | Linters, formatters, CI/CD, hooks, onboarding, automation |
-| `@dev-team-tufte` | Documentation Engineer | Doc accuracy, stale docs, README/API docs, doc-code sync |
-| `@dev-team-brooks` | Architect & Quality Reviewer | Architectural review, coupling, ADR compliance, quality attributes (performance, maintainability, scalability) |
-| `@dev-team-conway` | Release Manager | Versioning, changelog, release readiness, semver validation |
-| `@dev-team-drucker` | Team Lead / Orchestrator | Auto-delegates to specialists, manages review loops, resolves conflicts |
-| `@dev-team-turing` | Pre-implementation Researcher | Library evaluation, migration paths, trade-off analysis, security pattern research |
-| `@dev-team-rams` | Design System Reviewer | Token compliance, spacing consistency, component API usage, design-code alignment |
-| `@dev-team-borges` | Librarian | End-of-task memory extraction, cross-agent coherence, system improvement |
+Available agents: `@dev-team-voss`, `@dev-team-hamilton`, `@dev-team-mori`, `@dev-team-szabo`, `@dev-team-knuth`, `@dev-team-beck`, `@dev-team-deming`, `@dev-team-tufte`, `@dev-team-brooks`, `@dev-team-conway`, `@dev-team-drucker`, `@dev-team-turing`, `@dev-team-rams`, `@dev-team-borges`. See `.dev-team/agents/` for full definitions, roles, and when to use each agent.
 
 ### Capabilities
 
@@ -64,25 +49,11 @@ For automatic delegation, use `@dev-team-drucker` — it analyzes the task and r
 
 For non-trivial work: explore the area first, then implement, then review.
 
-**Automatic invocation (hooks):**
-- **Szabo** — auto-flagged when security-sensitive files change (auth, token, session, crypto, etc.)
-- **Knuth** — auto-flagged when any non-test implementation code changes
-- **Mori** — auto-flagged when API contract files change (/api/, /routes/, schema, etc.)
-- **Hamilton** — auto-flagged when infrastructure/operations files change (Dockerfile, docker-compose, CI workflows, Terraform, Helm, k8s, health checks, monitoring config, .env templates, etc.)
-- **Voss** — auto-flagged when app config/data files change (.env, config, migrations, database, etc.)
-- **Deming** — auto-flagged when tooling files change (linter/formatter config, CI workflows, package.json, etc.)
-- **Tufte** — auto-flagged when documentation files change (.md, /docs/, README, etc.) AND when significant implementation files change to detect doc-code drift
-- **Brooks** — auto-flagged when any non-test implementation code changes (quality attributes) and when architectural boundaries are touched (/adr/, /core/, /domain/, /lib/, build config, etc.)
-- **Conway** — auto-flagged when release artifacts change (package.json, changelog, version files, release/publish/deploy workflows, etc.)
-- **Turing** — on-demand only. Spawned by Drucker when task involves library selection, migration, or unfamiliar domain. Not auto-triggered by hooks.
-- **Beck** — auto-flagged when test code files change (`*.test.*`, `*.spec.*`, `__tests__/`, `/test(s)/`)
-- **Rams** — auto-flagged when frontend/UI component files change (same trigger as Mori). Gracefully no-ops when no design system is detected.
+**Automatic invocation (hooks):** Agents are auto-spawned based on changed file patterns. See `.dev-team/hooks/` for the watch-list patterns that determine which agents are triggered. Turing is on-demand only (spawned by Drucker for research tasks).
 
-**End-of-workflow agents:**
-- **Borges** — mandatory at end of every `/dev-team:task`, `/dev-team:review`, `/dev-team:audit`, and `/dev-team:retro`. Extracts structured memory entries, reviews cross-agent coherence, and identifies system improvement opportunities.
+**End-of-workflow agents:** Borges is mandatory at end of every `/dev-team:task`, `/dev-team:review`, `/dev-team:audit`, and `/dev-team:retro`.
 
-**Orchestration:**
-- **Drucker** — delegates tasks to the right implementing agent and spawns reviewers. Szabo, Knuth, and Brooks review all code changes.
+**Orchestration:** Drucker delegates tasks to the right implementing agent and spawns reviewers. Szabo, Knuth, and Brooks review all code changes.
 
 **CRITICAL: Always run agents in the background.** When spawning Drucker or any agent for tasks that take more than a few seconds, use `run_in_background: true`. The main conversation loop must remain interactive.
 
@@ -156,12 +127,12 @@ Project facts, overruled challenges, cross-agent decisions, process rules. All a
 **Tier 2 — Agent calibration memory** (`.dev-team/agent-memory/<agent>/MEMORY.md`):
 Domain-specific findings, known patterns, active watch lists. Each agent owns its own file. Entries include `Last-verified` dates for temporal decay.
 
-| What | Where | Examples |
-|------|-------|---------|
-| Project patterns, process rules, tech debt, overruled challenges | `.dev-team/learnings.md` (Tier 1) | "We use PostgreSQL", "Hooks over guidelines", "Knuth's finding X was overruled because Y" |
-| Agent-specific calibration | `.dev-team/agent-memory/<agent>/MEMORY.md` (Tier 2) | Szabo: "Auth uses JWT not sessions", Knuth: "Coverage weak in parsers" |
-| Formal architecture decisions | `docs/adr/` | ADR format, not learnings |
-| User-specific preferences only | Machine-local memory | Personal style, name, role — things that vary per person, not per project |
+| What | Where |
+|------|-------|
+| Project patterns, process rules, tech debt, overruled challenges | `.dev-team/learnings.md` (Tier 1) |
+| Agent-specific calibration | `.dev-team/agent-memory/<agent>/MEMORY.md` (Tier 2) |
+| Formal architecture decisions | `docs/adr/` |
+| User-specific preferences only | Machine-local memory |
 
 **Memory evolution:** New entries trigger re-evaluation of related existing entries. Duplicates are merged, contradictions are superseded, and 3+ overrules on the same tag generate calibration rules.
 

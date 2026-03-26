@@ -70,6 +70,7 @@ Write entries to the appropriate agent's MEMORY.md using the structured format:
 - Entries that record specific numeric metrics derivable from the codebase (test counts, file counts, line counts)
 - Entries that merely restate what is in `package.json`, `tsconfig.json`, or other config files
 - Entries that duplicate existing ADRs or `.dev-team/learnings.md` entries
+- **Discoverability test:** Before writing any entry, ask: "Can an agent learn this by reading the code, config files, or directory structure?" If yes, do not write it. Focus on: calibration data, non-obvious conventions, overruled findings, cross-agent coherence issues.
 
 **Extraction rules:**
 - Every accepted DEFECT becomes a memory entry for the reviewer who found it (reinforcement)
