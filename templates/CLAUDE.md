@@ -40,6 +40,7 @@ For non-trivial work: explore the area first, then implement, then review.
 - **Brooks** — auto-flagged when any non-test implementation code changes (quality attributes) and when architectural boundaries are touched (/adr/, /core/, /domain/, /lib/, build config, etc.)
 - **Conway** — auto-flagged when release artifacts change (package.json, changelog, version files, release/publish/deploy workflows, etc.)
 - **Turing** — on-demand only. Spawned by Drucker when task involves library selection, migration, or unfamiliar domain. Not auto-triggered by hooks.
+- **Beck** — auto-flagged when test code files change (`*.test.*`, `*.spec.*`, `__tests__/`, `/test(s)/`)
 - **Rams** — auto-flagged when frontend/UI component files change (same trigger as Mori). Gracefully no-ops when no design system is detected.
 
 **End-of-workflow agents:**
