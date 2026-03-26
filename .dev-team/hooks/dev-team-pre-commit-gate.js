@@ -2,12 +2,15 @@
 
 /**
  * dev-team-pre-commit-gate.js
- * Pre-commit hook — memory freshness gate.
+ * Pre-commit hook — memory freshness gate + Borges completion warning.
  *
  * Runs before each commit. Checks whether memory files need updating.
  * Blocks (exit 1) when implementation files are staged without memory updates.
  * Override: create an empty `.dev-team/.memory-reviewed` file to acknowledge
  * that memory was reviewed and nothing needs updating.
+ *
+ * On task branches (feat/*, fix/*), warns (non-blocking) if metrics.md is not
+ * in staged changes — a reminder to run Borges before considering a task complete.
  */
 
 "use strict";
@@ -180,6 +183,33 @@ if (hasImplFiles && !hasMemoryUpdates) {
     );
   }
   process.exit(1);
+}
+
+// Borges completion warning (soft gate — warns but does not block)
+// On task branches (feat/*, fix/*), remind the user to run Borges if metrics.md
+// is not in the staged changes. Not every commit is the final one, so this is
+// advisory only — it nudges teams to run Borges before closing out a task.
+let currentBranch = "";
+try {
+  currentBranch = execFileSync("git", ["rev-parse", "--abbrev-ref", "HEAD"], {
+    encoding: "utf-8",
+    timeout: 2000,
+  }).trim();
+} catch {
+  // Ignore — best effort
+}
+
+if (/^(feat|fix)\//.test(currentBranch)) {
+  const hasMetricsUpdate = files.some(
+    (f) => f.endsWith(".dev-team/metrics.md") || f === ".dev-team/metrics.md",
+  );
+  if (!hasMetricsUpdate) {
+    console.warn(
+      "[dev-team pre-commit] WARNING: Committing on a task branch without metrics.md updates. " +
+        "Remember to run Borges before considering this task complete — " +
+        "Borges extracts learnings, updates metrics, and ensures cross-agent coherence.",
+    );
+  }
 }
 
 process.exit(0);
