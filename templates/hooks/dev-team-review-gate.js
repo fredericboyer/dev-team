@@ -417,7 +417,8 @@ for (const file of gatedFiles) {
     // LIGHT reviews are advisory only — skip defect check
     if (sidecar.reviewDepth === "LIGHT") continue;
 
-    const findings = sidecar.findings || [];
+    const findings = sidecar.findings;
+    if (!Array.isArray(findings)) continue; // Malformed sidecar — skip
     for (const finding of findings) {
       if (finding.classification === "[DEFECT]" && !finding.resolved) {
         unresolvedDefects.push({

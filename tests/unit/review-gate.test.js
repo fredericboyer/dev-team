@@ -382,6 +382,263 @@ describe("dev-team-review-gate", () => {
     });
   });
 
+  // ─── Mixed staged files ─────────────────────────────────────────────────
+
+  describe("mixed staged files", () => {
+    it("only requires sidecars for gated implementation files", () => {
+      const tmpDir = createTempRepo();
+      try {
+        const code = "module.exports = {}";
+        fs.writeFileSync(path.join(tmpDir, "handler.js"), code);
+        fs.writeFileSync(path.join(tmpDir, "README.md"), "# Docs");
+        fs.writeFileSync(path.join(tmpDir, "handler.test.js"), "test('works', () => {})");
+        execFileSync("git", ["add", "handler.js", "README.md", "handler.test.js"], {
+          cwd: tmpDir,
+          encoding: "utf-8",
+        });
+
+        const hash = contentHash(code);
+
+        // Only handler.js needs knuth + brooks sidecars (gated impl file)
+        // README.md is non-code, handler.test.js is a test file — neither gated
+        writeSidecar(tmpDir, "dev-team-knuth", hash, {
+          agent: "dev-team-knuth",
+          file: "handler.js",
+          contentHash: hash,
+          reviewDepth: "STANDARD",
+          findings: [],
+        });
+        writeSidecar(tmpDir, "dev-team-brooks", hash, {
+          agent: "dev-team-brooks",
+          file: "handler.js",
+          contentHash: hash,
+          reviewDepth: "STANDARD",
+          findings: [],
+        });
+
+        const result = runGate({ command: "git commit -m 'feat: mixed files'" }, tmpDir);
+        assert.equal(result.code, 0, `Expected exit 0: ${result.stderr}`);
+      } finally {
+        fs.rmSync(tmpDir, { recursive: true, force: true });
+      }
+    });
+  });
+
+  // ─── QUESTION classification ───────────────────────────────────────────────
+
+  describe("Gate 2 — [QUESTION] classification", () => {
+    it("allows unresolved [QUESTION] findings without blocking", () => {
+      const tmpDir = createTempRepo();
+      try {
+        const code = "module.exports = {}";
+        fs.writeFileSync(path.join(tmpDir, "handler.js"), code);
+        execFileSync("git", ["add", "handler.js"], { cwd: tmpDir, encoding: "utf-8" });
+
+        const hash = contentHash(code);
+
+        writeSidecar(tmpDir, "dev-team-knuth", hash, {
+          agent: "dev-team-knuth",
+          file: "handler.js",
+          contentHash: hash,
+          reviewDepth: "STANDARD",
+          findings: [
+            { classification: "[QUESTION]", description: "Why is this exported?", resolved: false },
+          ],
+        });
+        writeSidecar(tmpDir, "dev-team-brooks", hash, {
+          agent: "dev-team-brooks",
+          file: "handler.js",
+          contentHash: hash,
+          reviewDepth: "STANDARD",
+          findings: [],
+        });
+
+        const result = runGate({ command: "git commit -m 'feat'" }, tmpDir);
+        assert.equal(result.code, 0, `[QUESTION] should not block: ${result.stderr}`);
+      } finally {
+        fs.rmSync(tmpDir, { recursive: true, force: true });
+      }
+    });
+  });
+
+  // ─── Cleanup manifest ─────────────────────────────────────────────────────
+
+  describe("cleanup manifest", () => {
+    it("writes .cleanup-manifest.json with correct sidecar filenames after gates pass", () => {
+      const tmpDir = createTempRepo();
+      try {
+        const code = "module.exports = {}";
+        fs.writeFileSync(path.join(tmpDir, "handler.js"), code);
+        execFileSync("git", ["add", "handler.js"], { cwd: tmpDir, encoding: "utf-8" });
+
+        const hash = contentHash(code);
+
+        writeSidecar(tmpDir, "dev-team-knuth", hash, {
+          agent: "dev-team-knuth",
+          file: "handler.js",
+          contentHash: hash,
+          reviewDepth: "STANDARD",
+          findings: [],
+        });
+        writeSidecar(tmpDir, "dev-team-brooks", hash, {
+          agent: "dev-team-brooks",
+          file: "handler.js",
+          contentHash: hash,
+          reviewDepth: "STANDARD",
+          findings: [],
+        });
+
+        const result = runGate({ command: "git commit -m 'feat'" }, tmpDir);
+        assert.equal(result.code, 0, `Expected exit 0: ${result.stderr}`);
+
+        const manifestPath = path.join(tmpDir, ".dev-team", ".reviews", ".cleanup-manifest.json");
+        assert.ok(fs.existsSync(manifestPath), "cleanup manifest should exist");
+
+        const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf-8"));
+        assert.ok(Array.isArray(manifest), "manifest should be an array");
+        assert.ok(manifest.includes(`dev-team-knuth--${hash}.json`));
+        assert.ok(manifest.includes(`dev-team-brooks--${hash}.json`));
+      } finally {
+        fs.rmSync(tmpDir, { recursive: true, force: true });
+      }
+    });
+  });
+
+  // ─── Security-pattern files triggering Szabo ───────────────────────────────
+
+  describe("security-pattern file gating", () => {
+    it("requires dev-team-szabo sidecar for auth.js", () => {
+      const tmpDir = createTempRepo();
+      try {
+        const code = "module.exports = { login() {} }";
+        fs.writeFileSync(path.join(tmpDir, "auth.js"), code);
+        execFileSync("git", ["add", "auth.js"], { cwd: tmpDir, encoding: "utf-8" });
+
+        const hash = contentHash(code);
+
+        // Provide knuth + brooks but NOT szabo
+        writeSidecar(tmpDir, "dev-team-knuth", hash, {
+          agent: "dev-team-knuth",
+          file: "auth.js",
+          contentHash: hash,
+          reviewDepth: "STANDARD",
+          findings: [],
+        });
+        writeSidecar(tmpDir, "dev-team-brooks", hash, {
+          agent: "dev-team-brooks",
+          file: "auth.js",
+          contentHash: hash,
+          reviewDepth: "STANDARD",
+          findings: [],
+        });
+
+        const result = runGate({ command: "git commit -m 'feat: auth'" }, tmpDir);
+        assert.equal(result.code, 2, "should block — missing szabo review");
+        assert.ok(result.stderr.includes("dev-team-szabo"), "should mention szabo");
+      } finally {
+        fs.rmSync(tmpDir, { recursive: true, force: true });
+      }
+    });
+
+    it("passes when szabo sidecar is provided for security file", () => {
+      const tmpDir = createTempRepo();
+      try {
+        const code = "module.exports = { verify() {} }";
+        fs.writeFileSync(path.join(tmpDir, "token-service.ts"), code);
+        execFileSync("git", ["add", "token-service.ts"], { cwd: tmpDir, encoding: "utf-8" });
+
+        const hash = contentHash(code);
+
+        writeSidecar(tmpDir, "dev-team-szabo", hash, {
+          agent: "dev-team-szabo",
+          file: "token-service.ts",
+          contentHash: hash,
+          reviewDepth: "STANDARD",
+          findings: [],
+        });
+        writeSidecar(tmpDir, "dev-team-knuth", hash, {
+          agent: "dev-team-knuth",
+          file: "token-service.ts",
+          contentHash: hash,
+          reviewDepth: "STANDARD",
+          findings: [],
+        });
+        writeSidecar(tmpDir, "dev-team-brooks", hash, {
+          agent: "dev-team-brooks",
+          file: "token-service.ts",
+          contentHash: hash,
+          reviewDepth: "STANDARD",
+          findings: [],
+        });
+
+        const result = runGate({ command: "git commit -m 'feat: token'" }, tmpDir);
+        assert.equal(result.code, 0, `Expected exit 0: ${result.stderr}`);
+      } finally {
+        fs.rmSync(tmpDir, { recursive: true, force: true });
+      }
+    });
+  });
+
+  // ─── Sidecar schema validation ─────────────────────────────────────────────
+
+  describe("sidecar schema validation", () => {
+    it("skips malformed sidecar where findings is not an array", () => {
+      const tmpDir = createTempRepo();
+      try {
+        const code = "module.exports = {}";
+        fs.writeFileSync(path.join(tmpDir, "handler.js"), code);
+        execFileSync("git", ["add", "handler.js"], { cwd: tmpDir, encoding: "utf-8" });
+
+        const hash = contentHash(code);
+
+        // Knuth sidecar has findings as a string instead of array
+        writeSidecar(tmpDir, "dev-team-knuth", hash, {
+          agent: "dev-team-knuth",
+          file: "handler.js",
+          contentHash: hash,
+          reviewDepth: "STANDARD",
+          findings: "not an array",
+        });
+        writeSidecar(tmpDir, "dev-team-brooks", hash, {
+          agent: "dev-team-brooks",
+          file: "handler.js",
+          contentHash: hash,
+          reviewDepth: "STANDARD",
+          findings: [],
+        });
+
+        // Gate 1 passes (sidecars exist), Gate 2 should skip malformed findings
+        const result = runGate({ command: "git commit -m 'feat'" }, tmpDir);
+        assert.equal(result.code, 0, `Malformed findings should be skipped: ${result.stderr}`);
+      } finally {
+        fs.rmSync(tmpDir, { recursive: true, force: true });
+      }
+    });
+  });
+
+  // ─── --skip-review strict matching ─────────────────────────────────────────
+
+  describe("--skip-review strict matching", () => {
+    it("does NOT bypass when --skip-review appears only in -m message body", () => {
+      const tmpDir = createTempRepo();
+      try {
+        fs.writeFileSync(path.join(tmpDir, "handler.js"), "module.exports = {}");
+        execFileSync("git", ["add", "handler.js"], { cwd: tmpDir, encoding: "utf-8" });
+
+        // --skip-review is inside the commit message, not as a git flag
+        const result = runGate(
+          { command: "git commit -m 'fix: mentioned --skip-review in message'" },
+          tmpDir,
+        );
+        // Should still block — no sidecars present
+        assert.equal(result.code, 2, "should block — --skip-review in message should not bypass");
+        assert.ok(result.stderr.includes("BLOCKED"));
+      } finally {
+        fs.rmSync(tmpDir, { recursive: true, force: true });
+      }
+    });
+  });
+
   // ─── Security ─────────────────────────────────────────────────────────────
 
   describe("security", () => {
