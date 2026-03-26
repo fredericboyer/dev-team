@@ -19,6 +19,7 @@
 - Hooks over CLAUDE.md for enforcement (ADR-001). If agents keep flagging the same pattern, it should be a hook.
 - **Every deferred finding must become a tracked GitHub issue.** When deferring a review or Copilot finding, create the issue immediately with origin (PR, reviewer), the finding, and assessment context. "Worth considering in a follow-up" without a tracked issue is not acceptable.
 - **Close the GitHub milestone after creating the release PR.** Use `gh api repos/{owner}/{repo}/milestones/{number} -X PATCH -f state=closed`.
+- **Release publishing is automated via CI.** After merging the release PR, push the git tag — the `release.yml` workflow handles npm publish and GitHub release creation automatically. Do NOT manually run `npm publish` or `gh release create` — this causes CI job failures (duplicate release) and wasted effort (no local npm auth).
 - **Improvements must be project-agnostic and target `templates/`.** Never modify `.dev-team/` directly for improvements — those files get overwritten by `dev-team update`. All improvements go into `templates/` and ship in future versions. Project-specific conventions stay in local learnings only.
 - **Dogfooding is the product loop.** Using dev-team on dev-team surfaces friction → `/dev-team:retro` captures patterns → issues target `templates/` → next release improves the tool for everyone. Every session is a test run.
 
