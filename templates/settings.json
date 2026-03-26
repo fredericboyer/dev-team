@@ -30,6 +30,10 @@
           {
             "type": "command",
             "command": "node .dev-team/hooks/dev-team-pre-commit-lint.js"
+          },
+          {
+            "type": "command",
+            "command": "node .dev-team/hooks/dev-team-review-gate.js"
           }
         ]
       },
