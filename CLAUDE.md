@@ -70,7 +70,7 @@ For non-trivial work: explore the area first, then implement, then review.
 - **Mori** — auto-flagged when API contract files change (/api/, /routes/, schema, etc.)
 - **Hamilton** — auto-flagged when infrastructure/operations files change (Dockerfile, docker-compose, CI workflows, Terraform, Helm, k8s, health checks, monitoring config, .env templates, etc.)
 - **Voss** — auto-flagged when app config/data files change (.env, config, migrations, database, etc.)
-- **Deming** — auto-flagged when tooling files change (eslint, CI workflows, package.json, etc.)
+- **Deming** — auto-flagged when tooling files change (linter/formatter config, CI workflows, package.json, etc.)
 - **Tufte** — auto-flagged when documentation files change (.md, /docs/, README, etc.) AND when significant implementation files change to detect doc-code drift
 - **Brooks** — auto-flagged when any non-test implementation code changes (quality attributes) and when architectural boundaries are touched (/adr/, /core/, /domain/, /lib/, build config, etc.)
 - **Conway** — auto-flagged when release artifacts change (package.json, changelog, version files, release/publish/deploy workflows, etc.)

@@ -9,7 +9,7 @@ Start a task loop for: $ARGUMENTS
 
 1. Parse the task description and any flags:
    - `--max-iterations N` (default: 10)
-   - `--reviewers` (default: @dev-team-szabo, @dev-team-knuth)
+   - `--reviewers` (default: @dev-team-szabo, @dev-team-knuth, @dev-team-brooks)
 
 2. Determine the right implementing agent based on the task:
    - Backend/API/data work -> @dev-team-voss
