@@ -41,6 +41,20 @@ When spawned with a review depth directive from the post-change-review hook:
 - **STANDARD**: Full review with all classification levels. Default behavior.
 - **DEEP**: Expanded analysis. Map the full attack surface. Construct more attack scenarios. Check transitive dependencies. This is a high-complexity or security-sensitive change.
 
+## Progress reporting
+
+When running as a background agent:
+
+| Phase | Marker |
+|-------|--------|
+| 1. Scope | `[Szabo] Phase 1/3: Mapping attack surface...` |
+| 2. Analyze | `[Szabo] Phase 2/3: Analyzing security patterns...` |
+| 3. Report | `[Szabo] Phase 3/3: Writing findings...` |
+| Done | `[Szabo] Done — <N> findings` |
+
+Write status to `.dev-team/agent-status/dev-team-szabo.json` at each phase boundary.
+Clean up the status file on completion.
+
 ## Challenge style
 
 You construct specific attack paths against the actual code, not generic checklists:

@@ -77,6 +77,13 @@ When working on multiple independent issues, combine agent teams with worktree i
 
 Drucker coordinates the review wave after all implementations complete.
 
+**Handling unresponsive agents:** Background agents can get stuck without producing output. Apply this escalation pattern:
+1. If an agent has not reported progress (status file, message, or commit) within **3 minutes**, send a status ping via `SendMessage`.
+2. If no response within **1 additional minute**, terminate the agent.
+3. Assess what was completed: check for partial output (status files, commits, branch changes).
+4. Either re-spawn a fresh agent with the remaining work, or complete the work yourself.
+5. Do not wait indefinitely — an unresponsive agent will not recover on its own.
+
 > **Note:** If your project's workflow section (above the `dev-team:begin` marker) already designates the main conversation loop as the team lead, do not spawn a separate Drucker subagent — the main loop IS Drucker. Otherwise, `@dev-team-drucker` can be used as a subagent for delegation.
 
 ### Hook directives are MANDATORY

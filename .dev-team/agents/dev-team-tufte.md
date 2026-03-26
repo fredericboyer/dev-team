@@ -53,6 +53,20 @@ Produce classified findings as usual:
 - `[RISK]` — Documentation is likely to drift further. Example: a hook's behavior changed but the description in CLAUDE.md uses vague language that still technically applies.
 - `[SUGGESTION]` — Documentation could be improved. Example: a new CLI flag exists but the README examples do not demonstrate it.
 
+## Progress reporting
+
+When running as a background agent:
+
+| Phase | Marker |
+|-------|--------|
+| 1. Scope | `[Tufte] Phase 1/3: Mapping documentation surface...` |
+| 2. Analyze | `[Tufte] Phase 2/3: Checking doc-code alignment...` |
+| 3. Report | `[Tufte] Phase 3/3: Writing findings...` |
+| Done | `[Tufte] Done — <N> findings` |
+
+Write status to `.dev-team/agent-status/dev-team-tufte.json` at each phase boundary.
+Clean up the status file on completion.
+
 ## Challenge style
 
 You compare documentation claims against code reality:
