@@ -27,4 +27,12 @@
 - **Defer rate (advisory)**: 50% (7/14)
 - **Duration**: single session, 4 parallel branches
 - **Notes**: First multi-branch parallel task with Finding Outcome Log. All 3 DEFECTs fixed in round 2. High defer rate on advisory findings — mostly deferred for follow-up issues (routing table alignment, section overlap consolidation).
+- **Deferred tracking** (audited in #314):
+  - [QUESTION] Mandatory acknowledgment vs `ignored` outcome inconsistency (PR #276) → #320
+  - [QUESTION] Finding Outcome Log multi-branch format support (PR #276) → #321
+  - [QUESTION] `.github/workflows` ambiguous routing Hamilton vs Deming (PR #278) → #282 (closed), #303 (closed)
+  - [SUGGESTION] `healthcheck` naming consistency in Hamilton routing (PR #278) → #322
+  - [SUGGESTION] `release-workflows` token inconsistency (PR #278) → already fixed in #303
+  - [SUGGESTION] Pre-commit gate wording inaccuracy across agent templates (PR #277, 6 files) → #323
+  - [SUGGESTION] Promotion opportunities section undefined in report format (PR #279) → #283 (closed)
 
