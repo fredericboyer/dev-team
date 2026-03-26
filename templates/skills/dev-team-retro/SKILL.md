@@ -114,6 +114,20 @@ If `.dev-team/metrics.md` exists and contains entries, analyze:
 - Are SUGGESTION findings dominating? This suggests agents are not calibrated to the project's conventions
 - Are review rounds consistently high (3+)? This suggests systemic quality issues or miscalibrated reviewers
 
+### Deferred findings follow-through
+- Scan all entries for findings with outcome `deferred` — these are findings accepted but deferred to a follow-up issue
+- For each deferred finding, extract the tracking reference from the Reason column (e.g., "Tracked in #999")
+- **Issue tracker detection:** Check `.dev-team/config.json` or `CLAUDE.md` for the project's issue tracker type (GitHub Issues, Jira, Linear, or None). The verification steps below assume GitHub Issues — if the project uses a different tracker, perform the equivalent lookup in that system (e.g., Jira JQL search, Linear API query). If no external tracker is configured, flag all deferred findings for manual audit instead.
+- If the Reason column contains an issue reference (e.g., "Tracked in #999"), strip the `#` prefix before passing to the CLI — `"Tracked in #999"` means run `gh issue view 999`, not `gh issue view #999`
+- Verify the issue exists and is tracked: use `gh issue list --state all --search "<issue number or summary>"` so that both open and closed issues count as valid tracking (a deferred finding whose issue was already resolved should not be flagged as untracked)
+- If the Reason column does NOT contain an issue number, search for a matching issue using `gh issue list --state all --search "<finding summary>"` and check if any issue (open or closed) corresponds to the deferred finding
+- Flag each deferred finding with no corresponding issue as:
+  ```
+  **[RISK]** Metrics — Deferred finding has no tracking issue: "<finding summary>" (from <agent>, <date>)
+  The review process accepted this deferral on the promise of a follow-up issue, but none was created. The finding is untracked.
+  ```
+- Report the conversion rate in the executive summary: "N/M deferred findings have tracking issues"
+
 ### Delegation patterns
 - Which implementing agents are used most frequently?
 - Are reviewers consistently finding issues in specific domains? This may indicate an implementing agent needs calibration
