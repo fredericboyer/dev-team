@@ -40,6 +40,8 @@
 - Last Borges run: not tracked yet (Borges spawning is now enforced via skill definitions)
 - Pre-commit gate: blocks commits without memory updates (override via `.dev-team/.memory-reviewed`)
 - All implementing agents have mandatory Learnings Output section in their definitions
+- First calibration metrics entry recorded for v1.2.0. All future tasks should append to `.dev-team/metrics.md`.
+- Finding Outcome Log vocabulary is standardized: outcomes are `fixed`, `accepted`, `deferred`, `overruled`, `ignored`. All skills and agents must use this vocabulary.
 
 ## Overruled Challenges
 <!-- When the human overrules an agent, record why — prevents re-flagging -->

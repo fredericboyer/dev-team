@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-03-25
+
+### Fixed
+- Task skill now routes all classified findings (DEFECT, RISK, QUESTION, SUGGESTION) to the implementing agent — not just DEFECTs. Implementers must acknowledge each finding (#266).
+- Structured Finding Outcome Log format added to task skill for Borges metrics recording, using aligned vocabulary (fixed/accepted/overruled/deferred/ignored) (#275).
+- Review skill routing table: infrastructure files now route to Hamilton instead of Voss. Split into Hamilton (Docker, deploy, Terraform, k8s, CI) and Voss (config, migrations, database) (#273).
+- Backtick formatting standardized across all review skill routing table entries (#273).
+- `.env` ownership aligned with hook patterns: app config to Voss, templates to Hamilton (#273).
+
+### Added
+- Learnings Output (mandatory) section standardized across all 14 agent definitions. Szabo, Knuth, Brooks, Borges, and Drucker gain the section; Turing and Rams upgraded to full format (#274).
+- Agent memory to shared learnings promotion check in both `/dev-team:assess` and `/assess-learnings` skills (#265).
+- Post-promotion cleanup guidance to prevent duplication after memory entries are promoted (#265).
+- Dispute escalation protocol added to parallel mode Phase 3 in task skill (#275).
+
 ## [1.1.1] - 2026-03-25
 
 ### Fixed
