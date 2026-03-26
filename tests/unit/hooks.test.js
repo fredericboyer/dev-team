@@ -1571,3 +1571,154 @@ describe("dev-team-watch-list", () => {
     );
   });
 });
+
+// ─── Agent Teams Guide ──────────────────────────────────────────────────────
+
+describe("dev-team-agent-teams-guide", () => {
+  const hook = "dev-team-agent-teams-guide.js";
+  let tmpDir;
+  let originalCwd;
+
+  beforeEach(() => {
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "dev-team-agent-guide-"));
+    originalCwd = process.cwd();
+    process.chdir(tmpDir);
+    fs.mkdirSync(path.join(tmpDir, ".dev-team"), { recursive: true });
+  });
+
+  afterEach(() => {
+    process.chdir(originalCwd);
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  });
+
+  function runGuideHook(toolInput, cwd) {
+    const { spawnSync } = require("child_process");
+    const input = JSON.stringify({ tool_input: toolInput });
+    const result = spawnSync(process.execPath, [path.join(HOOKS_DIR, hook), input], {
+      encoding: "utf-8",
+      timeout: 5000,
+      cwd: cwd || tmpDir,
+    });
+    return { code: result.status, stdout: result.stdout || "", stderr: result.stderr || "" };
+  }
+
+  it("always exits 0 (advisory only)", () => {
+    const result = runGuideHook({
+      team_name: "impl",
+      name: "builder",
+      prompt: "implement feature",
+    });
+    assert.equal(result.code, 0);
+  });
+
+  it("warns when implementing agent has team_name but no isolation", () => {
+    const result = runGuideHook({
+      team_name: "impl-team",
+      name: "builder",
+      prompt: "implement the login feature",
+    });
+    assert.equal(result.code, 0);
+    assert.ok(result.stderr.includes("isolation"), "should mention isolation in advisory");
+  });
+
+  it("does not warn when implementing agent has both team_name and worktree isolation", () => {
+    const result = runGuideHook({
+      team_name: "impl-team",
+      name: "builder",
+      isolation: "worktree",
+      prompt: "implement the login feature",
+    });
+    assert.equal(result.code, 0);
+    assert.ok(!result.stderr.includes('isolation: "worktree"'), "should not warn about isolation");
+  });
+
+  it("suggests TeamCreate when worktree used without team_name and agentTeams enabled", () => {
+    fs.writeFileSync(
+      path.join(tmpDir, ".dev-team", "config.json"),
+      JSON.stringify({ agentTeams: true }),
+    );
+    const result = runGuideHook({
+      isolation: "worktree",
+      name: "builder",
+      prompt: "implement feature",
+    });
+    assert.equal(result.code, 0);
+    assert.ok(result.stderr.includes("TeamCreate"), "should suggest TeamCreate");
+  });
+
+  it("does not suggest TeamCreate when agentTeams is not enabled", () => {
+    fs.writeFileSync(
+      path.join(tmpDir, ".dev-team", "config.json"),
+      JSON.stringify({ agentTeams: false }),
+    );
+    const result = runGuideHook({
+      isolation: "worktree",
+      name: "builder",
+      prompt: "implement feature",
+    });
+    assert.equal(result.code, 0);
+    assert.ok(!result.stderr.includes("TeamCreate"), "should not suggest TeamCreate");
+  });
+
+  it("reminds about read-only agent worktree access when spawned as teammate", () => {
+    const result = runGuideHook({
+      team_name: "review-team",
+      name: "knuth-reviewer",
+      prompt: "review the changes",
+    });
+    assert.equal(result.code, 0);
+    assert.ok(
+      result.stderr.includes("read-only") || result.stderr.includes("worktree"),
+      "should mention worktree consideration for read-only agent",
+    );
+  });
+
+  it("does not warn for read-only agent without team_name", () => {
+    const result = runGuideHook({
+      name: "szabo-security",
+      subagent_type: "read-only",
+      prompt: "audit security",
+    });
+    assert.equal(result.code, 0);
+    assert.ok(!result.stderr.includes("read-only agent"), "should not warn without team_name");
+  });
+
+  it("does not warn for implementing agent with team_name but detected as read-only", () => {
+    // Knuth is a known read-only agent — should not get the "missing isolation" warning
+    const result = runGuideHook({
+      team_name: "review-team",
+      name: "knuth",
+      prompt: "review quality",
+    });
+    assert.equal(result.code, 0);
+    assert.ok(
+      !result.stderr.includes("Add isolation"),
+      "should not tell read-only agent to add worktree isolation",
+    );
+  });
+
+  it("exits 0 on malformed input", () => {
+    try {
+      const stdout = execFileSync(process.execPath, [path.join(HOOKS_DIR, hook), "not-json"], {
+        encoding: "utf-8",
+        timeout: 5000,
+        cwd: tmpDir,
+      });
+      // If it doesn't throw, it exited 0
+      assert.ok(true);
+    } catch (err) {
+      assert.fail(`Should exit 0 on malformed input, got exit ${err.status}`);
+    }
+  });
+
+  it("exits 0 with no config file for worktree-without-team check", () => {
+    const result = runGuideHook({
+      isolation: "worktree",
+      name: "builder",
+      prompt: "implement feature",
+    });
+    assert.equal(result.code, 0);
+    // Without config, should not suggest TeamCreate
+    assert.ok(!result.stderr.includes("TeamCreate"));
+  });
+});

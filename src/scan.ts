@@ -45,7 +45,7 @@ export function scanProject(targetDir: string): ScanFinding[] {
     if (pkg) {
       try {
         const parsed = JSON.parse(pkg);
-        hasLintScript = !!(parsed.scripts && parsed.scripts.lint);
+        hasLintScript = !!(parsed.scripts && "lint" in parsed.scripts);
       } catch {
         // invalid JSON — treat as no script
       }
@@ -98,8 +98,8 @@ export function scanProject(targetDir: string): ScanFinding[] {
       try {
         const parsed = JSON.parse(fmtPkg);
         const scripts = parsed.scripts || {};
-        hasFormatScript = !!scripts.format;
-        hasFormatCheckScript = !!scripts["format:check"];
+        hasFormatScript = "format" in scripts;
+        hasFormatCheckScript = "format:check" in scripts;
       } catch {
         // invalid JSON — treat as no script
       }
