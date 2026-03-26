@@ -70,11 +70,12 @@ For non-trivial work: explore the area first, then implement, then review.
 - **Mori** — auto-flagged when API contract files change (/api/, /routes/, schema, etc.)
 - **Hamilton** — auto-flagged when infrastructure/operations files change (Dockerfile, docker-compose, CI workflows, Terraform, Helm, k8s, health checks, monitoring config, .env templates, etc.)
 - **Voss** — auto-flagged when app config/data files change (.env, config, migrations, database, etc.)
-- **Deming** — auto-flagged when tooling files change (eslint, CI workflows, package.json, etc.)
+- **Deming** — auto-flagged when tooling files change (linter/formatter config, CI workflows, package.json, etc.)
 - **Tufte** — auto-flagged when documentation files change (.md, /docs/, README, etc.) AND when significant implementation files change to detect doc-code drift
 - **Brooks** — auto-flagged when any non-test implementation code changes (quality attributes) and when architectural boundaries are touched (/adr/, /core/, /domain/, /lib/, build config, etc.)
 - **Conway** — auto-flagged when release artifacts change (package.json, changelog, version files, release/publish/deploy workflows, etc.)
 - **Turing** — on-demand only. Spawned by Drucker when task involves library selection, migration, or unfamiliar domain. Not auto-triggered by hooks.
+- **Beck** — auto-flagged when test code files change (`*.test.*`, `*.spec.*`, `__tests__/`, `/test(s)/`)
 - **Rams** — auto-flagged when frontend/UI component files change (same trigger as Mori). Gracefully no-ops when no design system is detected.
 
 **End-of-workflow agents:**
@@ -91,7 +92,12 @@ Agents challenge each other using classified findings:
 
 ### Parallel execution
 
-When working on multiple independent issues, use agent teams or worktree subagents to run parallel agents on separate branches. Drucker coordinates the review wave after all implementations complete.
+When working on multiple independent issues, combine agent teams with worktree isolation:
+
+- **Implementing agents** must use both `team_name` and `isolation: "worktree"` to prevent branch conflicts between parallel teammates.
+- **Review/read-only agents** should assess whether they need access to an implementer's worktree (to run tests or read changed files in context), or should work in their own isolation for independent analysis.
+
+Drucker coordinates the review wave after all implementations complete.
 
 > **Note:** If your project's workflow section (above the `dev-team:begin` marker) already designates the main conversation loop as the team lead, do not spawn a separate Drucker subagent — the main loop IS Drucker. Otherwise, `@dev-team-drucker` can be used as a subagent for delegation.
 
@@ -151,6 +157,7 @@ Domain-specific findings, known patterns, active watch lists. Each agent owns it
 When the human gives feedback about process, coding style, or tool behavior: write it to `.dev-team/learnings.md`. Only use machine-local memory for things that are truly personal and would not apply to another developer on the same project.
 
 <!-- dev-team:end -->
+
 
 
 
