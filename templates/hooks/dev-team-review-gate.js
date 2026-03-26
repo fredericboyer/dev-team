@@ -38,13 +38,14 @@ try {
 
 const command = (input.tool_input && input.tool_input.command) || "";
 
-// Only intercept git commit commands
-if (!/\bgit\s+commit\b/.test(command)) {
+// Only intercept git commit commands (not commit-tree, commit-graph, etc.)
+if (!/\bgit\s+commit(\s|$)/.test(command)) {
   process.exit(0);
 }
 
-// Escape hatch: --skip-review bypasses both gates
-if (/--skip-review\b/.test(command)) {
+// Escape hatch: --skip-review bypasses both gates (only match as a flag, not in commit messages)
+const argsBeforeMessage = command.replace(/\s+-m\s+(['"].*|[^\s]*).*$/, "");
+if (/--skip-review\b/.test(argsBeforeMessage)) {
   console.warn(
     "[dev-team review-gate] WARNING: --skip-review used — review gates bypassed. " +
       "This is logged as a process deviation for Borges calibration.",
