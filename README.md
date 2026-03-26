@@ -2,7 +2,7 @@
 
 Adversarial AI agent team for any project. Installs [Claude Code](https://claude.ai/claude-code) agents, hooks, and skills that enforce quality through productive friction.
 
-Instead of an AI that agrees with everything, dev-team gives you twelve opinionated specialists that challenge each other — and you. Hooks enforce the process deterministically. Agents can't skip reviews. Commits are blocked until the team signs off.
+Instead of an AI that agrees with everything, dev-team gives you fourteen opinionated specialists that challenge each other — and you. Hooks enforce the process deterministically. Agents can't skip reviews. Commits are blocked until the team signs off.
 
 ## How the system works
 
@@ -30,10 +30,15 @@ graph TB
         Conway["@dev-team-conway\nRelease Manager"]
     end
 
-    subgraph Rev["Review Agents (opus, read-only)"]
+    subgraph Rev["Review Agents (read-only)"]
         Szabo["@dev-team-szabo\nSecurity"]
         Knuth["@dev-team-knuth\nQuality"]
         Brooks["@dev-team-brooks\nArchitecture"]
+        Rams["@dev-team-rams\nDesign System"]
+    end
+
+    subgraph Research["On-demand Research"]
+        Turing["@dev-team-turing\nResearcher"]
     end
 
     subgraph End["End-of-workflow"]
@@ -47,6 +52,8 @@ graph TB
         H4["pre-commit-gate\nMemory freshness check"]
         H5["watch-list\nCustom pattern → agent"]
         H6["pre-commit-lint\nLint + format checks"]
+        H7["agent-teams-guide\nWorktree isolation guidance"]
+        H8["review-gate\nStateless commit gates"]
     end
 
     subgraph Mem["Persistent Memory"]
@@ -62,6 +69,7 @@ graph TB
     S5 -->|knowledge base audit| End
     L -->|delegates| Impl
     L -->|spawns parallel| Rev
+    L -->|on-demand| Research
     Impl -->|writes code| Hooks
     H3 -->|ACTION REQUIRED| Rev
     Rev -->|"[DEFECT] → fix"| Impl
@@ -106,7 +114,7 @@ npx @fredericboyer/dev-team create-agent <name>     # Scaffold a custom agent
 
 ## What you get
 
-### Agents (12)
+### Agents (14)
 
 | Agent | Role | Model | When to use |
 |-------|------|-------|-------------|
@@ -121,11 +129,13 @@ npx @fredericboyer/dev-team create-agent <name>     # Scaffold a custom agent
 | `@dev-team-tufte` | Documentation Engineer | sonnet | Doc accuracy, stale docs, doc-code sync |
 | `@dev-team-brooks` | Architect & Quality Reviewer | opus | Coupling, ADR compliance, quality attributes |
 | `@dev-team-conway` | Release Manager | sonnet | Versioning, changelog, semver validation |
+| `@dev-team-turing` | Pre-implementation Researcher | opus | Library evaluation, migration paths, trade-off analysis |
+| `@dev-team-rams` | Design System Reviewer | sonnet | Token compliance, spacing consistency, design-code alignment |
 | `@dev-team-borges` | Librarian | sonnet | Memory extraction, cross-agent coherence, system improvement |
 
-**Opus** agents do deep analysis — Szabo, Knuth, and Brooks are read-only reviewers; Drucker uses opus for orchestration with full access. **Sonnet** agents implement (faster, full write access). Borges runs at end-of-workflow for memory consolidation.
+**Opus** agents do deep analysis — Szabo, Knuth, Brooks, and Turing are read-only; Drucker uses opus for orchestration with full access. **Sonnet** agents implement (faster, full write access). Borges runs at end-of-workflow for memory consolidation. Rams reviews design system compliance.
 
-### Hooks (6)
+### Hooks (8)
 
 | Hook | Trigger | Behavior |
 |------|---------|----------|
@@ -134,7 +144,9 @@ npx @fredericboyer/dev-team create-agent <name>     # Scaffold a custom agent
 | Post-change review | After Edit/Write | **Flags + tracks** domain agents for review. Writes tracking file. Outputs `ACTION REQUIRED` directive. |
 | Pre-commit gate | On task completion | **Blocks** commit if flagged agents were not spawned. Advisory for memory freshness. |
 | Watch list | After Edit/Write | **Flags** custom agents based on configurable file-pattern-to-agent mappings in `dev-team.json`. |
-| Task loop | On stop | Manages iteration counting for `/dev-team:task` adversarial review loop. |
+| Pre-commit lint | Before commit | **Blocks** commit if lint or format checks fail. |
+| Agent teams guide | Before Agent spawn | **Advisory** guidance for worktree isolation and team coordination patterns. |
+| Review gate | Before commit | **Blocks** commit without review evidence. Stateless commit gates for adversarial review enforcement. |
 
 All hooks are Node.js scripts — work on macOS, Linux, and Windows.
 
@@ -286,7 +298,7 @@ Add file-pattern-to-agent mappings in `.dev-team/config.json`:
 | Preset | Agents included |
 |--------|----------------|
 | `backend` | Voss, Hamilton, Szabo, Knuth, Beck, Deming, Brooks, Conway |
-| `fullstack` | All 12 agents |
+| `fullstack` | All 14 agents |
 | `data` | Voss, Szabo, Knuth, Beck, Deming, Tufte |
 
 Drucker (orchestrator) and Borges (librarian) are included in all presets. For non-fullstack presets, invoke Drucker with `@dev-team-drucker` for automatic delegation.
@@ -303,8 +315,8 @@ Updates agents, hooks, and skills to the latest templates. Preserves your agent 
 
 ```
 .dev-team/
-  agents/              # 12 agent definitions (YAML frontmatter + prompt)
-  hooks/               # 6 quality enforcement scripts
+  agents/              # 14 agent definitions (YAML frontmatter + prompt)
+  hooks/               # 8 quality enforcement scripts
   skills/              # 5 skill definitions
   agent-memory/        # Per-agent persistent memory (never overwritten on update)
   learnings.md         # Shared team knowledge (never overwritten on update)
