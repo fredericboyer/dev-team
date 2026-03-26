@@ -86,7 +86,7 @@ Numbered list of concrete actions, ordered by priority. Each action should refer
 
 ### Security preamble
 
-Before starting the audit, check for open security alerts: run `/dev-team:security-status` if available, or use the project's security monitoring tools. Include these in the audit scope.
+Before starting the audit, check for open security alerts using the project's security monitoring process (skill or CLAUDE.md guidance), if configured. Include these in the audit scope.
 
 ### Completion
 
