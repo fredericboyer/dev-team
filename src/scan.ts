@@ -81,13 +81,25 @@ export function scanProject(targetDir: string): ScanFinding[] {
       recommendation: `${foundFormatter.tool} detected. Consider a pre-commit hook or PostToolUse hook to auto-format on save.`,
     });
   } else {
-    findings.push({
-      category: "formatter",
-      status: "missing",
-      tool: "none",
-      recommendation:
-        "No formatter detected. Add Prettier, Biome, or a language-appropriate formatter to enforce consistent style.",
-    });
+    // Check package.json for format script
+    const fmtPkg = readFile(path.join(targetDir, "package.json"));
+    if (fmtPkg && (fmtPkg.includes('"format"') || fmtPkg.includes('"format:check"'))) {
+      findings.push({
+        category: "formatter",
+        status: "found",
+        tool: "npm format script",
+        recommendation:
+          "Format script found in package.json. Consider adding a PostToolUse hook to run it automatically.",
+      });
+    } else {
+      findings.push({
+        category: "formatter",
+        status: "missing",
+        tool: "none",
+        recommendation:
+          "No formatter detected. Add Prettier, Biome, or a language-appropriate formatter to enforce consistent style.",
+      });
+    }
   }
 
   // SAST / Security scanning
