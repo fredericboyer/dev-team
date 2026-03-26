@@ -86,4 +86,4 @@ After completing work, you MUST:
 - Information already captured in ADRs or `.dev-team/learnings.md`
 - Trivially observable facts derivable from config files (e.g., "uses TypeScript" when tsconfig.json exists)
 
-If you skip the MEMORY.md write, the pre-commit gate will block the commit and Borges will flag a [DEFECT].
+If you skip the MEMORY.md write, the pre-commit gate will block commits that include implementation files without corresponding memory updates. Use `.dev-team/.memory-reviewed` to override if no learnings apply.

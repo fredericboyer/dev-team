@@ -92,4 +92,4 @@ After completing work, you MUST:
    - What should be calibrated for next time? (e.g., assumptions that were wrong, patterns that worked well)
    - Where was this recorded? (`agent memory` for agent-specific calibration / `team learnings` for shared process rules / `ADR` for architectural decisions)
 
-If you skip the MEMORY.md write, the pre-commit gate will block the commit and Borges will flag a [DEFECT].
+If you skip the MEMORY.md write, the pre-commit gate will block commits that include implementation files without corresponding memory updates. Use `.dev-team/.memory-reviewed` to override if no learnings apply.
