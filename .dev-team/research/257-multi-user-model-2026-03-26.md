@@ -169,7 +169,7 @@ Add change hashing to post-change-review hooks. Before spawning a review agent, 
 
 ## Known Issues / Caveats
 
-1. **Append-only compaction is critical**: Without Borges compaction, learnings.md will grow unboundedly in high-activity projects. The 200-line guideline must be enforced by compaction, not just convention.
+1. **Append-only compaction is critical**: Without Borges compaction, learnings.md will grow unboundedly in high-activity projects. The 200-line guideline for agent MEMORY.md files (per agent definitions) must be enforced by compaction, not just convention.
 
 2. **Session ID availability**: Claude Code exposes session context through agent teams (team name, teammate ID), but a standalone session may not have a stable ID. Fallback: generate a short UUID at session start and persist it in `.dev-team/agent-status/session-id`.
 
