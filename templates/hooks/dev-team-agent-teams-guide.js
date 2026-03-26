@@ -57,7 +57,7 @@ const isReadOnly =
   prompt.includes("audit");
 
 // Implementing agents: have team_name but no worktree isolation
-if (teamName && !isolation && !isReadOnly) {
+if (teamName && isolation !== "worktree" && !isReadOnly) {
   console.error(
     `[dev-team agent-teams-guide] Advisory: implementing teammate "${agentName || "(unnamed)"}" has team_name but no isolation: "worktree". ` +
       `Add isolation: "worktree" to prevent branch conflicts between parallel teammates.`,
