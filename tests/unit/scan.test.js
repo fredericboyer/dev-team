@@ -1,158 +1,222 @@
-'use strict';
+"use strict";
 
-const { describe, it, beforeEach, afterEach } = require('node:test');
-const assert = require('node:assert/strict');
-const fs = require('fs');
-const path = require('path');
-const os = require('os');
+const { describe, it, beforeEach, afterEach } = require("node:test");
+const assert = require("node:assert/strict");
+const fs = require("fs");
+const path = require("path");
+const os = require("os");
 
-const { scanProject, formatScanReport, parseCiScripts, parseHookCommands } = require('../../dist/scan');
+const {
+  scanProject,
+  formatScanReport,
+  parseCiScripts,
+  parseHookCommands,
+} = require("../../dist/scan");
 
 let tmpDir;
 
 beforeEach(() => {
-  tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'dev-team-scan-'));
+  tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "dev-team-scan-"));
 });
 
 afterEach(() => {
   fs.rmSync(tmpDir, { recursive: true, force: true });
 });
 
-describe('scanProject', () => {
-  it('detects ESLint config', () => {
-    fs.writeFileSync(path.join(tmpDir, '.eslintrc.json'), '{}');
+describe("scanProject", () => {
+  it("detects ESLint config", () => {
+    fs.writeFileSync(path.join(tmpDir, ".eslintrc.json"), "{}");
     const findings = scanProject(tmpDir);
-    const linter = findings.find((f) => f.category === 'linter');
-    assert.equal(linter.status, 'found');
-    assert.ok(linter.tool.includes('ESLint'));
+    const linter = findings.find((f) => f.category === "linter");
+    assert.equal(linter.status, "found");
+    assert.ok(linter.tool.includes("ESLint"));
   });
 
-  it('detects Prettier config', () => {
-    fs.writeFileSync(path.join(tmpDir, '.prettierrc'), '{}');
+  it("detects Prettier config", () => {
+    fs.writeFileSync(path.join(tmpDir, ".prettierrc"), "{}");
     const findings = scanProject(tmpDir);
-    const formatter = findings.find((f) => f.category === 'formatter');
-    assert.equal(formatter.status, 'found');
-    assert.ok(formatter.tool.includes('Prettier'));
+    const formatter = findings.find((f) => f.category === "formatter");
+    assert.equal(formatter.status, "found");
+    assert.ok(formatter.tool.includes("Prettier"));
   });
 
-  it('detects GitHub Actions', () => {
-    fs.mkdirSync(path.join(tmpDir, '.github', 'workflows'), { recursive: true });
-    fs.writeFileSync(path.join(tmpDir, '.github', 'workflows', 'ci.yml'), 'name: CI');
+  it("detects GitHub Actions", () => {
+    fs.mkdirSync(path.join(tmpDir, ".github", "workflows"), { recursive: true });
+    fs.writeFileSync(path.join(tmpDir, ".github", "workflows", "ci.yml"), "name: CI");
     const findings = scanProject(tmpDir);
-    const ci = findings.find((f) => f.category === 'ci');
-    assert.equal(ci.status, 'found');
-    assert.ok(ci.tool.includes('GitHub Actions'));
+    const ci = findings.find((f) => f.category === "ci");
+    assert.equal(ci.status, "found");
+    assert.ok(ci.tool.includes("GitHub Actions"));
   });
 
-  it('detects Semgrep SAST config', () => {
-    fs.writeFileSync(path.join(tmpDir, '.semgrep.yml'), 'rules: []');
+  it("detects Semgrep SAST config", () => {
+    fs.writeFileSync(path.join(tmpDir, ".semgrep.yml"), "rules: []");
     const findings = scanProject(tmpDir);
-    const sast = findings.find((f) => f.category === 'sast');
-    assert.equal(sast.status, 'found');
-    assert.ok(sast.tool.includes('Semgrep'));
+    const sast = findings.find((f) => f.category === "sast");
+    assert.equal(sast.status, "found");
+    assert.ok(sast.tool.includes("Semgrep"));
   });
 
-  it('detects npm lock file for dependency audit', () => {
-    fs.writeFileSync(path.join(tmpDir, 'package-lock.json'), '{}');
+  it("detects npm lock file for dependency audit", () => {
+    fs.writeFileSync(path.join(tmpDir, "package-lock.json"), "{}");
     const findings = scanProject(tmpDir);
-    const dep = findings.find((f) => f.category === 'dependency');
-    assert.equal(dep.status, 'found');
-    assert.ok(dep.tool.includes('npm audit'));
+    const dep = findings.find((f) => f.category === "dependency");
+    assert.equal(dep.status, "found");
+    assert.ok(dep.tool.includes("npm audit"));
   });
 
-  it('reports missing tooling for empty project', () => {
+  it("reports missing tooling for empty project", () => {
     const findings = scanProject(tmpDir);
-    const missing = findings.filter((f) => f.status === 'missing');
+    const missing = findings.filter((f) => f.status === "missing");
     // Should detect missing linter, formatter, SAST, CI at minimum
     assert.ok(missing.length >= 4, `expected at least 4 missing categories, got ${missing.length}`);
   });
 
-  it('detects both linter and formatter when both configs exist', () => {
-    fs.writeFileSync(path.join(tmpDir, '.eslintrc.json'), '{}');
-    fs.writeFileSync(path.join(tmpDir, '.prettierrc'), '{}');
+  it("detects both linter and formatter when both configs exist", () => {
+    fs.writeFileSync(path.join(tmpDir, ".eslintrc.json"), "{}");
+    fs.writeFileSync(path.join(tmpDir, ".prettierrc"), "{}");
     const findings = scanProject(tmpDir);
-    const linter = findings.find((f) => f.category === 'linter');
-    const formatter = findings.find((f) => f.category === 'formatter');
-    assert.equal(linter.status, 'found');
-    assert.ok(linter.tool.includes('ESLint'));
-    assert.equal(formatter.status, 'found');
-    assert.ok(formatter.tool.includes('Prettier'));
+    const linter = findings.find((f) => f.category === "linter");
+    const formatter = findings.find((f) => f.category === "formatter");
+    assert.equal(linter.status, "found");
+    assert.ok(linter.tool.includes("ESLint"));
+    assert.equal(formatter.status, "found");
+    assert.ok(formatter.tool.includes("Prettier"));
   });
 
-  it('handles package.json with empty scripts key', () => {
+  it("handles package.json with empty scripts key", () => {
+    fs.writeFileSync(path.join(tmpDir, "package.json"), JSON.stringify({ scripts: {} }));
+    const findings = scanProject(tmpDir);
+    const linter = findings.find((f) => f.category === "linter");
+    assert.equal(linter.status, "missing", "linter should be missing with empty scripts");
+  });
+
+  it("detects lint script in package.json when no config file exists", () => {
     fs.writeFileSync(
-      path.join(tmpDir, 'package.json'),
-      JSON.stringify({ scripts: {} }),
+      path.join(tmpDir, "package.json"),
+      JSON.stringify({ scripts: { lint: "eslint ." } }),
     );
     const findings = scanProject(tmpDir);
-    const linter = findings.find((f) => f.category === 'linter');
-    assert.equal(linter.status, 'missing', 'linter should be missing with empty scripts');
+    const linter = findings.find((f) => f.category === "linter");
+    assert.equal(linter.status, "found");
+    assert.ok(linter.tool.includes("npm lint"));
   });
 
-  it('detects lint script in package.json when no config file exists', () => {
+  it("detects format script in package.json when no formatter config file exists", () => {
     fs.writeFileSync(
-      path.join(tmpDir, 'package.json'),
-      JSON.stringify({ scripts: { lint: 'eslint .' } }),
+      path.join(tmpDir, "package.json"),
+      JSON.stringify({ scripts: { format: "oxfmt ." } }),
     );
     const findings = scanProject(tmpDir);
-    const linter = findings.find((f) => f.category === 'linter');
-    assert.equal(linter.status, 'found');
-    assert.ok(linter.tool.includes('npm lint'));
+    const formatter = findings.find((f) => f.category === "formatter");
+    assert.equal(formatter.status, "found");
+    assert.ok(formatter.tool.includes("npm format"));
   });
 
-  it('detects Biome as both linter and formatter from single config', () => {
-    fs.writeFileSync(path.join(tmpDir, 'biome.json'), '{}');
+  it("detects format:check script in package.json when no formatter config file exists", () => {
+    fs.writeFileSync(
+      path.join(tmpDir, "package.json"),
+      JSON.stringify({ scripts: { "format:check": "oxfmt --check ." } }),
+    );
     const findings = scanProject(tmpDir);
-    const linter = findings.find((f) => f.category === 'linter');
-    const formatter = findings.find((f) => f.category === 'formatter');
-    assert.equal(linter.status, 'found');
-    assert.ok(linter.tool.includes('Biome'));
-    assert.equal(formatter.status, 'found');
-    assert.ok(formatter.tool.includes('Biome'));
+    const formatter = findings.find((f) => f.category === "formatter");
+    assert.equal(formatter.status, "found");
+    assert.equal(formatter.tool, "npm format:check script");
   });
 
-  it('detects pyproject.toml as linter config', () => {
-    fs.writeFileSync(path.join(tmpDir, 'pyproject.toml'), '[tool.ruff]\n');
+  it("prefers formatter config file over package.json format script", () => {
+    fs.writeFileSync(path.join(tmpDir, ".prettierrc"), "{}");
+    fs.writeFileSync(
+      path.join(tmpDir, "package.json"),
+      JSON.stringify({ scripts: { format: "prettier --write ." } }),
+    );
     const findings = scanProject(tmpDir);
-    const linter = findings.find((f) => f.category === 'linter');
-    assert.equal(linter.status, 'found');
-    assert.ok(linter.tool.includes('ruff'));
+    const formatter = findings.find((f) => f.category === "formatter");
+    assert.equal(formatter.status, "found");
+    assert.ok(
+      formatter.tool.includes("Prettier"),
+      "should prefer config file detection over script",
+    );
+  });
+
+  it("reports missing formatter when package.json has no format script", () => {
+    fs.writeFileSync(
+      path.join(tmpDir, "package.json"),
+      JSON.stringify({ scripts: { lint: "eslint ." } }),
+    );
+    const findings = scanProject(tmpDir);
+    const formatter = findings.find((f) => f.category === "formatter");
+    assert.equal(formatter.status, "missing");
+  });
+
+  it("does not false-positive on dependency named format without format script", () => {
+    fs.writeFileSync(
+      path.join(tmpDir, "package.json"),
+      JSON.stringify({
+        dependencies: { format: "^1.0.0" },
+        scripts: { lint: "eslint ." },
+      }),
+    );
+    const findings = scanProject(tmpDir);
+    const formatter = findings.find((f) => f.category === "formatter");
+    assert.equal(
+      formatter.status,
+      "missing",
+      "dependency named 'format' should not trigger formatter detection",
+    );
+  });
+
+  it("detects Biome as both linter and formatter from single config", () => {
+    fs.writeFileSync(path.join(tmpDir, "biome.json"), "{}");
+    const findings = scanProject(tmpDir);
+    const linter = findings.find((f) => f.category === "linter");
+    const formatter = findings.find((f) => f.category === "formatter");
+    assert.equal(linter.status, "found");
+    assert.ok(linter.tool.includes("Biome"));
+    assert.equal(formatter.status, "found");
+    assert.ok(formatter.tool.includes("Biome"));
+  });
+
+  it("detects pyproject.toml as linter config", () => {
+    fs.writeFileSync(path.join(tmpDir, "pyproject.toml"), "[tool.ruff]\n");
+    const findings = scanProject(tmpDir);
+    const linter = findings.find((f) => f.category === "linter");
+    assert.equal(linter.status, "found");
+    assert.ok(linter.tool.includes("ruff"));
   });
 });
 
-describe('enforcement gap detection', () => {
-  it('flags gap when CI has lint script but no hook installed', () => {
+describe("enforcement gap detection", () => {
+  it("flags gap when CI has lint script but no hook installed", () => {
     fs.writeFileSync(
-      path.join(tmpDir, 'package.json'),
-      JSON.stringify({ scripts: { lint: 'eslint .', test: 'jest' } }),
+      path.join(tmpDir, "package.json"),
+      JSON.stringify({ scripts: { lint: "eslint .", test: "jest" } }),
     );
     const findings = scanProject(tmpDir);
-    const gaps = findings.filter(
-      (f) => f.category === 'enforcement' && f.status === 'gap',
-    );
-    assert.ok(gaps.length > 0, 'expected at least one enforcement gap');
-    const lintGap = gaps.find((f) => f.tool === 'lint');
-    assert.ok(lintGap, 'expected a gap for lint');
-    assert.ok(lintGap.recommendation.includes('dev-team-pre-commit-lint.js'));
+    const gaps = findings.filter((f) => f.category === "enforcement" && f.status === "gap");
+    assert.ok(gaps.length > 0, "expected at least one enforcement gap");
+    const lintGap = gaps.find((f) => f.tool === "lint");
+    assert.ok(lintGap, "expected a gap for lint");
+    assert.ok(lintGap.recommendation.includes("dev-team-pre-commit-lint.js"));
   });
 
-  it('reports found when CI lint script has matching hook', () => {
+  it("reports found when CI lint script has matching hook", () => {
     fs.writeFileSync(
-      path.join(tmpDir, 'package.json'),
-      JSON.stringify({ scripts: { lint: 'eslint .' } }),
+      path.join(tmpDir, "package.json"),
+      JSON.stringify({ scripts: { lint: "eslint ." } }),
     );
-    fs.mkdirSync(path.join(tmpDir, '.claude'), { recursive: true });
+    fs.mkdirSync(path.join(tmpDir, ".claude"), { recursive: true });
     fs.writeFileSync(
-      path.join(tmpDir, '.claude', 'settings.json'),
+      path.join(tmpDir, ".claude", "settings.json"),
       JSON.stringify({
         hooks: {
           PreToolUse: [
             {
-              matcher: 'Bash',
+              matcher: "Bash",
               hooks: [
                 {
-                  type: 'command',
-                  command: 'node .dev-team/hooks/dev-team-pre-commit-lint.js',
+                  type: "command",
+                  command: "node .dev-team/hooks/dev-team-pre-commit-lint.js",
                 },
               ],
             },
@@ -161,31 +225,29 @@ describe('enforcement gap detection', () => {
       }),
     );
     const findings = scanProject(tmpDir);
-    const lintEnforcement = findings.find(
-      (f) => f.category === 'enforcement' && f.tool === 'lint',
-    );
-    assert.ok(lintEnforcement, 'expected enforcement finding for lint');
-    assert.equal(lintEnforcement.status, 'found');
-    assert.ok(lintEnforcement.recommendation.includes('covered locally'));
+    const lintEnforcement = findings.find((f) => f.category === "enforcement" && f.tool === "lint");
+    assert.ok(lintEnforcement, "expected enforcement finding for lint");
+    assert.equal(lintEnforcement.status, "found");
+    assert.ok(lintEnforcement.recommendation.includes("covered locally"));
   });
 
-  it('reports test script as partially covered by tdd-enforce hook', () => {
+  it("reports test script as partially covered by tdd-enforce hook", () => {
     fs.writeFileSync(
-      path.join(tmpDir, 'package.json'),
-      JSON.stringify({ scripts: { test: 'jest' } }),
+      path.join(tmpDir, "package.json"),
+      JSON.stringify({ scripts: { test: "jest" } }),
     );
-    fs.mkdirSync(path.join(tmpDir, '.claude'), { recursive: true });
+    fs.mkdirSync(path.join(tmpDir, ".claude"), { recursive: true });
     fs.writeFileSync(
-      path.join(tmpDir, '.claude', 'settings.json'),
+      path.join(tmpDir, ".claude", "settings.json"),
       JSON.stringify({
         hooks: {
           PostToolUse: [
             {
-              matcher: 'Edit|Write',
+              matcher: "Edit|Write",
               hooks: [
                 {
-                  type: 'command',
-                  command: 'node .dev-team/hooks/dev-team-tdd-enforce.js',
+                  type: "command",
+                  command: "node .dev-team/hooks/dev-team-tdd-enforce.js",
                 },
               ],
             },
@@ -194,133 +256,117 @@ describe('enforcement gap detection', () => {
       }),
     );
     const findings = scanProject(tmpDir);
-    const testEnforcement = findings.find(
-      (f) => f.category === 'enforcement' && f.tool === 'test',
-    );
-    assert.ok(testEnforcement, 'expected enforcement finding for test');
-    assert.equal(testEnforcement.status, 'found');
-    assert.ok(testEnforcement.recommendation.includes('partially covered'));
+    const testEnforcement = findings.find((f) => f.category === "enforcement" && f.tool === "test");
+    assert.ok(testEnforcement, "expected enforcement finding for test");
+    assert.equal(testEnforcement.status, "found");
+    assert.ok(testEnforcement.recommendation.includes("partially covered"));
   });
 
-  it('flags gap for CI scripts with no known hook mapping', () => {
+  it("flags gap for CI scripts with no known hook mapping", () => {
     fs.writeFileSync(
-      path.join(tmpDir, 'package.json'),
-      JSON.stringify({ scripts: { build: 'tsc', typecheck: 'tsc --noEmit' } }),
+      path.join(tmpDir, "package.json"),
+      JSON.stringify({ scripts: { build: "tsc", typecheck: "tsc --noEmit" } }),
     );
     const findings = scanProject(tmpDir);
-    const gaps = findings.filter(
-      (f) => f.category === 'enforcement' && f.status === 'gap',
-    );
-    const buildGap = gaps.find((f) => f.tool === 'build');
-    const typecheckGap = gaps.find((f) => f.tool === 'typecheck');
-    assert.ok(buildGap, 'expected a gap for build');
-    assert.ok(typecheckGap, 'expected a gap for typecheck');
-    assert.ok(buildGap.recommendation.includes('no local hook'));
+    const gaps = findings.filter((f) => f.category === "enforcement" && f.status === "gap");
+    const buildGap = gaps.find((f) => f.tool === "build");
+    const typecheckGap = gaps.find((f) => f.tool === "typecheck");
+    assert.ok(buildGap, "expected a gap for build");
+    assert.ok(typecheckGap, "expected a gap for typecheck");
+    assert.ok(buildGap.recommendation.includes("no local hook"));
   });
 
-  it('produces no enforcement findings when no package.json exists', () => {
+  it("produces no enforcement findings when no package.json exists", () => {
     const findings = scanProject(tmpDir);
-    const enforcement = findings.filter((f) => f.category === 'enforcement');
-    assert.equal(
-      enforcement.length,
-      0,
-      'expected no enforcement findings without package.json',
-    );
+    const enforcement = findings.filter((f) => f.category === "enforcement");
+    assert.equal(enforcement.length, 0, "expected no enforcement findings without package.json");
   });
 
-  it('flags gap when CI scripts exist but settings.json is empty', () => {
+  it("flags gap when CI scripts exist but settings.json is empty", () => {
     fs.writeFileSync(
-      path.join(tmpDir, 'package.json'),
-      JSON.stringify({ scripts: { lint: 'eslint .' } }),
+      path.join(tmpDir, "package.json"),
+      JSON.stringify({ scripts: { lint: "eslint ." } }),
     );
-    fs.mkdirSync(path.join(tmpDir, '.claude'), { recursive: true });
-    fs.writeFileSync(
-      path.join(tmpDir, '.claude', 'settings.json'),
-      JSON.stringify({}),
-    );
+    fs.mkdirSync(path.join(tmpDir, ".claude"), { recursive: true });
+    fs.writeFileSync(path.join(tmpDir, ".claude", "settings.json"), JSON.stringify({}));
     const findings = scanProject(tmpDir);
-    const gaps = findings.filter(
-      (f) => f.category === 'enforcement' && f.status === 'gap',
-    );
-    assert.ok(gaps.length > 0, 'expected enforcement gap with empty settings');
-    const lintGap = gaps.find((f) => f.tool === 'lint');
-    assert.ok(lintGap, 'expected a gap for lint with empty settings');
+    const gaps = findings.filter((f) => f.category === "enforcement" && f.status === "gap");
+    assert.ok(gaps.length > 0, "expected enforcement gap with empty settings");
+    const lintGap = gaps.find((f) => f.tool === "lint");
+    assert.ok(lintGap, "expected a gap for lint with empty settings");
   });
 });
 
-describe('parseCiScripts', () => {
-  it('extracts CI-relevant scripts from package.json', () => {
+describe("parseCiScripts", () => {
+  it("extracts CI-relevant scripts from package.json", () => {
     fs.writeFileSync(
-      path.join(tmpDir, 'package.json'),
+      path.join(tmpDir, "package.json"),
       JSON.stringify({
         scripts: {
-          lint: 'eslint .',
-          'format:check': 'prettier --check .',
-          dev: 'nodemon',
+          lint: "eslint .",
+          "format:check": "prettier --check .",
+          dev: "nodemon",
         },
       }),
     );
     const scripts = parseCiScripts(tmpDir);
-    assert.ok(scripts.includes('lint'));
-    assert.ok(scripts.includes('format:check'));
-    assert.ok(!scripts.includes('dev'), 'dev is not a CI-relevant script');
+    assert.ok(scripts.includes("lint"));
+    assert.ok(scripts.includes("format:check"));
+    assert.ok(!scripts.includes("dev"), "dev is not a CI-relevant script");
   });
 
-  it('returns empty array when no package.json exists', () => {
+  it("returns empty array when no package.json exists", () => {
     const scripts = parseCiScripts(tmpDir);
     assert.deepEqual(scripts, []);
   });
 
-  it('returns empty array for invalid JSON', () => {
-    fs.writeFileSync(path.join(tmpDir, 'package.json'), 'not json');
+  it("returns empty array for invalid JSON", () => {
+    fs.writeFileSync(path.join(tmpDir, "package.json"), "not json");
     const scripts = parseCiScripts(tmpDir);
     assert.deepEqual(scripts, []);
   });
 
-  it('returns empty array when scripts key is empty', () => {
+  it("returns empty array when scripts key is empty", () => {
+    fs.writeFileSync(path.join(tmpDir, "package.json"), JSON.stringify({ scripts: {} }));
+    const scripts = parseCiScripts(tmpDir);
+    assert.deepEqual(scripts, []);
+  });
+
+  it("returns empty array when all scripts are non-CI-relevant", () => {
     fs.writeFileSync(
-      path.join(tmpDir, 'package.json'),
-      JSON.stringify({ scripts: {} }),
-    );
-    const scripts = parseCiScripts(tmpDir);
-    assert.deepEqual(scripts, []);
-  });
-
-  it('returns empty array when all scripts are non-CI-relevant', () => {
-    fs.writeFileSync(
-      path.join(tmpDir, 'package.json'),
-      JSON.stringify({ scripts: { dev: 'nodemon', start: 'node .' } }),
+      path.join(tmpDir, "package.json"),
+      JSON.stringify({ scripts: { dev: "nodemon", start: "node ." } }),
     );
     const scripts = parseCiScripts(tmpDir);
     assert.deepEqual(scripts, []);
   });
 });
 
-describe('parseHookCommands', () => {
-  it('extracts hook commands from settings.json', () => {
-    fs.mkdirSync(path.join(tmpDir, '.claude'), { recursive: true });
+describe("parseHookCommands", () => {
+  it("extracts hook commands from settings.json", () => {
+    fs.mkdirSync(path.join(tmpDir, ".claude"), { recursive: true });
     fs.writeFileSync(
-      path.join(tmpDir, '.claude', 'settings.json'),
+      path.join(tmpDir, ".claude", "settings.json"),
       JSON.stringify({
         hooks: {
           PreToolUse: [
             {
-              matcher: 'Bash',
+              matcher: "Bash",
               hooks: [
                 {
-                  type: 'command',
-                  command: 'node .dev-team/hooks/dev-team-pre-commit-lint.js',
+                  type: "command",
+                  command: "node .dev-team/hooks/dev-team-pre-commit-lint.js",
                 },
               ],
             },
           ],
           PostToolUse: [
             {
-              matcher: 'Edit|Write',
+              matcher: "Edit|Write",
               hooks: [
                 {
-                  type: 'command',
-                  command: 'node .dev-team/hooks/dev-team-tdd-enforce.js',
+                  type: "command",
+                  command: "node .dev-team/hooks/dev-team-tdd-enforce.js",
                 },
               ],
             },
@@ -329,88 +375,76 @@ describe('parseHookCommands', () => {
       }),
     );
     const commands = parseHookCommands(tmpDir);
-    assert.ok(
-      commands.includes('node .dev-team/hooks/dev-team-pre-commit-lint.js'),
-    );
-    assert.ok(
-      commands.includes('node .dev-team/hooks/dev-team-tdd-enforce.js'),
-    );
+    assert.ok(commands.includes("node .dev-team/hooks/dev-team-pre-commit-lint.js"));
+    assert.ok(commands.includes("node .dev-team/hooks/dev-team-tdd-enforce.js"));
   });
 
-  it('returns empty array when no settings.json exists', () => {
+  it("returns empty array when no settings.json exists", () => {
     const commands = parseHookCommands(tmpDir);
     assert.deepEqual(commands, []);
   });
 
-  it('returns empty array for invalid JSON', () => {
-    fs.mkdirSync(path.join(tmpDir, '.claude'), { recursive: true });
-    fs.writeFileSync(
-      path.join(tmpDir, '.claude', 'settings.json'),
-      'not json',
-    );
+  it("returns empty array for invalid JSON", () => {
+    fs.mkdirSync(path.join(tmpDir, ".claude"), { recursive: true });
+    fs.writeFileSync(path.join(tmpDir, ".claude", "settings.json"), "not json");
     const commands = parseHookCommands(tmpDir);
     assert.deepEqual(commands, []);
   });
 });
 
-
-describe('formatScanReport', () => {
-  it('formats findings as readable report', () => {
+describe("formatScanReport", () => {
+  it("formats findings as readable report", () => {
     const findings = [
-      { category: 'linter', status: 'found', tool: 'ESLint', recommendation: 'ok' },
-      { category: 'formatter', status: 'missing', tool: 'none', recommendation: 'Add Prettier' },
+      { category: "linter", status: "found", tool: "ESLint", recommendation: "ok" },
+      { category: "formatter", status: "missing", tool: "none", recommendation: "Add Prettier" },
     ];
     const report = formatScanReport(findings);
-    assert.ok(report.includes('[OK]'));
-    assert.ok(report.includes('[MISSING]'));
-    assert.ok(report.includes('ESLint'));
-    assert.ok(report.includes('Add Prettier'));
+    assert.ok(report.includes("[OK]"));
+    assert.ok(report.includes("[MISSING]"));
+    assert.ok(report.includes("ESLint"));
+    assert.ok(report.includes("Add Prettier"));
   });
 
-  it('reports all OK when nothing is missing', () => {
+  it("reports all OK when nothing is missing", () => {
     const findings = [
-      { category: 'linter', status: 'found', tool: 'ESLint', recommendation: 'ok' },
+      { category: "linter", status: "found", tool: "ESLint", recommendation: "ok" },
     ];
     const report = formatScanReport(findings);
-    assert.ok(report.includes('All checked tooling'));
+    assert.ok(report.includes("All checked tooling"));
   });
-  it('formats gap findings with [GAP] tag', () => {
+  it("formats gap findings with [GAP] tag", () => {
     const findings = [
       {
-        category: 'enforcement',
-        status: 'gap',
-        tool: 'build',
+        category: "enforcement",
+        status: "gap",
+        tool: "build",
         recommendation: 'CI runs "build" but no local hook enforces it.',
       },
     ];
     const report = formatScanReport(findings);
-    assert.ok(report.includes('[GAP]'));
-    assert.ok(report.includes('enforcement'));
-    assert.ok(report.includes('no local hook'));
+    assert.ok(report.includes("[GAP]"));
+    assert.ok(report.includes("enforcement"));
+    assert.ok(report.includes("no local hook"));
   });
 
-  it('does not show all-OK message when gaps exist', () => {
+  it("does not show all-OK message when gaps exist", () => {
     const findings = [
       {
-        category: 'linter',
-        status: 'found',
-        tool: 'ESLint',
-        recommendation: 'ok',
+        category: "linter",
+        status: "found",
+        tool: "ESLint",
+        recommendation: "ok",
       },
       {
-        category: 'enforcement',
-        status: 'gap',
-        tool: 'build',
+        category: "enforcement",
+        status: "gap",
+        tool: "build",
         recommendation: 'CI runs "build" but no local hook enforces it.',
       },
     ];
     const report = formatScanReport(findings);
-    assert.ok(
-      !report.includes('All checked tooling'),
-      'should not show all-OK when gaps exist',
-    );
-    assert.ok(report.includes('[GAP]'));
-    assert.ok(report.includes('Tip:'));
+    assert.ok(!report.includes("All checked tooling"), "should not show all-OK when gaps exist");
+    assert.ok(report.includes("[GAP]"));
+    assert.ok(report.includes("Tip:"));
   });
-
 });
