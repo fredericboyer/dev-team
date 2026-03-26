@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-03-26
+
+### Added
+- Shared file-pattern matching extracted into `agent-patterns.json` for hook and review routing consistency (#344).
+- Agent timeout guidance and progress reporting added to skills and agent definitions (#343).
+- Meaningful agent teammate naming convention enforced via hook (#336).
+- Adversarial review loop enforcement via stateless commit gates (#331).
+- Borges completion warning added to pre-commit gate (#317).
+- README validation script to detect stale agent/hook counts (#346).
+- Concurrent multi-user usage model research brief (#330).
+
+### Changed
+- Agent definitions updated with research-backed instruction surface improvements (#347).
+- Finding acknowledgment clarified and multi-branch outcome logs supported (#329).
+- 200-line guideline attribution corrected in multi-user research brief (#340).
+
+### Fixed
+- Finding routing in task loop now enforces all classified findings, merge skill usage, and Borges completion (#345).
+- Review-gate hook edge cases covered with missing test cases (#342).
+- Hamilton routing updated to include healthcheck variant (#328).
+- Pre-commit gate wording in agent templates aligned with actual behavior (#327).
+- Deferred findings from v1.2.0 tracked as GitHub issues (#324).
+- Deming trigger example updated to generic linter/formatter config (#316).
+- Release automation learning added to shared learnings (#310).
+
 ## [1.3.0] - 2026-03-26
 
 ### Added
