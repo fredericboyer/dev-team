@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-03-26
+
+### Added
+- Agent-teams-guide hook for TeamCreate and worktree enforcement (#306).
+- Deferred findings conversion tracking in retro skill (#305).
+
+### Changed
+- `/dev-team:assess` renamed to `/dev-team:retro` (#297).
+- Project-specific skills dropped `dev-team` prefix (#290).
+- Template references to merge/security-status skills made generic (#304).
+
+### Fixed
+- Review skill routing table aligned with hook patterns — Beck, Brooks, Hamilton gaps resolved (#303).
+- Copilot login detection now handles `[bot]` suffix via regex matching (#307).
+- Script detection aligned to use key-existence checks consistently (#308).
+- Disambiguated 'Promotion opportunities' section names in retro skill (#301).
+- Formatter detection package.json fallback added (#292).
+- Dual Learning / Learnings Output sections consolidated in agent definitions (#293).
+- Deferred findings tracking rule added to shared learnings (#296).
+- Conway milestone closure promoted to shared learnings (#291).
+
 ## [1.2.0] - 2026-03-25
 
 ### Fixed
