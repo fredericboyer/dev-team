@@ -1,5 +1,5 @@
 ---
-name: dev-team:merge
+name: merge
 description: Merge a PR with monitoring -- checks Copilot comments, sets auto-merge, monitors until complete, triggers next steps.
 user_invocable: true
 ---
