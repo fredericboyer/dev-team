@@ -19,7 +19,7 @@ Run a comprehensive audit of: $ARGUMENTS
 
 ## Execution
 
-1. Spawn all three agents as **parallel background subagents** using the Agent tool with `subagent_type: "general-purpose"`.
+1. Spawn all three agents as **parallel background subagents** using the Agent tool with `subagent_type: "general-purpose"`. Use the agent teammate naming convention: `szabo-audit`, `knuth-audit`, `deming-audit`.
 
 2. Each agent's prompt must include:
    - The agent's full definition (read from `.dev-team/agents/<agent>.md`)
@@ -91,6 +91,6 @@ Before starting the audit, check for open security alerts: run `/dev-team:securi
 ### Completion
 
 After the audit report is delivered:
-1. You MUST spawn **@dev-team-borges** (Librarian) as the final step to review memory freshness and capture learnings from the audit findings. Do NOT skip this.
+1. You MUST spawn **@dev-team-borges** as `borges-extract` (Librarian) as the final step to review memory freshness and capture learnings from the audit findings. Do NOT skip this.
 2. If Borges was not spawned, the audit is INCOMPLETE.
 3. Include Borges's recommendations in the final report.

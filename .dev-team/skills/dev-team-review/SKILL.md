@@ -38,7 +38,7 @@ Before spawning reviewers, verify the changes are reviewable:
 
 ## Execution
 
-1. Spawn each selected agent as a **parallel background subagent** using the Agent tool with `subagent_type: "general-purpose"`.
+1. Spawn each selected agent as a **parallel background subagent** using the Agent tool with `subagent_type: "general-purpose"`. Use the agent teammate naming convention: `{agent}-review` (e.g., `szabo-review`, `knuth-review`, `brooks-review`).
 
 2. Each agent's prompt must include:
    - The agent's full definition (read from `.dev-team/agents/<agent>.md`)
@@ -103,7 +103,7 @@ Before starting the review, check for open security alerts using the project's s
 ### Completion
 
 After the review report is delivered:
-1. You MUST spawn **@dev-team-borges** (Librarian) as the final step. Pass Borges the **finding outcome log**: every finding with its classification, source agent, and outcome (accepted/overruled/ignored), including reasoning for overrules. Borges will:
+1. You MUST spawn **@dev-team-borges** as `borges-extract` (Librarian) as the final step. Pass Borges the **finding outcome log**: every finding with its classification, source agent, and outcome (accepted/overruled/ignored), including reasoning for overrules. Borges will:
    - **Extract structured memory entries** from the review findings (each classified finding becomes a memory entry for the reviewer who produced it)
    - **Reinforce accepted patterns** and **record overruled findings** for reviewer calibration
    - **Generate calibration rules** when 3+ findings on the same tag are overruled

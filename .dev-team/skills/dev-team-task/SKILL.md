@@ -119,10 +119,10 @@ Spawn @dev-team-brooks once with all issues. Brooks identifies:
 Issues in the same conflict group execute sequentially. Independent issues proceed in parallel.
 
 ### Phase 1: Parallel implementation
-Drucker spawns one implementing agent per independent issue, each on its own branch (`feat/<issue>-<description>`). Agents work concurrently without awareness of each other. Drucker tracks which issues are assigned to which agents and branches in conversation context.
+Drucker spawns one implementing agent per independent issue, each on its own branch (`feat/<issue>-<description>`). Use the agent teammate naming convention: `{agent}-implement[-{qualifier}]` (e.g., `voss-implement`, `deming-implement-auth`, `tufte-implement-319`). Agents work concurrently without awareness of each other. Drucker tracks which issues are assigned to which agents and branches in conversation context.
 
 ### Phase 2: Review wave
-Reviews do **not** start until **all** implementation agents have completed (Agent tool provides completion notifications as the sync barrier). Once all are done, spawn review agents (Szabo + Knuth, plus conditional reviewers) in parallel across all branches simultaneously. Each reviewer receives the diff for one specific branch and produces classified findings scoped to that branch.
+Reviews do **not** start until **all** implementation agents have completed (Agent tool provides completion notifications as the sync barrier). Once all are done, spawn review agents using the naming convention `{agent}-review` (e.g., `szabo-review`, `knuth-review`, `brooks-review`) in parallel across all branches simultaneously. Each reviewer receives the diff for one specific branch and produces classified findings scoped to that branch.
 
 ### Phase 3: Finding routing
 Collect all findings across all branches. Route **all classified findings** — `[DEFECT]`, `[RISK]`, `[QUESTION]`, `[SUGGESTION]` — back to the original implementing agent for each branch. Each agent must acknowledge every finding (address/defer/dispute). Disputes follow the same protocol as single-issue mode: one-round escalation between implementer and reviewer, then human decides. A disputed finding blocks only the affected branch, not the entire batch. Only `[DEFECT]` findings block progress. Agents fix defects on their own branch. Before spawning the next review wave, **compact context**: produce a structured summary of all findings, their classification, and final outcome (fixed/accepted/deferred/overruled/ignored), plus files changed. New reviewers receive current diff + compact summary only — not full conversation history from prior waves. Continue until no `[DEFECT]` findings remain or the per-branch iteration limit is reached.
@@ -144,7 +144,7 @@ Before starting work, check for open security alerts using the project's securit
 When the loop exits:
 1. **Deliver the work**: If changes are on a feature branch, create the PR (body must include `Closes #<issue>`). Ensure the PR is ready to merge: CI green, reviews passed, branch up to date. If the project provides a merge workflow (e.g., a `/merge` skill or CLAUDE.md guidance), use it; if no such workflow exists, ensure the PR is mergeable and report readiness. If merge fails (CI failures, merge conflicts, branch protection), report the blocker to the human rather than leaving work unattended.
 2. **Clean up worktree**: If the work was done in a worktree, clean it up after the branch is pushed and the PR is created. Do not wait for merge to clean the worktree.
-3. You MUST spawn **@dev-team-borges** (Librarian) as the final step. Format and pass Borges the **finding outcome log** using this structured format:
+3. You MUST spawn **@dev-team-borges** as `borges-extract` (Librarian) as the final step. Format and pass Borges the **finding outcome log** using this structured format:
 
    **Single-branch format:**
    ```
