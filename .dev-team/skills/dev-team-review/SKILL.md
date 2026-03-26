@@ -16,16 +16,19 @@ Run a multi-agent parallel review of: $ARGUMENTS
 
 | File pattern | Agent | Reason |
 |---|---|---|
-| `auth`, `login`, `password`, `token`, `session`, `crypto`, `secret`, `permission`, `oauth`, `jwt`, `cors`, `csrf` | @dev-team-szabo | Security surface |
-| `/api/`, `/routes/`, `schema`, `.graphql`, `.proto`, `openapi` | @dev-team-mori | API/UI contract |
-| `docker`, `.env`, `config`, `migration`, `database`, `.sql`, `deploy` | @dev-team-voss | Infrastructure |
-| `.github/workflows`, `.dev-team/`, `tsconfig`, `eslint`, `prettier`, `package.json` | @dev-team-deming | Tooling |
-| `readme`, `changelog`, `.md`, `/docs/` | @dev-team-tufte | Documentation |
-| `/adr/`, `architecture`, `/core/`, `/domain/` | @dev-team-brooks | Architecture |
-| `package.json`, `version`, `changelog`, release workflows | @dev-team-conway | Release artifacts |
+| `auth`, `login`, `password`, `token`, `session`, `crypto`, `encrypt`, `decrypt`, `secret`, `permission`, `rbac`, `acl`, `oauth`, `jwt`, `cors`, `csrf`, `sanitiz`, `escap` | @dev-team-szabo | Security surface |
+| `/api/`, `/route/`, `/routes/`, `/endpoint/`, `/endpoints/`, `schema`, `.graphql`, `.proto`, `openapi`, `swagger` | @dev-team-mori | API/UI contract |
+| `docker`, `Dockerfile`, `docker-compose`, `.dockerignore`, `.env.example`, `env.template`, `deploy`, `terraform/`, `.tf`, `.tfvars`, `pulumi/`, `cloudformation/`, `helm`, `k8s`, `kubernetes`, `health-check`, `monitoring.yml`, `monitoring.yaml`, `monitoring.json`, `observability`, `otel`, `alerting.yml`, `alerting.yaml`, `alerting.json`, `logging.yml`, `logging.yaml`, `logging.json`, `.github/workflows`, `.gitlab-ci`, `jenkinsfile` | @dev-team-hamilton | Infrastructure |
+| `.env`, `config`, `migration`, `database`, `.sql` | @dev-team-voss | Backend/data layer |
+| `.github/workflows`, `.claude/`, `tsconfig`, `eslint`, `prettier`, `jest.config`, `vitest`, `.husky`, `package.json` | @dev-team-deming | Tooling |
+| `readme`, `changelog`, `.md`, `.mdx`, `/docs/`, `api-doc`, `jsdoc`, `typedoc` | @dev-team-tufte | Documentation |
+| `/adr/`, `architecture`, `/modules/`, `/layers/`, `/core/`, `/domain/`, `/shared/`, `/lib/`, `/plugins/`, `/middleware/`, `tsconfig`, `webpack`, `vite`, `rollup`, `esbuild` | @dev-team-brooks | Architecture |
+| `package.json`, `pyproject.toml`, `cargo.toml`, `version`, `changelog`, `.npmrc`, `.npmignore`, `release.config`, `lerna.json`, release/publish/deploy workflows | @dev-team-conway | Release artifacts |
+| `/components/`, `/pages/`, `/views/`, `/layouts/`, `/ui/`, `.css`, `.scss`, `.sass`, `.less`, `.jsx`, `.tsx`, `tailwind`, `styled` | @dev-team-rams | Design system compliance |
+| `*.test.*`, `*.spec.*`, `__tests__/`, `/test/`, `/tests/` (code files only) | @dev-team-beck | Test quality |
 | Any `.js`, `.ts`, `.py`, `.go`, `.java`, `.rs` (non-test) | @dev-team-knuth | Quality/coverage |
 
-3. Always include @dev-team-szabo and @dev-team-knuth — they review all code changes.
+3. Always include @dev-team-szabo. For non-test code changes, also always include @dev-team-knuth and @dev-team-brooks; for test-only changes, ensure @dev-team-beck is included.
 
 ## Pre-review validation
 

@@ -20,7 +20,7 @@
 - **Every deferred finding must become a tracked GitHub issue.** When deferring a review or Copilot finding, create the issue immediately with origin (PR, reviewer), the finding, and assessment context. "Worth considering in a follow-up" without a tracked issue is not acceptable.
 - **Close the GitHub milestone after creating the release PR.** Use `gh api repos/{owner}/{repo}/milestones/{number} -X PATCH -f state=closed`.
 - **Improvements must be project-agnostic and target `templates/`.** Never modify `.dev-team/` directly for improvements — those files get overwritten by `dev-team update`. All improvements go into `templates/` and ship in future versions. Project-specific conventions stay in local learnings only.
-- **Dogfooding is the product loop.** Using dev-team on dev-team surfaces friction → `/dev-team:assess` captures patterns → issues target `templates/` → next release improves the tool for everyone. Every session is a test run.
+- **Dogfooding is the product loop.** Using dev-team on dev-team surfaces friction → `/dev-team:retro` captures patterns → issues target `templates/` → next release improves the tool for everyone. Every session is a test run.
 
 ## Known Tech Debt
 

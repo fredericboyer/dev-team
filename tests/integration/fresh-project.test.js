@@ -50,7 +50,7 @@ describe("fresh project installation", () => {
     );
     assert.ok(fs.existsSync(path.join(tmpDir, ".dev-team", "skills", "dev-team-task", "SKILL.md")));
     assert.ok(
-      fs.existsSync(path.join(tmpDir, ".dev-team", "skills", "dev-team-assess", "SKILL.md")),
+      fs.existsSync(path.join(tmpDir, ".dev-team", "skills", "dev-team-retro", "SKILL.md")),
     );
     // Memory
     assert.ok(

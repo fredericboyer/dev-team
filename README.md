@@ -13,7 +13,7 @@ graph TB
         S2["/dev-team:review"]
         S3["/dev-team:audit"]
         S4["/dev-team:challenge"]
-        S5["/dev-team:assess"]
+        S5["/dev-team:retro"]
     end
 
     subgraph Lead["Orchestrator"]
@@ -146,7 +146,7 @@ All hooks are Node.js scripts — work on macOS, Linux, and Windows.
 | `/dev-team:review` | Parallel multi-agent review — spawns agents based on changed file patterns |
 | `/dev-team:audit` | Full codebase scan — Szabo (security) + Knuth (quality) + Deming (tooling) |
 | `/dev-team:challenge` | Critical examination of a proposal or design decision |
-| `/dev-team:assess` | Audit knowledge base health — learnings, agent memory, CLAUDE.md accuracy |
+| `/dev-team:retro` | Audit knowledge base health — learnings, agent memory, CLAUDE.md accuracy |
 
 ## Step-by-step usage guide
 
