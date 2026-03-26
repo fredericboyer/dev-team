@@ -136,6 +136,7 @@ if (hasMemoryUpdates) {
   }
 }
 
+let memoryGatePassed = false;
 if (hasImplFiles && !hasMemoryUpdates) {
   // Check for .memory-reviewed override marker
   const markerPath = path.join(process.cwd(), ".dev-team", ".memory-reviewed");
@@ -155,34 +156,37 @@ if (hasImplFiles && !hasMemoryUpdates) {
     } catch {
       // Best effort — don't fail the hook over cleanup
     }
-    process.exit(0);
+    // Don't exit yet — still run the Borges completion warning below
+    memoryGatePassed = true;
   }
 
-  let unstagedMemory = false;
-  try {
-    const unstaged = cachedGitDiff(["diff", "--name-only"], 2000);
-    unstagedMemory = unstaged
-      .split("\n")
-      .map((f) => f.split("\\").join("/"))
-      .some((f) => f.endsWith("learnings.md") || /agent-memory\/.*MEMORY\.md$/.test(f));
-  } catch {
-    // Ignore — best effort
-  }
+  if (!memoryGatePassed) {
+    let unstagedMemory = false;
+    try {
+      const unstaged = cachedGitDiff(["diff", "--name-only"], 2000);
+      unstagedMemory = unstaged
+        .split("\n")
+        .map((f) => f.split("\\").join("/"))
+        .some((f) => f.endsWith("learnings.md") || /agent-memory\/.*MEMORY\.md$/.test(f));
+    } catch {
+      // Ignore — best effort
+    }
 
-  if (unstagedMemory) {
-    console.error(
-      "[dev-team pre-commit] BLOCKED: Memory files were updated but not staged. " +
-        "Run `git add .dev-team/learnings.md .dev-team/agent-memory/` to include learnings, " +
-        "or create an empty `.dev-team/.memory-reviewed` file to acknowledge that memory was reviewed.",
-    );
-  } else {
-    console.error(
-      "[dev-team pre-commit] BLOCKED: Implementation files staged without memory updates. " +
-        "Update .dev-team/learnings.md or agent memory with any patterns, conventions, or decisions from this work. " +
-        "If no learnings apply, create an empty `.dev-team/.memory-reviewed` file to acknowledge.",
-    );
+    if (unstagedMemory) {
+      console.error(
+        "[dev-team pre-commit] BLOCKED: Memory files were updated but not staged. " +
+          "Run `git add .dev-team/learnings.md .dev-team/agent-memory/` to include learnings, " +
+          "or create an empty `.dev-team/.memory-reviewed` file to acknowledge that memory was reviewed.",
+      );
+    } else {
+      console.error(
+        "[dev-team pre-commit] BLOCKED: Implementation files staged without memory updates. " +
+          "Update .dev-team/learnings.md or agent memory with any patterns, conventions, or decisions from this work. " +
+          "If no learnings apply, create an empty `.dev-team/.memory-reviewed` file to acknowledge.",
+      );
+    }
+    process.exit(1);
   }
-  process.exit(1);
 }
 
 // Borges completion warning (soft gate — warns but does not block)
@@ -200,9 +204,7 @@ try {
 }
 
 if (/^(feat|fix)\//.test(currentBranch)) {
-  const hasMetricsUpdate = files.some(
-    (f) => f.endsWith(".dev-team/metrics.md") || f === ".dev-team/metrics.md",
-  );
+  const hasMetricsUpdate = files.some((f) => f.endsWith(".dev-team/metrics.md"));
   if (!hasMetricsUpdate) {
     console.warn(
       "[dev-team pre-commit] WARNING: Committing on a task branch without metrics.md updates. " +
