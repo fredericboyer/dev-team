@@ -43,11 +43,11 @@ gh api repos/{owner}/{repo}/commits/${PR_SHA}/check-runs \
 
 # Signal 2: Requested reviewers API (Copilot pending as reviewer)
 gh api repos/{owner}/{repo}/pulls/{number}/requested_reviewers \
-  --jq '[.users[] | select(.login == "Copilot" or .login == "copilot-pull-request-reviewer")] | length'
+  --jq '[.users[] | select(.login | test("^(Copilot|copilot-pull-request-reviewer)(\\[bot\\])?$"))] | length'
 
 # Signal 3: Reviews API (Copilot already submitted a review — terminal states only)
 gh api --paginate repos/{owner}/{repo}/pulls/{number}/reviews \
-  --jq '[.[] | select((.user.login == "Copilot" or .user.login == "copilot-pull-request-reviewer") and (.state == "APPROVED" or .state == "CHANGES_REQUESTED" or .state == "COMMENTED"))] | length'
+  --jq '[.[] | select((.user.login | test("^(Copilot|copilot-pull-request-reviewer)(\\[bot\\])?$")) and (.state == "APPROVED" or .state == "CHANGES_REQUESTED" or .state == "COMMENTED"))] | length'
 ```
 
 **Decision logic (evaluate in order):**
@@ -58,7 +58,7 @@ gh api --paginate repos/{owner}/{repo}/pulls/{number}/reviews \
 2. **If Copilot is in requested_reviewers (Signal 2 count > 0):** Copilot has been requested but hasn't submitted a review yet. Poll the reviews API every 15 seconds until a review from Copilot appears with state `APPROVED`, `CHANGES_REQUESTED`, or `COMMENTED` (max 12 polls, ~3 minutes):
    ```bash
    gh api --paginate repos/{owner}/{repo}/pulls/{number}/reviews \
-     --jq '[.[] | select((.user.login == "Copilot" or .user.login == "copilot-pull-request-reviewer") and (.state == "APPROVED" or .state == "CHANGES_REQUESTED" or .state == "COMMENTED"))] | length'
+     --jq '[.[] | select((.user.login | test("^(Copilot|copilot-pull-request-reviewer)(\\[bot\\])?$")) and (.state == "APPROVED" or .state == "CHANGES_REQUESTED" or .state == "COMMENTED"))] | length'
    ```
    - If a completed review appears within the polling limit: proceed to 1a-read below.
    - If after the final (12th) poll no completed review exists, **treat this as a timeout**: surface a clear error, do **not** proceed to comment reading or merge, and stop the workflow without setting auto-merge.
@@ -75,10 +75,10 @@ Once the check run is completed (or after the fallback wait), read comments once
 
 ```bash
 # Inline review comments (check both Copilot logins)
-gh api --paginate repos/{owner}/{repo}/pulls/{number}/comments --jq '[.[] | select(.user.login == "Copilot" or .user.login == "copilot-pull-request-reviewer")] | length'
+gh api --paginate repos/{owner}/{repo}/pulls/{number}/comments --jq '[.[] | select(.user.login | test("^(Copilot|copilot-pull-request-reviewer)(\\[bot\\])?$"))] | length'
 
 # Summary reviews (check both Copilot logins)
-gh api --paginate repos/{owner}/{repo}/pulls/{number}/reviews --jq '[.[] | select(.user.login == "Copilot" or .user.login == "copilot-pull-request-reviewer")] | length'
+gh api --paginate repos/{owner}/{repo}/pulls/{number}/reviews --jq '[.[] | select(.user.login | test("^(Copilot|copilot-pull-request-reviewer)(\\[bot\\])?$"))] | length'
 ```
 
 - If either count > 0: Copilot review has findings, proceed to 1b
@@ -89,10 +89,10 @@ gh api --paginate repos/{owner}/{repo}/pulls/{number}/reviews --jq '[.[] | selec
 
 ```bash
 # Inline comments (include node_id for thread resolution, check both Copilot logins)
-gh api --paginate repos/{owner}/{repo}/pulls/{number}/comments --jq '.[] | select(.user.login == "Copilot" or .user.login == "copilot-pull-request-reviewer") | {id: .id, node_id: .node_id, path: .path, line: .line, body: .body}'
+gh api --paginate repos/{owner}/{repo}/pulls/{number}/comments --jq '.[] | select(.user.login | test("^(Copilot|copilot-pull-request-reviewer)(\\[bot\\])?$")) | {id: .id, node_id: .node_id, path: .path, line: .line, body: .body}'
 
 # Summary reviews (check both Copilot logins)
-gh api --paginate repos/{owner}/{repo}/pulls/{number}/reviews --jq '.[] | select(.user.login == "Copilot" or .user.login == "copilot-pull-request-reviewer") | {id: .id, state: .state, body: .body}'
+gh api --paginate repos/{owner}/{repo}/pulls/{number}/reviews --jq '.[] | select(.user.login | test("^(Copilot|copilot-pull-request-reviewer)(\\[bot\\])?$")) | {id: .id, state: .state, body: .body}'
 ```
 
 For each Copilot comment:
