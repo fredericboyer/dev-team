@@ -17,6 +17,7 @@
 - **Follow through to completion without prompting.** When auto-merge is set or CI is pending, monitor and complete the next step (tag, release, cleanup) without waiting for the user to ask "is it done yet?"
 - **When creating a PR for a tracked issue, link it in the PR body** (e.g., `Closes #NNN`). This lets the platform auto-close the issue on merge. Agents should include this when they know the issue number.
 - Hooks over CLAUDE.md for enforcement (ADR-001). If agents keep flagging the same pattern, it should be a hook.
+- **Close the GitHub milestone after creating the release PR.** Use `gh api repos/{owner}/{repo}/milestones/{number} -X PATCH -f state=closed`.
 - **Improvements must be project-agnostic and target `templates/`.** Never modify `.dev-team/` directly for improvements — those files get overwritten by `dev-team update`. All improvements go into `templates/` and ship in future versions. Project-specific conventions stay in local learnings only.
 - **Dogfooding is the product loop.** Using dev-team on dev-team surfaces friction → `/dev-team:assess` captures patterns → issues target `templates/` → next release improves the tool for everyone. Every session is a test run.
 
