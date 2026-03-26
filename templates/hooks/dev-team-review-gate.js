@@ -219,8 +219,8 @@ function deriveRequiredAgents(filePath) {
   }
 
   // Always flag Knuth and Brooks for non-test implementation files
-  const isTestFile = /\.(test|spec)\.|__tests__|\/tests?\//.test(fullPath);
-  const isCodeFile = /\.(js|ts|jsx|tsx|py|rb|go|java|rs|c|cpp|cs)$/.test(fullPath);
+  const isTestFile = testFilePattern.test(fullPath);
+  const isCodeFile = codeFilePattern.test(fullPath);
 
   if (isCodeFile && !isTestFile) {
     if (!agents.includes("dev-team-knuth")) {
@@ -244,8 +244,8 @@ function deriveRequiredAgents(filePath) {
  */
 function isGatedFile(filePath) {
   const fullPath = filePath.split("\\").join("/").toLowerCase();
-  const isCodeFile = /\.(js|ts|jsx|tsx|py|rb|go|java|rs|c|cpp|cs)$/.test(fullPath);
-  const isTestFile = /\.(test|spec)\.|__tests__|\/tests?\//.test(fullPath);
+  const isCodeFile = codeFilePattern.test(fullPath);
+  const isTestFile = testFilePattern.test(fullPath);
   // Gate implementation code files, not test files or non-code files
   return isCodeFile && !isTestFile;
 }

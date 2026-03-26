@@ -1,0 +1,183 @@
+{
+  "security": {
+    "agent": "dev-team-szabo",
+    "label": "security surface changed",
+    "matchOn": ["fullPath", "basename"],
+    "patterns": [
+      "auth",
+      "login",
+      "password",
+      "token",
+      "session",
+      "crypto",
+      "encrypt",
+      "decrypt",
+      "secret",
+      "permission",
+      "rbac",
+      "acl",
+      "oauth",
+      "jwt",
+      "cors",
+      "csrf",
+      "sanitiz",
+      "escap"
+    ]
+  },
+  "api": {
+    "agent": "dev-team-mori",
+    "label": "API contract may affect UI",
+    "matchOn": ["fullPath"],
+    "patterns": [
+      "\\/api\\/",
+      "\\/routes?\\/",
+      "\\/endpoints?\\/",
+      "schema",
+      "\\.graphql$",
+      "\\.proto$",
+      "openapi",
+      "swagger"
+    ]
+  },
+  "frontend": {
+    "agent": "dev-team-rams",
+    "label": "design system compliance review",
+    "matchOn": ["fullPath"],
+    "patterns": [
+      "\\/components?\\/",
+      "\\/pages?\\/",
+      "\\/views?\\/",
+      "\\/layouts?\\/",
+      "\\/ui\\/",
+      "\\.(css|scss|sass|less|styl)$",
+      "\\.(jsx|tsx)$",
+      "tailwind",
+      "styled"
+    ]
+  },
+  "appConfig": {
+    "agent": "dev-team-voss",
+    "label": "app config/data change",
+    "matchOn": ["fullPath"],
+    "patterns": ["\\.env", "config", "migration", "database", "\\.sql$"]
+  },
+  "tooling": {
+    "agent": "dev-team-deming",
+    "label": "tooling change",
+    "matchOn": ["fullPath"],
+    "patterns": [
+      "eslint",
+      "prettier",
+      "\\.github\\/workflows",
+      "\\.claude\\/",
+      "tsconfig",
+      "jest\\.config",
+      "vitest",
+      "package\\.json$",
+      "\\.husky"
+    ]
+  },
+  "docs": {
+    "agent": "dev-team-tufte",
+    "label": "documentation changed",
+    "matchOn": ["fullPath"],
+    "patterns": [
+      "readme",
+      "changelog",
+      "\\.md$",
+      "\\.mdx$",
+      "\\/docs?\\/",
+      "api-doc",
+      "jsdoc",
+      "typedoc"
+    ]
+  },
+  "docDrift": {
+    "agent": "dev-team-tufte",
+    "label": "implementation changed — check for doc drift",
+    "matchOn": ["fullPath"],
+    "patterns": [
+      "(?:^|\\/)src\\/.*\\.(ts|js)$",
+      "(?:^|\\/)templates\\/agents\\/",
+      "(?:^|\\/)templates\\/skills\\/",
+      "(?:^|\\/)templates\\/hooks\\/",
+      "(?:^|\\/)src\\/init\\.(ts|js)$",
+      "(?:^|\\/)src\\/cli\\.(ts|js)$",
+      "(?:^|\\/)bin\\/",
+      "(?:^|\\/)package\\.json$"
+    ]
+  },
+  "architecture": {
+    "agent": "dev-team-brooks",
+    "label": "architectural boundary touched",
+    "matchOn": ["fullPath"],
+    "patterns": [
+      "\\/adr\\/",
+      "architecture",
+      "\\/modules?\\/",
+      "\\/layers?\\/",
+      "\\/core\\/",
+      "\\/domain\\/",
+      "\\/shared\\/",
+      "\\/lib\\/",
+      "\\/plugins?\\/",
+      "\\/middleware\\/",
+      "tsconfig",
+      "webpack|vite|rollup|esbuild"
+    ]
+  },
+  "release": {
+    "agent": "dev-team-conway",
+    "label": "version/release artifact changed",
+    "matchOn": ["fullPath"],
+    "patterns": [
+      "package\\.json$",
+      "pyproject\\.toml$",
+      ["cargo\\.toml$", "i"],
+      ["changelog", "i"],
+      "version",
+      "\\.github\\/workflows\\/.*release",
+      "\\.github\\/workflows\\/.*publish",
+      "\\.github\\/workflows\\/.*deploy",
+      "\\.npmrc$",
+      "\\.npmignore$",
+      "release\\.config",
+      "lerna\\.json$"
+    ]
+  },
+  "operations": {
+    "agent": "dev-team-hamilton",
+    "label": "infrastructure/operations change",
+    "matchOn": ["fullPath", "basename"],
+    "patterns": [
+      "dockerfile",
+      "docker-compose",
+      "\\.dockerignore$",
+      "\\.github\\/workflows\\/",
+      "\\.gitlab-ci",
+      ["jenkinsfile", "i"],
+      "terraform\\/",
+      "pulumi\\/",
+      "cloudformation\\/",
+      "helm\\/",
+      "k8s\\/",
+      "\\.tf$",
+      "\\.tfvars$",
+      "health[-_]?check",
+      "(?:^|\\/)(?:monitoring|prometheus|grafana|datadog)\\.(?:ya?ml|json|conf|config|toml)$",
+      "(?:^|\\/)(?:logging|logs)\\.(?:ya?ml|json|conf|config|toml)$",
+      "(?:^|\\/)(?:alerting|alerts?)\\.(?:ya?ml|json|conf|config|toml)$",
+      "(?:^|\\/)(?:observability|otel|opentelemetry)\\.(?:ya?ml|json|conf|config|toml)$",
+      "(?<!\\/src)\\/(?:monitoring|logging|alerting|observability)\\/",
+      "\\.env\\.example$",
+      "\\.env\\.template$",
+      "env\\.template$"
+    ]
+  },
+  "codeFile": {
+    "pattern": "\\.(js|ts|jsx|tsx|py|rb|go|java|rs|c|cpp|cs)$"
+  },
+  "testFile": {
+    "pattern": "\\.(test|spec)\\.|__tests__|\\/tests?\\/"
+  }
+}
