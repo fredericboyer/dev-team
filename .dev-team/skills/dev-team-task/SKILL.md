@@ -117,7 +117,7 @@ Drucker spawns one implementing agent per independent issue, each on its own bra
 Reviews do **not** start until **all** implementation agents have completed (Agent tool provides completion notifications as the sync barrier). Once all are done, spawn review agents (Szabo + Knuth, plus conditional reviewers) in parallel across all branches simultaneously. Each reviewer receives the diff for one specific branch and produces classified findings scoped to that branch.
 
 ### Phase 3: Finding routing
-Collect all findings across all branches. Route **all classified findings** — `[DEFECT]`, `[RISK]`, `[QUESTION]`, `[SUGGESTION]` — back to the original implementing agent for each branch. Each agent must acknowledge every finding (address/defer/dispute). Disputes follow the same protocol as single-issue mode: one-round escalation between implementer and reviewer, then human decides. A disputed finding blocks only the affected branch, not the entire batch. Only `[DEFECT]` findings block progress. Agents fix defects on their own branch. Before spawning the next review wave, **compact context**: produce a structured summary of all findings, their classification, and outcome (fixed/deferred/disputed/pending), plus files changed. New reviewers receive current diff + compact summary only — not full conversation history from prior waves. Continue until no `[DEFECT]` findings remain or the per-branch iteration limit is reached.
+Collect all findings across all branches. Route **all classified findings** — `[DEFECT]`, `[RISK]`, `[QUESTION]`, `[SUGGESTION]` — back to the original implementing agent for each branch. Each agent must acknowledge every finding (address/defer/dispute). Disputes follow the same protocol as single-issue mode: one-round escalation between implementer and reviewer, then human decides. A disputed finding blocks only the affected branch, not the entire batch. Only `[DEFECT]` findings block progress. Agents fix defects on their own branch. Before spawning the next review wave, **compact context**: produce a structured summary of all findings, their classification, and final outcome (fixed/accepted/deferred/overruled/ignored), plus files changed. New reviewers receive current diff + compact summary only — not full conversation history from prior waves. Continue until no `[DEFECT]` findings remain or the per-branch iteration limit is reached.
 
 ### Phase 4: Borges completion
 Borges runs **once** across all branches after the final review wave clears. Pass Borges the **finding outcome log** (see Completion step 3 for format) covering all branches. This ensures cross-branch coherence: memory files are consistent, learnings are not duplicated, metrics are recorded, and system improvement recommendations consider the full batch.
@@ -148,15 +148,17 @@ When the loop exits:
    ### Findings
    | # | Agent | Classification | File | Finding summary | Outcome | Reason |
    |---|-------|---------------|------|-----------------|---------|--------|
+   Allowed Outcome values: `fixed`, `accepted`, `deferred`, `overruled`, `ignored`.
    | 1 | szabo | [DEFECT] | src/auth.ts | Missing input validation | fixed | Fixed in round 2 |
    | 2 | knuth | [RISK] | src/parser.ts | No boundary check for empty input | deferred | Tracked in #999 |
    | 3 | brooks | [SUGGESTION] | src/core.ts | Extract to shared utility | accepted | Refactored |
-   | 4 | knuth | [QUESTION] | src/config.ts | Why not use env vars? | accepted | Added explanation |
+   | 4 | knuth | [QUESTION] | src/config.ts | Why not use env vars? | overruled | Env vars not available in target runtime |
+   | 5 | szabo | [RISK] | src/cache.ts | Consider adding cache busting | ignored | Advisory; out of scope and not tracked |
 
    ### Summary
    - Total findings: <N>
-   - DEFECTs: <N> fixed, <N> overruled
-   - Advisory (RISK/QUESTION/SUGGESTION): <N> accepted, <N> deferred, <N> overruled
+   - DEFECTs: <N> fixed, <N> overruled, <N> ignored
+   - Advisory (RISK/QUESTION/SUGGESTION): <N> accepted, <N> deferred, <N> overruled, <N> ignored
    - Rounds to convergence: <N>
    ```
 
