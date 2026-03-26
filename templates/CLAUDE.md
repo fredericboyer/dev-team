@@ -57,7 +57,12 @@ Agents challenge each other using classified findings:
 
 ### Parallel execution
 
-When working on multiple independent issues, use agent teams or worktree subagents to run parallel agents on separate branches. Drucker coordinates the review wave after all implementations complete.
+When working on multiple independent issues, combine agent teams with worktree isolation:
+
+- **Implementing agents** must use both `team_name` and `isolation: "worktree"` to prevent branch conflicts between parallel teammates.
+- **Review/read-only agents** should assess whether they need access to an implementer's worktree (to run tests or read changed files in context), or should work in their own isolation for independent analysis.
+
+Drucker coordinates the review wave after all implementations complete.
 
 > **Note:** If your project's workflow section (above the `dev-team:begin` marker) already designates the main conversation loop as the team lead, do not spawn a separate Drucker subagent — the main loop IS Drucker. Otherwise, `@dev-team-drucker` can be used as a subagent for delegation.
 

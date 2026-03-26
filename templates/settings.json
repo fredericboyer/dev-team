@@ -32,6 +32,15 @@
             "command": "node .dev-team/hooks/dev-team-pre-commit-lint.js"
           }
         ]
+      },
+      {
+        "matcher": "Agent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .dev-team/hooks/dev-team-agent-teams-guide.js"
+          }
+        ]
       }
     ],
     "TaskCompleted": [
