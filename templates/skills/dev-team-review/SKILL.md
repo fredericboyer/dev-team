@@ -98,7 +98,7 @@ State the verdict clearly. List what must be fixed for approval if requesting ch
 
 ### Security preamble
 
-Before starting the review, check for open security alerts: run `/dev-team:security-status` if available, or use the project's security monitoring tools. Flag any critical findings in the review report.
+Before starting the review, check for open security alerts using the project's security monitoring process (e.g., a `/security-status` skill or CLAUDE.md guidance). Flag any critical findings in the review report.
 
 ### Completion
 

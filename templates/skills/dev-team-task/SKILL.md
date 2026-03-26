@@ -129,12 +129,12 @@ Parallel mode is complete when:
 
 ## Security preamble
 
-Before starting work, check for open security alerts: run `/dev-team:security-status` if available, or use the project's security monitoring tools. Flag any critical findings before proceeding.
+Before starting work, check for open security alerts using the project's security monitoring process (e.g., a `/security-status` skill or CLAUDE.md guidance). Flag any critical findings before proceeding.
 
 ## Completion
 
 When the loop exits:
-1. **Deliver the work**: If changes are on a feature branch, create the PR (body must include `Closes #<issue>`). Ensure the PR is ready to merge: CI green, reviews passed, branch up to date. Then follow the project's merge workflow — use `/dev-team:merge` if the project has it configured, otherwise report readiness. If merge fails (CI failures, merge conflicts, branch protection), report the blocker to the human rather than leaving work unattended.
+1. **Deliver the work**: If changes are on a feature branch, create the PR (body must include `Closes #<issue>`). Ensure the PR is ready to merge: CI green, reviews passed, branch up to date. Then follow the project's merge workflow (e.g., a `/merge` skill or CLAUDE.md guidance), otherwise report readiness. If merge fails (CI failures, merge conflicts, branch protection), report the blocker to the human rather than leaving work unattended.
 2. **Clean up worktree**: If the work was done in a worktree, clean it up after the branch is pushed and the PR is created. Do not wait for merge to clean the worktree.
 3. You MUST spawn **@dev-team-borges** (Librarian) as the final step. Format and pass Borges the **finding outcome log** using this structured format:
 
