@@ -43,7 +43,7 @@ For non-trivial work: explore the area first, then implement, then review.
 - **Rams** — auto-flagged when frontend/UI component files change (same trigger as Mori). Gracefully no-ops when no design system is detected.
 
 **End-of-workflow agents:**
-- **Borges** — mandatory at end of every `/dev-team:task`, `/dev-team:review`, `/dev-team:audit`, and `/dev-team:assess`. Extracts structured memory entries, reviews cross-agent coherence, and identifies system improvement opportunities.
+- **Borges** — mandatory at end of every `/dev-team:task`, `/dev-team:review`, `/dev-team:audit`, and `/dev-team:retro`. Extracts structured memory entries, reviews cross-agent coherence, and identifies system improvement opportunities.
 
 **Orchestration:**
 - **Drucker** — delegates tasks to the right implementing agent and spawns reviewers. Szabo, Knuth, and Brooks review all code changes.
@@ -76,7 +76,7 @@ Do NOT skip this. Do NOT treat hook output as optional. If you believe a review 
 - `/dev-team:task` — start an iterative task loop with adversarial review gates
 - `/dev-team:review` — orchestrated multi-agent parallel review of changes
 - `/dev-team:audit` — full codebase security + quality + tooling audit
-- `/dev-team:assess` — audit knowledge base health (learnings, agent memory, CLAUDE.md)
+- `/dev-team:retro` — audit knowledge base health (learnings, agent memory, CLAUDE.md)
 
 ### Project-specific customization
 

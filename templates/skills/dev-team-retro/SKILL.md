@@ -1,5 +1,5 @@
 ---
-name: dev-team:assess
+name: dev-team:retro
 description: Audit the health of your project's dev-team knowledge base — learnings, agent memory, and CLAUDE.md. Finds stale entries, contradictions, enforcement gaps, and promotion opportunities. Use periodically or after major changes.
 ---
 
@@ -192,4 +192,4 @@ After the health report is delivered:
 - **After major refactors** — code changes may invalidate learnings
 - **Before onboarding** — ensure the knowledge base is accurate for new team members
 - **After resolving many review findings** — learnings and memory may need cleanup
-- **On request** — `/dev-team:assess`
+- **On request** — `/dev-team:retro`
