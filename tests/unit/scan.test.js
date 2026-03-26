@@ -121,7 +121,7 @@ describe("scanProject", () => {
     const findings = scanProject(tmpDir);
     const formatter = findings.find((f) => f.category === "formatter");
     assert.equal(formatter.status, "found");
-    assert.ok(formatter.tool.includes("npm format"));
+    assert.equal(formatter.tool, "npm format:check script");
   });
 
   it("prefers formatter config file over package.json format script", () => {
@@ -147,6 +147,23 @@ describe("scanProject", () => {
     const findings = scanProject(tmpDir);
     const formatter = findings.find((f) => f.category === "formatter");
     assert.equal(formatter.status, "missing");
+  });
+
+  it("does not false-positive on dependency named format without format script", () => {
+    fs.writeFileSync(
+      path.join(tmpDir, "package.json"),
+      JSON.stringify({
+        dependencies: { format: "^1.0.0" },
+        scripts: { lint: "eslint ." },
+      }),
+    );
+    const findings = scanProject(tmpDir);
+    const formatter = findings.find((f) => f.category === "formatter");
+    assert.equal(
+      formatter.status,
+      "missing",
+      "dependency named 'format' should not trigger formatter detection",
+    );
   });
 
   it("detects Biome as both linter and formatter from single config", () => {

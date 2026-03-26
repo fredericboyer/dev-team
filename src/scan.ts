@@ -41,7 +41,16 @@ export function scanProject(targetDir: string): ScanFinding[] {
   } else {
     // Check package.json for lint script
     const pkg = readFile(path.join(targetDir, "package.json"));
-    if (pkg && pkg.includes('"lint"')) {
+    let hasLintScript = false;
+    if (pkg) {
+      try {
+        const parsed = JSON.parse(pkg);
+        hasLintScript = !!(parsed.scripts && parsed.scripts.lint);
+      } catch {
+        // invalid JSON — treat as no script
+      }
+    }
+    if (hasLintScript) {
       findings.push({
         category: "linter",
         status: "found",
@@ -83,11 +92,24 @@ export function scanProject(targetDir: string): ScanFinding[] {
   } else {
     // Check package.json for format script
     const fmtPkg = readFile(path.join(targetDir, "package.json"));
-    if (fmtPkg && (fmtPkg.includes('"format"') || fmtPkg.includes('"format:check"'))) {
+    let hasFormatScript = false;
+    let hasFormatCheckScript = false;
+    if (fmtPkg) {
+      try {
+        const parsed = JSON.parse(fmtPkg);
+        const scripts = parsed.scripts || {};
+        hasFormatScript = !!scripts.format;
+        hasFormatCheckScript = !!scripts["format:check"];
+      } catch {
+        // invalid JSON — treat as no script
+      }
+    }
+    if (hasFormatScript || hasFormatCheckScript) {
+      const toolLabel = hasFormatScript ? "npm format script" : "npm format:check script";
       findings.push({
         category: "formatter",
         status: "found",
-        tool: "npm format script",
+        tool: toolLabel,
         recommendation:
           "Format script found in package.json. Consider adding a PostToolUse hook to run it automatically.",
       });
