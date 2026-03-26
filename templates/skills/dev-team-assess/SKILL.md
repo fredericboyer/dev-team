@@ -71,7 +71,7 @@ Check each agent's memory file for:
 - Installed agents (from `config.json`) with no meaningful memory — suggests the agent has not been calibrated
 - Agents referenced in learnings but missing a memory file
 
-### Promotion opportunities
+### Memory promotion opportunities
 - Scan each agent's `MEMORY.md` for entries that describe project-wide patterns, conventions, or rules rather than agent-specific calibration
 - Examples of promotable entries: "all API endpoints require rate limiting" (Szabo), "we always use transactions for multi-table writes" (Voss), "components must support keyboard navigation" (Mori)
 - Examples of non-promotable entries: "I tend to over-flag SQL injection in parameterized queries" (agent-specific calibration), "coverage is weak in the parser module" (agent-specific observation)
