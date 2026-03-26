@@ -80,12 +80,19 @@ Track iterations in conversation context (no state files). For each iteration:
    - If validation fails, route back to implementer with specific failure reason. If it fails twice, escalate to human.
 3. After validation passes, spawn review agents in parallel as background tasks.
 4. Collect classified challenges from reviewers.
-5. Route **all classified findings** to the implementing agent — not just `[DEFECT]`s. The implementer must explicitly acknowledge each finding with one of these outcomes:
-   - **Address**: fix or incorporate the finding in the next iteration
-   - **Defer**: accept the finding but defer to a follow-up issue (must state reason)
-   - **Dispute**: disagree with the finding (triggers one-round escalation — reviewer responds, then human decides)
-   - **Ignore**: explicitly decline to act on the finding (must state reason — e.g., out of scope, not applicable)
-   Only `[DEFECT]` findings block progress. `[RISK]`, `[QUESTION]`, and `[SUGGESTION]` are advisory — they must be acknowledged but do not prevent the loop from exiting.
+5. Route **all classified findings** to the implementing agent — not just `[DEFECT]`s. The implementer must explicitly acknowledge each finding:
+
+   **For `[DEFECT]` findings** (these block progress):
+   - **Address** (`fixed`): fix the defect in the next iteration
+   - **Dispute** (`overruled`): disagree with the finding (triggers one-round escalation — reviewer responds, then human decides)
+   DEFECTs cannot be deferred or ignored — they must be fixed or explicitly overruled.
+
+   **For advisory findings** (`[RISK]`, `[QUESTION]`, `[SUGGESTION]`):
+   - **Address** (`accepted`): incorporate the finding
+   - **Defer** (`deferred`): accept but defer to a follow-up issue (must state reason and issue number)
+   - **Dispute** (`overruled`): disagree (same escalation as above)
+   - **Ignore** (`ignored`): explicitly decline to act (must state reason — e.g., out of scope, not applicable)
+   Advisory findings must be acknowledged but do not prevent the loop from exiting.
    The orchestrator verifies that **all** findings have an explicit outcome before proceeding to step 8 (exit check). Findings without an explicit outcome block the exit check — there is no automatic fallback.
 6. After the implementer has acknowledged all findings, **compact the context** before the next iteration:
    - Produce a structured summary: all findings (agent, classification, file, status/outcome), files changed, outstanding items
@@ -158,7 +165,7 @@ When the loop exits:
    ### Summary
    - Total findings: <N>
    - DEFECTs: <N> fixed, <N> overruled
-   - Advisory (RISK/QUESTION/SUGGESTION): <N> accepted, <N> deferred, <N> ignored
+   - Advisory (RISK/QUESTION/SUGGESTION): <N> accepted, <N> deferred, <N> overruled, <N> ignored
    - Rounds to convergence: <N>
    ```
 
@@ -180,7 +187,7 @@ When the loop exits:
    ### Summary
    - Total findings: <N> across <N> branches
    - DEFECTs: <N> fixed, <N> overruled
-   - Advisory (RISK/QUESTION/SUGGESTION): <N> accepted, <N> deferred, <N> ignored
+   - Advisory (RISK/QUESTION/SUGGESTION): <N> accepted, <N> deferred, <N> overruled, <N> ignored
    - Rounds to convergence: <per-branch breakdown or max>
    ```
 
