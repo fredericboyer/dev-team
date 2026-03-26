@@ -121,6 +121,11 @@ const QUALITY_HOOKS: HookDefinition[] = [
     description: "Run lint + format checks before git commit",
   },
   {
+    label: "Agent teams guide",
+    file: "dev-team-agent-teams-guide.js",
+    description: "Advisory guidance for agent team isolation patterns",
+  },
+  {
     label: "Watch list",
     file: "dev-team-watch-list.js",
     description: "Auto-spawn agents when file patterns match (configurable)",
