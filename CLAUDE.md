@@ -97,6 +97,19 @@ When working on multiple independent issues, combine agent teams with worktree i
 - **Implementing agents** must use both `team_name` and `isolation: "worktree"` to prevent branch conflicts between parallel teammates.
 - **Review/read-only agents** should assess whether they need access to an implementer's worktree (to run tests or read changed files in context), or should work in their own isolation for independent analysis.
 
+**Agent teammate naming convention:** Use `{agent}-{role}[-{qualifier}]` when spawning teammates:
+- `{agent}` — dev-team agent name (lowercase): `voss`, `deming`, `szabo`, etc.
+- `{role}` — action: `implement`, `review`, `research`, `audit`, `extract`
+- `{qualifier}` — optional, for disambiguation when multiple agents of the same type run in parallel (e.g., issue number, feature name)
+
+| Role suffix | When used | Examples |
+|-------------|-----------|---------|
+| `-implement` | Implementing agent on a task branch | `voss-implement`, `deming-implement-auth` |
+| `-review` | Reviewer in a review wave | `szabo-review`, `knuth-review` |
+| `-research` | Turing research brief | `turing-research`, `turing-research-caching` |
+| `-audit` | Full codebase audit pass | `szabo-audit`, `knuth-audit` |
+| `-extract` | Borges memory extraction | `borges-extract` |
+
 Drucker coordinates the review wave after all implementations complete.
 
 > **Note:** If your project's workflow section (above the `dev-team:begin` marker) already designates the main conversation loop as the team lead, do not spawn a separate Drucker subagent — the main loop IS Drucker. Otherwise, `@dev-team-drucker` can be used as a subagent for delegation.

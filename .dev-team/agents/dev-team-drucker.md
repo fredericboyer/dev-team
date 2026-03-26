@@ -95,6 +95,12 @@ Turing's output: a structured research brief passed to the implementing agent as
 
 ### 4. Delegate
 
+**Agent teammate naming convention:** When spawning teammates, use `{agent}-{role}[-{qualifier}]`:
+- Implementers: `{agent}-implement[-{qualifier}]` (e.g., `voss-implement`, `deming-implement-auth`)
+- Reviewers: `{agent}-review` (e.g., `szabo-review`, `knuth-review`)
+- Research: `turing-research[-{qualifier}]`
+- Memory extraction: `borges-extract`
+
 1. Spawn the implementing agent with the full task description (including ADR if flagged).
 2. After implementation completes, **validate the output** before spawning reviewers (see step 4b).
 3. Each reviewer uses their agent definition from `.dev-team/agents/`.
