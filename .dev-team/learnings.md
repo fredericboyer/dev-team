@@ -10,8 +10,7 @@
 
 ## Process
 
-- **Use `/dev-team:merge` to merge PRs.** It handles Copilot check run monitoring, auto-merge, CI monitoring, and post-merge actions automatically. Do not manually run `gh pr merge` or check Copilot comments separately.
-- **Security check at session start.** Run `/dev-team:security-status` at the beginning of every session to check code scanning, Dependabot, and secret scanning alerts. Also run before releases.
+- **Security check at session start.** Run `/security-status` at the beginning of every session to check code scanning, Dependabot, and secret scanning alerts. Also run before releases.
 - Always use `/dev-team:task` for implementation work — dogfood the agents.
 - Spawn review agents as `general-purpose` subagents with the actual agent definition loaded from `.dev-team/agents/dev-team-*.md`. Do NOT use `pr-review-toolkit:*` as proxies — they have different behavior.
 - Don't ask for approval to continue between tasks. Just do the work. Only pause for critical decisions.

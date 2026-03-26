@@ -1,5 +1,5 @@
 ---
-name: assess-learnings
+name: dogfood
 description: Audit team learnings, agent memories, and CLAUDE.md template to identify project-agnostic improvements to dev-team templates. Reports findings for human/orchestrator triage. Local to this repo — not shipped to users.
 user_invocable: true
 ---
