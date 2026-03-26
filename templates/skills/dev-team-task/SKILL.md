@@ -83,7 +83,7 @@ Track iterations in conversation context (no state files). For each iteration:
    - If validation fails, route back to implementer with specific failure reason. If it fails twice, escalate to human.
 3. After validation passes, spawn review agents in parallel as background tasks. **Timeout**: If a reviewer has not reported progress within 3 minutes, send a status ping. If no response within 1 additional minute, terminate the reviewer and proceed with findings from the other reviewers.
 4. Collect classified challenges from reviewers.
-5. Route **all classified findings** to the implementing agent — not just `[DEFECT]`s. The implementer must explicitly acknowledge each finding:
+5. Route **all classified findings** to the implementing agent — not just `[DEFECT]`s. **Implementing agents must remain alive until all findings have been routed and acknowledged.** Do not shut down implementing agents when the review wave starts — they must receive findings directly and produce their own acknowledgments. If an implementer was terminated prematurely, re-spawn it with a compact context (findings + their original diff) for acknowledgment. The implementer must explicitly acknowledge each finding:
 
    **For `[DEFECT]` findings** (these block progress):
    - **Address** (`fixed`): fix the defect in the next iteration
@@ -128,10 +128,13 @@ Drucker spawns one implementing agent per independent issue, each on its own bra
 Reviews do **not** start until **all** implementation agents have completed (Agent tool provides completion notifications as the sync barrier). Once all are done, spawn review agents using the naming convention `{agent}-review` (e.g., `szabo-review`, `knuth-review`, `brooks-review`) in parallel across all branches simultaneously. Each reviewer receives the diff for one specific branch and produces classified findings scoped to that branch.
 
 ### Phase 3: Finding routing
-Collect all findings across all branches. Route **all classified findings** — `[DEFECT]`, `[RISK]`, `[QUESTION]`, `[SUGGESTION]` — back to the original implementing agent for each branch. Each agent must acknowledge every finding (address/defer/dispute). Disputes follow the same protocol as single-issue mode: one-round escalation between implementer and reviewer, then human decides. A disputed finding blocks only the affected branch, not the entire batch. Only `[DEFECT]` findings block progress. Agents fix defects on their own branch. Before spawning the next review wave, **compact context**: produce a structured summary of all findings, their classification, and outcome (fixed/deferred/disputed/pending), plus files changed. New reviewers receive current diff + compact summary only — not full conversation history from prior waves. Continue until no `[DEFECT]` findings remain or the per-branch iteration limit is reached.
+Collect all findings across all branches. Route **all classified findings** — `[DEFECT]`, `[RISK]`, `[QUESTION]`, `[SUGGESTION]` — back to the original implementing agent for each branch. **Implementing agents must remain alive through the review wave** — do not shut them down after implementation completes. Each agent must acknowledge every finding (address/defer/dispute) directly. If an implementer was terminated prematurely, re-spawn it with a compact context (findings + their original diff) for acknowledgment. Disputes follow the same protocol as single-issue mode: one-round escalation between implementer and reviewer, then human decides. A disputed finding blocks only the affected branch, not the entire batch. Only `[DEFECT]` findings block progress. Agents fix defects on their own branch. Before spawning the next review wave, **compact context**: produce a structured summary of all findings, their classification, and outcome (fixed/deferred/disputed/pending), plus files changed. New reviewers receive current diff + compact summary only — not full conversation history from prior waves. Continue until no `[DEFECT]` findings remain or the per-branch iteration limit is reached.
 
 ### Phase 4: Borges completion
 Borges runs **once** across all branches after the final review wave clears. Pass Borges the **finding outcome log** (see Completion step 3 for format) covering all branches. This ensures cross-branch coherence: memory files are consistent, learnings are not duplicated, metrics are recorded, and system improvement recommendations consider the full batch.
+
+### Phase 5: Merge
+After all PRs are created, merge each via the project's merge skill (e.g., `/merge`) — not raw `gh pr merge` or other git commands. The merge skill handles Copilot review monitoring, CI verification, and post-merge actions.
 
 ### Convergence criteria
 Parallel mode is complete when:
@@ -145,7 +148,7 @@ Before starting work, check for open security alerts using the project's securit
 ## Completion
 
 When the loop exits:
-1. **Deliver the work**: If changes are on a feature branch, create the PR (body must include `Closes #<issue>`). Ensure the PR is ready to merge: CI green, reviews passed, branch up to date. If the project provides a merge workflow (e.g., a `/merge` skill or CLAUDE.md guidance), use it; if no such workflow exists, ensure the PR is mergeable and report readiness. If merge fails (CI failures, merge conflicts, branch protection), report the blocker to the human rather than leaving work unattended.
+1. **Deliver the work**: If changes are on a feature branch, create the PR (body must include `Closes #<issue>`). Ensure the PR is ready to merge: CI green, reviews passed, branch up to date. **Use the project's merge skill (e.g., `/merge`) for every PR. Do not use raw `gh pr merge` — the merge skill handles Copilot review monitoring, CI verification, and post-merge actions.** If no merge skill exists, ensure the PR is mergeable and report readiness. If merge fails (CI failures, merge conflicts, branch protection), report the blocker to the human rather than leaving work unattended.
 2. **Clean up worktree**: If the work was done in a worktree, clean it up after the branch is pushed and the PR is created. Do not wait for merge to clean the worktree.
 3. You MUST spawn **@dev-team-borges** as `borges-extract` (Librarian) as the final step. Format and pass Borges the **finding outcome log** using this structured format:
 
@@ -204,7 +207,11 @@ When the loop exits:
    - Update shared learnings in `.dev-team/learnings.md`
    - Check cross-agent coherence
    - Report system improvement opportunities
-4. If Borges was not spawned, the task is INCOMPLETE.
+4. **Borges completion gate (HARD CHECK)**: Before emitting "Done", verify BOTH conditions:
+   - (a) Borges has been spawned **and completed** (not just spawned — wait for completion)
+   - (b) `.dev-team/metrics.md` contains a new entry for this task
+
+   **If either check fails, the task is NOT complete.** Spawn Borges now and wait for completion. Do not emit "Done" or report task completion until both conditions are satisfied. This is a gate, not advisory — skipping it means the task loop has not finished.
 5. **Memory formation gate**: After Borges runs, verify that each participating agent's MEMORY.md contains at least one new structured entry from this task. Empty agent memory after a completed task is a system failure — Borges prevents this by automating extraction.
 6. Summarize what was accomplished across all iterations.
 7. Report any remaining `[RISK]` or `[SUGGESTION]` items, including Borges's recommendations.
