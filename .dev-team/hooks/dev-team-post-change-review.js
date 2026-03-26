@@ -6,10 +6,14 @@
  *
  * After a file is modified, flags which agents should review based on
  * the file's domain. Advisory only — always exits 0.
+ *
+ * Patterns are loaded from agent-patterns.json (shared with dev-team-review-gate.js).
+ * Falls back to hardcoded patterns if the JSON file is missing or malformed.
  */
 
 "use strict";
 
+const fs = require("fs");
 const path = require("path");
 
 let input = {};
@@ -27,13 +31,48 @@ if (!filePath) {
   process.exit(0);
 }
 
-const basename = path.basename(filePath).toLowerCase();
-const fullPath = filePath.split("\\").join("/").toLowerCase();
+// ─── Load agent patterns from shared JSON ────────────────────────────────────
 
-const flags = [];
+/**
+ * Compile a pattern entry from the JSON into a RegExp.
+ * Entries are either a string (no flags) or [source, flags].
+ */
+function compilePattern(entry) {
+  if (Array.isArray(entry)) {
+    return new RegExp(entry[0], entry[1] || "");
+  }
+  return new RegExp(entry);
+}
 
-// Security-sensitive patterns → flag for Szabo
-const SECURITY_PATTERNS = [
+/**
+ * Load pattern categories from agent-patterns.json.
+ * Returns null on failure (caller falls back to hardcoded).
+ */
+function loadPatternsFromJSON() {
+  try {
+    const jsonPath = path.join(__dirname, "agent-patterns.json");
+    const data = JSON.parse(fs.readFileSync(jsonPath, "utf-8"));
+    const result = {};
+    for (const [key, value] of Object.entries(data)) {
+      if (value.patterns) {
+        result[key] = {
+          agent: value.agent,
+          label: value.label,
+          matchOn: value.matchOn || ["fullPath"],
+          compiled: value.patterns.map(compilePattern),
+        };
+      } else if (value.pattern) {
+        result[key] = { compiled: compilePattern(value.pattern) };
+      }
+    }
+    return result;
+  } catch {
+    return null;
+  }
+}
+
+// Hardcoded fallback patterns (kept in sync with agent-patterns.json)
+const FALLBACK_SECURITY_PATTERNS = [
   /auth/,
   /login/,
   /password/,
@@ -53,13 +92,7 @@ const SECURITY_PATTERNS = [
   /sanitiz/,
   /escap/,
 ];
-
-if (SECURITY_PATTERNS.some((p) => p.test(fullPath) || p.test(basename))) {
-  flags.push("@dev-team-szabo (security surface changed)");
-}
-
-// API/contract patterns → flag for Mori
-const API_PATTERNS = [
+const FALLBACK_API_PATTERNS = [
   /\/api\//,
   /\/routes?\//,
   /\/endpoints?\//,
@@ -69,13 +102,7 @@ const API_PATTERNS = [
   /openapi/,
   /swagger/,
 ];
-
-if (API_PATTERNS.some((p) => p.test(fullPath))) {
-  flags.push("@dev-team-mori (API contract may affect UI)");
-}
-
-// Frontend/UI component patterns → flag for Rams (design system review)
-const FRONTEND_PATTERNS = [
+const FALLBACK_FRONTEND_PATTERNS = [
   /\/components?\//,
   /\/pages?\//,
   /\/views?\//,
@@ -86,23 +113,8 @@ const FRONTEND_PATTERNS = [
   /tailwind/,
   /styled/,
 ];
-
-if (FRONTEND_PATTERNS.some((p) => p.test(fullPath))) {
-  flags.push("@dev-team-rams (design system compliance review)");
-}
-
-// App config patterns → flag for Voss
-// Voss owns: application config, migrations, database, .env (app-specific)
-// Intentional overlap: Docker files trigger Hamilton below; .env files trigger
-// Voss here for app-config review. Both perspectives are valuable.
-const APP_CONFIG_PATTERNS = [/\.env/, /config/, /migration/, /database/, /\.sql$/];
-
-if (APP_CONFIG_PATTERNS.some((p) => p.test(fullPath))) {
-  flags.push("@dev-team-voss (app config/data change)");
-}
-
-// Tooling patterns → flag for Deming
-const TOOLING_PATTERNS = [
+const FALLBACK_APP_CONFIG_PATTERNS = [/\.env/, /config/, /migration/, /database/, /\.sql$/];
+const FALLBACK_TOOLING_PATTERNS = [
   /eslint/,
   /prettier/,
   /\.github\/workflows/,
@@ -113,13 +125,7 @@ const TOOLING_PATTERNS = [
   /package\.json$/,
   /\.husky/,
 ];
-
-if (TOOLING_PATTERNS.some((p) => p.test(fullPath))) {
-  flags.push("@dev-team-deming (tooling change)");
-}
-
-// Documentation patterns → flag for Docs
-const DOC_PATTERNS = [
+const FALLBACK_DOC_PATTERNS = [
   /readme/,
   /changelog/,
   /\.md$/,
@@ -129,35 +135,17 @@ const DOC_PATTERNS = [
   /jsdoc/,
   /typedoc/,
 ];
-
-if (DOC_PATTERNS.some((p) => p.test(fullPath))) {
-  flags.push("@dev-team-tufte (documentation changed)");
-}
-
-// Doc-drift patterns → flag Tufte for implementation changes that may need doc updates
-const DOC_DRIFT_PATTERNS = [
-  /(?:^|\/)src\/.*\.(ts|js)$/, // New or changed source files
-  /(?:^|\/)templates\/agents\//, // New or changed agent definitions
-  /(?:^|\/)templates\/skills\//, // New or changed skill definitions
-  /(?:^|\/)templates\/hooks\//, // New or changed hook definitions
-  /(?:^|\/)src\/init\.(ts|js)$/, // Installer changes
-  /(?:^|\/)src\/cli\.(ts|js)$/, // CLI entry point changes
-  /(?:^|\/)bin\//, // CLI shim changes
-  /(?:^|\/)package\.json$/, // Dependency or script changes
+const FALLBACK_DOC_DRIFT_PATTERNS = [
+  /(?:^|\/)src\/.*\.(ts|js)$/,
+  /(?:^|\/)templates\/agents\//,
+  /(?:^|\/)templates\/skills\//,
+  /(?:^|\/)templates\/hooks\//,
+  /(?:^|\/)src\/init\.(ts|js)$/,
+  /(?:^|\/)src\/cli\.(ts|js)$/,
+  /(?:^|\/)bin\//,
+  /(?:^|\/)package\.json$/,
 ];
-
-// Only flag for doc-drift if Tufte was not already flagged for a direct doc change
-const alreadyFlaggedTufte = flags.some((f) => f.startsWith("@dev-team-tufte"));
-if (!alreadyFlaggedTufte && DOC_DRIFT_PATTERNS.some((p) => p.test(fullPath))) {
-  flags.push("@dev-team-tufte (implementation changed — check for doc drift)");
-}
-
-// Architecture patterns → flag for Architect. For architectural boundary files,
-// Brooks is flagged here with the "architectural boundary touched" reason. The
-// dedupe check below skips the generic "quality attribute review" reason for
-// these files — this is intentional because Brooks's expanded agent definition
-// already includes quality attribute assessment in every review.
-const ARCH_PATTERNS = [
+const FALLBACK_ARCH_PATTERNS = [
   /\/adr\//,
   /architecture/,
   /\/modules?\//,
@@ -171,13 +159,7 @@ const ARCH_PATTERNS = [
   /tsconfig/,
   /webpack|vite|rollup|esbuild/,
 ];
-
-if (ARCH_PATTERNS.some((p) => p.test(fullPath))) {
-  flags.push("@dev-team-brooks (architectural boundary touched)");
-}
-
-// Release patterns → flag for Release
-const RELEASE_PATTERNS = [
+const FALLBACK_RELEASE_PATTERNS = [
   /package\.json$/,
   /pyproject\.toml$/,
   /cargo\.toml$/i,
@@ -191,17 +173,7 @@ const RELEASE_PATTERNS = [
   /release\.config/,
   /lerna\.json$/,
 ];
-
-if (RELEASE_PATTERNS.some((p) => p.test(fullPath))) {
-  flags.push("@dev-team-conway (version/release artifact changed)");
-}
-
-// Operations/infra patterns → flag for Hamilton
-// NOTE: Docker and .env patterns intentionally overlap with INFRA_PATTERNS (Voss).
-// Voss reviews Docker files for infrastructure correctness (base images, build stages, networking),
-// while Hamilton reviews them for operational concerns (resource limits, health checks, image optimization).
-// This dual-review is by design — both perspectives add value.
-const OPS_PATTERNS = [
+const FALLBACK_OPS_PATTERNS = [
   /dockerfile/,
   /docker-compose/,
   /\.dockerignore$/,
@@ -216,23 +188,113 @@ const OPS_PATTERNS = [
   /\.tf$/,
   /\.tfvars$/,
   /health[-_]?check/,
-  /(?:^|\/)(?:monitoring|prometheus|grafana|datadog)\.(?:ya?ml|json|conf|config|toml)$/, // monitoring config files (not src/monitoring.ts)
-  /(?:^|\/)(?:logging|logs)\.(?:ya?ml|json|conf|config|toml)$/, // logging config files (not src/logging.ts)
-  /(?:^|\/)(?:alerting|alerts?)\.(?:ya?ml|json|conf|config|toml)$/, // alerting config files
-  /(?:^|\/)(?:observability|otel|opentelemetry)\.(?:ya?ml|json|conf|config|toml)$/, // observability config files
-  /(?<!\/src)\/(?:monitoring|logging|alerting|observability)\//, // ops directories (but not under src/)
+  /(?:^|\/)(?:monitoring|prometheus|grafana|datadog)\.(?:ya?ml|json|conf|config|toml)$/,
+  /(?:^|\/)(?:logging|logs)\.(?:ya?ml|json|conf|config|toml)$/,
+  /(?:^|\/)(?:alerting|alerts?)\.(?:ya?ml|json|conf|config|toml)$/,
+  /(?:^|\/)(?:observability|otel|opentelemetry)\.(?:ya?ml|json|conf|config|toml)$/,
+  /(?<!\/src)\/(?:monitoring|logging|alerting|observability)\//,
   /\.env\.example$/,
   /\.env\.template$/,
   /env\.template$/,
 ];
+const FALLBACK_CODE_FILE = /\.(js|ts|jsx|tsx|py|rb|go|java|rs|c|cpp|cs)$/;
+const FALLBACK_TEST_FILE = /\.(test|spec)\.|__tests__|\/tests?\//;
 
+const loaded = loadPatternsFromJSON();
+
+function getPatterns(key) {
+  return loaded && loaded[key] ? loaded[key].compiled : null;
+}
+function getCategory(key) {
+  return loaded && loaded[key] ? loaded[key] : null;
+}
+function getSinglePattern(key) {
+  return loaded && loaded[key] ? loaded[key].compiled : null;
+}
+
+const SECURITY_PATTERNS = getPatterns("security") || FALLBACK_SECURITY_PATTERNS;
+const API_PATTERNS = getPatterns("api") || FALLBACK_API_PATTERNS;
+const FRONTEND_PATTERNS = getPatterns("frontend") || FALLBACK_FRONTEND_PATTERNS;
+const APP_CONFIG_PATTERNS = getPatterns("appConfig") || FALLBACK_APP_CONFIG_PATTERNS;
+const TOOLING_PATTERNS = getPatterns("tooling") || FALLBACK_TOOLING_PATTERNS;
+const DOC_PATTERNS = getPatterns("docs") || FALLBACK_DOC_PATTERNS;
+const DOC_DRIFT_PATTERNS = getPatterns("docDrift") || FALLBACK_DOC_DRIFT_PATTERNS;
+const ARCH_PATTERNS = getPatterns("architecture") || FALLBACK_ARCH_PATTERNS;
+const RELEASE_PATTERNS = getPatterns("release") || FALLBACK_RELEASE_PATTERNS;
+const OPS_PATTERNS = getPatterns("operations") || FALLBACK_OPS_PATTERNS;
+const codeFilePattern = getSinglePattern("codeFile") || FALLBACK_CODE_FILE;
+const testFilePattern = getSinglePattern("testFile") || FALLBACK_TEST_FILE;
+
+// Resolve labels from JSON or use defaults
+function label(key, fallback) {
+  const cat = getCategory(key);
+  return cat && cat.label ? cat.label : fallback;
+}
+
+// ─── Pattern matching ────────────────────────────────────────────────────────
+
+const basename = path.basename(filePath).toLowerCase();
+const fullPath = filePath.split("\\").join("/").toLowerCase();
+
+const flags = [];
+
+// Security-sensitive patterns → flag for Szabo
+if (SECURITY_PATTERNS.some((p) => p.test(fullPath) || p.test(basename))) {
+  flags.push(`@dev-team-szabo (${label("security", "security surface changed")})`);
+}
+
+// API/contract patterns → flag for Mori
+if (API_PATTERNS.some((p) => p.test(fullPath))) {
+  flags.push(`@dev-team-mori (${label("api", "API contract may affect UI")})`);
+}
+
+// Frontend/UI component patterns → flag for Rams (design system review)
+if (FRONTEND_PATTERNS.some((p) => p.test(fullPath))) {
+  flags.push(`@dev-team-rams (${label("frontend", "design system compliance review")})`);
+}
+
+// App config patterns → flag for Voss
+if (APP_CONFIG_PATTERNS.some((p) => p.test(fullPath))) {
+  flags.push(`@dev-team-voss (${label("appConfig", "app config/data change")})`);
+}
+
+// Tooling patterns → flag for Deming
+if (TOOLING_PATTERNS.some((p) => p.test(fullPath))) {
+  flags.push(`@dev-team-deming (${label("tooling", "tooling change")})`);
+}
+
+// Documentation patterns → flag for Tufte
+if (DOC_PATTERNS.some((p) => p.test(fullPath))) {
+  flags.push(`@dev-team-tufte (${label("docs", "documentation changed")})`);
+}
+
+// Doc-drift patterns → flag Tufte for implementation changes that may need doc updates
+// Only flag for doc-drift if Tufte was not already flagged for a direct doc change
+const alreadyFlaggedTufte = flags.some((f) => f.startsWith("@dev-team-tufte"));
+if (!alreadyFlaggedTufte && DOC_DRIFT_PATTERNS.some((p) => p.test(fullPath))) {
+  flags.push(
+    `@dev-team-tufte (${label("docDrift", "implementation changed — check for doc drift")})`,
+  );
+}
+
+// Architecture patterns → flag for Brooks
+if (ARCH_PATTERNS.some((p) => p.test(fullPath))) {
+  flags.push(`@dev-team-brooks (${label("architecture", "architectural boundary touched")})`);
+}
+
+// Release patterns → flag for Conway
+if (RELEASE_PATTERNS.some((p) => p.test(fullPath))) {
+  flags.push(`@dev-team-conway (${label("release", "version/release artifact changed")})`);
+}
+
+// Operations/infra patterns → flag for Hamilton
 if (OPS_PATTERNS.some((p) => p.test(fullPath) || p.test(basename))) {
-  flags.push("@dev-team-hamilton (infrastructure/operations change)");
+  flags.push(`@dev-team-hamilton (${label("operations", "infrastructure/operations change")})`);
 }
 
 // Always flag Knuth and Brooks for non-test implementation files
-const isTestFile = /\.(test|spec)\.|__tests__|\/tests?\//.test(fullPath);
-const isCodeFile = /\.(js|ts|jsx|tsx|py|rb|go|java|rs|c|cpp|cs)$/.test(fullPath);
+const isTestFile = testFilePattern.test(fullPath);
+const isCodeFile = codeFilePattern.test(fullPath);
 
 if (isCodeFile && !isTestFile) {
   flags.push("@dev-team-knuth (new or changed code path to audit)");
@@ -254,7 +316,7 @@ if (flags.length === 0) {
 // Score the change to determine review depth: LIGHT, STANDARD, or DEEP.
 // Uses available tool_input data (old_string/new_string for Edit, content for Write).
 
-function scoreComplexity(toolInput, filePath) {
+function scoreComplexity(toolInput, scorePath) {
   let score = 0;
 
   // Lines changed
@@ -283,7 +345,7 @@ function scoreComplexity(toolInput, filePath) {
   }
 
   // Security-sensitive files get a boost
-  if (SECURITY_PATTERNS.some((p) => p.test(filePath))) {
+  if (SECURITY_PATTERNS.some((p) => p.test(scorePath))) {
     score += 20;
   }
 
@@ -294,7 +356,6 @@ function scoreComplexity(toolInput, filePath) {
 let lightThreshold = 10;
 let deepThreshold = 40;
 try {
-  const fs = require("fs");
   const configPath = path.join(process.cwd(), ".dev-team", "config.json");
   const config = JSON.parse(fs.readFileSync(configPath, "utf-8"));
   if (config.reviewThresholds) {

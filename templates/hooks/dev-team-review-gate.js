@@ -53,11 +53,41 @@ if (/--skip-review\b/.test(argsBeforeMessage)) {
   process.exit(0);
 }
 
-// ─── Pattern matching (mirrors dev-team-post-change-review.js) ──────────────
-// These patterns determine which agents are required for which files.
-// Kept in sync with post-change-review — if you update one, update both.
+// ─── Pattern matching (shared with dev-team-post-change-review.js) ───────────
+// Patterns are loaded from agent-patterns.json. Falls back to hardcoded
+// patterns if the JSON file is missing or malformed.
 
-const SECURITY_PATTERNS = [
+/**
+ * Compile a pattern entry from the JSON into a RegExp.
+ * Entries are either a string (no flags) or [source, flags].
+ */
+function compilePattern(entry) {
+  if (Array.isArray(entry)) {
+    return new RegExp(entry[0], entry[1] || "");
+  }
+  return new RegExp(entry);
+}
+
+function loadPatternsFromJSON() {
+  try {
+    const jsonPath = path.join(__dirname, "agent-patterns.json");
+    const data = JSON.parse(fs.readFileSync(jsonPath, "utf-8"));
+    const result = {};
+    for (const [key, value] of Object.entries(data)) {
+      if (value.patterns) {
+        result[key] = { compiled: value.patterns.map(compilePattern) };
+      } else if (value.pattern) {
+        result[key] = { compiled: compilePattern(value.pattern) };
+      }
+    }
+    return result;
+  } catch {
+    return null;
+  }
+}
+
+// Hardcoded fallback patterns (kept in sync with agent-patterns.json)
+const FALLBACK_SECURITY_PATTERNS = [
   /auth/,
   /login/,
   /password/,
@@ -77,8 +107,7 @@ const SECURITY_PATTERNS = [
   /sanitiz/,
   /escap/,
 ];
-
-const API_PATTERNS = [
+const FALLBACK_API_PATTERNS = [
   /\/api\//,
   /\/routes?\//,
   /\/endpoints?\//,
@@ -88,8 +117,7 @@ const API_PATTERNS = [
   /openapi/,
   /swagger/,
 ];
-
-const FRONTEND_PATTERNS = [
+const FALLBACK_FRONTEND_PATTERNS = [
   /\/components?\//,
   /\/pages?\//,
   /\/views?\//,
@@ -100,10 +128,8 @@ const FRONTEND_PATTERNS = [
   /tailwind/,
   /styled/,
 ];
-
-const APP_CONFIG_PATTERNS = [/\.env/, /config/, /migration/, /database/, /\.sql$/];
-
-const TOOLING_PATTERNS = [
+const FALLBACK_APP_CONFIG_PATTERNS = [/\.env/, /config/, /migration/, /database/, /\.sql$/];
+const FALLBACK_TOOLING_PATTERNS = [
   /eslint/,
   /prettier/,
   /\.github\/workflows/,
@@ -114,8 +140,7 @@ const TOOLING_PATTERNS = [
   /package\.json$/,
   /\.husky/,
 ];
-
-const DOC_PATTERNS = [
+const FALLBACK_DOC_PATTERNS = [
   /readme/,
   /changelog/,
   /\.md$/,
@@ -125,8 +150,7 @@ const DOC_PATTERNS = [
   /jsdoc/,
   /typedoc/,
 ];
-
-const ARCH_PATTERNS = [
+const FALLBACK_ARCH_PATTERNS = [
   /\/adr\//,
   /architecture/,
   /\/modules?\//,
@@ -140,8 +164,7 @@ const ARCH_PATTERNS = [
   /tsconfig/,
   /webpack|vite|rollup|esbuild/,
 ];
-
-const RELEASE_PATTERNS = [
+const FALLBACK_RELEASE_PATTERNS = [
   /package\.json$/,
   /pyproject\.toml$/,
   /cargo\.toml$/i,
@@ -155,8 +178,7 @@ const RELEASE_PATTERNS = [
   /release\.config/,
   /lerna\.json$/,
 ];
-
-const OPS_PATTERNS = [
+const FALLBACK_OPS_PATTERNS = [
   /dockerfile/,
   /docker-compose/,
   /\.dockerignore$/,
@@ -180,6 +202,29 @@ const OPS_PATTERNS = [
   /\.env\.template$/,
   /env\.template$/,
 ];
+const FALLBACK_CODE_FILE = /\.(js|ts|jsx|tsx|py|rb|go|java|rs|c|cpp|cs)$/;
+const FALLBACK_TEST_FILE = /\.(test|spec)\.|__tests__|\/tests?\//;
+
+const loaded = loadPatternsFromJSON();
+
+function getPatterns(key) {
+  return loaded && loaded[key] ? loaded[key].compiled : null;
+}
+function getSinglePattern(key) {
+  return loaded && loaded[key] ? loaded[key].compiled : null;
+}
+
+const SECURITY_PATTERNS = getPatterns("security") || FALLBACK_SECURITY_PATTERNS;
+const API_PATTERNS = getPatterns("api") || FALLBACK_API_PATTERNS;
+const FRONTEND_PATTERNS = getPatterns("frontend") || FALLBACK_FRONTEND_PATTERNS;
+const APP_CONFIG_PATTERNS = getPatterns("appConfig") || FALLBACK_APP_CONFIG_PATTERNS;
+const TOOLING_PATTERNS = getPatterns("tooling") || FALLBACK_TOOLING_PATTERNS;
+const DOC_PATTERNS = getPatterns("docs") || FALLBACK_DOC_PATTERNS;
+const ARCH_PATTERNS = getPatterns("architecture") || FALLBACK_ARCH_PATTERNS;
+const RELEASE_PATTERNS = getPatterns("release") || FALLBACK_RELEASE_PATTERNS;
+const OPS_PATTERNS = getPatterns("operations") || FALLBACK_OPS_PATTERNS;
+const codeFilePattern = getSinglePattern("codeFile") || FALLBACK_CODE_FILE;
+const testFilePattern = getSinglePattern("testFile") || FALLBACK_TEST_FILE;
 
 /**
  * Derive which agents are required for a given file path.
