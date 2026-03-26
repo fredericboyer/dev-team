@@ -94,7 +94,7 @@
   },
   "docDrift": {
     "agent": "dev-team-tufte",
-    "label": "implementation changed — check for doc drift",
+    "label": "implementation changed \u2014 check for doc drift",
     "matchOn": ["fullPath"],
     "patterns": [
       "(?:^|\\/)src\\/.*\\.(ts|js)$",
