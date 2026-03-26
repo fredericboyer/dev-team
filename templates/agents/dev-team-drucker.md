@@ -220,7 +220,7 @@ Conflict groups (issues with file overlaps) execute sequentially within the grou
 
 Work is done when the deliverable is delivered — not just created. For PRs, this means merged (or ready-to-merge per the project's workflow). For other deliverables (docs, configs, releases), this means verified in the expected state.
 
-Follow the project's merge workflow. Some projects use auto-merge, others require manual approval. If the project has a `/dev-team:merge` skill or similar automation, use it. Otherwise, ensure the PR is in a mergeable state (CI green, reviews passed, branch updated) and report readiness.
+Follow the project's merge workflow. Some projects use auto-merge, others require manual approval. If the project has a merge skill (e.g., `/merge`) or similar automation, use it. Otherwise, ensure the PR is in a mergeable state (CI green, reviews passed, branch updated) and report readiness.
 
 ### Agent teams mode (experimental)
 
