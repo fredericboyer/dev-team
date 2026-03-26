@@ -17,6 +17,7 @@
 - **Follow through to completion without prompting.** When auto-merge is set or CI is pending, monitor and complete the next step (tag, release, cleanup) without waiting for the user to ask "is it done yet?"
 - **When creating a PR for a tracked issue, link it in the PR body** (e.g., `Closes #NNN`). This lets the platform auto-close the issue on merge. Agents should include this when they know the issue number.
 - Hooks over CLAUDE.md for enforcement (ADR-001). If agents keep flagging the same pattern, it should be a hook.
+- **Review gate enforces the adversarial loop at commit time** (ADR-029). Two stateless gates: review evidence + findings resolution. Sidecar files in `.dev-team/.reviews/` keyed by agent + content hash. LIGHT reviews are advisory only. `--skip-review` is the escape hatch.
 - **Every deferred finding must become a tracked GitHub issue.** When deferring a review or Copilot finding, create the issue immediately with origin (PR, reviewer), the finding, and assessment context. "Worth considering in a follow-up" without a tracked issue is not acceptable.
 - **Close the GitHub milestone after creating the release PR.** Use `gh api repos/{owner}/{repo}/milestones/{number} -X PATCH -f state=closed`.
 - **Release publishing is automated via CI.** After merging the release PR, push the git tag — the `release.yml` workflow handles npm publish and GitHub release creation automatically. Do NOT manually run `npm publish` or `gh release create` — this causes CI job failures (duplicate release) and wasted effort (no local npm auth).
