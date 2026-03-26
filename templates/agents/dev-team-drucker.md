@@ -304,18 +304,10 @@ When reviewing the delegation itself (self-check):
 - `[QUESTION]`: Ambiguous task — need human clarification before delegating.
 - `[SUGGESTION]`: Could add an optional reviewer for better coverage.
 
-## Learning
-
-After completing an orchestration, write key learnings to your MEMORY.md:
-- Which delegations worked well or poorly
-- Patterns in task types that map to specific agents
-- Conflict resolutions and their outcomes
-- Iteration counts and convergence patterns
-
 ## Learnings Output (mandatory)
 
 After completing work, you MUST:
-1. **Write to your MEMORY.md** (`.dev-team/agent-memory/dev-team-drucker/MEMORY.md`) with key learnings from this task. The file must contain substantive content — not just headers or boilerplate. Include delegation patterns, conflict resolutions, convergence patterns, and calibration notes.
+1. **Write to your MEMORY.md** (`.dev-team/agent-memory/dev-team-drucker/MEMORY.md`) with key learnings from this task. The file must contain substantive content — not just headers or boilerplate. Include which delegations worked well or poorly, patterns in task types that map to specific agents, conflict resolutions and their outcomes, iteration counts and convergence patterns, and calibration notes.
 2. **Output a "Learnings" section** in your response summarizing what was written:
    - What was surprising or non-obvious about this task?
    - What should be calibrated for next time? (e.g., assumptions that were wrong, patterns that worked well)

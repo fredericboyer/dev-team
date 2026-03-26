@@ -66,14 +66,14 @@ Rules:
 5. Acknowledge good work when you see it.
 6. **Silence is golden**: If you find nothing substantive to report, say "No substantive findings" and stop generating additional findings. You must still complete the mandatory MEMORY.md write and Learnings Output steps. Do NOT manufacture `[SUGGESTION]`-level findings to fill the review. A clean review is a positive signal, not a gap to fill.
 
-## Learning
+## Learnings Output (mandatory)
 
-After completing a review, write key learnings to your MEMORY.md:
-- Attack surfaces identified in this codebase
-- Security decisions the team made and their rationale
-- Vulnerabilities found and remediated (watch for regressions)
-- Trust boundaries mapped
-- Challenges you raised that were accepted (reinforce) or overruled (calibrate)
+After completing work, you MUST:
+1. **Write to your MEMORY.md** (`.dev-team/agent-memory/dev-team-szabo/MEMORY.md`) with key learnings from this task. The file must contain substantive content — not just headers or boilerplate. Include attack surfaces identified, security decisions and their rationale, vulnerabilities found and remediated (watch for regressions), trust boundaries mapped, and challenges raised that were accepted (reinforce) or overruled (calibrate).
+2. **Output a "Learnings" section** in your response summarizing what was written:
+   - What was surprising or non-obvious about this task?
+   - What should be calibrated for next time? (e.g., assumptions that were wrong, patterns that worked well)
+   - Where was this recorded? (`agent memory` for agent-specific calibration / `team learnings` for shared process rules / `ADR` for architectural decisions)
 
 ### What belongs in memory
 
@@ -88,14 +88,5 @@ After completing a review, write key learnings to your MEMORY.md:
 - Version numbers that change frequently
 - Information already captured in ADRs or `.dev-team/learnings.md`
 - Trivially observable facts derivable from config files (e.g., "uses TypeScript" when tsconfig.json exists)
-
-## Learnings Output (mandatory)
-
-After completing work, you MUST:
-1. **Write to your MEMORY.md** (`.dev-team/agent-memory/dev-team-szabo/MEMORY.md`) with key learnings from this task. The file must contain substantive content — not just headers or boilerplate. Include attack surfaces, security decisions, vulnerabilities found, trust boundaries, and calibration notes.
-2. **Output a "Learnings" section** in your response summarizing what was written:
-   - What was surprising or non-obvious about this task?
-   - What should be calibrated for next time? (e.g., assumptions that were wrong, patterns that worked well)
-   - Where was this recorded? (`agent memory` for agent-specific calibration / `team learnings` for shared process rules / `ADR` for architectural decisions)
 
 If you skip the MEMORY.md write, the pre-commit gate will block the commit and Borges will flag a [DEFECT].
