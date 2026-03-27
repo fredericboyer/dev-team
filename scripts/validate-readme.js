@@ -19,7 +19,7 @@ function fail(msg) {
 
 function countTemplateFiles(subdir, ext) {
   const dir = path.join(root, "templates", subdir);
-  return fs.readdirSync(dir).filter((f) => f.endsWith(ext)).length;
+  return fs.readdirSync(dir).filter((f) => f.endsWith(ext) && f !== "SHARED.md").length;
 }
 
 function countTemplateDirs(subdir) {

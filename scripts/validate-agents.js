@@ -6,7 +6,7 @@ const fs = require("fs");
 const path = require("path");
 
 const dir = path.join(__dirname, "..", "templates", "agents");
-const files = fs.readdirSync(dir).filter((f) => f.endsWith(".md"));
+const files = fs.readdirSync(dir).filter((f) => f.endsWith(".md") && f !== "SHARED.md");
 
 const REQUIRED_FIELDS = ["name:", "description:", "model:", "memory: project"];
 
