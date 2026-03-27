@@ -29,6 +29,17 @@ Adversarial AI agent team for any project. Installs Claude Code agents, hooks, a
 - TypeScript source, compiled to CommonJS. Node.js 22+, zero runtime dependencies.
 - Version bumps: use `npm version <version> --no-git-tag-version` to update both `package.json` and `package-lock.json` atomically. Do not edit `package-lock.json` manually.
 
+## Template design principles
+
+Templates, agent definitions, skills, and hooks ship to all projects. They must remain:
+- **Workflow-agnostic** — don't assume PRs, specific branch naming, or any particular development workflow
+- **Platform-neutral** — don't hardcode `gh`, GitHub Actions, Copilot, or any specific tool. Use the `platform` config field for detection
+- **Language-neutral** — don't encode language conventions (test patterns, linter commands, file extensions) that the agent already knows. Hooks detect the ecosystem; agents apply their built-in knowledge
+- **Discoverable-only** — if the agent can learn it by reading the codebase, don't put it in a template. Include only what agents can't discover: tool preferences, legacy traps, process decisions
+- **Process-driven** — agent definitions describe *capabilities* (what the agent can do), not *steps* (how a specific project uses them). Workflow steps (release process, review requirements, integration rules) belong in `.dev-team/process.md`, which each project customizes. Agents read process.md at runtime rather than having steps hardcoded in their definitions.
+
+Project-specific conventions belong in `.dev-team/process.md` (workflow) or `.dev-team/learnings.md` (organic findings) — not in templates.
+
 ## Architecture decisions
 
 Stored in `docs/adr/`. Read before making changes to foundational patterns. ADRs are immutable records — if a decision changes, write a new ADR that supersedes the original. Do not edit existing ADRs.
@@ -124,4 +135,5 @@ Domain-specific findings, known patterns, active watch lists. Each agent owns it
 When the human gives feedback about process, coding style, or tool behavior: write it to `.dev-team/learnings.md`. Only use machine-local memory for things that are truly personal and would not apply to another developer on the same project.
 
 <!-- dev-team:end -->
+
 
