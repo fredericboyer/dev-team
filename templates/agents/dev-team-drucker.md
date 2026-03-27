@@ -196,17 +196,17 @@ This bounds token usage per review wave regardless of iteration count and preven
 ### 6. Complete
 
 When no `[DEFECT]` findings remain:
-1. **Deliver the work**: Ensure the task is complete end-to-end. If the task produces a PR, create it. The PR body must include the platform's issue-closing keyword (e.g., `Closes #NNN` for GitHub, `Closes <PROJ>-NNN` for Jira/Linear — check `.dev-team/config.json` for `platform` and `issueTracker` settings). Ensure CI is green, reviews have passed, and the branch is up to date — then follow the project's merge workflow. If the task produces other artifacts, verify they are in the expected state. Work is not done until the deliverable is delivered — not just created.
-2. **Clean up worktree**: If the work was done in a worktree, clean it up after the branch is pushed and the PR is created. Do not wait for merge to clean the worktree.
+1. **Deliver the work**: Ensure the task is complete end-to-end. Follow the integration process defined in `.claude/rules/dev-team-process.md` — this covers issue linking, review requirements, and merge workflow. If the task produces other artifacts, verify they are in the expected state. Work is not done until the deliverable is delivered — not just created.
+2. **Clean up worktree**: If the work was done in a worktree, clean it up after the branch is pushed and the deliverable is created. Do not wait for merge to clean the worktree.
 3. Spawn **@dev-team-borges** (Librarian) to review memory freshness, cross-agent coherence, and system improvement opportunities. This is mandatory — Borges runs at the end of every task.
 4. Summarize what was implemented and what was reviewed.
 5. Report any remaining `[RISK]` or `[SUGGESTION]` items, including Borges's recommendations.
 6. List which agents reviewed and their verdicts.
 7. Write learnings to agent memory files.
 
-**Review bot monitoring:** After PR creation, check for automated review findings promptly. Do not wait for merge to discover review bot comments — route them to implementing agents as they appear.
+**Review bot monitoring:** After delivering work, check for automated review findings promptly. Do not wait for merge to discover review bot comments — route them to implementing agents as they appear.
 
-**Task is complete only when the deliverable is delivered.** If a PR cannot merge (CI failures, merge conflicts, branch protection), report the blocker to the human rather than leaving work unattended.
+**Task is complete only when the deliverable is delivered.** If integration is blocked (CI failures, merge conflicts, review requirements), report the blocker to the human rather than leaving work unattended.
 
 ### Parallel orchestration
 
@@ -214,7 +214,7 @@ When working on multiple issues simultaneously (see ADR-019):
 
 1. **Analyze for file independence**: Spawn @dev-team-brooks with the full batch of issues. Brooks identifies conflict groups — issues that touch overlapping files and must execute sequentially. Independent issues can proceed in parallel.
 
-2. **Spawn implementation agents in parallel**: For each independent issue, spawn one implementing agent on its own branch (`feat/<issue>-<description>`). Each agent works without awareness of other parallel agents.
+2. **Spawn implementation agents in parallel**: For each independent issue, spawn one implementing agent on its own branch (following the branching convention in `.claude/rules/dev-team-process.md`). Each agent works without awareness of other parallel agents.
 
 3. **Wait for all implementations to complete**: Do not start reviews until every implementation agent has finished. This is the synchronization barrier.
 
@@ -230,9 +230,7 @@ Conflict groups (issues with file overlaps) execute sequentially within the grou
 
 ### Completing work
 
-Work is done when the deliverable is delivered — not just created. For PRs, this means merged (or ready-to-merge per the project's workflow). For other deliverables (docs, configs, releases), this means verified in the expected state.
-
-Follow the project's merge workflow. Some projects use auto-merge, others require manual approval. If the project has a merge skill (e.g., `/merge`) or similar automation, use it. Otherwise, ensure the PR is in a mergeable state (CI green, reviews passed, branch updated) and report readiness.
+Work is done when the deliverable is delivered — not just created. Follow the integration and merge workflow defined in `.claude/rules/dev-team-process.md`. For other deliverables (docs, configs, releases), verify they are in the expected state.
 
 ### Agent teams mode (experimental)
 
