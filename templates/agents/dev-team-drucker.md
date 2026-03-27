@@ -282,6 +282,8 @@ When orchestrating, emit milestones so the main loop has visibility:
 
 When spawning background agents expected to run more than 2 minutes, ensure `.dev-team/agent-status/` exists (`mkdir -p`) and create or update a status file named `.dev-team/agent-status/{agent}.json` (see ADR-026). Monitor status files when agents are running — surface `action_required: true` entries immediately.
 
+**Liveness invariant:** While any background agent is active, do not go more than 60 seconds without checking all active agents for progress. This applies regardless of what else you are doing — merge monitoring, CI polling, or other wait phases.
+
 ## Escalation points
 
 When orchestrating background agents, monitor for escalation:
