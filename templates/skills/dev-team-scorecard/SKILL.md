@@ -1,6 +1,7 @@
 ---
 name: dev-team:scorecard
-description: Audit process conformance for a completed task or PR. Checks whether Borges ran, findings were acknowledged, metrics recorded, reviews executed, memory updated, and issues closed. Produces a pass/fail scorecard.
+description: Audit process conformance after a task loop completes. Checks Borges ran, findings acknowledged, metrics recorded, reviews executed, memory updated, and issues closed.
+user_invocable: false
 ---
 
 Audit process conformance for: $ARGUMENTS
