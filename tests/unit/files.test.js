@@ -217,7 +217,42 @@ describe("mergeSettings", () => {
     assert.ok(commands.includes("new-framework"), "adds new framework hook");
   });
 
-  it("does not duplicate identical hooks on re-run", () => {
+  it("handles null hooks in existing entry without throwing", () => {
+    const settingsPath = path.join(tmpDir, "settings.json");
+    const existing = { hooks: { PostToolUse: [{ matcher: "Edit", hooks: null }] } };
+    fs.writeFileSync(settingsPath, JSON.stringify(existing));
+    const fragment = { hooks: { PostToolUse: [{ matcher: "Edit", hooks: [{ type: "command", command: "a" }] }] } };
+    mergeSettings(settingsPath, fragment);
+    const result = JSON.parse(fs.readFileSync(settingsPath, "utf-8"));
+    assert.equal(result.hooks.PostToolUse[0].hooks.length, 1);
+  });
+
+  it("consolidates duplicate matcher blocks from prior bug", () => {
+    const settingsPath = path.join(tmpDir, "settings.json");
+    const existing = { hooks: { PostToolUse: [
+      { matcher: "Edit", hooks: [{ type: "command", command: "a" }] },
+      { matcher: "Edit", hooks: [{ type: "command", command: "b" }] }
+    ] } };
+    fs.writeFileSync(settingsPath, JSON.stringify(existing));
+    const fragment = { hooks: { PostToolUse: [{ matcher: "Edit", hooks: [{ type: "command", command: "c" }] }] } };
+    mergeSettings(settingsPath, fragment);
+    const result = JSON.parse(fs.readFileSync(settingsPath, "utf-8"));
+    assert.equal(result.hooks.PostToolUse.length, 1, "consolidates into one block");
+    const cmds = result.hooks.PostToolUse[0].hooks.map(h => h.command);
+    assert.deepEqual(cmds.sort(), ["a", "b", "c"]);
+  });
+
+  it("deduplicates repeated commands in new entry", () => {
+    const settingsPath = path.join(tmpDir, "settings.json");
+    const existing = { hooks: { PostToolUse: [{ matcher: "Edit", hooks: [{ type: "command", command: "a" }] }] } };
+    fs.writeFileSync(settingsPath, JSON.stringify(existing));
+    const fragment = { hooks: { PostToolUse: [{ matcher: "Edit", hooks: [{ type: "command", command: "b" }, { type: "command", command: "b" }] }] } };
+    mergeSettings(settingsPath, fragment);
+    const cmds = JSON.parse(fs.readFileSync(settingsPath, "utf-8")).hooks.PostToolUse[0].hooks.map(h => h.command);
+    assert.deepEqual(cmds, ["a", "b"]);
+  });
+
+    it("does not duplicate identical hooks on re-run", () => {
     const settingsPath = path.join(tmpDir, "settings.json");
     const fragment = {
       hooks: { PreToolUse: [{ matcher: "Bash", hooks: [{ type: "command", command: "same" }] }] },

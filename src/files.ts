@@ -119,22 +119,44 @@ export function mergeSettings(existingPath: string, newFragment: HookSettings): 
     if (!existing.hooks[event]) {
       existing.hooks[event] = entries;
     } else {
+      // Consolidate duplicate matcher blocks that may already exist from prior bug
+      const consolidated: HookMatcher[] = [];
+      for (const entry of existing.hooks[event]) {
+        entry.hooks = entry.hooks ?? [];
+        const target = consolidated.find((c) => c.matcher === entry.matcher);
+        if (target) {
+          const cmds = new Set(target.hooks.map((h) => h.command));
+          for (const hook of entry.hooks) {
+            if (!cmds.has(hook.command)) {
+              target.hooks.push(hook);
+              cmds.add(hook.command);
+            }
+          }
+        } else {
+          consolidated.push(entry);
+        }
+      }
+      existing.hooks[event] = consolidated;
+
       // Merge by matcher value — deduplicate hooks within matched blocks
       for (const newEntry of entries) {
         const matchedExisting = existing.hooks[event].find(
           (existingEntry) => existingEntry.matcher === newEntry.matcher,
         );
         if (matchedExisting) {
-          const existingCommands = new Set((matchedExisting.hooks || []).map((h) => h.command));
+          matchedExisting.hooks = matchedExisting.hooks ?? [];
+          const existingCommands = new Set(matchedExisting.hooks.map((h) => h.command));
           for (const hook of newEntry.hooks || []) {
             if (!existingCommands.has(hook.command)) {
               matchedExisting.hooks.push(hook);
+              existingCommands.add(hook.command);
             }
           }
         } else {
           existing.hooks[event].push(newEntry);
         }
       }
+
     }
   }
 
