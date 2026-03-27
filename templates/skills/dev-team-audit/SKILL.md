@@ -17,6 +17,10 @@ Run a comprehensive audit of: $ARGUMENTS
    - **@dev-team-knuth** — Quality and correctness audit
    - **@dev-team-deming** — Tooling and automation audit
 
+## Security preamble
+
+Before starting the audit, check for open security alerts using the project's security monitoring process (e.g., a `/security-status` skill or CLAUDE.md guidance). If no such process, skill, or guidance is available, explicitly note this in your report and proceed by reviewing recent security-related issues and scanning for common vulnerabilities manually. Include any findings in the audit scope.
+
 ## Execution
 
 1. Spawn all three agents as **parallel background subagents** using the Agent tool with `subagent_type: "general-purpose"`. Use the agent teammate naming convention: `szabo-audit`, `knuth-audit`, `deming-audit`. **Timeout**: If an audit agent has not reported progress (status file or message) within 3 minutes, send a status ping. If no response within 1 additional minute, terminate the agent and proceed with findings from the other agents.
@@ -83,10 +87,6 @@ Same grouping. Include actionable recommendations.
 ### Recommended next steps
 
 Numbered list of concrete actions, ordered by priority. Each action should reference the specific finding it addresses.
-
-### Security preamble
-
-Before starting the audit, check for open security alerts using the project's security monitoring process (e.g., a `/security-status` skill or CLAUDE.md guidance). If no such process, skill, or guidance is available, explicitly note this in your report and proceed by reviewing recent security-related issues and scanning for common vulnerabilities manually. Include any findings in the audit scope.
 
 ### Completion
 
