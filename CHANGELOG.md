@@ -179,7 +179,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Internal
 - 306 tests. 12 agents. 5 framework skills. 6 hooks. 25 ADRs.
 - ADR immutability convention: decision content is immutable, only the Status field changes as a lifecycle marker.
-- Docs restructured: `docs/guides/`, `docs/research/`, `docs/adr/`, `docs/design-notes/`.
+- Docs restructured: `docs/guides/`, `docs/research/`, `docs/adr/`, `docs/design/`, `docs/benchmarks/`.
 
 ## [0.11.0] - 2026-03-24
 
