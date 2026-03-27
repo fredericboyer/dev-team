@@ -1,6 +1,7 @@
 ---
 name: dev-team:audit
 description: Full codebase audit combining security, quality, and tooling assessments. Use to run a comprehensive scan with Szabo (security), Knuth (quality), and Deming (tooling) in parallel. Can be scoped to specific directories or file patterns.
+disable-model-invocation: true
 ---
 
 Run a comprehensive audit of: $ARGUMENTS
