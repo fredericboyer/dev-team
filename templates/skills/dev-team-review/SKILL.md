@@ -12,23 +12,13 @@ Run a multi-agent parallel review of: $ARGUMENTS
    - If a directory or file pattern is given, review those files
    - If no argument, review all uncommitted changes (`git diff HEAD`)
 
-2. Categorize changed files by domain to determine which agents to spawn:
+2. Categorize changed files by domain to determine which agents to spawn. File-pattern-to-agent routing follows `.dev-team/agent-patterns.json` — the same patterns used by the post-change-review and review-gate hooks. Read that file to map changed files to the appropriate specialist agents.
 
-| File pattern | Agent | Reason |
-|---|---|---|
-| `auth`, `login`, `password`, `token`, `session`, `crypto`, `encrypt`, `decrypt`, `secret`, `permission`, `rbac`, `acl`, `oauth`, `jwt`, `cors`, `csrf`, `sanitiz`, `escap` | @dev-team-szabo | Security surface |
-| `/api/`, `/route/`, `/routes/`, `/endpoint/`, `/endpoints/`, `schema`, `.graphql`, `.proto`, `openapi`, `swagger` | @dev-team-mori | API/UI contract |
-| `docker`, `Dockerfile`, `docker-compose`, `.dockerignore`, `.env.example`, `env.template`, `deploy`, `terraform/`, `.tf`, `.tfvars`, `pulumi/`, `cloudformation/`, `helm`, `k8s`, `kubernetes`, `health-check`, `healthcheck`, `monitoring.yml`, `monitoring.yaml`, `monitoring.json`, `observability`, `otel`, `alerting.yml`, `alerting.yaml`, `alerting.json`, `logging.yml`, `logging.yaml`, `logging.json`, `.github/workflows`, `.gitlab-ci`, `jenkinsfile` | @dev-team-hamilton | Infrastructure |
-| `.env`, `config`, `migration`, `database`, `.sql` | @dev-team-voss | Backend/data layer |
-| `.github/workflows`, `.claude/`, `tsconfig`, `eslint`, `prettier`, `jest.config`, `vitest`, `.husky`, `package.json` | @dev-team-deming | Tooling |
-| `readme`, `changelog`, `.md`, `.mdx`, `/docs/`, `api-doc`, `jsdoc`, `typedoc` | @dev-team-tufte | Documentation |
-| `/adr/`, `architecture`, `/modules/`, `/layers/`, `/core/`, `/domain/`, `/shared/`, `/lib/`, `/plugins/`, `/middleware/`, `tsconfig`, `webpack`, `vite`, `rollup`, `esbuild` | @dev-team-brooks | Architecture |
-| `package.json`, `pyproject.toml`, `cargo.toml`, `version`, `changelog`, `.npmrc`, `.npmignore`, `release.config`, `lerna.json`, release/publish/deploy workflows | @dev-team-conway | Release artifacts |
-| `/components/`, `/pages/`, `/views/`, `/layouts/`, `/ui/`, `.css`, `.scss`, `.sass`, `.less`, `.jsx`, `.tsx`, `tailwind`, `styled` | @dev-team-rams | Design system compliance |
-| `*.test.*`, `*.spec.*`, `__tests__/`, `/test/`, `/tests/` (code files only) | @dev-team-beck | Test quality |
-| Any `.js`, `.ts`, `.py`, `.go`, `.java`, `.rs` (non-test) | @dev-team-knuth | Quality/coverage |
-
-3. Always include @dev-team-szabo. For non-test code changes, also always include @dev-team-knuth and @dev-team-brooks; for test-only changes, ensure @dev-team-beck is included.
+3. **Always-on reviewers** (spawn regardless of file patterns):
+   - **@dev-team-szabo** — always included (security review)
+   - **@dev-team-knuth** — included for any non-test code changes (quality/coverage)
+   - **@dev-team-brooks** — included for any non-test code changes (architecture)
+   - **@dev-team-beck** — included for test-only changes (test quality)
 
 ## Pre-review validation
 
