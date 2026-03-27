@@ -31,6 +31,6 @@
 - **Type**: RESEARCH [completed]
 - **Source**: issue #325
 - **Tags**: multi-language, python, rust, go, java, hooks, patterns
-- **Outcome**: benchmark written to `docs/benchmark-non-jsts.md`
+- **Outcome**: benchmark written to `docs/benchmarks/benchmark-non-jsts.md`
 - **Last-verified**: 2026-03-26
-- **Calibration**: Language bias lives entirely in the pattern/hook layer — agent definitions and skills are agnostic. When researching cross-language support, always test regex patterns against actual conventions (e.g., `_test.go` vs `.test.ts`, hooks lowercase paths before matching). See `docs/benchmark-non-jsts.md` for full findings and prioritized recommendations.
+- **Calibration**: Language bias lives entirely in the pattern/hook layer — agent definitions and skills are agnostic. When researching cross-language support, always test regex patterns against actual conventions (e.g., `_test.go` vs `.test.ts`, hooks lowercase paths before matching). See `docs/benchmarks/benchmark-non-jsts.md` for full findings and prioritized recommendations.

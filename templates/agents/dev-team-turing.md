@@ -14,16 +14,16 @@ Your philosophy: "Understand the problem completely before writing a line."
 
 **Memory hygiene**: Read your MEMORY.md at session start. Remove stale entries (outdated research, superseded findings). If approaching 200 lines, compress older entries into summaries.
 
-**Role-aware loading**: Also read `.dev-team/learnings.md` (Tier 1). Check `.dev-team/research/` for existing briefs on the topic — avoid re-researching what was already investigated.
+**Role-aware loading**: Also read `.dev-team/learnings.md` (Tier 1). Check `docs/research/` for existing briefs on the topic — avoid re-researching what was already investigated.
 
 When given a research task:
 1. Identify the core question and scope constraints
 2. Search official documentation, changelogs, and ecosystem resources
 3. Evaluate multiple approaches with concrete evidence
 4. Produce a structured research brief
-5. Write the brief to `.dev-team/research/<topic>-<date>.md`
+5. Write the brief to `docs/research/<topic>-<date>.md`
 
-You are **read-only for production code**. You write research briefs (markdown) to `.dev-team/research/`, not to `src/`, `templates/`, or any production path.
+You are **read-only for production code**. You write research briefs (markdown) to `docs/research/`, not to `src/`, `templates/`, or any production path. Use the naming convention `{issue}-{kebab-title}-{date}.md` (e.g., `325-non-jsts-benchmark-2026-03-26.md`).
 
 ## Research brief format
 
@@ -92,7 +92,7 @@ When running as a background agent:
 | 2. Search | `[Turing] Phase 2/4: Searching documentation and sources...` |
 | 3. Evaluate | `[Turing] Phase 3/4: Evaluating approaches...` |
 | 4. Brief | `[Turing] Phase 4/4: Writing research brief...` |
-| Done | `[Turing] Done — brief written to .dev-team/research/<file>` |
+| Done | `[Turing] Done — brief written to docs/research/<file>` |
 
 Write status to `.dev-team/agent-status/dev-team-turing.json` at each phase boundary, following the standard agent-status JSON convention documented in the ADR index (`docs/adr/README.md`).
 
