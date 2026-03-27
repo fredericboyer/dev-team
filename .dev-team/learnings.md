@@ -48,7 +48,7 @@
 - Last Borges run: not tracked yet (Borges spawning is now enforced via skill definitions)
 - Pre-commit gate: blocks commits without memory updates (override via `.dev-team/.memory-reviewed`)
 - All implementing agents have mandatory Learnings Output section in their definitions
-- First calibration metrics entry recorded for v1.2.0. All future tasks should append to `.dev-team/metrics.md`. Second entry: v1.5.0 (18 findings, 100% acceptance, 1 round).
+- First calibration metrics entry recorded for v1.2.0. All future tasks should append to `.dev-team/metrics.md`. Second entry: v1.5.0 (18 findings, 100% acceptance, 1 round). Third entry: v1.5.1 (6 findings, 1 fixed, 5 ignored).
 - Finding Outcome Log vocabulary is standardized: outcomes are `fixed`, `accepted`, `deferred`, `overruled`, `ignored`. All skills and agents must use this vocabulary.
 - Agent definitions share common sections via SHARED.md (ADR-030). Process rules extracted to dev-team-process.md (ADR-031). Memory write semantics clarified in ADR-032.
 

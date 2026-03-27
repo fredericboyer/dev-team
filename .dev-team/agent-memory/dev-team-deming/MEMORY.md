@@ -62,10 +62,18 @@
 ### [2026-03-26] Process rules extracted from CLAUDE.md to dev-team-process.md
 - **Type**: DECISION [verified]
 - **Source**: PR #373, ADR-031
-- **Tags**: process, dx, claude-md, templates
+- **Tags**: process, dx, claude-md, templates, guarded-files
 - **Outcome**: accepted
 - **Last-verified**: 2026-03-26
 - **Context**: CLAUDE.md was growing unwieldy. Process rules now live in a dedicated file, keeping CLAUDE.md under 100 lines. ADR-031 governs the extraction.
+
+### [2026-03-26] process.md is a guarded file — never overwritten on update
+- **Type**: DECISION [verified]
+- **Source**: PR #398 (fix/397)
+- **Tags**: update, guarded-files, process
+- **Outcome**: accepted
+- **Last-verified**: 2026-03-26
+- **Context**: process.md joins learnings.md and metrics.md as files that are never overwritten by `dev-team update`. update.ts only installs process.md if missing (for pre-v1.5.0 projects). The contradiction between "Never modify .dev-team/" and process.md being user-editable was resolved by clarifying which files are preserved vs overwritten.
 
 ## Calibration Log
 <!-- Challenges accepted/overruled — tunes adversarial intensity over time -->
