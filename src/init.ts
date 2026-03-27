@@ -319,7 +319,12 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
     copyFile(learningsSrc, learningsDest);
   }
 
-  // Step 8b: Create metrics log
+  // Step 8b: Install process file
+  const processSrc = path.join(templates, "dev-team-process.md");
+  const processDest = path.join(devTeamDir, "process.md");
+  copyFile(processSrc, processDest);
+
+  // Step 8c: Create metrics log
   // Install destination must be .dev-team/metrics.md — skills (task, review, retro)
   // and agents (Borges, Drucker) reference this exact path for calibration metrics.
   const metricsSrc = path.join(templates, "dev-team-metrics.md");
