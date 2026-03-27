@@ -88,6 +88,10 @@ Same grouping. Include actionable recommendations.
 
 Numbered list of concrete actions, ordered by priority. Each action should reference the specific finding it addresses.
 
+### Platform detection
+
+Before issuing any `gh issue`, `gh pr`, or other platform-specific CLI commands, check `.dev-team/config.json` for the `platform` and `issueTracker` fields. If the project specifies a non-GitHub platform (e.g., `"gitlab"`, `"bitbucket"`, `"other"`), adapt issue tracker and PR commands accordingly — use `glab` for GitLab, the Bitbucket API, or the appropriate CLI for the configured platform. The steps in this skill assume GitHub by default.
+
 ### Completion
 
 After the audit report is delivered:

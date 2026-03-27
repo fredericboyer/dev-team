@@ -75,6 +75,10 @@ Do NOT skip this. Do NOT treat hook output as optional. If you believe a review 
 - `/dev-team:audit` — full codebase security + quality + tooling audit
 - `/dev-team:retro` — audit knowledge base health (learnings, agent memory, CLAUDE.md)
 
+> **Non-GitHub platforms:** Skills and hooks reference `gh` CLI commands for GitHub. If your project uses GitLab, Bitbucket, or another platform, adapt these commands accordingly. Set the `platform` field in `.dev-team/config.json` to `"gitlab"`, `"bitbucket"`, or `"other"`.
+
+> **Non-JS/TS projects:** File patterns in `agent-patterns.json` are optimized for JavaScript/TypeScript projects. For Python, Rust, Go, Java, or other ecosystems, you may need to extend these patterns to cover language-specific test conventions, build tools, and framework structures.
+
 ### Project-specific customization
 
 `.dev-team/` is managed by dev-team and updated by `dev-team update`. Do not add project-specific files here.

@@ -141,6 +141,10 @@ Parallel mode is complete when:
 1. All branches have zero `[DEFECT]` findings, OR the per-branch iteration limit (default: 10) is reached
 2. Borges has run across all branches
 
+## Platform detection
+
+Before issuing any `gh issue`, `gh pr`, or other platform-specific CLI commands, check `.dev-team/config.json` for the `platform` and `issueTracker` fields. If the project specifies a non-GitHub platform (e.g., `"gitlab"`, `"bitbucket"`, `"other"`), adapt issue tracker and PR commands accordingly — use `glab` for GitLab, the Bitbucket API, or the appropriate CLI for the configured platform. The steps in this skill assume GitHub by default.
+
 ## Security preamble
 
 Before starting work, check for open security alerts using the project's security monitoring process (e.g., a `/security-status` skill or CLAUDE.md guidance). If no such process is defined, use whatever security tooling is available or proceed while noting that no automated security check is configured. Flag any critical findings before proceeding.

@@ -459,6 +459,7 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
     hooks: selectedHooks,
     issueTracker,
     branchConvention,
+    platform: "github",
     agentTeams: agentTeamsEnabled,
   };
   if (preset) {
