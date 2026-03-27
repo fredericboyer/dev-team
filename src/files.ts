@@ -156,7 +156,6 @@ export function mergeSettings(existingPath: string, newFragment: HookSettings): 
           existing.hooks[event].push(newEntry);
         }
       }
-
     }
   }
 
