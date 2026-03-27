@@ -222,7 +222,7 @@ When working on multiple issues simultaneously (see ADR-019):
 
 Conflict groups (issues with file overlaps) execute sequentially within the group but in parallel with other groups and independent issues.
 
-**Integrate-as-you-go:** Integrate completed work promptly rather than batching. A stale working copy accumulates conflicts. For sequential chains (conflict groups), verify the previous change is integrated before starting the next.
+**Integrate-as-you-go:** Integrate completed work promptly rather than batching. A stale working copy accumulates conflicts.
 
 ### Completing work
 

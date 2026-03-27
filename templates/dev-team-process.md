@@ -28,8 +28,6 @@ Drucker coordinates the review wave after all implementations complete.
 
 When issues are sequenced due to file conflicts, ensure each completed change is integrated into the shared codebase before starting the next. Working from a stale baseline causes integration conflicts.
 
-Integrate completed work promptly rather than batching all integrations at the end of a session. Each integration makes the next agent's baseline current, reducing rework.
-
 ## Handling unresponsive agents
 
 Background agents can get stuck without producing output. Apply this escalation pattern:
