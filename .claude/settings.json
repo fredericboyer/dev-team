@@ -7,46 +7,35 @@
           {
             "type": "command",
             "command": "node .claude/hooks/issue-pr-enforce.js"
-          }
-        ]
-      },
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node .dev-team/hooks/dev-team-safety-guard.js"
-          }
-        ]
-      },
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node .claude/hooks/copilot-merge-gate.js"
-          }
-        ]
-      },
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node .claude/hooks/precommit-lint-format.js"
-          }
-        ]
-      },
-      {
-        "matcher": "Bash",
-        "hooks": [
+          },
           {
             "type": "command",
             "command": "node .dev-team/hooks/dev-team-safety-guard.js"
           },
           {
             "type": "command",
+            "command": "node .claude/hooks/copilot-merge-gate.js"
+          },
+          {
+            "type": "command",
+            "command": "node .claude/hooks/precommit-lint-format.js"
+          },
+          {
+            "type": "command",
             "command": "node .dev-team/hooks/dev-team-pre-commit-lint.js"
+          },
+          {
+            "type": "command",
+            "command": "node .dev-team/hooks/dev-team-review-gate.js"
+          }
+        ]
+      },
+      {
+        "matcher": "Agent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .dev-team/hooks/dev-team-agent-teams-guide.js"
           }
         ]
       }
@@ -66,19 +55,6 @@
           {
             "type": "command",
             "command": "node .claude/hooks/lint-format.js"
-          }
-        ]
-      },
-      {
-        "matcher": "Edit|Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node .dev-team/hooks/dev-team-post-change-review.js"
-          },
-          {
-            "type": "command",
-            "command": "node .dev-team/hooks/dev-team-tdd-enforce.js"
           },
           {
             "type": "command",

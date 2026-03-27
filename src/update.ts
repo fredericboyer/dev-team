@@ -656,6 +656,13 @@ export async function update(targetDir: string): Promise<void> {
     copyFile(metricsSrc, metricsDest);
   }
 
+  // Step 7c: Install process file (only if missing — for pre-v1.5.0 installs)
+  const processSrc = path.join(templates, "dev-team-process.md");
+  const processDest = path.join(devTeamDir, "process.md");
+  if (!fileExists(processDest) && fileExists(processSrc)) {
+    copyFile(processSrc, processDest);
+  }
+
   // Backfill platform field for existing installs (added in v1.5.0)
   if (!prefs.platform) {
     prefs.platform = "github";

@@ -324,10 +324,12 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
     copyFile(learningsSrc, learningsDest);
   }
 
-  // Step 8b: Install process file
+  // Step 8b: Install process file (only if missing — never overwrite user customizations)
   const processSrc = path.join(templates, "dev-team-process.md");
   const processDest = path.join(devTeamDir, "process.md");
-  copyFile(processSrc, processDest);
+  if (!fileExists(processDest)) {
+    copyFile(processSrc, processDest);
+  }
 
   // Step 8c: Create metrics log
   // Install destination must be .dev-team/metrics.md — skills (task, review, retro)

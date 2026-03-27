@@ -164,6 +164,30 @@ describe("dev-team update", () => {
     assert.ok(content.includes("PostgreSQL"), "learnings should not be overwritten");
   });
 
+  it("preserves process file on update", async () => {
+    await run(tmpDir, ["--all"]);
+
+    const processPath = path.join(tmpDir, ".dev-team", "process.md");
+    fs.writeFileSync(processPath, "# Custom Process\nWe use trunk-based development.");
+
+    await update(tmpDir);
+
+    const content = fs.readFileSync(processPath, "utf-8");
+    assert.ok(content.includes("trunk-based"), "process file should not be overwritten");
+  });
+
+  it("installs process file on update if missing", async () => {
+    await run(tmpDir, ["--all"]);
+
+    const processPath = path.join(tmpDir, ".dev-team", "process.md");
+    fs.unlinkSync(processPath);
+    assert.ok(!fs.existsSync(processPath));
+
+    await update(tmpDir);
+
+    assert.ok(fs.existsSync(processPath), "process file should be installed on update");
+  });
+
   it("updates all agents including those added after initial install", async () => {
     await run(tmpDir, ["--all"]);
 
