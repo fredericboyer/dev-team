@@ -41,10 +41,18 @@
 - **Tags**: adr, format, documentation
 - **Outcome**: verified
 - **Last-verified**: 2026-03-26
-- **Context**: All ADRs use the Nygard lightweight format. No frontmatter, no YAML. Title line is `# ADR-NNN: Title`. Status line values: proposed, accepted, deprecated, superseded by ADR-NNN.
+- **Context**: All ADRs use the Nygard lightweight format. No frontmatter, no YAML. Title line is `# ADR-NNN: Title`. Status line values: proposed, accepted, deprecated, superseded by ADR-NNN, amended by ADR-NNN.
 
 ## Patterns to Watch For
 
 
 ## Calibration Log
 <!-- Challenges accepted/overruled — tunes adversarial intensity over time -->
+
+### [2026-03-26] Copilot review: ADR-032 over-attributed append-only to ADR-012
+- **Type**: CALIBRATION [accepted]
+- **Source**: PR #361 Copilot finding
+- **Tags**: adr, precision, attribution
+- **Outcome**: fixed
+- **Last-verified**: 2026-03-26
+- **Context**: ADR-012 only specifies a freshness reminder, not append-only semantics. Append-only was an emergent practice. Be precise about what an ADR actually mandates vs what emerged organically.

@@ -9,7 +9,7 @@ Each ADR follows the lightweight format inspired by Michael Nygard:
 ```
 # ADR-NNN: Title
 Date: YYYY-MM-DD
-Status: proposed | accepted | deprecated | superseded by ADR-NNN
+Status: proposed | accepted | deprecated | superseded by ADR-NNN | amended by ADR-NNN
 
 ## Context
 What is the issue motivating this decision?
