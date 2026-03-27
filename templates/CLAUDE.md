@@ -49,7 +49,7 @@ Do NOT skip this. Do NOT treat hook output as optional. If you believe a review 
 
 > **Non-GitHub platforms:** Skills and hooks reference `gh` CLI commands for GitHub. If your project uses GitLab, Bitbucket, or another platform, adapt these commands accordingly. Set the `platform` field in `.dev-team/config.json` to `"gitlab"`, `"bitbucket"`, or `"other"`.
 
-> **Non-JS/TS projects:** File patterns in `agent-patterns.json` are optimized for JavaScript/TypeScript projects. For Python, Rust, Go, Java, or other ecosystems, you may need to extend these patterns to cover language-specific test conventions, build tools, and framework structures.
+> **Non-JS/TS projects:** Hooks detect the ecosystem and delegate language-specific reasoning to agents. File patterns in `agent-patterns.json` cover common conventions; agents apply their built-in knowledge for language-specific test naming, build tools, and framework structures beyond these patterns (see ADR-034).
 
 ### Project-specific customization
 

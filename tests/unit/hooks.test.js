@@ -164,6 +164,18 @@ describe("dev-team-post-change-review", () => {
     assert.ok(!result.stdout.includes("@dev-team-brooks"));
   });
 
+  it("does not flag Knuth for Go test files (_test.go)", () => {
+    const result = runHook(hook, { file_path: "/app/handler_test.go" });
+    assert.equal(result.code, 0);
+    assert.ok(!result.stdout.includes("@dev-team-knuth"), "should not flag Knuth for _test.go");
+  });
+
+  it("flags Beck for Go test files (_test.go)", () => {
+    const result = runHook(hook, { file_path: "/app/handler_test.go" });
+    assert.equal(result.code, 0);
+    assert.ok(result.stdout.includes("@dev-team-beck"), "should flag Beck for _test.go");
+  });
+
   it("flags Brooks only once for arch boundary files (no duplicate)", () => {
     const result = runHook(hook, { file_path: "/app/src/core/engine.ts" });
     assert.equal(result.code, 0);
@@ -577,6 +589,7 @@ describe("dev-team-tdd-enforce", () => {
       { name: ".test.js", file_path: "/app/src/utils.test.js" },
       { name: ".spec.ts", file_path: "/app/src/utils.spec.ts" },
       { name: "_test.go", file_path: "/app/handler_test.go" },
+      { name: "test_*.py (Python)", file_path: "/app/test_handler.py" },
       { name: "__tests__/", file_path: "/app/__tests__/utils.js" },
       { name: "tests/ dir", file_path: "/app/tests/unit/utils.js" },
     ];
@@ -692,6 +705,76 @@ describe("dev-team-tdd-enforce", () => {
       });
       // Should exit 0 (allowed because test file exists)
       assert.ok(true);
+    });
+
+    it("allows Go file when _test.go exists", () => {
+      const implFile = path.join(tmpDir, "handler.go");
+      const testFile = path.join(tmpDir, "handler_test.go");
+      fs.writeFileSync(implFile, "package main");
+      fs.writeFileSync(testFile, "package main");
+
+      const input = JSON.stringify({ tool_input: { file_path: implFile } });
+      execFileSync(process.execPath, [path.join(HOOKS_DIR, hook), input], {
+        encoding: "utf-8",
+        timeout: 5000,
+        cwd: tmpDir,
+      });
+      // Should exit 0
+      assert.ok(true);
+    });
+
+    it("allows Python file when test_*.py exists", () => {
+      const implFile = path.join(tmpDir, "handler.py");
+      const testFile = path.join(tmpDir, "test_handler.py");
+      fs.writeFileSync(implFile, "def main(): pass");
+      fs.writeFileSync(testFile, "def test_main(): pass");
+
+      const input = JSON.stringify({ tool_input: { file_path: implFile } });
+      execFileSync(process.execPath, [path.join(HOOKS_DIR, hook), input], {
+        encoding: "utf-8",
+        timeout: 5000,
+        cwd: tmpDir,
+      });
+      // Should exit 0
+      assert.ok(true);
+    });
+
+    it("allows Java file when *Test.java exists", () => {
+      const implFile = path.join(tmpDir, "Handler.java");
+      const testFile = path.join(tmpDir, "HandlerTest.java");
+      fs.writeFileSync(implFile, "public class Handler {}");
+      fs.writeFileSync(testFile, "public class HandlerTest {}");
+
+      const input = JSON.stringify({ tool_input: { file_path: implFile } });
+      execFileSync(process.execPath, [path.join(HOOKS_DIR, hook), input], {
+        encoding: "utf-8",
+        timeout: 5000,
+        cwd: tmpDir,
+      });
+      // Should exit 0
+      assert.ok(true);
+    });
+
+    it("includes agent delegation message when blocking", () => {
+      const implFile = path.join(tmpDir, "src", "handler.rs");
+      fs.mkdirSync(path.join(tmpDir, "src"), { recursive: true });
+      fs.writeFileSync(implFile, "fn main() {}");
+
+      const input = JSON.stringify({ tool_input: { file_path: implFile } });
+      try {
+        execFileSync(process.execPath, [path.join(HOOKS_DIR, hook), input], {
+          encoding: "utf-8",
+          timeout: 5000,
+          cwd: tmpDir,
+        });
+        assert.fail("Should have exited with code 2");
+      } catch (err) {
+        assert.equal(err.status, 2);
+        assert.ok(
+          err.stderr.includes("use your knowledge"),
+          "blocking message should delegate to agent's language knowledge",
+        );
+      }
     });
   });
 

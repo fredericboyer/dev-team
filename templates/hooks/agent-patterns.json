@@ -178,6 +178,7 @@
     "pattern": "\\.(js|ts|jsx|tsx|py|rb|go|java|rs|c|cpp|cs)$"
   },
   "testFile": {
-    "pattern": "\\.(test|spec)\\.|__tests__|\\/tests?\\/"
+    "pattern": "\\.(test|spec)\\.|_test\\.|__tests__|\\/tests?\\/",
+    "_note": "Minimal pattern covering common conventions. Agents apply built-in knowledge of language-specific test conventions (e.g., Go _test.go, Python test_*.py, Java *Test.java) beyond this pattern."
   }
 }

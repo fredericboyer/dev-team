@@ -107,7 +107,15 @@ if (SKIP_EXTENSIONS.includes(ext)) {
 }
 
 // Skip if the file IS a test file
-const TEST_PATTERNS = [/\.test\./, /\.spec\./, /_test\./, /\/__tests__\//, /\/test\//, /\/tests\//];
+const TEST_PATTERNS = [
+  /\.test\./,
+  /\.spec\./,
+  /_test\./,
+  /\/test_[^/]+$/,
+  /\/__tests__\//,
+  /\/test\//,
+  /\/tests\//,
+];
 
 if (TEST_PATTERNS.some((p) => p.test(filePath))) {
   process.exit(0);
@@ -155,11 +163,21 @@ if (hasTestChanges) {
 const dir = path.dirname(filePath);
 const name = path.basename(filePath, ext);
 
+// Language-aware candidate test file patterns.
+// Covers JS/TS (.test, .spec, __tests__), Go (_test), Python (test_), and Java (Test suffix).
+// For languages beyond these, the agent fallback message below delegates to agent knowledge.
 const CANDIDATE_PATTERNS = [
+  // JS/TS conventions
   path.join(dir, `${name}.test${ext}`),
   path.join(dir, `${name}.spec${ext}`),
   path.join(dir, "__tests__", `${name}${ext}`),
   path.join(dir, "__tests__", `${name}.test${ext}`),
+  // Go convention: foo_test.go alongside foo.go
+  path.join(dir, `${name}_test${ext}`),
+  // Python convention: test_foo.py alongside foo.py
+  path.join(dir, `test_${name}${ext}`),
+  // Java convention: FooTest.java alongside Foo.java
+  path.join(dir, `${name}Test${ext}`),
 ];
 
 const hasExistingTests = CANDIDATE_PATTERNS.some((candidate) => {
@@ -175,8 +193,10 @@ if (hasExistingTests) {
   process.exit(0);
 }
 
-// No test changes AND no existing test file — block
+// No test changes AND no existing test file — block.
+// The message delegates language-specific test discovery to the agent.
 console.error(
-  `[dev-team tdd-enforce] TDD violation: "${basename}" modified but no corresponding test file exists. Write tests first.`,
+  `[dev-team tdd-enforce] TDD violation: "${basename}" modified but no corresponding test file found. ` +
+    `If no candidate test file matches the patterns above, use your knowledge of this language's test conventions to locate or create the appropriate test file. Write tests first.`,
 );
 process.exit(2);
