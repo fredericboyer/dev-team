@@ -175,13 +175,13 @@ if (hasImplFiles && !hasMemoryUpdates) {
     if (unstagedMemory) {
       console.error(
         "[dev-team pre-commit] BLOCKED: Memory files were updated but not staged. " +
-          "Run `git add .dev-team/learnings.md .dev-team/agent-memory/` to include learnings, " +
+          "Run `git add .claude/rules/dev-team-learnings.md .dev-team/agent-memory/` to include learnings, " +
           "or create an empty `.dev-team/.memory-reviewed` file to acknowledge that memory was reviewed.",
       );
     } else {
       console.error(
         "[dev-team pre-commit] BLOCKED: Implementation files staged without memory updates. " +
-          "Update .dev-team/learnings.md or agent memory with any patterns, conventions, or decisions from this work. " +
+          "Update .claude/rules/dev-team-learnings.md or agent memory with any patterns, conventions, or decisions from this work. " +
           "If no learnings apply, create an empty `.dev-team/.memory-reviewed` file to acknowledge.",
       );
     }

@@ -131,6 +131,8 @@ Drucker spawns one implementing agent per independent issue, each on its own bra
 
 **Sequential chains:** For sequential chains, verify the previous change is integrated before starting the next dependent task. Do not start multiple sequential agents from the same stale baseline — this causes integration conflicts that negate the sequencing benefit.
 
+**Sequential chain gate:** When issues are sequenced due to file conflicts, verify the previous change is integrated into the shared codebase before starting the next dependent task. Do not spawn the next agent until integration is confirmed. This is a hard gate.
+
 ### Phase 2: Review wave
 Reviews do **not** start until **all** implementation agents have completed (Agent tool provides completion notifications as the sync barrier). Once all are done, spawn review agents using the naming convention `{agent}-review` (e.g., `szabo-review`, `knuth-review`, `brooks-review`) in parallel across all branches simultaneously. Each reviewer receives the diff for one specific branch and produces classified findings scoped to that branch.
 
@@ -141,7 +143,11 @@ Collect all findings across all branches. Route **all classified findings** — 
 Borges runs **once** across all branches after the final review wave clears. Pass Borges the **finding outcome log** (see Completion step 3 for format) covering all branches. This ensures cross-branch coherence: memory files are consistent, learnings are not duplicated, metrics are recorded, and system improvement recommendations consider the full batch.
 
 ### Phase 5: Merge
-After all PRs are created, merge each via the project's merge skill (e.g., `/merge`) — not raw `gh pr merge` or other git commands. The merge skill handles Copilot review monitoring, CI verification, and post-merge actions.
+After all PRs are created, merge each via the project's merge skill (e.g., `/merge`) — not raw `gh pr merge` or other git commands. The merge skill handles automated review monitoring, CI verification, and post-merge actions.
+
+**Integrate-as-you-go:** Integrate completed work promptly as agents finish. Do not batch all integrations at the end of a session. Each integration makes the next agent's baseline current, reducing rework.
+
+**Integrate-as-you-go:** Integrate completed work promptly as agents finish. Do not batch all integrations at the end of a session. Each integration makes the next agent's baseline current, reducing rework.
 
 ### Convergence criteria
 Parallel mode is complete when:
@@ -159,9 +165,10 @@ Before starting work, check for open security alerts using the project's securit
 ## Completion
 
 When the loop exits:
-1. **Deliver the work**: If changes are on a feature branch, create the PR. The PR body must include the platform's issue-closing keyword (e.g., `Closes #NNN` for GitHub, `Closes <PROJ>-NNN` for Jira/Linear — check `.dev-team/config.json` for `platform` and `issueTracker` settings). Ensure the PR is ready to merge: CI green, reviews passed, branch up to date. **Use the project's merge skill (e.g., `/merge`) for every PR. Do not use raw `gh pr merge` — the merge skill handles Copilot review monitoring, CI verification, and post-merge actions.** If no merge skill exists, ensure the PR is mergeable and report readiness. If merge fails (CI failures, merge conflicts, branch protection), report the blocker to the human rather than leaving work unattended.
+1. **Deliver the work**: If changes are on a feature branch, create the PR. The PR body must include the platform's issue-closing keyword (e.g., `Closes #NNN` for GitHub, `Closes <PROJ>-NNN` for Jira/Linear — check `.dev-team/config.json` for `platform` and `issueTracker` settings). Ensure the PR is ready to merge: CI green, reviews passed, branch up to date. **Use the project's merge skill (e.g., `/merge`) for every PR. Do not use raw `gh pr merge` — the merge skill handles automated review monitoring, CI verification, and post-merge actions.** If no merge skill exists, ensure the PR is mergeable and report readiness. If merge fails (CI failures, merge conflicts, branch protection), report the blocker to the human rather than leaving work unattended.
 2. **Clean up worktree**: If the work was done in a worktree, clean it up after the branch is pushed and the PR is created. Do not wait for merge to clean the worktree.
-3. You MUST spawn **@dev-team-borges** as `borges-extract` (Librarian) as the final step. Format and pass Borges the **finding outcome log** using this structured format:
+3. **Automated review check:** After creating a PR, check for automated review findings from the platform's review bot (if configured). If findings exist, route actionable ones to the implementing agent for fixes before proceeding to Borges. This prevents findings from piling up until merge time.
+4. You MUST spawn **@dev-team-borges** as `borges-extract` (Librarian) as the final step. Format and pass Borges the **finding outcome log** using this structured format:
 
    **Single-branch format:**
    ```
@@ -215,14 +222,14 @@ When the loop exits:
    - **Generate calibration rules** when 3+ findings on the same tag are overruled
    - **Record metrics** to `.dev-team/metrics.md` (acceptance rates, rounds to convergence, per-agent stats)
    - Write entries to each participating agent's MEMORY.md using the structured format
-   - Update shared learnings in `.dev-team/learnings.md`
+   - Update shared learnings in `.claude/rules/dev-team-learnings.md`
    - Check cross-agent coherence
    - Report system improvement opportunities
-4. **Borges completion gate (HARD CHECK)**: Before emitting "Done", verify BOTH conditions:
+5. **Borges completion gate (HARD CHECK)**: Before emitting "Done", verify BOTH conditions:
    - (a) Borges has been spawned **and completed** (not just spawned — wait for completion)
    - (b) Read `.dev-team/metrics.md` and verify it contains a new `Task: <issue or PR reference>` entry for the current task. A stale metrics file (no new entry) means Borges did not complete successfully.
 
    **If either check fails, the task is NOT complete.** If metrics.md has no new entry after Borges reports completion, flag this as a system failure and re-run Borges with explicit instruction to record metrics. Do not emit "Done" or report task completion until both conditions are satisfied. This is a gate, not advisory — skipping it means the task loop has not finished.
-5. **Memory formation gate**: After Borges runs, verify that each participating agent's MEMORY.md contains at least one new structured entry from this task. Empty agent memory after a completed task is a system failure — Borges prevents this by automating extraction.
-6. Summarize what was accomplished across all iterations.
-7. Report any remaining `[RISK]` or `[SUGGESTION]` items, including Borges's recommendations.
+6. **Memory formation gate**: After Borges runs, verify that each participating agent's MEMORY.md contains at least one new structured entry from this task. Empty agent memory after a completed task is a system failure — Borges prevents this by automating extraction.
+7. Summarize what was accomplished across all iterations.
+8. Report any remaining `[RISK]` or `[SUGGESTION]` items, including Borges's recommendations.

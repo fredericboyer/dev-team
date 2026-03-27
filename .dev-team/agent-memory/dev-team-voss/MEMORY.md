@@ -29,5 +29,13 @@
 - **Last-verified**: 2026-03-26
 - **Context**: mergeSettings() pushed new commands into the array but did not update the Set used for dedup tracking. Also required null-safe normalization for hooks (` ?? []`) and a consolidation pass for duplicate matcher blocks. Three related DEFECTs fixed together.
 
+### [2026-03-26] Rules-based context migration — init.ts and update.ts install to .claude/rules/
+- **Type**: DECISION
+- **Source**: Issue #406
+- **Tags**: architecture, file-layout, migration
+- **Outcome**: accepted
+- **Last-verified**: 2026-03-26
+- **Context**: Shared context files (learnings.md, process.md) moved from .dev-team/ to .claude/rules/ for automatic agent context loading. update.ts migration uses fs.renameSync for atomic move from old to new path. init.ts creates .claude/rules/ directory via copyFile (which mkdirSync's parent). Key pattern: migration checks old path exists AND new path missing before moving — prevents data loss if both exist.
+
 ## Calibration Log
 <!-- Challenges accepted/overruled — tunes adversarial intensity over time -->
