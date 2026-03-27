@@ -150,7 +150,7 @@ npx @fredericboyer/dev-team create-agent <name>     # Scaffold a custom agent
 
 All hooks are Node.js scripts — work on macOS, Linux, and Windows.
 
-### Skills (5)
+### Skills (6)
 
 | Skill | What it does |
 |-------|-------------|
