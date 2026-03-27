@@ -93,11 +93,11 @@
 
 ### [2026-03-26] Guarded files: learnings.md, metrics.md, process.md — never overwritten
 - **Type**: PATTERN [verified]
-- **Source**: PR #398 (fix/397)
-- **Tags**: update, guarded-files, release
+- **Source**: PR #398 (fix/397), updated by v1.6.0 rules migration (ADR-033)
+- **Tags**: update, guarded-files, release, rules
 - **Outcome**: verified
 - **Last-verified**: 2026-03-26
-- **Context**: update.ts guards three user-editable files in .dev-team/: learnings.md, metrics.md, and process.md. These are only installed if missing (for upgrades from older versions). All other .dev-team/ files are overwritten on update. This matters for release testing — verify guarded files survive `dev-team update`.
+- **Context**: update.ts guards user-editable files. In v1.6.0, learnings.md and process.md migrated from `.dev-team/` to `.claude/rules/dev-team-learnings.md` and `.claude/rules/dev-team-process.md`. Migration is automatic (renameSync from old to new path, only if old exists and new doesn't). metrics.md stays in `.dev-team/`. All guarded files are only installed if missing. Release testing must verify: (1) fresh install creates files in `.claude/rules/`, (2) upgrade migrates from old paths, (3) existing `.claude/rules/` files are preserved.
 
 ## Calibration Log
 <!-- Challenges accepted/overruled — tunes adversarial intensity over time -->

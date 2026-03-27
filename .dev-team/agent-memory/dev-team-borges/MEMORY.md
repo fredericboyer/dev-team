@@ -66,3 +66,11 @@
 - **Outcome**: resolved
 - **Last-verified**: 2026-03-26
 - **Context**: Deming had a RISK entry about review-gate pattern duplication. This was resolved in PR #344 (agent-patterns.json extraction). Updated entry from [acknowledged] to [resolved].
+
+### [2026-03-26] v1.6.0 extraction — 16 PRs, Copilot-only review, no formal wave
+- **Type**: MILESTONE [verified]
+- **Source**: v1.6.0 task loop (16 issues, 16 PRs)
+- **Tags**: metrics, calibration, extraction
+- **Outcome**: verified
+- **Last-verified**: 2026-03-26
+- **Context**: Major architectural release. Research-first approach (Turing #406, #407). No formal review wave — Copilot sole reviewer. All findings addressed inline. 2 new ADRs (033, 034), 7 design principles codified. Key coherence update: Conway's guarded files entry updated for rules migration. New entries written for Deming (2), Tufte (2), Turing (2), Voss (1), Brooks (2), Drucker (1). Process learnings added to shared learnings (research-first, verify against official docs).
