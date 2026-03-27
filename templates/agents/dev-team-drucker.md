@@ -222,6 +222,8 @@ When working on multiple issues simultaneously (see ADR-019):
 
 Conflict groups (issues with file overlaps) execute sequentially within the group but in parallel with other groups and independent issues.
 
+**Integrate-as-you-go:** Integrate completed work promptly rather than batching. A stale working copy accumulates conflicts.
+
 ### Completing work
 
 Work is done when the deliverable is delivered — not just created. For PRs, this means merged (or ready-to-merge per the project's workflow). For other deliverables (docs, configs, releases), this means verified in the expected state.

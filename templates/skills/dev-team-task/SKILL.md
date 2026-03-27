@@ -107,6 +107,8 @@ Track iterations in conversation context (no state files). For each iteration:
 
 The convergence check happens in conversation context: count iterations, check for `[DEFECT]` findings, and decide whether to continue or exit.
 
+**Integrate-as-you-go:** When orchestrating multiple issues, integrate completed work promptly rather than batching at the end. A stale working copy accumulates conflicts.
+
 ## Parallel mode
 
 When multiple issues are being addressed in a single session, the task loop switches to parallel orchestration (see ADR-019). Drucker coordinates all phases in conversation context.
@@ -123,6 +125,8 @@ Issues in the same conflict group execute sequentially. Independent issues proce
 
 ### Phase 1: Parallel implementation
 Drucker spawns one implementing agent per independent issue, each on its own branch (`feat/<issue>-<description>`). Use the agent teammate naming convention: `{agent}-implement[-{qualifier}]` (e.g., `voss-implement`, `deming-implement-auth`, `tufte-implement-319`). Agents work concurrently without awareness of each other. Drucker tracks which issues are assigned to which agents and branches in conversation context.
+
+**Sequential chains:** For sequential chains, verify the previous change is integrated before starting the next dependent task. Do not start multiple sequential agents from the same stale baseline — this causes integration conflicts that negate the sequencing benefit.
 
 ### Phase 2: Review wave
 Reviews do **not** start until **all** implementation agents have completed (Agent tool provides completion notifications as the sync barrier). Once all are done, spawn review agents using the naming convention `{agent}-review` (e.g., `szabo-review`, `knuth-review`, `brooks-review`) in parallel across all branches simultaneously. Each reviewer receives the diff for one specific branch and produces classified findings scoped to that branch.

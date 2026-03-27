@@ -24,6 +24,10 @@ When working on multiple independent issues, combine agent teams with worktree i
 
 Drucker coordinates the review wave after all implementations complete.
 
+## Sequential execution
+
+When issues are sequenced due to file conflicts, ensure each completed change is integrated into the shared codebase before starting the next. Working from a stale baseline causes integration conflicts.
+
 ## Handling unresponsive agents
 
 Background agents can get stuck without producing output. Apply this escalation pattern:
