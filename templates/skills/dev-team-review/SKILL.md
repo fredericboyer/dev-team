@@ -1,6 +1,7 @@
 ---
 name: dev-team:review
 description: Orchestrated multi-agent parallel review. Use to review a PR, branch, or set of changes with multiple specialist agents simultaneously. Spawns agents based on changed file patterns and produces a unified review summary.
+disable-model-invocation: true
 ---
 
 Run a multi-agent parallel review of: $ARGUMENTS

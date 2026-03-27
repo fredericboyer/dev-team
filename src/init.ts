@@ -471,6 +471,7 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
     hooks: selectedHooks,
     issueTracker,
     branchConvention,
+    taskBranchPattern: "(feat|fix)\\/",
     platform: "github",
     agentTeams: agentTeamsEnabled,
   };

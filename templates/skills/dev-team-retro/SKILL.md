@@ -1,6 +1,7 @@
 ---
 name: dev-team:retro
 description: Audit the health of your project's dev-team knowledge base — learnings, agent memory, and CLAUDE.md. Finds stale entries, contradictions, enforcement gaps, and promotion opportunities. Use periodically or after major changes.
+disable-model-invocation: true
 ---
 
 Assess the health of the dev-team knowledge base for: $ARGUMENTS
@@ -22,6 +23,7 @@ This skill audits **only update-safe files** — files that survive `dev-team up
    - All `.dev-team/agent-memory/*/MEMORY.md` files (use Glob to discover them)
    - The project's `CLAUDE.md` (root of repo)
    - `.dev-team/config.json` (to know which agents are installed)
+   - `.dev-team/process.md` (orchestration protocol and workflow rules)
    - `.dev-team/metrics.md` (if it exists — calibration metrics log)
 
 2. If `$ARGUMENTS` specifies a focus area (e.g., "learnings", "memory", "claude.md"), scope the audit to that area only. Otherwise, audit all three.
@@ -48,6 +50,30 @@ Check for:
 - Learnings that are mature enough to become formal project instructions in `CLAUDE.md`
 - Learnings that should be elevated to an ADR in `docs/adr/`
 - Learnings that are really agent-specific calibration and should move to the appropriate agent's `MEMORY.md`
+
+## Phase 1b: Process file audit (`.dev-team/process.md`)
+
+Check `.dev-team/process.md` for:
+
+### Staleness
+- References to agent names, hook scripts, or workflow steps that no longer exist
+- Orchestration rules that describe removed or renamed commands
+- References to old file paths, deprecated tools, or outdated conventions
+
+### Contradictions
+- Rules that conflict with `.dev-team/learnings.md` (e.g., process says "sequential reviews" but learnings say "parallel reviews")
+- Instructions that contradict the project's `CLAUDE.md`
+- Workflow descriptions that disagree with actual hook or agent behavior
+
+### Completeness
+- Workflow rules documented in `.dev-team/learnings.md` that describe process but are missing from `process.md`
+- Orchestration patterns that agents follow in practice but are not documented here
+- Missing sections that a new agent or developer would need to understand the workflow
+
+### Accuracy
+- Verify orchestration claims against actual agent definitions in `.dev-team/agents/`
+- Verify hook trigger descriptions against actual hook scripts in `.dev-team/hooks/`
+- Verify naming conventions and parallel execution rules against observed behavior in recent git history
 
 ## Phase 2: Agent memory audit (`.dev-team/agent-memory/*/MEMORY.md`)
 
@@ -189,6 +215,7 @@ Provide a simple health score:
 | Area | Status | Issues |
 |------|--------|--------|
 | Learnings | healthy / needs attention / unhealthy | count by severity |
+| Process | healthy / needs attention / unhealthy | count by severity |
 | Agent Memory | healthy / needs attention / unhealthy | count by severity |
 | CLAUDE.md | healthy / needs attention / unhealthy | count by severity |
 | Metrics | healthy / needs attention / unhealthy | count by severity |
