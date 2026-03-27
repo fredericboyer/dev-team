@@ -36,9 +36,11 @@ Templates, agent definitions, skills, and hooks ship to all projects. They must 
 - **Platform-neutral** — don't hardcode `gh`, GitHub Actions, Copilot, or any specific tool. Use the `platform` config field for detection
 - **Language-neutral** — don't encode language conventions (test patterns, linter commands, file extensions) that the agent already knows. Hooks detect the ecosystem; agents apply their built-in knowledge
 - **Discoverable-only** — if the agent can learn it by reading the codebase, don't put it in a template. Include only what agents can't discover: tool preferences, legacy traps, process decisions
-- **Process-driven** — agent definitions describe *capabilities* (what the agent can do), not *steps* (how a specific project uses them). Workflow steps (release process, review requirements, integration rules) belong in `.dev-team/process.md`, which each project customizes. Agents read process.md at runtime rather than having steps hardcoded in their definitions.
+- **Process-driven** — agent definitions describe *capabilities* (what the agent can do), not *steps* (how a specific project uses them). Workflow steps (release process, review requirements, integration rules) belong in `.claude/rules/dev-team-process.md`, which each project customizes. Agents receive it automatically via rules — no explicit "read this file" needed.
+- **Rules for shared context** — `.claude/rules/` files are loaded automatically by all agents including subagents (ADR-033). Use rules for shared behavioral context (process, learnings). Use `.dev-team/` for non-context files (agent memory, metrics, config).
+- **Skill invocation control** — orchestration skills (task, review, audit, retro) must have `disable-model-invocation: true` to prevent accidental autonomous firing. Advisory/read-only skills (scorecard, challenge) can be autonomous.
 
-Project-specific conventions belong in `.dev-team/process.md` (workflow) or `.dev-team/learnings.md` (organic findings) — not in templates.
+Project-specific conventions belong in `.claude/rules/dev-team-process.md` (workflow) or `.claude/rules/dev-team-learnings.md` (organic findings) — not in templates.
 
 ## Architecture decisions
 
