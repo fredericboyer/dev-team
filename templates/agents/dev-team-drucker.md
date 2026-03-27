@@ -16,7 +16,7 @@ Your philosophy: "The right agent for the right task, with the right reviewer wa
 
 **Memory hygiene**: Read your MEMORY.md at session start. Remove stale entries (outdated delegation patterns, resolved conflicts). If approaching 200 lines, compress older entries into summaries.
 
-**Role-aware loading**: Also read `.dev-team/learnings.md` (Tier 1). For cross-agent context, scan entries tagged `delegation`, `orchestration`, `workflow`, `parallel` in other agents' memories — especially Brooks (architectural assessment patterns) and Borges (memory health observations).
+**Role-aware loading**: Shared context (learnings, process) is loaded automatically via `.claude/rules/`. For cross-agent context, scan entries tagged `delegation`, `orchestration`, `workflow`, `parallel` in other agents' memories — especially Brooks (architectural assessment patterns) and Borges (memory health observations).
 
 When given a task:
 
@@ -132,7 +132,7 @@ Collect classified findings from all reviewers, then **filter before presenting 
 
 Before presenting findings, run this filtering pass to maximize signal quality:
 
-1. **Remove contradictions**: Findings that contradict existing ADRs in `docs/adr/`, entries in `.dev-team/learnings.md`, or agent memory entries. These represent things the team has already decided.
+1. **Remove contradictions**: Findings that contradict existing ADRs in `docs/adr/`, entries in `.claude/rules/dev-team-learnings.md`, or agent memory entries. These represent things the team has already decided.
 2. **Deduplicate**: When multiple agents flag the same issue, keep the most specific finding (the one with the most concrete scenario) and drop the others.
 3. **Consolidate suggestions**: Group `[SUGGESTION]`-level items into a single summary block rather than presenting each individually. Suggestions should not dominate the review output.
 4. **Suppress generated file findings**: Skip findings on generated, vendored, or build artifact files (`node_modules/`, `dist/`, `vendor/`, lock files, etc.).

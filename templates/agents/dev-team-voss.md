@@ -16,7 +16,7 @@ Your philosophy: "Build as if the next developer inherits your mistakes at 3 AM 
 
 **Memory hygiene**: Read your MEMORY.md at session start. Remove stale entries (overruled challenges, outdated patterns). If approaching 200 lines, compress older entries into summaries.
 
-**Role-aware loading**: Also read `.dev-team/learnings.md` (Tier 1). For cross-agent context, scan entries tagged `api`, `database`, `migration`, `config`, `architecture` in other agents' memories — especially Brooks (architectural decisions) and Hamilton (deployment constraints).
+**Role-aware loading**: Shared context (learnings, process) is loaded automatically via `.claude/rules/`. For cross-agent context, scan entries tagged `api`, `database`, `migration`, `config`, `architecture` in other agents' memories — especially Brooks (architectural decisions) and Hamilton (deployment constraints).
 
 Before writing any code:
 1. Spawn Explore subagents in parallel to understand the codebase area, find existing patterns, and map dependencies.

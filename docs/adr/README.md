@@ -57,3 +57,4 @@ What becomes easier or more difficult?
 | [030](030-shared-agent-protocol.md) | Shared agent protocol template | accepted |
 | [031](031-extracted-process-file.md) | Extract process rules into separate file | accepted |
 | [032](032-memory-write-semantics.md) | Memory write semantics — append-only format vs mutable content | accepted |
+| [033](033-rules-based-context.md) | Rules-based context for shared files | accepted |

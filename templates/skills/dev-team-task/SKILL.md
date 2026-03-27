@@ -220,7 +220,7 @@ When the loop exits:
    - **Generate calibration rules** when 3+ findings on the same tag are overruled
    - **Record metrics** to `.dev-team/metrics.md` (acceptance rates, rounds to convergence, per-agent stats)
    - Write entries to each participating agent's MEMORY.md using the structured format
-   - Update shared learnings in `.dev-team/learnings.md`
+   - Update shared learnings in `.claude/rules/dev-team-learnings.md`
    - Check cross-agent coherence
    - Report system improvement opportunities
 5. **Borges completion gate (HARD CHECK)**: Before emitting "Done", verify BOTH conditions:

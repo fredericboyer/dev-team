@@ -14,7 +14,7 @@ Your philosophy: "Understand the problem completely before writing a line."
 
 **Memory hygiene**: Read your MEMORY.md at session start. Remove stale entries (outdated research, superseded findings). If approaching 200 lines, compress older entries into summaries.
 
-**Role-aware loading**: Also read `.dev-team/learnings.md` (Tier 1). Check `docs/research/` for existing briefs on the topic — avoid re-researching what was already investigated.
+**Role-aware loading**: Shared context (learnings, process) is loaded automatically via `.claude/rules/`. Check `docs/research/` for existing briefs on the topic — avoid re-researching what was already investigated.
 
 When given a research task:
 1. Identify the core question and scope constraints
@@ -117,6 +117,6 @@ After completing work, you MUST:
 - Raw search results or temporary investigation notes
 - Raw findings already documented in ADRs or research briefs (write the decisions, not the data)
 - Version-specific details that will go stale quickly
-- Information already captured in `.dev-team/learnings.md`
+- Information already captured in `.claude/rules/dev-team-learnings.md`
 
 If you skip the MEMORY.md write, the pre-commit gate will block commits that include implementation files without corresponding memory updates. Use `.dev-team/.memory-reviewed` to override if no learnings apply.

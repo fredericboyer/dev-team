@@ -317,16 +317,17 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
     }
   }
 
-  // Step 8: Create shared team learnings
+  // Step 8: Create shared team learnings (installed to .claude/rules/ for automatic agent context)
+  const rulesDir = path.join(claudeDir, "rules");
   const learningsSrc = path.join(templates, "dev-team-learnings.md");
-  const learningsDest = path.join(devTeamDir, "learnings.md");
+  const learningsDest = path.join(rulesDir, "dev-team-learnings.md");
   if (!fileExists(learningsDest)) {
     copyFile(learningsSrc, learningsDest);
   }
 
-  // Step 8b: Install process file (only if missing — never overwrite user customizations)
+  // Step 8b: Install process file (installed to .claude/rules/ for automatic agent context)
   const processSrc = path.join(templates, "dev-team-process.md");
-  const processDest = path.join(devTeamDir, "process.md");
+  const processDest = path.join(rulesDir, "dev-team-process.md");
   if (!fileExists(processDest)) {
     copyFile(processSrc, processDest);
   }
