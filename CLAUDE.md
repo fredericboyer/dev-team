@@ -61,29 +61,7 @@ Agents challenge each other using classified findings:
 - `[DEFECT]` blocks progress. `[RISK]`, `[QUESTION]`, `[SUGGESTION]` are advisory.
 - When agents disagree, they escalate to the human after one exchange each. Human decides.
 
-### Parallel execution
-
-When working on multiple independent issues, combine agent teams with worktree isolation:
-
-- **Implementing agents** must use both `team_name` and `isolation: "worktree"` to prevent branch conflicts between parallel teammates.
-- **Review/read-only agents** should assess whether they need access to an implementer's worktree (to run tests or read changed files in context), or should work in their own isolation for independent analysis.
-
-**Agent teammate naming convention:** Use `{agent}-{role}[-{qualifier}]` when spawning teammates:
-- `{agent}` — dev-team agent name (lowercase): `voss`, `deming`, `szabo`, etc.
-- `{role}` — action: `implement`, `review`, `research`, `audit`, `extract`
-- `{qualifier}` — optional, for disambiguation when multiple agents of the same type run in parallel (e.g., issue number, feature name)
-
-| Role suffix | When used | Examples |
-|-------------|-----------|---------|
-| `-implement` | Implementing agent on a task branch | `voss-implement`, `deming-implement-auth` |
-| `-review` | Reviewer in a review wave | `szabo-review`, `knuth-review` |
-| `-research` | Turing research brief | `turing-research`, `turing-research-caching` |
-| `-audit` | Full codebase audit pass | `szabo-audit`, `knuth-audit` |
-| `-extract` | Borges memory extraction | `borges-extract` |
-
-Drucker coordinates the review wave after all implementations complete.
-
-> **Note:** If your project's workflow section (above the `dev-team:begin` marker) already designates the main conversation loop as the team lead, do not spawn a separate Drucker subagent — the main loop IS Drucker. Otherwise, `@dev-team-drucker` can be used as a subagent for delegation.
+See `.dev-team/process.md` for orchestration protocol, parallel execution, and agent naming conventions.
 
 ### Hook directives are MANDATORY
 
@@ -102,6 +80,11 @@ Do NOT skip this. Do NOT treat hook output as optional. If you believe a review 
 - `/dev-team:review` — orchestrated multi-agent parallel review of changes
 - `/dev-team:audit` — full codebase security + quality + tooling audit
 - `/dev-team:retro` — audit knowledge base health (learnings, agent memory, CLAUDE.md)
+- `/dev-team:scorecard` — audit process conformance for a completed task
+
+> **Non-GitHub platforms:** Skills and hooks reference `gh` CLI commands for GitHub. If your project uses GitLab, Bitbucket, or another platform, adapt these commands accordingly. Set the `platform` field in `.dev-team/config.json` to `"gitlab"`, `"bitbucket"`, or `"other"`.
+
+> **Non-JS/TS projects:** File patterns in `agent-patterns.json` are optimized for JavaScript/TypeScript projects. For Python, Rust, Go, Java, or other ecosystems, you may need to extend these patterns to cover language-specific test conventions, build tools, and framework structures.
 
 ### Project-specific customization
 
@@ -141,17 +124,4 @@ Domain-specific findings, known patterns, active watch lists. Each agent owns it
 When the human gives feedback about process, coding style, or tool behavior: write it to `.dev-team/learnings.md`. Only use machine-local memory for things that are truly personal and would not apply to another developer on the same project.
 
 <!-- dev-team:end -->
-
-
-
-
-
-
-## Project-Specific Workflow
-
-### Merging PRs
-
-**Always use `/merge` to merge PRs.** Do not use raw `gh pr merge` or check Copilot comments separately.
-
-The merge skill handles Copilot check run monitoring, auto-merge, CI verification, and post-merge actions automatically. This applies to all PRs — including those created by background agents.
 

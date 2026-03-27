@@ -23,7 +23,9 @@
     "Post-change review",
     "Pre-commit gate",
     "Watch list",
-    "Pre-commit lint"
+    "Pre-commit lint",
+    "Agent teams guide",
+    "Review gate"
   ],
   "agentTeams": true
 }
