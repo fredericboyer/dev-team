@@ -68,8 +68,11 @@ export function status(targetDir: string): void {
     }
   }
 
-  // Shared learnings
-  const learningsPath = path.join(devTeamDir, "learnings.md");
+  // Shared learnings (check new path first, fall back to legacy)
+  const claudeDir = path.join(targetDir, ".claude");
+  const rulesLearningsPath = path.join(claudeDir, "rules", "dev-team-learnings.md");
+  const legacyLearningsPath = path.join(devTeamDir, "learnings.md");
+  const learningsPath = fileExists(rulesLearningsPath) ? rulesLearningsPath : legacyLearningsPath;
   if (fileExists(learningsPath)) {
     try {
       const content = readFile(learningsPath) || "";

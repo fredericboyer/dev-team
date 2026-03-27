@@ -54,6 +54,7 @@ export function doctor(targetDir: string): void {
       "Watch list": "dev-team-watch-list.js",
       "Pre-commit lint": "dev-team-pre-commit-lint.js",
       "Review gate": "dev-team-review-gate.js",
+      "Agent teams guide": "dev-team-agent-teams-guide.js",
     };
     for (const label of prefs.hooks) {
       const fileName = hookFileMap[label];
