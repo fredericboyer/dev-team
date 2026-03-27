@@ -61,7 +61,10 @@ Project-specific customization belongs in `.claude/`:
 |------|-------|
 | Custom hooks (linting, workflow enforcement) | `.claude/hooks/` |
 | Project-specific skills (merge, deploy, etc.) | `.claude/skills/` |
+| Path-scoped instructions loaded automatically into agent context | `.claude/rules/` |
 | Claude Code settings and hook wiring | `.claude/settings.json` |
+
+Rules files (`.claude/rules/*.md`) are loaded automatically by all agents including subagents. Use them for project-specific behavioral context that should be shared across all agent sessions.
 
 `.claude/hooks/` and `.claude/skills/` are not overwritten by `dev-team update` — your project-specific customizations are safe. Only `.claude/settings.json` is merged additively (new product hooks are added, but user-added entries are never removed).
 
