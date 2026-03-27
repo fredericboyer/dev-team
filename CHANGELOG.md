@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.0] - 2026-03-26
+
+### Added
+- Shared agent protocol extracted into `SHARED.md` — 16% agent definition size reduction (#353).
+- Process rules extracted from `CLAUDE.md` into `.dev-team/process.md` — CLAUDE.md under 100 lines (#348).
+- `/dev-team:scorecard` skill for process conformance tracking (#351).
+- Non-GitHub platform guidance and `platform` config field (#358).
+- Turing research briefs now end with triage-ready Recommended Actions (#368).
+- Non-JS/TS ecosystem benchmark for dev-team harness (#325).
+- ADR-032: Memory write semantics — documents tension with ADR-012 (#335).
+
+### Fixed
+- `mergeSettings` duplicate hook entries on update (#364).
+- Security preamble section ordering in audit and review skills (#354).
+- Deduplicate routing tables — review skill references `agent-patterns.json` (#355).
+- Strengthen Borges enforcement: placeholder cleanup, metrics gate (#356).
+- Agent definition quality improvements: Conway, Deming, Turing, Rams (#357).
+- Metrics file install path verified for skill alignment (#359).
+- Sequential chain integration guidance made VCS-neutral (#374).
+
+### New ADRs
+- ADR-030: Shared agent protocol template.
+- ADR-031: Extracted process definition file.
+- ADR-032: Memory write semantics.
+
 ## [1.4.0] - 2026-03-26
 
 ### Added
