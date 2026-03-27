@@ -62,7 +62,8 @@ Advisory hook about agent team isolation patterns. No language-specific logic.
 - Implementation file detection: `/\.(js|ts|jsx|tsx|py|rb|go|java|rs)$/` -- explicitly multi-language
 - Memory and learnings file detection: universal
 - Borges completion warning: universal
-- **Status**: already language-agnostic
+- Test file exclusion (`hasImplFiles`): skips files matching `\.(test|spec)\.` — same JS/TS-centric pattern that misses `_test.go`, `test_*.py`, `*Test.java`, and Rust inline tests. Implementation files in these languages may be incorrectly classified.
+- **Status**: mostly language-agnostic (test exclusion pattern is JS/TS-biased)
 
 #### dev-team-post-change-review.js -- MOSTLY LANGUAGE-AGNOSTIC
 
@@ -178,7 +179,7 @@ All 5 skills (`task`, `review`, `audit`, `challenge`, `retro`) are language-agno
 
 Current: `\\.(test|spec)\\.|__tests__|\\/tests?\\/`
 
-Proposed: `\\.(test|spec)\\.|_test\\.|__tests__|\\/tests?\\/|test_|\\.Tests?\\.|Tests?\\.java$`
+Proposed: `\\.(test|spec)\\.|_test\\.|__tests__|\\/tests?\\/|test_|\\.tests?\\.|tests?\\.java$`
 
 This single regex change fixes Go (`_test.go`), Python (`test_*.py` partially via `test_` prefix), and Java (`*Test.java`, `*Tests.java`). Both `post-change-review.js` and `review-gate.js` inherit this fix through the JSON.
 
@@ -187,11 +188,11 @@ This single regex change fixes Go (`_test.go`), Python (`test_*.py` partially vi
 Add to `agent-patterns.json` tooling patterns:
 - `pyproject\\.toml$` (Python)
 - `setup\\.cfg$` (Python)
-- `Cargo\\.toml$` (Rust)
+- `cargo\\.toml$` (Rust)
 - `clippy\\.toml$` (Rust)
 - `build\\.gradle(\\.kts)?$` (Java)
 - `pom\\.xml$` (Java)
-- `Makefile$` (universal)
+- `makefile$` (universal)
 - `\\.golangci\\.ya?ml$` (Go)
 - `go\\.mod$` (Go)
 
@@ -237,7 +238,7 @@ In `tdd-enforce.js`, expand `CANDIDATE_PATTERNS` to include:
 - `build\\.gradle(\\.kts)?$` (Java/Kotlin version)
 - `pom\\.xml$` (Maven version)
 - `setup\\.py$` (legacy Python)
-- `Gemfile$` (Ruby)
+- `gemfile$` (Ruby)
 
 **8. Document multi-language support status**
 
