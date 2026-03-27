@@ -67,6 +67,8 @@ Background agents can get stuck without producing output. Apply this escalation 
 ## Dogfooding
 
 - Always use `/dev-team:task` for implementation work — dogfood the agents.
+- Don't ask for approval to continue between tasks. Just do the work. Only pause for critical decisions.
+- Follow through to completion without prompting. When auto-merge is set or CI is pending, monitor and complete the next step (tag, release, cleanup) without waiting for the user.
 - Improvements must be project-agnostic and target `templates/`. Most `.dev-team/` files get overwritten by `dev-team update` — exceptions are `process.md`, `learnings.md`, `metrics.md`, and agent memory files (these are preserved). Project-specific conventions stay in local learnings or this process file.
 - Dogfooding is the product loop: use dev-team on dev-team → surface friction → `/dev-team:retro` captures patterns → issues target `templates/` → next release improves the tool for everyone.
 

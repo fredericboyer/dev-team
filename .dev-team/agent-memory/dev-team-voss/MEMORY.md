@@ -19,14 +19,6 @@
 - **Last-verified**: 2026-03-25
 - **Context**: Project detection via scan.ts reads package.json, tsconfig.json, pyproject.toml to auto-detect runtime. Config stored as JSON. No environment variables for configuration (CLI tool, not a service).
 
-### [2026-03-25] Zero runtime dependencies — all functionality is self-contained
-- **Type**: PATTERN [verified]
-- **Source**: package.json analysis
-- **Tags**: dependencies, architecture
-- **Outcome**: verified
-- **Last-verified**: 2026-03-25
-- **Context**: Uses only Node.js built-in modules (fs, path, child_process). ADR-002 codifies zero-dep policy. Any new functionality must use built-ins or be implemented inline.
-
 ## Patterns to Watch For
 
 ### [2026-03-26] mergeSettings() must track Set state after push — dedup bug in src/files.ts

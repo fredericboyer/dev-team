@@ -27,14 +27,6 @@
 - **Last-verified**: 2026-03-25
 - **Context**: Hooks shipped as plain JS run in the target project's environment. They spawn subprocesses and read/write files. Any command injection in hook logic would execute with the user's permissions.
 
-### [2026-03-25] Zero runtime dependencies — small supply chain surface
-- **Type**: PATTERN [verified]
-- **Source**: package.json analysis
-- **Tags**: supply-chain, dependencies
-- **Outcome**: verified
-- **Last-verified**: 2026-03-25
-- **Context**: Only devDependencies (typescript, oxlint, oxfmt, @types/node). No runtime deps means minimal supply chain attack surface. ADR-002 codifies this as a design principle.
-
 ## Known Attack Surfaces
 
 
