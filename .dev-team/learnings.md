@@ -25,6 +25,10 @@
 - **Dogfooding is the product loop.** Using dev-team on dev-team surfaces friction → `/dev-team:retro` captures patterns → issues target `templates/` → next release improves the tool for everyone. Every session is a test run.
 - **Merge-as-you-go for sequential chains.** When issues depend on each other, merge each PR before spawning the next agent. Batching merges at the end causes stale-main branching. (Learned v1.5.0, now in process.md and Drucker definition.)
 
+## Design Principles
+
+- **Don't encode what agents already know.** AI agents have built-in knowledge of languages, frameworks, conventions, and standards. Hardcoding language-specific patterns (test file regex, linter commands, complexity keywords) into hooks or config creates static encyclopedias that are always incomplete. Instead, hooks should detect the ecosystem (read manifest files) and delegate language-specific reasoning to the agent. Include only what agents can't discover: tool preferences, legacy traps, test quirks, custom middleware warnings. (See: "AGENTS.md Verdict" — if the agent can discover it from code, delete it.)
+
 ## Known Tech Debt
 
 - `readFile()` in `src/files.ts` distinguishes ENOENT from EACCES/EPERM and logs a warning on permission errors, but still returns null in both cases — can mask security-relevant permission errors (Szabo finding, tracked).
