@@ -119,14 +119,19 @@ export function mergeSettings(existingPath: string, newFragment: HookSettings): 
     if (!existing.hooks[event]) {
       existing.hooks[event] = entries;
     } else {
-      // Add entries that don't already exist (by command string)
+      // Merge by matcher value — deduplicate hooks within matched blocks
       for (const newEntry of entries) {
-        const newCommands = (newEntry.hooks || []).map((h) => h.command);
-        const alreadyExists = existing.hooks[event].some((existingEntry) => {
-          const existingCommands = (existingEntry.hooks || []).map((h) => h.command);
-          return newCommands.every((cmd) => existingCommands.includes(cmd));
-        });
-        if (!alreadyExists) {
+        const matchedExisting = existing.hooks[event].find(
+          (existingEntry) => existingEntry.matcher === newEntry.matcher,
+        );
+        if (matchedExisting) {
+          const existingCommands = new Set((matchedExisting.hooks || []).map((h) => h.command));
+          for (const hook of newEntry.hooks || []) {
+            if (!existingCommands.has(hook.command)) {
+              matchedExisting.hooks.push(hook);
+            }
+          }
+        } else {
           existing.hooks[event].push(newEntry);
         }
       }
