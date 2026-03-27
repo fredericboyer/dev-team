@@ -7,6 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.0] - 2026-03-26
+
+### Added
+
+**Architecture:**
+- Move `process.md` and `learnings.md` to `.claude/rules/` for automatic agent context loading — ADR-033 (#406, #425).
+- Delegate language-specific knowledge to agents instead of hooks — ADR-034, language-agnostic hook patterns (#395, #419).
+- Audit agent templates for hardcoded workflow steps — Conway and Drucker now process-driven (#405, #426).
+- Add `disable-model-invocation: true` to orchestration skills (#409, #414).
+- Make scorecard skill autonomous — no longer requires manual invocation (#410, #413).
+
+**Platform neutrality:**
+- Generalize issue-closing syntax to be platform-aware (#386, #421).
+- Replace Copilot references with generic automated review monitoring (#387, #422).
+- Generalize milestone to milestone or iteration — platform-neutral language (#388, #415).
+- Configurable branch prefixes via `taskBranchPattern` in config.json (#385, #418).
+
+**Process improvements:**
+- Enforce merge-as-you-go with sequential chain hard gate (#393, #423).
+- Orchestrator agent liveness polling invariant for wait phases (#401, #420).
+- Post-PR automated review polling guidance (#391, #424).
+- Retro skill now audits `process.md` for staleness and gaps (#402, #416).
+- Generalize scorecard for review, audit, and task workflows (#352, #427).
+
+**Documentation:**
+- Document `.claude/rules/` as extension point in template CLAUDE.md (#411, #412).
+- Enforce `docs/` folder structure and file naming conventions (#392, #417).
+
+### New ADRs
+- ADR-033: Rules-based shared context distribution.
+- ADR-034: Delegate language-specific pattern matching to agents.
+
 ## [1.5.1] - 2026-03-27
 
 ### Fixed
