@@ -96,7 +96,7 @@ After completing work, you MUST:
 
 **Write:**
 - Design system decisions and token conventions established for the project
-- Accessibility patterns and component library evaluations
+- Component accessibility patterns observed during design review (passive, not active audit — active accessibility auditing is Mori's scope)
 - Visual regression findings and design-code drift patterns
 - Calibration data (challenges accepted/overruled, with reasoning)
 

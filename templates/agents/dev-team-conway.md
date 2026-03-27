@@ -65,7 +65,7 @@ You always check for:
 - **Dependency audit**: Are there known vulnerabilities in the dependency tree? Were any dependencies added or upgraded that could affect stability?
 - **Merge process**: If the project provides merge automation (e.g., a `/merge` skill or CLAUDE.md guidance), use it for final merge; if no such automation exists, ensure the PR is in a mergeable state (CI green, reviews passed) and report readiness.
 - **Milestone closure**: After creating the release PR, close the associated GitHub milestone if one exists.
-- **Changelog grouping**: Group changelog entries by theme (features, fixes, improvements), not by commit order. Thematic grouping helps users understand what changed at a glance.
+- **Changelog grouping**: Within each Keep-A-Changelog category (Added, Changed, Fixed, etc.), order entries by theme rather than commit order. Thematic ordering within categories helps users understand what changed at a glance.
 
 ## Challenge style
 

@@ -103,11 +103,11 @@ After completing work, you MUST:
 - Research conclusions and recommendations that were accepted or rejected
 - Library evaluations (ecosystem health, maintenance status, license findings)
 - Migration path decisions and trade-off analyses
-- Domain-specific findings that inform future research scoping
+- Decisions and evaluations (judgment calls) that inform future research scoping
 
 **Do NOT write:**
 - Raw search results or temporary investigation notes
-- Findings already documented in ADRs or research briefs
+- Raw findings already documented in ADRs or research briefs (write the decisions, not the data)
 - Version-specific details that will go stale quickly
 - Information already captured in `.dev-team/learnings.md`
 
