@@ -26,6 +26,10 @@ Before spawning reviewers, verify the changes are reviewable:
 1. **Non-empty diff**: The diff contains actual changes to review. If empty, report "nothing to review" and stop.
 2. **Tests pass**: If the project has a test command, confirm tests pass. Flag test failures in the review report header.
 
+## Security preamble
+
+Before starting the review, check for open security alerts using the project's security monitoring process (e.g., a `/security-status` skill or CLAUDE.md guidance). If no such process or tooling is available, note this explicitly in the review report and proceed with a manual review of security-sensitive changes. Flag any critical findings in the review report.
+
 ## Execution
 
 1. Spawn each selected agent as a **parallel background subagent** using the Agent tool with `subagent_type: "general-purpose"`. Use the agent teammate naming convention: `{agent}-review` (e.g., `szabo-review`, `knuth-review`, `brooks-review`). **Timeout**: If a reviewer has not reported progress (status file or message) within 3 minutes, send a status ping. If no response within 1 additional minute, terminate the reviewer and proceed with findings from the other reviewers.
@@ -85,10 +89,6 @@ Original finding summary.
 - **Request changes** — `[DEFECT]` findings must be resolved.
 
 State the verdict clearly. List what must be fixed for approval if requesting changes.
-
-### Security preamble
-
-Before starting the review, check for open security alerts using the project's security monitoring process (e.g., a `/security-status` skill or CLAUDE.md guidance). If no such process or tooling is available, note this explicitly in the review report and proceed with a manual review of security-sensitive changes. Flag any critical findings in the review report.
 
 ### Completion
 
