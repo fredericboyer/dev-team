@@ -203,7 +203,7 @@ const FALLBACK_OPS_PATTERNS = [
   /env\.template$/,
 ];
 const FALLBACK_CODE_FILE = /\.(js|ts|jsx|tsx|py|rb|go|java|rs|c|cpp|cs)$/;
-const FALLBACK_TEST_FILE = /\.(test|spec)\.|__tests__|\/tests?\//;
+const FALLBACK_TEST_FILE = /\.(test|spec)\.|_test\.|__tests__|\/tests?\//;
 
 const loaded = loadPatternsFromJSON();
 

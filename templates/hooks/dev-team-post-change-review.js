@@ -198,7 +198,7 @@ const FALLBACK_OPS_PATTERNS = [
   /env\.template$/,
 ];
 const FALLBACK_CODE_FILE = /\.(js|ts|jsx|tsx|py|rb|go|java|rs|c|cpp|cs)$/;
-const FALLBACK_TEST_FILE = /\.(test|spec)\.|__tests__|\/tests?\//;
+const FALLBACK_TEST_FILE = /\.(test|spec)\.|_test\.|__tests__|\/tests?\//;
 
 const loaded = loadPatternsFromJSON();
 
@@ -327,21 +327,33 @@ function scoreComplexity(toolInput, scorePath) {
   const linesChanged = oldLines + newLines;
   score += Math.min(linesChanged, 50); // Cap at 50 to avoid single large file dominating
 
-  // Complexity indicators in the new content
-  const complexityPatterns = [
-    /\bfunction\b/g, // new functions
-    /\bclass\b/g, // new classes
-    /\bif\b.*\belse\b/g, // control flow
-    /\bcatch\b/g, // error handling
-    /\bthrow\b/g, // error throwing
-    /\basync\b/g, // async operations
-    /\bawait\b/g, // async operations
-    /\bexport\b/g, // API surface changes
-  ];
+  // Language-agnostic complexity indicators.
+  // Instead of hardcoding language-specific keywords, use structural proxies:
+  // nesting depth and control flow density work across all languages.
+  const lines = newStr.split("\n");
 
-  for (const pattern of complexityPatterns) {
+  // Nesting depth: count max indent level as a proxy for cyclomatic complexity
+  let maxNesting = 0;
+  for (const line of lines) {
+    if (!line.trim()) continue;
+    const leading = line.match(/^(\s*)/)[1];
+    // Normalize: treat 1 tab or 2+ spaces as one indent level
+    const depth = leading.includes("\t")
+      ? leading.split("\t").length - 1
+      : Math.floor(leading.length / 2);
+    if (depth > maxNesting) maxNesting = depth;
+  }
+  score += Math.min(maxNesting * 3, 30); // Cap nesting contribution
+
+  // Control flow density: count lines with braces/brackets that indicate branching or blocks
+  // This is language-agnostic -- works for C-family, Python (colons), Ruby (do/end), etc.
+  const controlFlowPatterns = [
+    /[{}]/g, // braces (C-family block delimiters)
+    /\b(if|else|elif|elsif|case|when|switch|match|for|while|do|try|catch|except|finally|rescue)\b/g,
+  ];
+  for (const pattern of controlFlowPatterns) {
     const matches = newStr.match(pattern);
-    if (matches) score += matches.length * 2;
+    if (matches) score += matches.length;
   }
 
   // Security-sensitive files get a boost
