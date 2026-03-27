@@ -1,6 +1,6 @@
 ---
 name: dev-team:scorecard
-description: Audit process conformance after a task loop completes. Checks Borges ran, findings acknowledged, metrics recorded, reviews executed, memory updated, and issues closed.
+description: Audit process conformance after a workflow completes (task, review, or audit). Checks Borges ran, findings acknowledged, metrics recorded, review executed, memory updated, and conditionally checks ADR written and issue closed.
 user_invocable: false
 ---
 
@@ -8,17 +8,25 @@ Audit process conformance for: $ARGUMENTS
 
 ## Setup
 
-1. Determine the task to audit:
+1. Determine the workflow to audit:
    - If a PR number is given, use `gh pr view <number>` to get the branch, issue references, and merge status
    - If a branch name is given, use `git log` to find the associated issue number from commit messages
    - If an issue number is given, search for the PR that closes it
-   - If no argument, audit the most recent completed task (last merged PR or last entry in `.dev-team/metrics.md`)
+   - If no argument, audit the most recent completed workflow (last merged PR or last entry in `.dev-team/metrics.md`)
 
-2. Collect context:
-   - The issue number and PR number
-   - The branch name
+2. Detect the workflow type from the metrics entry or PR body:
+   - **task** — iterative task loop (`/dev-team:task`): implementation + review waves + convergence
+   - **review** — multi-agent review (`/dev-team:review`): review-only, no implementation phase
+   - **audit** — codebase audit (`/dev-team:audit`): parallel audit agents, no implementation phase
+
+3. Collect context:
+   - The issue number and PR number (if applicable)
+   - The branch name (if applicable)
+   - The workflow type detected above
    - The list of agents that participated (from `.dev-team/metrics.md` entry or PR body)
-   - Whether a Brooks pre-assessment flagged an ADR requirement
+   - Whether a Brooks pre-assessment flagged an ADR requirement (task workflows only)
+
+4. Read `.claude/rules/dev-team-process.md` for project-specific process expectations (integration rules, release steps, review requirements). Use these to calibrate pass/fail thresholds.
 
 ## Platform detection
 
@@ -30,9 +38,9 @@ Run each check and record pass/fail with evidence.
 
 ### 1. Borges ran
 
-**Check**: Read `.dev-team/metrics.md` and search for an entry matching the task's issue number, PR number, or branch name.
+**Check**: Read `.dev-team/metrics.md` and search for an entry matching the workflow's issue number, PR number, or branch name.
 
-- **Pass**: Entry exists with the task reference
+- **Pass**: Entry exists with the workflow reference
 - **Fail**: No matching entry found
 
 ### 2. All findings acknowledged
@@ -49,51 +57,57 @@ Run each check and record pass/fail with evidence.
 - **Pass**: Entry contains all required fields (Agents, Findings, Acceptance rate, Rounds)
 - **Fail**: Entry is missing required fields (list which ones)
 
-### 4. Review wave executed
+### 4. Review executed
 
 **Check**: The metrics entry shows at least one review round with classified findings from reviewer agents.
 
-- **Pass**: At least one review wave with findings from 1+ reviewers
-- **Fail**: No review wave recorded, or findings section is empty
+- **Pass**: At least one review round with findings from 1+ reviewers
+- **Fail**: No review recorded, or findings section is empty
 
 ### 5. Memory updated
 
-**Check**: For each agent listed as a participant in the metrics entry, read `.dev-team/agent-memory/<agent>/MEMORY.md` and verify it contains at least one entry dated on or after the task completion date, or referencing the task's issue/PR number.
+**Check**: For each agent listed as a participant in the metrics entry, read `.dev-team/agent-memory/<agent>/MEMORY.md` and verify it contains at least one entry dated on or after the workflow completion date, or referencing the workflow's issue/PR number.
 
 - **Pass**: All participating agents have a relevant memory entry
-- **Fail**: One or more agents have no memory entry from this task (list them)
+- **Fail**: One or more agents have no memory entry from this workflow (list them)
 
 ### 6. ADR written (conditional)
+
+**Applies to**: task workflows only. Skip for review and audit workflows.
 
 **Check**: If the PR body or commit messages mention "ADR" or "Write ADR-NNN", verify the corresponding file exists in `docs/adr/`.
 
 - **Pass**: ADR file exists, or no ADR was required
 - **Fail**: ADR was flagged as needed but the file does not exist
-- **Skip**: No ADR requirement detected
+- **Skip**: No ADR requirement detected, or workflow type is review/audit
 
-### 7. Issue closed
+### 7. Issue closed (conditional)
 
-**Check**: Use `gh issue view <number> --json state` to verify the referenced issue is closed.
+**Applies to**: task workflows only. Skip for review and audit workflows (which may not have an associated issue).
+
+**Check**: If an issue number is associated with the workflow, verify it is closed.
 
 - **Pass**: Issue state is "CLOSED"
 - **Fail**: Issue is still open
+- **Skip**: No issue associated, or workflow type is review/audit
 
 ## Report
 
 Produce a structured scorecard:
 
 ```
-## Process Scorecard: <issue/PR reference>
+## Process Scorecard: <issue/PR/workflow reference>
+**Workflow type**: task / review / audit
 
 | # | Check | Status | Evidence |
 |---|-------|--------|----------|
 | 1 | Borges ran | PASS/FAIL | metrics.md entry found/missing |
 | 2 | Findings acknowledged | PASS/FAIL | N/N findings with outcomes |
 | 3 | Metrics recorded | PASS/FAIL | all fields present / missing: X, Y |
-| 4 | Review wave executed | PASS/FAIL | N rounds, N reviewers |
+| 4 | Review executed | PASS/FAIL | N rounds, N reviewers |
 | 5 | Memory updated | PASS/FAIL | N/N agents with entries |
-| 6 | ADR written | PASS/FAIL/SKIP | ADR-NNN exists / not required |
-| 7 | Issue closed | PASS/FAIL | issue #NNN state |
+| 6 | ADR written | PASS/FAIL/SKIP | ADR-NNN exists / not required / not applicable |
+| 7 | Issue closed | PASS/FAIL/SKIP | issue #NNN state / not applicable |
 
 **Score: N/M** (skipped checks excluded from denominator)
 
