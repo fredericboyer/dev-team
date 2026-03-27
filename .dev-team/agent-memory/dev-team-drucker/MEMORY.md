@@ -16,7 +16,7 @@
 - **Source**: docs/adr/019-parallel-review-waves.md
 - **Tags**: orchestration, parallelism, review
 - **Outcome**: verified
-- **Last-verified**: 2026-03-25
+- **Last-verified**: 2026-03-26
 - **Context**: Brooks assesses file independence, implementations run concurrently in worktrees, reviews batched into coordinated wave, defects route back per-branch, Borges runs once across all branches at end.
 
 ### [2026-03-25] Agent proliferation check before recommending new agents (ADR-022)
@@ -34,6 +34,14 @@
 - **Outcome**: verified
 - **Last-verified**: 2026-03-25
 - **Context**: Must load actual agent definition from .dev-team/agents/dev-team-*.md when spawning. Do NOT use pr-review-toolkit proxies — different behavior. Use subagent_type: "general-purpose".
+
+### [2026-03-26] Sequential chains require merge-as-you-go orchestration
+- **Type**: PATTERN [verified]
+- **Source**: PR #375 (fix/374), v1.5.0 process learning
+- **Tags**: orchestration, merging, sequential-chains
+- **Outcome**: accepted
+- **Last-verified**: 2026-03-26
+- **Context**: When multiple issues form a dependency chain, each PR must be merged before the next agent starts. Batching merges at the end causes agents to branch from stale main, nullifying the sequencing. Drucker must integrate-as-you-go, not batch-at-end.
 
 ## Conflict Resolution Log
 

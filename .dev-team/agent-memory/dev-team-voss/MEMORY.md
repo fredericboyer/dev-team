@@ -29,6 +29,13 @@
 
 ## Patterns to Watch For
 
+### [2026-03-26] mergeSettings() must track Set state after push — dedup bug in src/files.ts
+- **Type**: DEFECT [fixed]
+- **Source**: PR #367 (fix/364), Copilot finding
+- **Tags**: merge-logic, settings, dedup
+- **Outcome**: fixed
+- **Last-verified**: 2026-03-26
+- **Context**: mergeSettings() pushed new commands into the array but did not update the Set used for dedup tracking. Also required null-safe normalization for hooks (` ?? []`) and a consolidation pass for duplicate matcher blocks. Three related DEFECTs fixed together.
 
 ## Calibration Log
 <!-- Challenges accepted/overruled — tunes adversarial intensity over time -->

@@ -36,3 +36,17 @@
   - [SUGGESTION] Pre-commit gate wording inaccuracy across agent templates (PR #277, 6 files) → #323
   - [SUGGESTION] Promotion opportunities section undefined in report format (PR #279) → #283 (closed)
 
+### [2026-03-26] Task: v1.5.0 delivery (#353, #354, #355, #356, #357, #358, #359, #364, #368, #374, #351, #348, #335, #325)
+- **Agents**: implementing: Voss, Deming, Tufte, Turing; pre-assessment: Brooks; reviewers: Copilot
+- **Rounds**: 1
+- **Findings**:
+  - Copilot: 8 DEFECT (8 fixed / 0 overruled), 7 RISK (7 fixed / 0 overruled), 1 SUGGESTION (1 fixed / 0 overruled)
+  - CI: 1 DEFECT (1 fixed / 0 overruled)
+  - Brooks: 1 SUGGESTION (1 fixed / 0 overruled)
+- **Acceptance rate**: 100% (18 fixed / 18 total)
+- **Overrule rate**: 0% (0 / 18)
+- **Fix rate (DEFECTs)**: 100% (9/9)
+- **Defer rate (advisory)**: 0% (0/9)
+- **Duration**: single session, 15 PRs across sequential and parallel branches
+- **Notes**: Largest batch to date. All findings addressed in first pass — zero deferred, zero overruled. Copilot was the primary code reviewer. Key themes: path correctness (findings #7, #12), null safety in merge logic (#1-3), documentation precision (#4-6, #9-11), and platform field backfill (#15-16). Process improvement: merge-as-you-go for sequential chains (#18).
+

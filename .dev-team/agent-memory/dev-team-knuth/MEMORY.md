@@ -53,3 +53,11 @@
 - Advisory findings: 7 accepted, 7 deferred (follow-up issues), 0 overruled.
 - Deferred items are legitimate follow-ups, not rejections. Calibration signal: advisory finding quality is good but volume could be tuned — 7 deferred out of 14 advisory suggests some findings are premature for the current scope.
 - Watch: "section name collision" and "overlap" findings tend to get deferred. Consider raising threshold for naming/overlap suggestions unless they cause functional ambiguity.
+
+### [2026-03-26] Review skill had wrong path for agent-patterns.json
+- **Type**: DEFECT [fixed]
+- **Source**: PR #365 (fix/355), Copilot finding
+- **Tags**: routing, review-skill, path
+- **Outcome**: fixed
+- **Last-verified**: 2026-03-26
+- **Context**: Review skill referenced agent-patterns.json at wrong path. Corrected to `.dev-team/hooks/agent-patterns.json`. Path correctness is a recurring theme — verify paths in skill definitions during review.

@@ -3,13 +3,21 @@
 
 ## Research Patterns
 
-### [2026-03-25] First install — no research history yet
-- **Type**: PATTERN [verified]
-- **Source**: initial setup
-- **Tags**: research, setup
-- **Outcome**: verified
-- **Last-verified**: 2026-03-25
-- **Context**: Turing was added in v1.1. Research briefs will be written to .dev-team/research/. Borges manages temporal decay (90-day archive).
+### [2026-03-26] Research brief template now includes Recommended Actions section
+- **Type**: DECISION [verified]
+- **Source**: PR #369
+- **Tags**: research, template, output-format
+- **Outcome**: accepted
+- **Last-verified**: 2026-03-26
+- **Context**: Research briefs must end with a Recommended Actions section for triage-ready output. This was a process learning from v1.5.0 — briefs without actionable recommendations require extra triage work by the orchestrator.
+
+### [2026-03-26] Memory writes should capture decisions and calibration, not repeat findings
+- **Type**: CALIBRATION [verified]
+- **Source**: PR #363 Copilot finding (fix/357)
+- **Tags**: memory, research, calibration
+- **Outcome**: fixed
+- **Last-verified**: 2026-03-26
+- **Context**: Turing memory entries should capture calibration data (what to test, which patterns to verify) rather than duplicating the research brief content. The brief is the authoritative source; memory captures what shapes future research behavior.
 
 ### [2026-03-26] Multi-user concurrency model (#257)
 - **Type**: RESEARCH [completed]

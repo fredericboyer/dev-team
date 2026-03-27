@@ -83,5 +83,13 @@
 - **Last-verified**: 2026-03-25
 - **Context**: Patch releases: verify all PRs merged, create branch `chore/release-v{x.y.z}`, add CHANGELOG section under [Unreleased] with `### Fixed` only, `npm version {x.y.z} --no-git-tag-version`, commit, push, create PR, close milestone. Do NOT merge — wait for human. After merge: tag and release workflow handles npm publish.
 
+### [2026-03-26] Changelog grouping: within categories, not across them
+- **Type**: CALIBRATION [verified]
+- **Source**: PR #363 (fix/357), Copilot finding
+- **Tags**: changelog, formatting, release
+- **Outcome**: fixed
+- **Last-verified**: 2026-03-26
+- **Context**: Changelog entries should be grouped within their Added/Changed/Fixed/Internal categories, not across them. Conway definition updated to clarify this convention.
+
 ## Calibration Log
 <!-- Challenges accepted/overruled — tunes adversarial intensity over time -->
