@@ -203,7 +203,22 @@ try {
   // Ignore — best effort
 }
 
-if (/^(feat|fix)\//.test(currentBranch)) {
+// Read taskBranchPattern from config, default to (feat|fix)\/
+let taskBranchPattern = "(feat|fix)\\/";
+try {
+  const configPath = path.join(process.cwd(), ".dev-team", "config.json");
+  const configStat = fs.lstatSync(configPath);
+  if (configStat.isFile() && !configStat.isSymbolicLink()) {
+    const config = JSON.parse(fs.readFileSync(configPath, "utf-8"));
+    if (typeof config.taskBranchPattern === "string" && config.taskBranchPattern) {
+      taskBranchPattern = config.taskBranchPattern;
+    }
+  }
+} catch {
+  // Config missing or invalid — use default
+}
+
+if (new RegExp("^" + taskBranchPattern).test(currentBranch)) {
   const hasMetricsUpdate = files.some((f) => f.endsWith(".dev-team/metrics.md"));
   if (!hasMetricsUpdate) {
     console.warn(
