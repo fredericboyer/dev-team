@@ -51,6 +51,14 @@
 - **Last-verified**: 2026-03-26
 - **Context**: Largest task batch to date. 8 DEFECTs + 10 advisory, all fixed in first pass. Copilot was the primary reviewer (no in-team agents reviewing). Brooks provided pre-assessment. Key process learnings: merge-as-you-go for sequential chains, Copilot comments must be monitored during delivery not just at merge time. 3 new ADRs, SHARED.md extraction, process.md extraction, platform detection, scorecard skill added. Cleaned up 2 bootstrapped entries (Turing "first install", Rams "first install").
 
+### [2026-03-26] v1.5.1 extraction — 6 findings, 1 fixed, 5 ignored (install artifacts)
+- **Type**: MILESTONE [verified]
+- **Source**: v1.5.1 hotfix (#397, PR #398)
+- **Tags**: metrics, calibration, extraction
+- **Outcome**: verified
+- **Last-verified**: 2026-03-26
+- **Context**: Small hotfix. High ignore rate (83%) is not a signal quality issue — 5 ignored findings were all about local install artifact paths (hook files not committed to repo). The 1 DEFECT (contradiction in process.md) was fixed. New memory entries written for Deming (guarded files) and Conway (guarded files + update testing). Design principle "Don't encode what agents already know" was already in learnings from a prior commit in this session.
+
 ### [2026-03-26] Deming pattern duplication entry superseded
 - **Type**: COHERENCE [resolved]
 - **Source**: cross-agent audit

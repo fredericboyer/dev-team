@@ -50,3 +50,16 @@
 - **Duration**: single session, 15 PRs across sequential and parallel branches
 - **Notes**: Largest batch to date. All findings addressed in first pass — zero deferred, zero overruled. Copilot was the primary code reviewer. Key themes: path correctness (findings #7, #12), null safety in merge logic (#1-3), documentation precision (#4-6, #9-11), and platform field backfill (#15-16). Process improvement: merge-as-you-go for sequential chains (#18).
 
+### [2026-03-26] Task: v1.5.1 hotfix (#397)
+- **Agents**: implementing: Deming (main loop), reviewers: Copilot
+- **Rounds**: 1
+- **Findings**:
+  - Copilot: 1 DEFECT (1 fixed / 0 overruled), 4 RISK (0 accepted / 0 overruled / 4 ignored), 1 SUGGESTION (0 accepted / 0 overruled / 1 ignored)
+- **Acceptance rate**: 17% (1 fixed / 6 total)
+- **Overrule rate**: 0% (0 / 6)
+- **Fix rate (DEFECTs)**: 100% (1/1)
+- **Defer rate (advisory)**: 0% (0/5)
+- **Ignore rate (advisory)**: 100% (5/5 — local install artifacts, not actionable)
+- **Duration**: single session, 1 PR
+- **Notes**: Small hotfix — process.md guarded from overwrite on reinstall. The 5 ignored findings were all about hook/config files referencing paths that only exist after local install (not committed to repo). One DEFECT fixed: contradiction in process.md between "never modify .dev-team/" and process.md being user-editable.
+

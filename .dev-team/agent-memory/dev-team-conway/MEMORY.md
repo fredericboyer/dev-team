@@ -66,7 +66,7 @@
 - **Source**: update.ts migration system, v1.0.0 skillRemovals migration
 - **Tags**: update, migration, breaking-change
 - **Outcome**: verified
-- **Last-verified**: 2026-03-25
+- **Last-verified**: 2026-03-26
 - **Context**: The MIGRATIONS array in update.ts supports agentRenames (v0.4.0) and skillRemovals (v1.0.0). When `dev-team update` detects the user's installed version is older, it runs all applicable migrations. Added skillRemovals to clean up legacy workflow skill dirs.
 
 ### [2026-03-25] Close milestone after release PR creation
@@ -90,6 +90,14 @@
 - **Outcome**: fixed
 - **Last-verified**: 2026-03-26
 - **Context**: Changelog entries should be grouped within their Added/Changed/Fixed/Internal categories, not across them. Conway definition updated to clarify this convention.
+
+### [2026-03-26] Guarded files: learnings.md, metrics.md, process.md — never overwritten
+- **Type**: PATTERN [verified]
+- **Source**: PR #398 (fix/397)
+- **Tags**: update, guarded-files, release
+- **Outcome**: verified
+- **Last-verified**: 2026-03-26
+- **Context**: update.ts guards three user-editable files in .dev-team/: learnings.md, metrics.md, and process.md. These are only installed if missing (for upgrades from older versions). All other .dev-team/ files are overwritten on update. This matters for release testing — verify guarded files survive `dev-team update`.
 
 ## Calibration Log
 <!-- Challenges accepted/overruled — tunes adversarial intensity over time -->
