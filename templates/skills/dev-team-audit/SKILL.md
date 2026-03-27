@@ -93,4 +93,5 @@ Before starting the audit, check for open security alerts using the project's se
 After the audit report is delivered:
 1. You MUST spawn **@dev-team-borges** as `borges-extract` (Librarian) as the final step to review memory freshness and capture learnings from the audit findings. Do NOT skip this.
 2. If Borges was not spawned, the audit is INCOMPLETE.
-3. Include Borges's recommendations in the final report.
+3. **Metrics completion gate**: Read `.dev-team/metrics.md` and verify it contains a new entry with the current audit's scope or date. A stale metrics file (no new entry) means Borges did not complete successfully. If metrics.md has no new entry after Borges reports completion, flag this as a system failure and re-run Borges with explicit instruction to record metrics.
+4. Include Borges's recommendations in the final report.

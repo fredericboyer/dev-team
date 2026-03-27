@@ -115,6 +115,8 @@ When agent memory files are empty (only contain the template boilerplate), gener
 - Focus on stable structural knowledge: framework choices, architectural patterns, security boundaries, naming conventions
 - If a fact can be derived by running a command or reading a config file, it does not belong in memory
 
+**Placeholder cleanup:** When writing a real entry for an agent that still has `[bootstrapped]` or "First install" placeholder entries, remove the placeholders. Cold-start seed entries should not coexist with real calibration data.
+
 **Seed entries are marked** with `[bootstrapped]` in their Type field so agents know to verify and refine them:
 ```markdown
 ### [YYYY-MM-DD] Project uses Jest with ~85% coverage target
@@ -150,7 +152,8 @@ Entries have `Last-verified` dates that track when they were last confirmed rele
 1. **Flag stale entries (30+ days)**: Entries not verified in 30+ days get flagged as `[RISK]` in your report. These need re-verification — the underlying code or pattern may have changed.
 2. **Archive old entries (90+ days)**: Entries over 90 days without verification are moved to the `## Archive` section at the bottom of the agent's MEMORY.md. Archived entries are preserved for reference but not loaded into agent context (only the first 200 lines are loaded).
 3. **Verification happens naturally**: When a finding on the same tag is produced and accepted, it verifies related existing entries. You update their `Last-verified` date during extraction (step 1).
-4. **Never delete**: Entries are archived, not deleted. The archive is the historical record.
+4. **Domain-aware updates**: Update `Last-verified` on existing entries when a task completes that touches the same domain area — not only during explicit retro/audit cycles. If a reviewer's findings touch a domain (e.g., auth, testing, CI) and related entries exist in that reviewer's memory, bump their `Last-verified` date even if no new finding was produced for those entries.
+5. **Never delete**: Entries are archived, not deleted. The archive is the historical record.
 
 ### 4. System improvement
 
