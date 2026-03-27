@@ -49,6 +49,30 @@ Check for:
 - Learnings that should be elevated to an ADR in `docs/adr/`
 - Learnings that are really agent-specific calibration and should move to the appropriate agent's `MEMORY.md`
 
+## Phase 1b: Process file audit (`.dev-team/process.md`)
+
+Check `.dev-team/process.md` for:
+
+### Staleness
+- References to agent names, hook scripts, or workflow steps that no longer exist
+- Orchestration rules that describe removed or renamed commands
+- References to old file paths, deprecated tools, or outdated conventions
+
+### Contradictions
+- Rules that conflict with `.dev-team/learnings.md` (e.g., process says "sequential reviews" but learnings say "parallel reviews")
+- Instructions that contradict the project's `CLAUDE.md`
+- Workflow descriptions that disagree with actual hook or agent behavior
+
+### Completeness
+- Workflow rules documented in `.dev-team/learnings.md` that describe process but are missing from `process.md`
+- Orchestration patterns that agents follow in practice but are not documented here
+- Missing sections that a new agent or developer would need to understand the workflow
+
+### Accuracy
+- Verify orchestration claims against actual agent definitions in `.dev-team/agents/`
+- Verify hook trigger descriptions against actual hook scripts in `.dev-team/hooks/`
+- Verify naming conventions and parallel execution rules against observed behavior in recent git history
+
 ## Phase 2: Agent memory audit (`.dev-team/agent-memory/*/MEMORY.md`)
 
 Check each agent's memory file for:
@@ -189,6 +213,7 @@ Provide a simple health score:
 | Area | Status | Issues |
 |------|--------|--------|
 | Learnings | healthy / needs attention / unhealthy | count by severity |
+| Process | healthy / needs attention / unhealthy | count by severity |
 | Agent Memory | healthy / needs attention / unhealthy | count by severity |
 | CLAUDE.md | healthy / needs attention / unhealthy | count by severity |
 | Metrics | healthy / needs attention / unhealthy | count by severity |
