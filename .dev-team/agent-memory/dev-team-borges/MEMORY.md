@@ -67,6 +67,14 @@
 - **Last-verified**: 2026-03-26
 - **Context**: Deming had a RISK entry about review-gate pattern duplication. This was resolved in PR #344 (agent-patterns.json extraction). Updated entry from [acknowledged] to [resolved].
 
+### [2026-03-26] Full codebase audit extraction — 37 findings, 3 agents, 11 issues
+- **Type**: MILESTONE [verified]
+- **Source**: /dev-team:audit (Szabo, Knuth, Deming)
+- **Tags**: metrics, calibration, extraction, audit
+- **Outcome**: verified
+- **Last-verified**: 2026-03-26
+- **Context**: First formal audit (not task-driven). 37 findings (2 DEFECT, 11 RISK, 4 QUESTION, 20 SUGGESTION), 100% acceptance, 0% overrule. 11 issues created (#431-#441). Cross-agent coherence: Knuth K1/K3 and Deming D8/D9 independently flagged same migration drift — confirms pattern. New shared learning: migration completeness. New memory entries: Szabo (3), Knuth (4), Deming (4). All agent acceptance rates remain at or above 100% — no noise signal.
+
 ### [2026-03-26] v1.6.0 extraction — 16 PRs, Copilot-only review, no formal wave
 - **Type**: MILESTONE [verified]
 - **Source**: v1.6.0 task loop (16 issues, 16 PRs)

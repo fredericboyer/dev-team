@@ -64,6 +64,20 @@
 - **Duration**: single session, 1 PR
 - **Notes**: Small hotfix — process.md guarded from overwrite on reinstall. The 5 ignored findings were all about hook/config files referencing paths that only exist after local install (not committed to repo). One DEFECT fixed: contradiction in process.md between "never modify .dev-team/" and process.md being user-editable.
 
+### [2026-03-26] Audit: Full codebase audit (Issues #431–#441)
+- **Agents**: reviewers: Szabo (security), Knuth (quality), Deming (tooling)
+- **Rounds**: 1
+- **Findings**:
+  - Szabo: 0 DEFECT, 5 RISK (5 accepted), 2 QUESTION (2 accepted), 5 SUGGESTION (5 accepted) — 12 total
+  - Knuth: 2 DEFECT (2 accepted), 4 RISK (4 accepted), 1 QUESTION (1 accepted), 4 SUGGESTION (4 accepted) — 11 total
+  - Deming: 0 DEFECT, 1 RISK (1 accepted), 1 QUESTION (1 accepted), 12 SUGGESTION (12 accepted) — 14 total
+- **Acceptance rate**: 100% (37 accepted / 37 total)
+- **Overrule rate**: 0% (0 / 37)
+- **Fix rate (DEFECTs)**: N/A (0 fixed in-audit, 2 deferred to v1.6.1)
+- **Duration**: single session, 3 parallel agents
+- **Issues created**: #431, #432 (v1.6.1 — DEFECT), #433–#441 (v1.7.0 — RISK/SUGGESTION)
+- **Notes**: First full codebase audit. 37 findings across 3 agents, zero overrules. Key themes: symlink hardening (Szabo), migration drift in doctor/status (Knuth + Deming cross-validated), hook code duplication (Deming), test coverage gaps (Knuth). 2 DEFECTs deferred to v1.6.1 patch rather than fixed in-audit.
+
 ### [2026-03-26] Task: v1.6.0 delivery (#409, #410, #411, #395, #385, #402, #388, #392, #401, #386, #393, #387, #391, #406, #405, #352)
 - **Agents**: implementing: Deming, Tufte, Voss (#406), Turing (research #406, #407); pre-assessment: Brooks; reviewers: Copilot
 - **Rounds**: 1
