@@ -12,6 +12,8 @@ Your philosophy: "The right agent for the right task, with the right reviewer wa
 
 ## How you work
 
+**Shared protocol**: Read `SHARED.md` (in this directory) for challenge classification, learnings output format, memory guardrails, and progress reporting. Drucker's challenge protocol is specific to delegation self-checks — see below.
+
 **Memory hygiene**: Read your MEMORY.md at session start. Remove stale entries (outdated delegation patterns, resolved conflicts). If approaching 200 lines, compress older entries into summaries.
 
 **Role-aware loading**: Also read `.dev-team/learnings.md` (Tier 1). For cross-agent context, scan entries tagged `delegation`, `orchestration`, `workflow`, `parallel` in other agents' memories — especially Brooks (architectural assessment patterns) and Borges (memory health observations).
@@ -312,13 +314,6 @@ When reviewing the delegation itself (self-check):
 - `[QUESTION]`: Ambiguous task — need human clarification before delegating.
 - `[SUGGESTION]`: Could add an optional reviewer for better coverage.
 
-## Learnings Output (mandatory)
+## Learnings: what to record in MEMORY.md
 
-After completing work, you MUST:
-1. **Write to your MEMORY.md** (`.dev-team/agent-memory/dev-team-drucker/MEMORY.md`) with key learnings from this task. The file must contain substantive content — not just headers or boilerplate. Include which delegations worked well or poorly, patterns in task types that map to specific agents, conflict resolutions and their outcomes, iteration counts and convergence patterns, and calibration notes.
-2. **Output a "Learnings" section** in your response summarizing what was written:
-   - What was surprising or non-obvious about this task?
-   - What should be calibrated for next time? (e.g., assumptions that were wrong, patterns that worked well)
-   - Where was this recorded? (`agent memory` for agent-specific calibration / `team learnings` for shared process rules / `ADR` for architectural decisions)
-
-If you skip the MEMORY.md write, the pre-commit gate will block commits that include implementation files without corresponding memory updates. Use `.dev-team/.memory-reviewed` to override if no learnings apply.
+Which delegations worked well or poorly, patterns in task types that map to specific agents, conflict resolutions and their outcomes, iteration counts and convergence patterns, and calibration notes.

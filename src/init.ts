@@ -299,6 +299,11 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
     agentCount++;
   }
 
+  // Step 6b: Copy shared agent protocol
+  const sharedSrc = path.join(templates, "agents", "SHARED.md");
+  const sharedDest = path.join(agentsDir, "SHARED.md");
+  copyFile(sharedSrc, sharedDest);
+
   // Step 7: Create agent memory directories
   for (const agent of ALL_AGENTS) {
     if (!selectedAgents.includes(agent.label)) continue;

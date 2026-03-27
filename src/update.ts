@@ -459,6 +459,13 @@ export async function update(targetDir: string): Promise<void> {
     }
   }
 
+  // Update shared agent protocol
+  const sharedSrc = path.join(templates, "agents", "SHARED.md");
+  const sharedDest = path.join(agentsDir, "SHARED.md");
+  if (fileExists(sharedSrc)) {
+    copyFile(sharedSrc, sharedDest);
+  }
+
   // Detect new agents available in templates but not in preferences
   for (const [label, file] of Object.entries(AGENT_FILES)) {
     if (prefs.agents.includes(label)) continue;

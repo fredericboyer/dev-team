@@ -81,6 +81,7 @@ describe("fresh project installation", () => {
       assert.ok(content.startsWith("---"), `${file} should start with YAML frontmatter`);
       assert.ok(content.includes("name:"), `${file} should have a name field`);
       assert.ok(content.includes("description:"), `${file} should have a description field`);
+      if (file === "SHARED.md") continue; // SHARED.md is not an agent — skip agent-specific fields
       assert.ok(content.includes("model:"), `${file} should have a model field`);
       assert.ok(content.includes("memory: project"), `${file} should have memory: project`);
     }
@@ -201,9 +202,10 @@ describe("fresh project installation", () => {
     assert.ok(!prefs.agents.includes("Mori"), "should not include Mori");
     assert.ok(!prefs.agents.includes("Tufte"), "should not include Docs");
 
-    // Only selected agents should have files
+    // Only selected agents should have files (plus SHARED.md)
     const agents = fs.readdirSync(path.join(tmpDir, ".dev-team", "agents"));
-    assert.equal(agents.length, prefs.agents.length);
+    assert.equal(agents.length, prefs.agents.length + 1);
+    assert.ok(agents.includes("SHARED.md"));
   });
 
   it("--preset fullstack installs all agents", async () => {
