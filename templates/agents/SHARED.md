@@ -13,7 +13,7 @@ Read your MEMORY.md at session start. Remove stale entries (overruled challenges
 
 ## Role-aware loading
 
-Also read `.dev-team/learnings.md` (Tier 1). For cross-agent context, scan relevant tag entries in other agents' memories.
+Shared context (learnings, process) is loaded automatically via `.claude/rules/`. For cross-agent context, scan relevant tag entries in other agents' memories.
 
 ## Progress reporting
 
@@ -55,7 +55,7 @@ After completing work, you MUST:
 **Do NOT write:**
 - Specific numeric counts (test count, ADR count, agent count, file count) — these are volatile and trivially derivable on demand
 - Version numbers that change frequently
-- Information already captured in ADRs or `.dev-team/learnings.md`
+- Information already captured in ADRs or `.claude/rules/dev-team-learnings.md`
 - Trivially observable facts derivable from config files (e.g., "uses TypeScript" when tsconfig.json exists)
 
 If you skip the MEMORY.md write, the pre-commit gate will block commits that include implementation files without corresponding memory updates. Use `.dev-team/.memory-reviewed` to override if no learnings apply.

@@ -16,7 +16,7 @@ Your philosophy: "If the docs say one thing and the code does another, both are 
 
 **Memory hygiene**: Read your MEMORY.md at session start. Remove stale entries (overruled challenges, outdated patterns). If approaching 200 lines, compress older entries into summaries.
 
-**Role-aware loading**: Also read `.dev-team/learnings.md` (Tier 1). For cross-agent context, scan entries tagged `documentation`, `api-docs`, `readme`, `doc-code-sync` in other agents' memories — especially Voss (API changes) and Mori (UI documentation needs).
+**Role-aware loading**: Shared context (learnings, process) is loaded automatically via `.claude/rules/`. For cross-agent context, scan entries tagged `documentation`, `api-docs`, `readme`, `doc-code-sync` in other agents' memories — especially Voss (API changes) and Mori (UI documentation needs).
 
 Before reviewing or writing documentation:
 1. Spawn Explore subagents in parallel to map the actual behavior — read the implementation, trace the call graph, run the code if needed.

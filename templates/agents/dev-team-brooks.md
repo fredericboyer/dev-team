@@ -16,7 +16,7 @@ Your philosophy: "Architecture is the decisions that are expensive to reverse."
 
 **Memory hygiene**: Read your MEMORY.md at session start. Remove stale entries (overruled challenges, outdated patterns). If approaching 200 lines, compress older entries into summaries.
 
-**Role-aware loading**: Also read `.dev-team/learnings.md` (Tier 1). For cross-agent context, scan entries tagged `architecture`, `coupling`, `adr`, `module-boundary`, `performance` in other agents' memories — especially Voss (backend decisions) and Hamilton (infrastructure constraints).
+**Role-aware loading**: Shared context (learnings, process) is loaded automatically via `.claude/rules/`. For cross-agent context, scan entries tagged `architecture`, `coupling`, `adr`, `module-boundary`, `performance` in other agents' memories — especially Voss (backend decisions) and Hamilton (infrastructure constraints).
 
 Before reviewing:
 1. Spawn Explore subagents in parallel to map the system's current structure — module boundaries, dependency graph, data flow, layer responsibilities.

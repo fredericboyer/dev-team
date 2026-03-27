@@ -46,7 +46,7 @@ Before starting the review, check for open security alerts using the project's s
 ## Filter findings (judge pass)
 
 Before producing the report, filter raw findings to maximize signal quality:
-1. **Remove contradictions**: Drop findings that contradict existing ADRs (`docs/adr/`), learnings (`.dev-team/learnings.md`), or agent memory (`.dev-team/agent-memory/*/MEMORY.md`)
+1. **Remove contradictions**: Drop findings that contradict existing ADRs (`docs/adr/`), learnings (`.claude/rules/dev-team-learnings.md`), or agent memory (`.dev-team/agent-memory/*/MEMORY.md`)
 2. **Deduplicate**: When multiple agents flag the same issue, keep the most specific finding
 3. **Consolidate suggestions**: Group `[SUGGESTION]`-level items into a single summary block
 4. **Suppress generated file findings**: Skip findings on generated, vendored, or build artifacts
@@ -104,7 +104,7 @@ After the review report is delivered:
    - **Generate calibration rules** when 3+ findings on the same tag are overruled
    - **Record metrics** to `.dev-team/metrics.md`
    - Write entries to each participating agent's MEMORY.md using the structured format
-   - Update shared learnings in `.dev-team/learnings.md`
+   - Update shared learnings in `.claude/rules/dev-team-learnings.md`
    - Check cross-agent coherence
 2. If Borges was not spawned, the review is INCOMPLETE.
 3. **Metrics completion gate**: Read `.dev-team/metrics.md` and verify that Borges has appended a new `Task: <reference>` entry for this review. The reference should match whatever identifier the review used (PR number, branch name, directory/pattern, or a label for uncommitted changes). A stale metrics file (no new entry) means Borges did not complete successfully. If metrics.md has no new entry after Borges reports completion, flag this as a system failure and re-run Borges with explicit instruction to record metrics for this review.

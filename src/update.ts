@@ -642,11 +642,34 @@ export async function update(targetDir: string): Promise<void> {
     summary.claudeMd = mergeClaudeMd(claudeMdPath, claudeMdTemplate);
   }
 
-  // Step 7: Update shared learnings template (only if missing)
+  // Step 7: Update shared learnings and process files (in .claude/rules/ for automatic agent context)
+  const rulesDir = path.join(claudeDir, "rules");
   const learningsSrc = path.join(templates, "dev-team-learnings.md");
-  const learningsDest = path.join(devTeamDir, "learnings.md");
+  const learningsDest = path.join(rulesDir, "dev-team-learnings.md");
+
+  // Migration: move from old .dev-team/ paths to .claude/rules/
+  const oldLearningsPath = path.join(devTeamDir, "learnings.md");
+  if (fileExists(oldLearningsPath) && !fileExists(learningsDest)) {
+    fs.mkdirSync(rulesDir, { recursive: true });
+    fs.renameSync(oldLearningsPath, learningsDest);
+    console.log("  Migrated learnings.md → .claude/rules/dev-team-learnings.md");
+  }
   if (!fileExists(learningsDest)) {
     copyFile(learningsSrc, learningsDest);
+  }
+
+  const processSrc = path.join(templates, "dev-team-process.md");
+  const processDest = path.join(rulesDir, "dev-team-process.md");
+
+  // Migration: move from old .dev-team/ path to .claude/rules/
+  const oldProcessPath = path.join(devTeamDir, "process.md");
+  if (fileExists(oldProcessPath) && !fileExists(processDest)) {
+    fs.mkdirSync(rulesDir, { recursive: true });
+    fs.renameSync(oldProcessPath, processDest);
+    console.log("  Migrated process.md → .claude/rules/dev-team-process.md");
+  }
+  if (!fileExists(processDest) && fileExists(processSrc)) {
+    copyFile(processSrc, processDest);
   }
 
   // Step 7b: Create metrics log (only if missing — never overwrite user data)
@@ -654,13 +677,6 @@ export async function update(targetDir: string): Promise<void> {
   const metricsDest = path.join(devTeamDir, "metrics.md");
   if (!fileExists(metricsDest) && fileExists(metricsSrc)) {
     copyFile(metricsSrc, metricsDest);
-  }
-
-  // Step 7c: Install process file (only if missing — for pre-v1.5.0 installs)
-  const processSrc = path.join(templates, "dev-team-process.md");
-  const processDest = path.join(devTeamDir, "process.md");
-  if (!fileExists(processDest) && fileExists(processSrc)) {
-    copyFile(processSrc, processDest);
   }
 
   // Backfill platform field for existing installs (added in v1.5.0)

@@ -155,7 +155,7 @@ describe("dev-team update", () => {
   it("preserves shared team learnings", async () => {
     await run(tmpDir, ["--all"]);
 
-    const learningsPath = path.join(tmpDir, ".dev-team", "learnings.md");
+    const learningsPath = path.join(tmpDir, ".claude", "rules", "dev-team-learnings.md");
     fs.writeFileSync(learningsPath, "# Custom Learnings\nWe use PostgreSQL.");
 
     await update(tmpDir);
@@ -167,7 +167,7 @@ describe("dev-team update", () => {
   it("preserves process file on update", async () => {
     await run(tmpDir, ["--all"]);
 
-    const processPath = path.join(tmpDir, ".dev-team", "process.md");
+    const processPath = path.join(tmpDir, ".claude", "rules", "dev-team-process.md");
     fs.writeFileSync(processPath, "# Custom Process\nWe use trunk-based development.");
 
     await update(tmpDir);
@@ -179,13 +179,42 @@ describe("dev-team update", () => {
   it("installs process file on update if missing", async () => {
     await run(tmpDir, ["--all"]);
 
-    const processPath = path.join(tmpDir, ".dev-team", "process.md");
+    const processPath = path.join(tmpDir, ".claude", "rules", "dev-team-process.md");
     fs.unlinkSync(processPath);
     assert.ok(!fs.existsSync(processPath));
 
     await update(tmpDir);
 
     assert.ok(fs.existsSync(processPath), "process file should be installed on update");
+  });
+
+  it("migrates learnings.md and process.md from .dev-team/ to .claude/rules/", async () => {
+    await run(tmpDir, ["--all"]);
+
+    // Simulate old layout: move files back to .dev-team/
+    const rulesDir = path.join(tmpDir, ".claude", "rules");
+    const oldLearnings = path.join(tmpDir, ".dev-team", "learnings.md");
+    const oldProcess = path.join(tmpDir, ".dev-team", "process.md");
+    const newLearnings = path.join(rulesDir, "dev-team-learnings.md");
+    const newProcess = path.join(rulesDir, "dev-team-process.md");
+
+    fs.writeFileSync(oldLearnings, "# Learnings\nWe use PostgreSQL.");
+    fs.writeFileSync(oldProcess, "# Process\nWe use trunk-based.");
+    fs.unlinkSync(newLearnings);
+    fs.unlinkSync(newProcess);
+
+    await update(tmpDir);
+
+    // Files should be at new paths with original content
+    assert.ok(fs.existsSync(newLearnings), "learnings should be migrated to .claude/rules/");
+    assert.ok(fs.existsSync(newProcess), "process should be migrated to .claude/rules/");
+    const learnings = fs.readFileSync(newLearnings, "utf-8");
+    assert.ok(learnings.includes("PostgreSQL"), "learnings content should be preserved");
+    const process_ = fs.readFileSync(newProcess, "utf-8");
+    assert.ok(process_.includes("trunk-based"), "process content should be preserved");
+    // Old files should be gone
+    assert.ok(!fs.existsSync(oldLearnings), "old learnings should be removed");
+    assert.ok(!fs.existsSync(oldProcess), "old process should be removed");
   });
 
   it("updates all agents including those added after initial install", async () => {
@@ -422,8 +451,8 @@ describe("dev-team update", () => {
       "config should be in .dev-team/",
     );
     assert.ok(
-      fs.existsSync(path.join(tmpDir, ".dev-team", "learnings.md")),
-      "learnings should be in .dev-team/",
+      fs.existsSync(path.join(tmpDir, ".claude", "rules", "dev-team-learnings.md")),
+      "learnings should be in .claude/rules/",
     );
     assert.ok(
       fs.existsSync(path.join(tmpDir, ".dev-team", "agent-memory", "dev-team-voss", "MEMORY.md")),
@@ -437,8 +466,11 @@ describe("dev-team update", () => {
     );
     assert.ok(memory.includes("Custom learnings"), "memory content should be preserved");
 
-    // Learnings content preserved
-    const learnings = fs.readFileSync(path.join(tmpDir, ".dev-team", "learnings.md"), "utf-8");
+    // Learnings content preserved (migrated from .claude/ → .dev-team/ → .claude/rules/)
+    const learnings = fs.readFileSync(
+      path.join(tmpDir, ".claude", "rules", "dev-team-learnings.md"),
+      "utf-8",
+    );
     assert.ok(learnings.includes("PostgreSQL"), "learnings content should be preserved");
 
     // Settings.json hook paths rewritten
