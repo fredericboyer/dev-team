@@ -209,7 +209,7 @@ When the loop exits:
    - Report system improvement opportunities
 4. **Borges completion gate (HARD CHECK)**: Before emitting "Done", verify BOTH conditions:
    - (a) Borges has been spawned **and completed** (not just spawned — wait for completion)
-   - (b) Read `.dev-team/metrics.md` and verify it contains a new entry with the current task's issue number or branch name. A stale metrics file (no new entry) means Borges did not complete successfully.
+   - (b) Read `.dev-team/metrics.md` and verify it contains a new `Task: <issue or PR reference>` entry for the current task. A stale metrics file (no new entry) means Borges did not complete successfully.
 
    **If either check fails, the task is NOT complete.** If metrics.md has no new entry after Borges reports completion, flag this as a system failure and re-run Borges with explicit instruction to record metrics. Do not emit "Done" or report task completion until both conditions are satisfied. This is a gate, not advisory — skipping it means the task loop has not finished.
 5. **Memory formation gate**: After Borges runs, verify that each participating agent's MEMORY.md contains at least one new structured entry from this task. Empty agent memory after a completed task is a system failure — Borges prevents this by automating extraction.

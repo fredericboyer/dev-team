@@ -112,6 +112,6 @@ After the review report is delivered:
    - Update shared learnings in `.dev-team/learnings.md`
    - Check cross-agent coherence
 2. If Borges was not spawned, the review is INCOMPLETE.
-3. **Metrics completion gate**: Read `.dev-team/metrics.md` and verify it contains a new entry with the current review's PR number or branch name. A stale metrics file (no new entry) means Borges did not complete successfully. If metrics.md has no new entry after Borges reports completion, flag this as a system failure and re-run Borges with explicit instruction to record metrics.
+3. **Metrics completion gate**: Read `.dev-team/metrics.md` and verify that Borges has appended a new `Task: <reference>` entry for this review. The reference should match whatever identifier the review used (PR number, branch name, directory/pattern, or a label for uncommitted changes). A stale metrics file (no new entry) means Borges did not complete successfully. If metrics.md has no new entry after Borges reports completion, flag this as a system failure and re-run Borges with explicit instruction to record metrics for this review.
 4. **Memory formation gate**: After Borges runs, verify that each participating reviewer's MEMORY.md contains at least one new structured entry from this review.
 5. Include Borges's recommendations in the final report.

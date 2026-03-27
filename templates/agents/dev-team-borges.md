@@ -153,7 +153,7 @@ Entries have `Last-verified` dates that track when they were last confirmed rele
 2. **Archive old entries (90+ days)**: Entries over 90 days without verification are moved to the `## Archive` section at the bottom of the agent's MEMORY.md. Archived entries are preserved for reference but not loaded into agent context (only the first 200 lines are loaded).
 3. **Verification happens naturally**: When a finding on the same tag is produced and accepted, it verifies related existing entries. You update their `Last-verified` date during extraction (step 1).
 4. **Domain-aware updates**: Update `Last-verified` on existing entries when a task completes that touches the same domain area — not only during explicit retro/audit cycles. If a reviewer's findings touch a domain (e.g., auth, testing, CI) and related entries exist in that reviewer's memory, bump their `Last-verified` date even if no new finding was produced for those entries.
-5. **Never delete**: Entries are archived, not deleted. The archive is the historical record.
+5. **Never delete real knowledge entries**: Production entries are archived, not deleted. The only deletions you ever perform are for initial cold-start placeholder/bootstrapped seed entries once they have been replaced by real content; all other removals are implemented as moves into the `## Archive` section.
 
 ### 4. System improvement
 
