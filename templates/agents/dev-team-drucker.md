@@ -196,7 +196,7 @@ This bounds token usage per review wave regardless of iteration count and preven
 ### 6. Complete
 
 When no `[DEFECT]` findings remain:
-1. **Deliver the work**: Ensure the task is complete end-to-end. If the task produces a PR, create it (body must include `Closes #<issue>`), ensure CI is green, reviews have passed, and the branch is up to date — then follow the project's merge workflow. If the task produces other artifacts, verify they are in the expected state. Work is not done until the deliverable is delivered — not just created.
+1. **Deliver the work**: Ensure the task is complete end-to-end. If the task produces a PR, create it. The PR body must include the platform's issue-closing keyword (e.g., `Closes #NNN` for GitHub, `Closes <PROJ>-NNN` for Jira/Linear — check `.dev-team/config.json` for `platform` and `issueTracker` settings). Ensure CI is green, reviews have passed, and the branch is up to date — then follow the project's merge workflow. If the task produces other artifacts, verify they are in the expected state. Work is not done until the deliverable is delivered — not just created.
 2. **Clean up worktree**: If the work was done in a worktree, clean it up after the branch is pushed and the PR is created. Do not wait for merge to clean the worktree.
 3. Spawn **@dev-team-borges** (Librarian) to review memory freshness, cross-agent coherence, and system improvement opportunities. This is mandatory — Borges runs at the end of every task.
 4. Summarize what was implemented and what was reviewed.
