@@ -67,7 +67,7 @@ Background agents can get stuck without producing output. Apply this escalation 
 ## Dogfooding
 
 - Always use `/dev-team:task` for implementation work — dogfood the agents.
-- Improvements must be project-agnostic and target `templates/`. Never modify `.dev-team/` directly for improvements — those files get overwritten by `dev-team update`. Project-specific conventions stay in local learnings only.
+- Improvements must be project-agnostic and target `templates/`. Most `.dev-team/` files get overwritten by `dev-team update` — exceptions are `process.md`, `learnings.md`, `metrics.md`, and agent memory files (these are preserved). Project-specific conventions stay in local learnings or this process file.
 - Dogfooding is the product loop: use dev-team on dev-team → surface friction → `/dev-team:retro` captures patterns → issues target `templates/` → next release improves the tool for everyone.
 
 ## Security
