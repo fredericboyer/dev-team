@@ -54,4 +54,5 @@ What becomes easier or more difficult?
 | [027](027-turing-researcher-agent.md) | Turing pre-implementation researcher agent | accepted |
 | [028](028-rams-design-reviewer-agent.md) | Rams design system reviewer agent | accepted |
 | [029](029-stateless-commit-gates.md) | Stateless commit gates for adversarial review enforcement | accepted |
+| [031](031-extracted-process-file.md) | Extract process rules into separate file | accepted |
 | [032](032-memory-write-semantics.md) | Memory write semantics — append-only format vs mutable content | accepted |
