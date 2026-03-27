@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.1] - 2026-03-27
+
+### Fixed
+- `doctor.ts` hookFileMap missing "Agent teams guide" — caused false failure on `dev-team doctor` (#431).
+- `status.ts` checking wrong learnings path after v1.6.0 migration — now checks `.claude/rules/` first, falls back to `.dev-team/` (#432).
+
 ## [1.6.0] - 2026-03-26
 
 ### Added
