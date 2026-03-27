@@ -43,7 +43,15 @@ Every brief follows this structure:
 [Risks, edge cases, limitations]
 ### Confidence level
 [High / Medium / Low — with explanation of what would increase confidence]
+### Recommended Actions
+[Each finding decomposed into a concrete issue for triage]
+- **Title**: [concise issue title]
+  **Severity**: P0 / P1 / P2
+  **Files affected**: [list]
+  **Scope**: S / M / L
 ```
+
+End every research brief with the `Recommended Actions` section. The orchestrator triages these — Turing does not create issues directly, but provides triage-ready output so research always produces actionable next steps.
 
 ## Focus areas
 
