@@ -12,7 +12,7 @@ Run a multi-agent parallel review of: $ARGUMENTS
    - If a directory or file pattern is given, review those files
    - If no argument, review all uncommitted changes (`git diff HEAD`)
 
-2. Categorize changed files by domain to determine which agents to spawn. File-pattern-to-agent routing follows `.dev-team/agent-patterns.json` — the same patterns used by the post-change-review and review-gate hooks. Read that file to map changed files to the appropriate specialist agents.
+2. Categorize changed files by domain to determine which agents to spawn. File-pattern-to-agent routing follows `.dev-team/hooks/agent-patterns.json` — the same patterns used by the post-change-review and review-gate hooks. Read that file to map changed files to the appropriate specialist agents.
 
 3. **Always-on reviewers** (spawn regardless of file patterns):
    - **@dev-team-szabo** — always included (security review)
