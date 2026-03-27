@@ -25,7 +25,7 @@
 - **Tags**: concurrency, memory, multi-user, agent-status
 - **Outcome**: brief written to `.dev-team/research/257-multi-user-model-2026-03-26.md`
 - **Last-verified**: 2026-03-26
-- **Calibration**: Language bias lives entirely in the pattern/hook layer — agent definitions and skills are agnostic. When researching cross-language support, always test regex patterns against actual conventions (e.g., `_test.go` vs `.test.ts`, hooks lowercase paths before matching). See `docs/benchmark-non-jsts.md` for full findings and prioritized recommendations.
+- **Calibration**: Concurrency risks center on shared mutable state — agent-status files, learnings.md, and agent memory can be written by multiple agents simultaneously. When researching multi-user scenarios, focus on file-level locking, status file contention, and memory merge conflicts rather than application-level concurrency primitives.
 
 ### [2026-03-26] Non-JS/TS ecosystem benchmark (#325)
 - **Type**: RESEARCH [completed]

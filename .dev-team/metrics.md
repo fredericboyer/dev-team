@@ -35,6 +35,7 @@
   - [SUGGESTION] `release-workflows` token inconsistency (PR #278) → already fixed in #303
   - [SUGGESTION] Pre-commit gate wording inaccuracy across agent templates (PR #277, 6 files) → #323
   - [SUGGESTION] Promotion opportunities section undefined in report format (PR #279) → #283 (closed)
+  - **Status (2026-03-26):** All 7 deferred findings resolved (issues closed). 100% conversion rate.
 
 ### [2026-03-26] Task: v1.5.0 delivery (#353, #354, #355, #356, #357, #358, #359, #364, #368, #374, #351, #348, #335, #325)
 - **Agents**: implementing: Voss, Deming, Tufte, Turing; pre-assessment: Brooks; reviewers: Copilot

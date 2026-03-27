@@ -3,14 +3,6 @@
 
 ## Coverage Gaps Identified
 
-### [2026-03-25] Three-tier test structure using Node.js built-in test runner
-- **Type**: PATTERN [verified]
-- **Source**: package.json + project structure analysis
-- **Tags**: testing, coverage, test-runner
-- **Outcome**: verified
-- **Last-verified**: 2026-03-25
-- **Context**: Node.js `node --test` runner, no third-party test framework. Tests are pre-compiled JS (not TS). Three tiers: unit (individual modules), integration (install flows), scenarios (end-to-end project types).
-
 ### [2026-03-25] No coverage tool configured — coverage is not measured
 - **Type**: PATTERN [verified]
 - **Source**: package.json analysis
@@ -36,14 +28,6 @@
 - **Outcome**: verified
 - **Last-verified**: 2026-03-25
 - **Context**: Finding outcome vocabularies must stay aligned between skill definitions that produce outcomes (task, review) and agents that consume them (Borges). The task skill originally used "addressed/deferred/disputed" but Borges expects "accepted/overruled/fixed/ignored". Mismatches break automated memory extraction.
-
-### [2026-03-25] Routing table ownership patterns — .env to Voss, .env.example to Hamilton
-- **Type**: PATTERN [verified]
-- **Source**: v1.2.0 Branch C (#273) — review skill routing fix
-- **Tags**: routing, ownership, review-skill
-- **Outcome**: verified
-- **Last-verified**: 2026-03-25
-- **Context**: .env files route to Voss (app config/data). .env.example and .env.template route to Hamilton (infra scaffolding). CI workflows (.github/workflows) route to Hamilton. This distinction matters for correct reviewer assignment.
 
 ## Calibration Log
 <!-- Challenges accepted/overruled — tunes adversarial intensity over time -->
