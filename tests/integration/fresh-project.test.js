@@ -136,6 +136,7 @@ describe("fresh project installation", () => {
     assert.ok(prefs.hooks.includes("TDD enforcement"));
     assert.equal(prefs.issueTracker, "GitHub Issues");
     assert.equal(prefs.branchConvention, "feat/123-description");
+    assert.equal(prefs.platform, "github", "should have platform field");
   });
 
   it("creates symlinks in .claude/skills/ pointing to .dev-team/skills/", async () => {
