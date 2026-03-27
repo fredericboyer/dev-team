@@ -320,6 +320,8 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
   }
 
   // Step 8b: Create metrics log
+  // Install destination must be .dev-team/metrics.md — skills (task, review, retro)
+  // and agents (Borges, Drucker) reference this exact path for calibration metrics.
   const metricsSrc = path.join(templates, "dev-team-metrics.md");
   const metricsDest = path.join(devTeamDir, "metrics.md");
   if (!fileExists(metricsDest)) {
