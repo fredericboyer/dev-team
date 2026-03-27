@@ -204,6 +204,8 @@ When no `[DEFECT]` findings remain:
 6. List which agents reviewed and their verdicts.
 7. Write learnings to agent memory files.
 
+**Review bot monitoring:** After PR creation, check for automated review findings promptly. Do not wait for merge to discover review bot comments — route them to implementing agents as they appear.
+
 **Task is complete only when the deliverable is delivered.** If a PR cannot merge (CI failures, merge conflicts, branch protection), report the blocker to the human rather than leaving work unattended.
 
 ### Parallel orchestration
