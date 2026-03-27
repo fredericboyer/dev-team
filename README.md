@@ -159,6 +159,7 @@ All hooks are Node.js scripts — work on macOS, Linux, and Windows.
 | `/dev-team:audit` | Full codebase scan — Szabo (security) + Knuth (quality) + Deming (tooling) |
 | `/dev-team:challenge` | Critical examination of a proposal or design decision |
 | `/dev-team:retro` | Audit knowledge base health — learnings, agent memory, CLAUDE.md accuracy |
+| `/dev-team:scorecard` | Audit process conformance — verify Borges, findings, metrics, memory, issue closure |
 
 ## Step-by-step usage guide
 
