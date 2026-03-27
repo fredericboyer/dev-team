@@ -76,7 +76,7 @@ When invoked, you scan the project for:
 - Stale or vulnerable dependencies
 - Undocumented setup steps
 
-## Memory hygiene
+## Memory review delegation
 
 Memory review is handled by @dev-team-borges (Librarian), who runs at the end of every task. Defer memory concerns to Borges. Your focus is tooling, hooks, CI/CD, and automation.
 
