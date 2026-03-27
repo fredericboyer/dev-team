@@ -106,6 +106,8 @@ Track iterations in conversation context (no state files). For each iteration:
 8. If no `[DEFECT]` remains, output DONE to exit the loop.
 9. If max iterations reached without convergence, report remaining defects and exit.
 
+**Liveness invariant:** While any background agent is active, the orchestrator must not go more than 60 seconds without checking all active agents for progress. This applies regardless of what else the orchestrator is doing.
+
 The convergence check happens in conversation context: count iterations, check for `[DEFECT]` findings, and decide whether to continue or exit.
 
 **Integrate-as-you-go:** When orchestrating multiple issues, integrate completed work promptly rather than batching at the end. A stale working copy accumulates conflicts.
