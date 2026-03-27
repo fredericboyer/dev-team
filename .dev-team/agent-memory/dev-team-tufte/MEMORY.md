@@ -27,6 +27,22 @@
 - **Last-verified**: 2026-03-25
 - **Context**: Tufte is auto-flagged when .md/docs/README files change AND when significant implementation files change (src/, templates/agents/, templates/skills/, templates/hooks/, bin/, package.json). Dual trigger catches both direct doc edits and implementation changes that may require doc updates.
 
+### [2026-03-26] ADR README index can drift from actual ADR files on disk
+- **Type**: PATTERN [verified]
+- **Source**: ADR-032 authoring — ADR-029 existed on disk but was missing from README index
+- **Tags**: adr, doc-code-drift, index
+- **Outcome**: fixed
+- **Last-verified**: 2026-03-26
+- **Context**: The ADR README.md index table is manually maintained. When ADRs are added without updating the index, the table drifts. Check for unlisted ADR files when editing the index.
+
+### [2026-03-26] ADR format is stable: Context/Decision/Consequences with Date+Status header
+- **Type**: PATTERN [verified]
+- **Source**: ADR-029, ADR-026, ADR-012 format comparison
+- **Tags**: adr, format, documentation
+- **Outcome**: verified
+- **Last-verified**: 2026-03-26
+- **Context**: All ADRs use the Nygard lightweight format. No frontmatter, no YAML. Title line is `# ADR-NNN: Title`. Status line values: proposed, accepted, deprecated, superseded by ADR-NNN.
+
 ## Patterns to Watch For
 
 
