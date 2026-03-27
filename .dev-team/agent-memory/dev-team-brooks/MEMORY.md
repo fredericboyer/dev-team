@@ -16,7 +16,7 @@
 - **Source**: project structure analysis
 - **Tags**: architecture, modules, build
 - **Outcome**: verified
-- **Last-verified**: 2026-03-25
+- **Last-verified**: 2026-03-26
 - **Context**: src/ contains core modules (init, files, scan, create-agent, update, doctor, status, skill-recommendations, prompts). bin/dev-team.js is the CLI shim. templates/ contains agents, hooks, skills shipped to target projects. .dev-team/ is self-use only.
 
 ### [2026-03-25] Strict separation: templates/ (shipped) vs .dev-team/ (self-use)
@@ -24,7 +24,7 @@
 - **Source**: CLAUDE.md + package.json files array
 - **Tags**: architecture, boundaries
 - **Outcome**: verified
-- **Last-verified**: 2026-03-25
+- **Last-verified**: 2026-03-26
 - **Context**: templates/ contains what gets installed in target projects. .dev-team/ contains dev-team's own agents/hooks/skills for dogfooding. Improvements must target templates/ to ship in releases — never modify .dev-team/ for improvements (overwritten by update).
 
 ### [2026-03-25] Agent proliferation governed by ADR-022 — soft cap of 15
@@ -37,6 +37,21 @@
 
 ## Patterns to Watch For
 
+### [2026-03-26] Sequential chain merges must integrate-as-you-go
+- **Type**: PATTERN [verified]
+- **Source**: PR #375 (fix/374), Brooks pre-assessment finding
+- **Tags**: orchestration, merging, sequential-chains
+- **Outcome**: accepted
+- **Last-verified**: 2026-03-26
+- **Context**: When issues form a sequential chain (each depending on the previous), each PR must be merged before the next agent branches. Branching from stale main nullifies the sequencing. This was a process gap discovered during v1.5.0 delivery.
+
+### [2026-03-26] SHARED.md extraction pattern for agent definitions (ADR-030)
+- **Type**: DECISION [verified]
+- **Source**: PR #376 (feat/353), ADR-030
+- **Tags**: architecture, agents, shared-protocol
+- **Outcome**: accepted
+- **Last-verified**: 2026-03-26
+- **Context**: Common agent protocol sections extracted to SHARED.md to reduce duplication. ~16% reduction in total agent definition lines. Brooks should watch for drift between SHARED.md and individual agent overrides.
 
 ## Calibration Log
 <!-- Challenges accepted/overruled — tunes adversarial intensity over time -->

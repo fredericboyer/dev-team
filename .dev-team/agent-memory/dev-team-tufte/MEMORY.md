@@ -56,3 +56,19 @@
 - **Outcome**: fixed
 - **Last-verified**: 2026-03-26
 - **Context**: ADR-012 only specifies a freshness reminder, not append-only semantics. Append-only was an emergent practice. Be precise about what an ADR actually mandates vs what emerged organically.
+
+### [2026-03-26] ADR README index status vocabulary expanded
+- **Type**: SUGGESTION [fixed]
+- **Source**: PR #361 Copilot finding
+- **Tags**: adr, documentation, vocabulary
+- **Outcome**: fixed
+- **Last-verified**: 2026-03-26
+- **Context**: ADR README.md status table was missing "superseded" and "amended" statuses. Added during ADR-032 work. Keep status vocabulary in sync when new lifecycle states are introduced.
+
+### [2026-03-26] Three new ADRs added in v1.5.0: 030, 031, 032
+- **Type**: DECISION [verified]
+- **Source**: PRs #376, #373, #361
+- **Tags**: adr, documentation
+- **Outcome**: accepted
+- **Last-verified**: 2026-03-26
+- **Context**: ADR-030 (shared agent protocol/SHARED.md), ADR-031 (process rules extraction), ADR-032 (memory write semantics — archive vs remove, seed vs real entries). All accepted status.

@@ -40,3 +40,11 @@
 
 ## Calibration Log
 <!-- Challenges accepted/overruled — tunes adversarial intensity over time -->
+
+### [2026-03-26] Platform detection defaults to github — no fallback risk
+- **Type**: RISK [fixed]
+- **Source**: PR #371 (feat/358), Copilot finding
+- **Tags**: platform, config, security
+- **Outcome**: fixed
+- **Last-verified**: 2026-03-26
+- **Context**: Skills now detect platform from config (default: github). When platform field is absent (pre-v1.5 installs), skills default to github rather than failing. update.ts backfills the platform field on upgrade.

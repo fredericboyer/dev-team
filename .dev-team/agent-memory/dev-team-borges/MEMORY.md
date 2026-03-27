@@ -42,3 +42,19 @@
 
 ### [2026-03-25] v1.2.0 extraction — high defer rate on advisory findings
 - Knuth's 50% advisory defer rate (7/14) is not a quality problem — deferred items were legitimate follow-ups outside the PR scope. But it signals that `/dev-team:retro` should track defer-to-issue conversion (are deferred findings actually becoming issues?).
+
+### [2026-03-26] v1.5.0 extraction — 18 findings, 100% acceptance, 1 round to convergence
+- **Type**: MILESTONE [verified]
+- **Source**: v1.5.0 task loop (14 issues, 15 PRs)
+- **Tags**: metrics, calibration, extraction
+- **Outcome**: verified
+- **Last-verified**: 2026-03-26
+- **Context**: Largest task batch to date. 8 DEFECTs + 10 advisory, all fixed in first pass. Copilot was the primary reviewer (no in-team agents reviewing). Brooks provided pre-assessment. Key process learnings: merge-as-you-go for sequential chains, Copilot comments must be monitored during delivery not just at merge time. 3 new ADRs, SHARED.md extraction, process.md extraction, platform detection, scorecard skill added. Cleaned up 2 bootstrapped entries (Turing "first install", Rams "first install").
+
+### [2026-03-26] Deming pattern duplication entry superseded
+- **Type**: COHERENCE [resolved]
+- **Source**: cross-agent audit
+- **Tags**: coherence, deming, patterns
+- **Outcome**: resolved
+- **Last-verified**: 2026-03-26
+- **Context**: Deming had a RISK entry about review-gate pattern duplication. This was resolved in PR #344 (agent-patterns.json extraction). Updated entry from [acknowledged] to [resolved].
