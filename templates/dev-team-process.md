@@ -18,12 +18,27 @@ Use descriptive branch names that reference the issue being worked on.
 ## Integration
 <!-- How are changes integrated? PRs? Direct commits? Review requirements? -->
 
-All changes via pull request. Link PRs to issues for auto-close on merge.
+All changes via pull request. Link the deliverable to the originating issue so it auto-closes on merge. Include the issue-closing keyword appropriate for your platform (e.g., `Closes #NNN` for GitHub, `Closes <PROJ>-NNN` for Jira/Linear).
+
+Ensure CI is green and reviews have passed before merging. If the project provides merge automation (a `/merge` skill or similar), use it; otherwise, confirm the deliverable is in a mergeable state and report readiness.
 
 ## Release
 <!-- How are releases cut? Manual or automated? Who approves? -->
 
-The release engineer (Conway) handles version bumps, changelogs, and release PRs.
+The release engineer (Conway) handles release readiness validation, version bumps, changelogs, and release deliverables.
+
+### Changelog format
+
+Use a structured changelog grouped by: Added, Changed, Deprecated, Removed, Fixed, Security. Within each category, order entries by theme rather than commit order. Link entries to issues or PRs where available.
+
+### Release steps
+
+1. Inventory changes since the last release — commits merged, breaking changes, dependency updates.
+2. Draft the changelog with all user-facing changes documented.
+3. Bump the version in the project's manifest file(s) according to semver.
+4. Create the release deliverable (PR, tag, or equivalent) and link it to the milestone.
+5. Verify CI passes on the release branch.
+6. Close the associated milestone or iteration if one exists.
 
 ## Orchestration
 
