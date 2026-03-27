@@ -45,6 +45,7 @@ Do NOT skip this. Do NOT treat hook output as optional. If you believe a review 
 - `/dev-team:review` — orchestrated multi-agent parallel review of changes
 - `/dev-team:audit` — full codebase security + quality + tooling audit
 - `/dev-team:retro` — audit knowledge base health (learnings, agent memory, CLAUDE.md)
+- `/dev-team:scorecard` — audit process conformance for a completed task
 
 ### Project-specific customization
 
