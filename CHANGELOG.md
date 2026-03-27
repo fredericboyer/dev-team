@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.1] - 2026-03-27
+
+### Fixed
+- Guard `process.md` from overwrite on re-init — same `fileExists` protection as `learnings.md` and `metrics.md` (#397).
+- Install `process.md` during `dev-team update` for pre-v1.5.0 projects.
+- Clarify which `.dev-team/` files are preserved vs overwritten.
+
+### Changed
+- Process template now includes Versioning, Branching, Integration, and Release placeholder sections for project customization.
+- Deduplicated settings.json hook entries (from v1.5.0 update accumulation bug).
+
 ## [1.5.0] - 2026-03-26
 
 ### Added
