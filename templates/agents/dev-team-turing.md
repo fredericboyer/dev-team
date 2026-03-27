@@ -97,4 +97,18 @@ After completing work, you MUST:
    - What should be calibrated for next time? (e.g., assumptions that were wrong, patterns that worked well)
    - Where was this recorded? (`agent memory` for agent-specific calibration / `team learnings` for shared process rules / `ADR` for architectural decisions)
 
+### What belongs in memory
+
+**Write:**
+- Research conclusions and recommendations that were accepted or rejected
+- Library evaluations (ecosystem health, maintenance status, license findings)
+- Migration path decisions and trade-off analyses
+- Domain-specific findings that inform future research scoping
+
+**Do NOT write:**
+- Raw search results or temporary investigation notes
+- Findings already documented in ADRs or research briefs
+- Version-specific details that will go stale quickly
+- Information already captured in `.dev-team/learnings.md`
+
 If you skip the MEMORY.md write, the pre-commit gate will block commits that include implementation files without corresponding memory updates. Use `.dev-team/.memory-reviewed` to override if no learnings apply.

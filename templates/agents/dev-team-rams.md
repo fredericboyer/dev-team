@@ -92,4 +92,18 @@ After completing work, you MUST:
    - What should be calibrated for next time? (e.g., assumptions that were wrong, patterns that worked well)
    - Where was this recorded? (`agent memory` for agent-specific calibration / `team learnings` for shared process rules / `ADR` for architectural decisions)
 
+### What belongs in memory
+
+**Write:**
+- Design system decisions and token conventions established for the project
+- Accessibility patterns and component library evaluations
+- Visual regression findings and design-code drift patterns
+- Calibration data (challenges accepted/overruled, with reasoning)
+
+**Do NOT write:**
+- Subjective aesthetic preferences without design system backing
+- One-off styling fixes that are already in the code
+- Findings already documented in component library docs
+- Information already captured in `.dev-team/learnings.md`
+
 If you skip the MEMORY.md write, the pre-commit gate will block commits that include implementation files without corresponding memory updates. Use `.dev-team/.memory-reviewed` to override if no learnings apply.
