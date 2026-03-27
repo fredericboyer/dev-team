@@ -9,7 +9,7 @@ Each ADR follows the lightweight format inspired by Michael Nygard:
 ```
 # ADR-NNN: Title
 Date: YYYY-MM-DD
-Status: proposed | accepted | deprecated | superseded by ADR-NNN
+Status: proposed | accepted | deprecated | superseded by ADR-NNN | amended by ADR-NNN
 
 ## Context
 What is the issue motivating this decision?
@@ -53,3 +53,5 @@ What becomes easier or more difficult?
 | [026](026-agent-progress-reporting.md) | Agent progress reporting and heartbeat protocol | accepted |
 | [027](027-turing-researcher-agent.md) | Turing pre-implementation researcher agent | accepted |
 | [028](028-rams-design-reviewer-agent.md) | Rams design system reviewer agent | accepted |
+| [029](029-stateless-commit-gates.md) | Stateless commit gates for adversarial review enforcement | accepted |
+| [032](032-memory-write-semantics.md) | Memory write semantics — append-only format vs mutable content | accepted |
