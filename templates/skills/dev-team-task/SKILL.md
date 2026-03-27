@@ -147,6 +147,8 @@ After all PRs are created, merge each via the project's merge skill (e.g., `/mer
 
 **Integrate-as-you-go:** Integrate completed work promptly as agents finish. Do not batch all integrations at the end of a session. Each integration makes the next agent's baseline current, reducing rework.
 
+**Integrate-as-you-go:** Integrate completed work promptly as agents finish. Do not batch all integrations at the end of a session. Each integration makes the next agent's baseline current, reducing rework.
+
 ### Convergence criteria
 Parallel mode is complete when:
 1. All branches have zero `[DEFECT]` findings, OR the per-branch iteration limit (default: 10) is reached
