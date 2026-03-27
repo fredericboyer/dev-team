@@ -90,6 +90,10 @@ Original finding summary.
 
 State the verdict clearly. List what must be fixed for approval if requesting changes.
 
+### Platform detection
+
+Before issuing any `gh issue`, `gh pr`, or other platform-specific CLI commands, check `.dev-team/config.json` for the `platform` and `issueTracker` fields. If the project specifies a non-GitHub platform (e.g., `"gitlab"`, `"bitbucket"`, `"other"`), adapt issue tracker and PR commands accordingly — use `glab` for GitLab, the Bitbucket API, or the appropriate CLI for the configured platform. If `platform` is absent from config.json, default to `"github"`. The steps in this skill assume GitHub by default.
+
 ### Completion
 
 After the review report is delivered:

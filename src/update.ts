@@ -209,6 +209,7 @@ interface Preferences {
   hooks: string[];
   issueTracker: string;
   branchConvention: string;
+  platform?: string;
   agentTeams?: boolean;
 }
 
@@ -646,6 +647,11 @@ export async function update(targetDir: string): Promise<void> {
   const metricsDest = path.join(devTeamDir, "metrics.md");
   if (!fileExists(metricsDest) && fileExists(metricsSrc)) {
     copyFile(metricsSrc, metricsDest);
+  }
+
+  // Backfill platform field for existing installs (added in v1.5.0)
+  if (!prefs.platform) {
+    prefs.platform = "github";
   }
 
   // Clean up ghost entries (labels from removed hooks/agents)
