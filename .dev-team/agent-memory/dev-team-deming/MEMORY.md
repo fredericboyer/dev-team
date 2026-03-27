@@ -91,5 +91,37 @@
 - **Last-verified**: 2026-03-26
 - **Context**: Hooks replaced JS/TS-specific patterns with language-agnostic structural proxies (nesting depth, control flow density). Test file detection expanded to Go/Python/Java conventions. Complexity scoring no longer keyword-based. Key principle: hooks handle detection and gating, agents handle language-specific interpretation.
 
+### [2026-03-26] Hook code duplication: cachedGitDiff and fallback patterns
+- **Type**: RISK [open]
+- **Source**: Codebase audit (D1/D2), Issues #436, #437
+- **Tags**: hooks, duplication, maintainability, dx
+- **Outcome**: accepted — issues created for v1.7.0
+- **Last-verified**: 2026-03-26
+- **Context**: cachedGitDiff is copy-pasted across multiple hooks — extract to shared module (#436). Fallback pattern arrays in hooks duplicate agent-patterns.json — remove or extract (#437). Supersedes the earlier pattern duplication concern (resolved for review-gate in PR #344) by identifying remaining duplication in other hooks.
+
+### [2026-03-26] CI gap: no npm audit step
+- **Type**: SUGGESTION [open]
+- **Source**: Codebase audit, Issue #440
+- **Tags**: ci, security, npm, dx
+- **Outcome**: accepted — issue created for v1.7.0
+- **Last-verified**: 2026-03-26
+- **Context**: CI runs build/test/lint/validate but does not run npm audit. Adding an audit step would catch known vulnerabilities in dependencies before release.
+
+### [2026-03-26] review-gate.test.js excluded from test script
+- **Type**: SUGGESTION [open]
+- **Source**: Codebase audit, Issue #435
+- **Tags**: testing, hooks, dx
+- **Outcome**: accepted — issue created for v1.7.0
+- **Last-verified**: 2026-03-26
+- **Context**: review-gate.test.js exists but is not included in the npm test glob. Tests are not running in CI.
+
 ## Calibration Log
 <!-- Challenges accepted/overruled — tunes adversarial intensity over time -->
+
+### [2026-03-26] Audit baseline: 14 findings (0 DEFECT, 1 RISK, 1 QUESTION, 12 SUGGESTION)
+- **Type**: CALIBRATION
+- **Source**: Full codebase audit 2026-03-26
+- **Tags**: audit, calibration, baseline
+- **Outcome**: all accepted — 14 issues created
+- **Last-verified**: 2026-03-26
+- **Context**: First full tooling audit. Zero DEFECTs — tooling infrastructure is solid. High SUGGESTION count (12) reflects maturity — the codebase is past critical issues, now in refinement phase. Primary themes: hook code consolidation (D1/D2), CI hardening (npm audit), test coverage expansion, and migration completeness (cross-validates Knuth K1/K3).
