@@ -72,3 +72,19 @@
 - **Outcome**: accepted
 - **Last-verified**: 2026-03-26
 - **Context**: ADR-030 (shared agent protocol/SHARED.md), ADR-031 (process rules extraction), ADR-032 (memory write semantics — archive vs remove, seed vs real entries). All accepted status.
+
+### [2026-03-26] Two new ADRs in v1.6.0: 033 (rules-based context), 034 (language delegation)
+- **Type**: DECISION [verified]
+- **Source**: PRs #425, #419
+- **Tags**: adr, documentation, rules, language-neutral
+- **Outcome**: accepted
+- **Last-verified**: 2026-03-26
+- **Context**: ADR-033 moves shared context to `.claude/rules/` for automatic agent loading. ADR-034 delegates language-specific knowledge from hooks to agents. Both accepted. ADR README index should be checked for these entries.
+
+### [2026-03-26] Design principles section added to CLAUDE.md template
+- **Type**: DECISION [verified]
+- **Source**: PRs #408, #428
+- **Tags**: documentation, design-principles, templates
+- **Outcome**: accepted
+- **Last-verified**: 2026-03-26
+- **Context**: Seven design principles codified: workflow-agnostic, platform-neutral, language-neutral, discoverable-only, process-driven, rules for shared context, skill invocation control. These are the product's template design contract — all future template changes must comply.

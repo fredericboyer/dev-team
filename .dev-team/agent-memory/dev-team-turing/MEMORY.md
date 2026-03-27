@@ -34,3 +34,19 @@
 - **Outcome**: benchmark written to `docs/benchmarks/benchmark-non-jsts.md`
 - **Last-verified**: 2026-03-26
 - **Calibration**: Language bias lives entirely in the pattern/hook layer — agent definitions and skills are agnostic. When researching cross-language support, always test regex patterns against actual conventions (e.g., `_test.go` vs `.test.ts`, hooks lowercase paths before matching). See `docs/benchmarks/benchmark-non-jsts.md` for full findings and prioritized recommendations.
+
+### [2026-03-26] Rules research (#406) — verify claims against official docs, not third-party
+- **Type**: CALIBRATION [verified]
+- **Source**: Issue #406, Turing research
+- **Tags**: research, verification, rules, official-docs
+- **Outcome**: corrected
+- **Last-verified**: 2026-03-26
+- **Context**: Initial research on `.claude/rules/` incorrectly stated subagents don't inherit rules. User corrected with official Claude Code documentation confirming rules ARE inherited by subagents and agent teams. Lesson: always verify behavioral claims against official platform documentation, not third-party blog posts or inferred behavior. This correction shaped ADR-033.
+
+### [2026-03-26] Research-first approach validated in v1.6.0
+- **Type**: PATTERN [verified]
+- **Source**: v1.6.0 session (#406, #407 research briefs)
+- **Tags**: research, orchestration, process
+- **Outcome**: accepted
+- **Last-verified**: 2026-03-26
+- **Context**: Two research briefs (#406 rules-based context, #407 AGENTS.md verdict) preceded 14 implementation issues. Research findings directly shaped ADR-033, ADR-034, and the design principles. Process confirmation: research-first reduces rework for architectural changes.

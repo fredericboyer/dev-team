@@ -37,5 +37,13 @@
 - **Last-verified**: 2026-03-26
 - **Context**: Shared context files (learnings.md, process.md) moved from .dev-team/ to .claude/rules/ for automatic agent context loading. update.ts migration uses fs.renameSync for atomic move from old to new path. init.ts creates .claude/rules/ directory via copyFile (which mkdirSync's parent). Key pattern: migration checks old path exists AND new path missing before moving — prevents data loss if both exist.
 
+### [2026-03-26] "AGENTS.md Verdict" — discoverable knowledge doesn't belong in templates
+- **Type**: DECISION [verified]
+- **Source**: Issue #405, v1.6.0 design principles
+- **Tags**: architecture, templates, discoverability
+- **Outcome**: accepted
+- **Last-verified**: 2026-03-26
+- **Context**: User insight that reshaped product direction: "if the agent can discover it from code, delete it." Templates should only contain what agents can't discover — tool preferences, legacy traps, process decisions. This filters what goes into agent definitions, hooks, and shared context.
+
 ## Calibration Log
 <!-- Challenges accepted/overruled — tunes adversarial intensity over time -->

@@ -75,5 +75,21 @@
 - **Last-verified**: 2026-03-26
 - **Context**: process.md joins learnings.md and metrics.md as files that are never overwritten by `dev-team update`. update.ts only installs process.md if missing (for pre-v1.5.0 projects). The contradiction between "Never modify .dev-team/" and process.md being user-editable was resolved by clarifying which files are preserved vs overwritten.
 
+### [2026-03-26] Skill invocation control: orchestration vs advisory skills
+- **Type**: DECISION [verified]
+- **Source**: Issue #409, PR #414
+- **Tags**: skills, invocation, dx, enforcement
+- **Outcome**: accepted
+- **Last-verified**: 2026-03-26
+- **Context**: Orchestration skills (task, review, audit, retro) get `disable-model-invocation: true` to prevent accidental autonomous firing. Advisory/read-only skills (scorecard, challenge) can be autonomous. This is a design principle in CLAUDE.md.
+
+### [2026-03-26] Language delegation: hooks detect ecosystem, agents interpret
+- **Type**: DECISION [verified]
+- **Source**: Issue #385, PR #419, ADR-034
+- **Tags**: hooks, language-neutral, delegation
+- **Outcome**: accepted
+- **Last-verified**: 2026-03-26
+- **Context**: Hooks replaced JS/TS-specific patterns with language-agnostic structural proxies (nesting depth, control flow density). Test file detection expanded to Go/Python/Java conventions. Complexity scoring no longer keyword-based. Key principle: hooks handle detection and gating, agents handle language-specific interpretation.
+
 ## Calibration Log
 <!-- Challenges accepted/overruled — tunes adversarial intensity over time -->

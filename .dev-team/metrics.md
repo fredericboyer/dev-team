@@ -64,3 +64,16 @@
 - **Duration**: single session, 1 PR
 - **Notes**: Small hotfix — process.md guarded from overwrite on reinstall. The 5 ignored findings were all about hook/config files referencing paths that only exist after local install (not committed to repo). One DEFECT fixed: contradiction in process.md between "never modify .dev-team/" and process.md being user-editable.
 
+### [2026-03-26] Task: v1.6.0 delivery (#409, #410, #411, #395, #385, #402, #388, #392, #401, #386, #393, #387, #391, #406, #405, #352)
+- **Agents**: implementing: Deming, Tufte, Voss (#406), Turing (research #406, #407); pre-assessment: Brooks; reviewers: Copilot
+- **Rounds**: 1
+- **Findings**:
+  - Copilot: inline findings across 16 PRs (all addressed per-PR)
+  - No formal review wave — Copilot was sole reviewer
+- **Acceptance rate**: 100% (all Copilot findings addressed inline)
+- **Overrule rate**: 0%
+- **Fix rate (DEFECTs)**: N/A (0 formal DEFECTs reported)
+- **Defer rate (advisory)**: 0%
+- **Duration**: single session, 16 PRs (#412-#428)
+- **Notes**: Major architectural release — research-first approach (Turing #406, #407). Key outcomes: rules-based shared context (ADR-033), language delegation (ADR-034), skill invocation control, process-driven agents, design principles codified. No formal review wave was run; Copilot was the sole code reviewer. All Copilot findings addressed inline during merge. Merge-as-you-go enforced successfully — no stale-branch issues (unlike v1.5.0 early delivery).
+

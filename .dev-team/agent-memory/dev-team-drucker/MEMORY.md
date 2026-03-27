@@ -43,6 +43,14 @@
 - **Last-verified**: 2026-03-26
 - **Context**: When multiple issues form a dependency chain, each PR must be merged before the next agent starts. Batching merges at the end causes agents to branch from stale main, nullifying the sequencing. Drucker must integrate-as-you-go, not batch-at-end.
 
+### [2026-03-26] Research-first orchestration for architectural changes
+- **Type**: PATTERN [verified]
+- **Source**: v1.6.0 session (#406, #407 research, then 14 implementation issues)
+- **Tags**: orchestration, research, process
+- **Outcome**: accepted
+- **Last-verified**: 2026-03-26
+- **Context**: For releases with architectural impact, spawn Turing research briefs before implementation. v1.6.0 used two briefs (#406 rules, #407 AGENTS.md verdict) that directly shaped ADR-033, ADR-034, and 7 design principles. Research findings reduced rework vs implementing-then-discovering issues.
+
 ## Conflict Resolution Log
 
 

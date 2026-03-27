@@ -53,5 +53,21 @@
 - **Last-verified**: 2026-03-26
 - **Context**: Common agent protocol sections extracted to SHARED.md to reduce duplication. ~16% reduction in total agent definition lines. Brooks should watch for drift between SHARED.md and individual agent overrides.
 
+### [2026-03-26] Process-driven agents: capabilities in definitions, steps in process.md
+- **Type**: DECISION [verified]
+- **Source**: Issue #405, v1.6.0 design principles
+- **Tags**: architecture, agents, process, separation-of-concerns
+- **Outcome**: accepted
+- **Last-verified**: 2026-03-26
+- **Context**: Agent definitions describe what the agent can do (capabilities), not how a specific project uses them (workflow steps). Steps live in `.claude/rules/dev-team-process.md` which each project customizes. This separates stable agent identity from variable project workflow. Brooks should flag agent definitions that embed workflow steps.
+
+### [2026-03-26] Two new ADRs in v1.6.0: 033 (rules-based context), 034 (language delegation)
+- **Type**: DECISION [verified]
+- **Source**: PRs #425, #419
+- **Tags**: architecture, adr
+- **Outcome**: accepted
+- **Last-verified**: 2026-03-26
+- **Context**: ADR-033 uses `.claude/rules/` for automatic shared context loading (replaces explicit read instructions). ADR-034 delegates language-specific knowledge from hooks to agents (hooks detect, agents interpret). Both support the "discoverable-only" and "language-neutral" design principles.
+
 ## Calibration Log
 <!-- Challenges accepted/overruled — tunes adversarial intensity over time -->
