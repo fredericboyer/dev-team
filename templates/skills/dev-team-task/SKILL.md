@@ -1,6 +1,7 @@
 ---
 name: dev-team:task
 description: Start an iterative task loop with adversarial review gates. Use when the user wants a task implemented with automatic quality convergence -- the loop continues until no [DEFECT] challenges remain or max iterations are reached.
+disable-model-invocation: true
 ---
 
 Start a task loop for: $ARGUMENTS

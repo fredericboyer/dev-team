@@ -1,6 +1,7 @@
 ---
 name: dev-team:retro
 description: Audit the health of your project's dev-team knowledge base — learnings, agent memory, and CLAUDE.md. Finds stale entries, contradictions, enforcement gaps, and promotion opportunities. Use periodically or after major changes.
+disable-model-invocation: true
 ---
 
 Assess the health of the dev-team knowledge base for: $ARGUMENTS
@@ -22,6 +23,7 @@ This skill audits **only update-safe files** — files that survive `dev-team up
    - All `.dev-team/agent-memory/*/MEMORY.md` files (use Glob to discover them)
    - The project's `CLAUDE.md` (root of repo)
    - `.dev-team/config.json` (to know which agents are installed)
+   - `.dev-team/process.md` (orchestration protocol and workflow rules)
    - `.dev-team/metrics.md` (if it exists — calibration metrics log)
 
 2. If `$ARGUMENTS` specifies a focus area (e.g., "learnings", "memory", "claude.md"), scope the audit to that area only. Otherwise, audit all three.
