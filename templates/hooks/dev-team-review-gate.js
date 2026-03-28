@@ -25,9 +25,9 @@
 const { createHash } = require("crypto");
 const { execFileSync } = require("child_process");
 const fs = require("fs");
-const os = require("os");
 const path = require("path");
 
+const { cachedGitDiff } = require("./lib/git-cache");
 let input = {};
 try {
   input = JSON.parse(process.argv[2] || "{}");
@@ -54,177 +54,23 @@ if (/--skip-review\b/.test(argsBeforeMessage)) {
 }
 
 // ─── Pattern matching (shared with dev-team-post-change-review.js) ───────────
-// Patterns are loaded from agent-patterns.json. Falls back to hardcoded
-// patterns if the JSON file is missing or malformed.
+// Patterns loaded from agent-patterns.json via the shared lib module.
 
-/**
- * Compile a pattern entry from the JSON into a RegExp.
- * Entries are either a string (no flags) or [source, flags].
- */
-function compilePattern(entry) {
-  if (Array.isArray(entry)) {
-    return new RegExp(entry[0], entry[1] || "");
-  }
-  return new RegExp(entry);
-}
+const { loadPatterns, getPatterns: gp, getSinglePattern: gsp } = require("./lib/agent-patterns");
 
-function loadPatternsFromJSON() {
-  try {
-    const jsonPath = path.join(__dirname, "agent-patterns.json");
-    const data = JSON.parse(fs.readFileSync(jsonPath, "utf-8"));
-    const result = {};
-    for (const [key, value] of Object.entries(data)) {
-      if (value.patterns) {
-        result[key] = { compiled: value.patterns.map(compilePattern) };
-      } else if (value.pattern) {
-        result[key] = { compiled: compilePattern(value.pattern) };
-      }
-    }
-    return result;
-  } catch {
-    return null;
-  }
-}
+const loaded = loadPatterns();
 
-// Hardcoded fallback patterns (kept in sync with agent-patterns.json)
-const FALLBACK_SECURITY_PATTERNS = [
-  /auth/,
-  /login/,
-  /password/,
-  /token/,
-  /session/,
-  /crypto/,
-  /encrypt/,
-  /decrypt/,
-  /secret/,
-  /permission/,
-  /rbac/,
-  /acl/,
-  /oauth/,
-  /jwt/,
-  /cors/,
-  /csrf/,
-  /sanitiz/,
-  /escap/,
-];
-const FALLBACK_API_PATTERNS = [
-  /\/api\//,
-  /\/routes?\//,
-  /\/endpoints?\//,
-  /schema/,
-  /\.graphql$/,
-  /\.proto$/,
-  /openapi/,
-  /swagger/,
-];
-const FALLBACK_FRONTEND_PATTERNS = [
-  /\/components?\//,
-  /\/pages?\//,
-  /\/views?\//,
-  /\/layouts?\//,
-  /\/ui\//,
-  /\.(css|scss|sass|less|styl)$/,
-  /\.(jsx|tsx)$/,
-  /tailwind/,
-  /styled/,
-];
-const FALLBACK_APP_CONFIG_PATTERNS = [/\.env/, /config/, /migration/, /database/, /\.sql$/];
-const FALLBACK_TOOLING_PATTERNS = [
-  /eslint/,
-  /prettier/,
-  /\.github\/workflows/,
-  /\.claude\//,
-  /tsconfig/,
-  /jest\.config/,
-  /vitest/,
-  /package\.json$/,
-  /\.husky/,
-];
-const FALLBACK_DOC_PATTERNS = [
-  /readme/,
-  /changelog/,
-  /\.md$/,
-  /\.mdx$/,
-  /\/docs?\//,
-  /api-doc/,
-  /jsdoc/,
-  /typedoc/,
-];
-const FALLBACK_ARCH_PATTERNS = [
-  /\/adr\//,
-  /architecture/,
-  /\/modules?\//,
-  /\/layers?\//,
-  /\/core\//,
-  /\/domain\//,
-  /\/shared\//,
-  /\/lib\//,
-  /\/plugins?\//,
-  /\/middleware\//,
-  /tsconfig/,
-  /webpack|vite|rollup|esbuild/,
-];
-const FALLBACK_RELEASE_PATTERNS = [
-  /package\.json$/,
-  /pyproject\.toml$/,
-  /cargo\.toml$/i,
-  /changelog/i,
-  /version/,
-  /\.github\/workflows\/.*release/,
-  /\.github\/workflows\/.*publish/,
-  /\.github\/workflows\/.*deploy/,
-  /\.npmrc$/,
-  /\.npmignore$/,
-  /release\.config/,
-  /lerna\.json$/,
-];
-const FALLBACK_OPS_PATTERNS = [
-  /dockerfile/,
-  /docker-compose/,
-  /\.dockerignore$/,
-  /\.github\/workflows\//,
-  /\.gitlab-ci/,
-  /jenkinsfile/i,
-  /terraform\//,
-  /pulumi\//,
-  /cloudformation\//,
-  /helm\//,
-  /k8s\//,
-  /\.tf$/,
-  /\.tfvars$/,
-  /health[-_]?check/,
-  /(?:^|\/)(?:monitoring|prometheus|grafana|datadog)\.(?:ya?ml|json|conf|config|toml)$/,
-  /(?:^|\/)(?:logging|logs)\.(?:ya?ml|json|conf|config|toml)$/,
-  /(?:^|\/)(?:alerting|alerts?)\.(?:ya?ml|json|conf|config|toml)$/,
-  /(?:^|\/)(?:observability|otel|opentelemetry)\.(?:ya?ml|json|conf|config|toml)$/,
-  /(?<!\/src)\/(?:monitoring|logging|alerting|observability)\//,
-  /\.env\.example$/,
-  /\.env\.template$/,
-  /env\.template$/,
-];
-const FALLBACK_CODE_FILE = /\.(js|ts|jsx|tsx|py|rb|go|java|rs|c|cpp|cs)$/;
-const FALLBACK_TEST_FILE = /\.(test|spec)\.|_test\.|__tests__|\/tests?\//;
-
-const loaded = loadPatternsFromJSON();
-
-function getPatterns(key) {
-  return loaded && loaded[key] ? loaded[key].compiled : null;
-}
-function getSinglePattern(key) {
-  return loaded && loaded[key] ? loaded[key].compiled : null;
-}
-
-const SECURITY_PATTERNS = getPatterns("security") || FALLBACK_SECURITY_PATTERNS;
-const API_PATTERNS = getPatterns("api") || FALLBACK_API_PATTERNS;
-const FRONTEND_PATTERNS = getPatterns("frontend") || FALLBACK_FRONTEND_PATTERNS;
-const APP_CONFIG_PATTERNS = getPatterns("appConfig") || FALLBACK_APP_CONFIG_PATTERNS;
-const TOOLING_PATTERNS = getPatterns("tooling") || FALLBACK_TOOLING_PATTERNS;
-const DOC_PATTERNS = getPatterns("docs") || FALLBACK_DOC_PATTERNS;
-const ARCH_PATTERNS = getPatterns("architecture") || FALLBACK_ARCH_PATTERNS;
-const RELEASE_PATTERNS = getPatterns("release") || FALLBACK_RELEASE_PATTERNS;
-const OPS_PATTERNS = getPatterns("operations") || FALLBACK_OPS_PATTERNS;
-const codeFilePattern = getSinglePattern("codeFile") || FALLBACK_CODE_FILE;
-const testFilePattern = getSinglePattern("testFile") || FALLBACK_TEST_FILE;
+const SECURITY_PATTERNS = gp(loaded, "security");
+const API_PATTERNS = gp(loaded, "api");
+const FRONTEND_PATTERNS = gp(loaded, "frontend");
+const APP_CONFIG_PATTERNS = gp(loaded, "appConfig");
+const TOOLING_PATTERNS = gp(loaded, "tooling");
+const DOC_PATTERNS = gp(loaded, "docs");
+const ARCH_PATTERNS = gp(loaded, "architecture");
+const RELEASE_PATTERNS = gp(loaded, "release");
+const OPS_PATTERNS = gp(loaded, "operations");
+const codeFilePattern = gsp(loaded, "codeFile");
+const testFilePattern = gsp(loaded, "testFile");
 
 /**
  * Derive which agents are required for a given file path.
@@ -293,45 +139,6 @@ function isGatedFile(filePath) {
   const isTestFile = testFilePattern.test(fullPath);
   // Gate implementation code files, not test files or non-code files
   return isCodeFile && !isTestFile;
-}
-
-// ─── Cached git diff (shared pattern with pre-commit-gate.js) ───────────────
-
-function cachedGitDiff(args, timeoutMs) {
-  const cwdHash = createHash("md5").update(process.cwd()).digest("hex").slice(0, 8);
-  const argsKey = args.join("-").replace(/[^a-zA-Z0-9-]/g, "");
-  const cacheFile = path.join(os.tmpdir(), `dev-team-git-cache-${cwdHash}-${argsKey}.txt`);
-  let skipWrite = false;
-  try {
-    const stat = fs.lstatSync(cacheFile);
-    if (stat.isSymbolicLink()) {
-      try {
-        fs.unlinkSync(cacheFile);
-      } catch {
-        skipWrite = true;
-      }
-    } else if (Date.now() - stat.mtimeMs < 5000) {
-      return fs.readFileSync(cacheFile, "utf-8");
-    }
-  } catch {
-    // No cache or stale
-  }
-  const result = execFileSync("git", args, { encoding: "utf-8", timeout: timeoutMs });
-  if (!skipWrite) {
-    try {
-      const tmpFile = `${cacheFile}.${process.pid}.tmp`;
-      fs.writeFileSync(tmpFile, result, { mode: 0o600 });
-      fs.renameSync(tmpFile, cacheFile);
-      try {
-        fs.chmodSync(cacheFile, 0o600);
-      } catch {
-        /* best effort */
-      }
-    } catch {
-      // Best effort
-    }
-  }
-  return result;
 }
 
 /**

@@ -9,6 +9,7 @@ import {
   mergeSettings,
   mergeClaudeMd,
   listSubdirectories,
+  listFilesRecursive,
   getPackageVersion,
   ensureSymlink,
 } from "./files.js";
@@ -357,6 +358,21 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
 
     copyFile(src, dest);
     hookCount++;
+  }
+
+  // Copy shared hook support files (required by hooks at runtime)
+  const hookLibSrc = path.join(templates, "hooks", "lib");
+  if (dirExists(hookLibSrc)) {
+    const libFiles = listFilesRecursive(hookLibSrc);
+    for (const libFile of libFiles) {
+      const relative = path.relative(hookLibSrc, libFile);
+      copyFile(libFile, path.join(hooksDir, "lib", relative));
+    }
+  }
+  // Copy agent-patterns.json (authoritative pattern source for hooks)
+  const patternsSrc = path.join(templates, "hooks", "agent-patterns.json");
+  if (fileExists(patternsSrc)) {
+    copyFile(patternsSrc, path.join(hooksDir, "agent-patterns.json"));
   }
 
   // Step 11: Merge hook settings

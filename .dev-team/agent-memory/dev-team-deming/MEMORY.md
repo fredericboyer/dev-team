@@ -91,13 +91,13 @@
 - **Last-verified**: 2026-03-26
 - **Context**: Hooks replaced JS/TS-specific patterns with language-agnostic structural proxies (nesting depth, control flow density). Test file detection expanded to Go/Python/Java conventions. Complexity scoring no longer keyword-based. Key principle: hooks handle detection and gating, agents handle language-specific interpretation.
 
-### [2026-03-26] Hook code duplication: cachedGitDiff and fallback patterns
-- **Type**: RISK [open]
-- **Source**: Codebase audit (D1/D2), Issues #436, #437
-- **Tags**: hooks, duplication, maintainability, dx
-- **Outcome**: accepted — issues created for v1.7.0
-- **Last-verified**: 2026-03-26
-- **Context**: cachedGitDiff is copy-pasted across multiple hooks — extract to shared module (#436). Fallback pattern arrays in hooks duplicate agent-patterns.json — remove or extract (#437). Supersedes the earlier pattern duplication concern (resolved for review-gate in PR #344) by identifying remaining duplication in other hooks.
+### [2026-03-27] cachedGitDiff extracted to shared hook module
+- **Type**: DECISION [verified]
+- **Source**: Issue #436, branch fix/436-extract-cached-git-diff
+- **Tags**: hooks, duplication, shared-module, dx
+- **Outcome**: fixed
+- **Last-verified**: 2026-03-27
+- **Context**: cachedGitDiff was copy-pasted across 3 hooks (tdd-enforce, pre-commit-gate, review-gate). Extracted to `templates/hooks/lib/git-cache.js`. All 3 hooks now `require("./lib/git-cache")`. init.ts and update.ts updated to copy lib/ directory. Remaining duplication: fallback pattern arrays (#437, still open).
 
 ### [2026-03-26] CI gap: no npm audit step
 - **Type**: SUGGESTION [open]
@@ -125,6 +125,14 @@
 
 ## Calibration Log
 <!-- Challenges accepted/overruled — tunes adversarial intensity over time -->
+
+### [2026-03-27] ReDoS guard: safe-regex.js shared module for user-controlled patterns
+- **Type**: DECISION [verified]
+- **Source**: Issue #434, branch fix/434-redos-guard
+- **Tags**: hooks, security, shared-module, regex
+- **Outcome**: fixed
+- **Last-verified**: 2026-03-27
+- **Context**: User-controlled regex from config.json (watchLists[].pattern, taskBranchPattern) was compiled without validation. Created `templates/hooks/lib/safe-regex.js` — checks for nested quantifiers and quantified backreferences, rejects patterns >1024 chars. Applied to dev-team-watch-list.js and dev-team-pre-commit-gate.js. agent-patterns.js left unchanged — it reads developer-authored agent-patterns.json (different trust boundary). Pattern: hooks should validate at system boundaries (user config) but can trust shipped data files.
 
 ### [2026-03-26] Audit baseline: 14 findings (0 DEFECT, 1 RISK, 1 QUESTION, 12 SUGGESTION)
 - **Type**: CALIBRATION
