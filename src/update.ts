@@ -542,6 +542,14 @@ export async function update(targetDir: string): Promise<void> {
       }
     }
   }
+  // Copy agent-patterns.json (authoritative pattern source for hooks)
+  const patternsSrc = path.join(templates, "hooks", "agent-patterns.json");
+  const patternsDest = path.join(hooksDir, "agent-patterns.json");
+  const patternsSrcContent = readFile(patternsSrc);
+  const patternsDestContent = readFile(patternsDest);
+  if (patternsSrcContent && patternsSrcContent !== patternsDestContent) {
+    copyFile(patternsSrc, patternsDest);
+  }
 
   // Step 4: Update settings
   const settingsPath = path.join(claudeDir, "settings.json");
