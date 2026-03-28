@@ -13,6 +13,7 @@ import {
   getPackageVersion,
   ensureSymlink,
   assertNotSymlink,
+  assertNoSymlinkInPath,
 } from "./files.js";
 import type { HookSettings, HookMatcher } from "./files.js";
 import fs from "fs";
@@ -113,6 +114,7 @@ export function cleanupLegacyMemoryDirs(devTeamDir: string): string[] {
       // Move legacy content to current location
       assertNotSymlink(legacyMemoryPath);
       assertNotSymlink(currentMemoryPath);
+      assertNoSymlinkInPath(currentMemoryPath);
       fs.mkdirSync(path.join(memoryDir, currentDir), { recursive: true });
       fs.renameSync(legacyMemoryPath, currentMemoryPath);
       log.push(`Moved memory: ${legacyDir} → ${currentDir}`);
@@ -173,6 +175,7 @@ function runMigrations(prefs: Preferences, fromVersion: string, devTeamDir: stri
           try {
             assertNotSymlink(path.join(oldMemDir, "MEMORY.md"));
             assertNotSymlink(path.join(newMemDir, "MEMORY.md"));
+            assertNoSymlinkInPath(path.join(newMemDir, "MEMORY.md"));
             fs.mkdirSync(newMemDir, { recursive: true });
             fs.renameSync(path.join(oldMemDir, "MEMORY.md"), path.join(newMemDir, "MEMORY.md"));
             fs.rmdirSync(oldMemDir);
@@ -641,6 +644,7 @@ export async function update(targetDir: string): Promise<void> {
   if (fileExists(oldLearningsPath) && !fileExists(learningsDest)) {
     assertNotSymlink(oldLearningsPath);
     assertNotSymlink(learningsDest);
+    assertNoSymlinkInPath(learningsDest);
     fs.mkdirSync(rulesDir, { recursive: true });
     fs.renameSync(oldLearningsPath, learningsDest);
     console.log("  Migrated learnings.md → .claude/rules/dev-team-learnings.md");
@@ -657,6 +661,7 @@ export async function update(targetDir: string): Promise<void> {
   if (fileExists(oldProcessPath) && !fileExists(processDest)) {
     assertNotSymlink(oldProcessPath);
     assertNotSymlink(processDest);
+    assertNoSymlinkInPath(processDest);
     fs.mkdirSync(rulesDir, { recursive: true });
     fs.renameSync(oldProcessPath, processDest);
     console.log("  Migrated process.md → .claude/rules/dev-team-process.md");
