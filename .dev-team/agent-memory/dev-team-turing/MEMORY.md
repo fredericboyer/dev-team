@@ -43,6 +43,14 @@
 - **Last-verified**: 2026-03-26
 - **Context**: Initial research on `.claude/rules/` incorrectly stated subagents don't inherit rules. User corrected with official Claude Code documentation confirming rules ARE inherited by subagents and agent teams. Lesson: always verify behavioral claims against official platform documentation, not third-party blog posts or inferred behavior. This correction shaped ADR-033.
 
+### [2026-03-27] README structure guidelines (#447)
+- **Type**: RESEARCH [completed]
+- **Source**: issue #447
+- **Tags**: readme, documentation, scaffolding, validation
+- **Outcome**: brief written to `docs/research/447-readme-structure-guidelines-2026-03-28.md`
+- **Last-verified**: 2026-03-27
+- **Calibration**: README best practices are stable and well-documented — high-confidence research area. The tiered model (5 essential + recommended) synthesizes consensus across Make a README, Good Docs Project, and OSS survey. Key decision: validation over scaffolding — dev-team should check README quality, not generate READMEs. Established projects (Tailwind, Next.js) can get away with minimal READMEs; most projects cannot. README vs CLAUDE.md boundary is clean: humans vs agents, marketing vs directives.
+
 ### [2026-03-26] Research-first approach validated in v1.6.0
 - **Type**: PATTERN [verified]
 - **Source**: v1.6.0 session (#406, #407 research briefs)
