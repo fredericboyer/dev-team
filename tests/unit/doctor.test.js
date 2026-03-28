@@ -91,7 +91,7 @@ function scaffold(opts = {}) {
 
 /**
  * Helper: capture doctor output and exit code.
- * doctor() calls process.exit — we intercept that.
+ * doctor() calls process.exit — we throw a sentinel to halt execution.
  */
 function runDoctor(targetDir) {
   const logs = [];
@@ -102,10 +102,13 @@ function runDoctor(targetDir) {
   console.log = (...args) => logs.push(args.join(" "));
   process.exit = (code) => {
     exitCode = code;
+    throw new Error(`__EXIT_${code}__`);
   };
 
   try {
     doctor(targetDir);
+  } catch (err) {
+    if (!err.message.startsWith("__EXIT_")) throw err;
   } finally {
     console.log = originalLog;
     process.exit = originalExit;
