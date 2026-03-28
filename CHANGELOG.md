@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.7.0] - 2026-03-27
+
+### Security
+- `lstatSync` guards to prevent symlink-following attacks in file operations (#433).
+- ReDoS guards for user-controlled regex patterns — bounded complexity (#434).
+
+### Added
+- Test coverage for `doctor.ts`, `status.ts`, `prompts.ts` — 61 new tests (#438).
+- `npm audit` step added to CI pipeline (#440).
+- Scaffold recommended CLAUDE.md sections for new projects on `dev-team init` (#446).
+- README structure guidelines research brief (#447).
+
+### Changed
+- Retro promotion criteria aligned with AGENTS.md Verdict framework (#445).
+
+### Fixed
+- `init.ts` step comment numbering corrected (#439).
+
+### Internal
+- Add `review-gate.test.js` to test script (#435).
+- Extract `cachedGitDiff` into shared hook module `templates/hooks/lib/git-cache.js` (#436).
+- Extract fallback patterns into shared module `templates/hooks/lib/agent-patterns.js` (#437).
+- Extract symlink creation logic into `files.ts` helper (#441).
+
 ## [1.6.1] - 2026-03-27
 
 ### Fixed

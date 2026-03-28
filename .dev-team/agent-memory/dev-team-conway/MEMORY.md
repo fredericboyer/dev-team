@@ -99,5 +99,13 @@
 - **Last-verified**: 2026-03-26
 - **Context**: update.ts guards user-editable files. In v1.6.0, learnings.md and process.md migrated from `.dev-team/` to `.claude/rules/dev-team-learnings.md` and `.claude/rules/dev-team-process.md`. Migration is automatic (renameSync from old to new path, only if old exists and new doesn't). metrics.md stays in `.dev-team/`. All guarded files are only installed if missing. Release testing must verify: (1) fresh install creates files in `.claude/rules/`, (2) upgrade migrates from old paths, (3) existing `.claude/rules/` files are preserved.
 
+### [2026-03-27] v1.7.0 milestone had 2 open issues at close time
+- **Type**: PATTERN [verified]
+- **Source**: v1.7.0 release execution
+- **Tags**: release, milestone, process
+- **Outcome**: verified
+- **Last-verified**: 2026-03-27
+- **Context**: Milestone 24 (v1.7.0) closed with 11 closed / 2 open issues. The task listed 12 issues but only 11 were closed in the milestone at release time. Always verify milestone completion counts match the release brief.
+
 ## Calibration Log
 <!-- Challenges accepted/overruled — tunes adversarial intensity over time -->
