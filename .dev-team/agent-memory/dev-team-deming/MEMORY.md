@@ -107,13 +107,13 @@
 - **Last-verified**: 2026-03-26
 - **Context**: CI runs build/test/lint/validate but does not run npm audit. Adding an audit step would catch known vulnerabilities in dependencies before release.
 
-### [2026-03-26] review-gate.test.js excluded from test script
-- **Type**: SUGGESTION [open]
+### [2026-03-27] review-gate.test.js added to test script (Issue #435)
+- **Type**: SUGGESTION [resolved]
 - **Source**: Codebase audit, Issue #435
 - **Tags**: testing, hooks, dx
-- **Outcome**: accepted — issue created for v1.7.0
-- **Last-verified**: 2026-03-26
-- **Context**: review-gate.test.js exists but is not included in the npm test glob. Tests are not running in CI.
+- **Outcome**: fixed
+- **Last-verified**: 2026-03-27
+- **Context**: review-gate.test.js was not in the npm test script. Added to package.json. Also fixed the runGate test helper: it used execFileSync which swallows stderr on exit 0 — switched to spawnSync to capture stderr in all cases. The --skip-review test was failing because the hook outputs via console.warn (stderr) but the helper only captured stderr on error paths.
 
 ### [2026-03-27] Symlink creation extracted to ensureSymlink() in files.ts
 - **Type**: DECISION [verified]
