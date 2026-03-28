@@ -30,8 +30,8 @@ function safeRegex(pattern) {
 
   // Detect nested quantifiers — the primary ReDoS vector.
   // Matches: group with quantifier inside, followed by outer quantifier.
-  // Examples: (.*)+  (a+)*  (\d*)+  ([^x]+)*
-  if (/\([^)]*[+*][^)]*\)[+*{]/.test(pattern)) {
+  // Examples: (.*)+  (a+)*  (\d*)+  ([^x]+)*  (a{1,}){2,}
+  if (/\([^)]*[+*{][^)]*\)[+*{]/.test(pattern)) {
     return { safe: false, reason: "nested quantifiers detected (potential ReDoS)" };
   }
 
