@@ -91,3 +91,18 @@
 - **Duration**: single session, 16 PRs (#412-#428)
 - **Notes**: Major architectural release — research-first approach (Turing #406, #407). Key outcomes: rules-based shared context (ADR-033), language delegation (ADR-034), skill invocation control, process-driven agents, design principles codified. No formal review wave was run; Copilot was the sole code reviewer. All Copilot findings addressed inline during merge. Merge-as-you-go enforced successfully — no stale-branch issues (unlike v1.5.0 early delivery).
 
+### [2026-03-27] Task: v1.7.0 delivery (#433, #434, #435, #436, #437, #438, #439, #440, #441, #445, #446, #447)
+- **Agents**: implementing: Deming, Voss, Beck, Tufte, Turing; reviewers: Szabo, Knuth, Brooks
+- **Rounds**: 1
+- **Findings**:
+  - Szabo: 0 DEFECT, 2 RISK (1 accepted / 1 fixed), 1 QUESTION (1 accepted) — 3 total
+  - Knuth: 1 DEFECT (1 fixed), 1 RISK (1 fixed), 1 SUGGESTION (1 accepted) — 3 total
+  - Brooks: 2 DEFECT (2 fixed), 1 RISK (1 accepted) — 3 total
+- **Unique findings**: 7 (after deduplication of 11 raw findings)
+- **Acceptance rate**: 100% (7/7 — 4 fixed, 3 accepted)
+- **Overrule rate**: 0% (0/7)
+- **Fix rate (DEFECTs)**: 100% (2/2 unique)
+- **Defer rate (advisory)**: 0% (0/5)
+- **Duration**: single session, 7 PRs (#449-#455)
+- **Notes**: First formal review wave with in-team agents since v1.2.0 (v1.5.0-v1.6.0 used Copilot-only). 12 issues resolved, all audit-derived tech debt from v1.6.0. Key themes: symlink hardening (Szabo), path correctness (Knuth — 4th instance), process.exit stub pattern (cross-agent convergence by Szabo+Knuth+Brooks on same finding). Operational issue: agent teams sharing working directory caused cross-branch contamination — 3 stray commits on wrong branches, 1 agent re-spawn needed. Worktree isolation recommended for future multi-branch work.
+

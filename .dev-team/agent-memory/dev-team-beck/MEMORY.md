@@ -43,6 +43,14 @@
 - **Last-verified**: 2026-03-27
 - **Context**: When testing functions that call process.exit(), a no-op stub allows execution to continue past the exit point, causing crashes on subsequent code that assumes valid state. The stub must throw a sentinel error that the test harness catches.
 
+### [2026-03-27] v1.7.0: doctor.test.js, status.test.js, prompts.test.js added (#438)
+- **Type**: DECISION [verified]
+- **Source**: PR #453 (#438)
+- **Tags**: testing, coverage, doctor, status, prompts
+- **Outcome**: fixed
+- **Last-verified**: 2026-03-27
+- **Context**: Three core modules had zero test coverage. Tests added using the sentinel-throw pattern for process.exit stubs. Key finding: process.exit stub must throw to halt execution — a no-op stub lets code continue past the exit point, causing crashes. This pattern is now established for all exit-testing.
+
 ## Framework and Runner Notes
 
 

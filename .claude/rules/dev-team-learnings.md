@@ -14,6 +14,8 @@
 - **Review gate enforces the adversarial loop at commit time** (ADR-029). Two stateless gates: review evidence + findings resolution. Sidecar files in `.dev-team/.reviews/` keyed by agent + content hash. LIGHT reviews are advisory only. `--skip-review` is the escape hatch.
 - **Research-first for architectural releases.** When a release involves architectural changes, run Turing research briefs before implementation. Findings shape ADRs and design decisions, reducing rework. Validated in v1.6.0 (2 briefs → 2 ADRs + 7 design principles).
 - **Verify platform behavior against official docs, not third-party sources.** Turing research #406 initially got rules inheritance wrong by relying on inferred behavior. Always check official Claude Code documentation for behavioral claims about rules, subagents, and agent teams.
+- **Agent teams sharing a working directory cause cross-branch contamination.** v1.7.0 delivery had repeated issues: agents switched branches under each other, stray commits landed on wrong branches (#447→#438, #436→#446, #440→#434), stashes went stale. Worktree isolation (one worktree per agent) prevents all of these. Prefer worktree-isolated agents for multi-branch parallel work.
+- **"Require up-to-date branches" protection creates merge cascades.** Each merge makes other PRs stale, requiring sequential rebase+push. GitHub merge queues would automate this. For now, factor this into time estimates for multi-PR batches.
 
 ## Design Principles
 
@@ -23,11 +25,11 @@
 
 - `readFile()` in `src/files.ts` distinguishes ENOENT from EACCES/EPERM and logs a warning on permission errors, but still returns null in both cases — can mask security-relevant permission errors (Szabo finding, tracked).
 - `mergeClaudeMd` append-on-missing-END-marker can produce duplicate BEGIN markers on subsequent runs (Knuth finding, edge case).
-- `doctor.ts` hookFileMap missing Agent teams guide hook (#431, v1.6.1).
-- `status.ts` checks wrong learnings path after v1.6.0 migration (#432, v1.6.1).
-- File operations (renameSync, copyFile) follow symlinks without lstat guards (#433, v1.7.0).
-- User-controlled regex patterns lack complexity bounds — ReDoS risk (#434, v1.7.0).
-- Hook code duplication: fallback patterns duplicate agent-patterns.json (#437, v1.7.0). cachedGitDiff extracted to shared module (#436, fixed).
+- ~~`doctor.ts` hookFileMap missing Agent teams guide hook (#431, fixed v1.6.1).~~ Resolved in PR #443.
+- ~~`status.ts` checks wrong learnings path after v1.6.0 migration (#432, fixed v1.6.1).~~ Resolved in PR #443.
+- ~~File operations (renameSync, copyFile) follow symlinks without lstat guards (#433, fixed v1.7.0).~~ Resolved: assertNotSymlink() guard added to files.ts, applied to copyFile + all renameSync calls in update.ts.
+- ~~User-controlled regex patterns lack complexity bounds — ReDoS risk (#434, fixed v1.7.0).~~ Resolved: safe-regex.js shared module validates user-supplied patterns (nested quantifiers, length bounds).
+- ~~Hook code duplication (#436, #437, fixed v1.7.0).~~ Resolved: cachedGitDiff extracted to lib/git-cache.js, fallback patterns removed (agents handle language-specific knowledge per ADR-034).
 
 ## Quality Benchmarks
 
@@ -35,6 +37,7 @@
 - Finding Outcome Log vocabulary is standardized: outcomes are `fixed`, `accepted`, `deferred`, `overruled`, `ignored`. All skills and agents must use this vocabulary.
 - Pre-commit gate: blocks commits without memory updates (override via `.dev-team/.memory-reviewed`).
 - **Migration completeness**: Any change that moves/renames files must audit all modules that reference those paths. doctor.ts, status.ts, and skill definitions are recurring victims of path drift (3 instances across v1.5.0–v1.6.0).
+- **Retro must verify tech debt staleness.** v1.7.0 found 5 of 7 tech debt entries were already resolved. Retro skill should cross-check Known Tech Debt against recent PRs before reporting (#456).
 
 ## Overruled Challenges
 <!-- When the human overrules an agent, record why — prevents re-flagging -->

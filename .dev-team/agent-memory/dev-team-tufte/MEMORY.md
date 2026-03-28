@@ -51,6 +51,14 @@
 - **Last-verified**: 2026-03-27
 - **Context**: Retro skill Phase 1 and Phase 3 now use an explicit classification table to distinguish PROMOTE categories (tool preferences, test quirks, legacy traps, custom middleware warnings) from DO NOT PROMOTE categories (codebase structure, language/framework, directory tree, tech stack overview). Previously the retro would flag tool preferences as discoverable, which contradicted the AGENTS.md Verdict principle already documented in design principles. oxlint/oxfmt entry was the first concrete promotion under this framework.
 
+### [2026-03-27] v1.7.0: README structure validation research completed (#447)
+- **Type**: DECISION [verified]
+- **Source**: PR #452 (#447)
+- **Tags**: readme, documentation, validation, research
+- **Outcome**: accepted
+- **Last-verified**: 2026-03-27
+- **Context**: Turing research brief established tiered README model (5 essential + recommended sections). Key decision: dev-team should validate README quality, not generate READMEs. README vs CLAUDE.md boundary is clean: humans vs agents, marketing vs directives.
+
 ## Patterns to Watch For
 
 
