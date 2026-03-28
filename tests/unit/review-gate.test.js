@@ -1,9 +1,9 @@
 "use strict";
 
-const { describe, it, beforeEach, afterEach } = require("node:test");
+const { describe, it } = require("node:test");
 const assert = require("node:assert/strict");
 const { createHash } = require("crypto");
-const { execFileSync } = require("child_process");
+const { execFileSync, spawnSync } = require("child_process");
 const fs = require("fs");
 const path = require("path");
 const os = require("os");
@@ -15,17 +15,13 @@ const HOOK_PATH = path.join(__dirname, "..", "..", "templates", "hooks", "dev-te
  */
 function runGate(toolInput, cwd) {
   const input = JSON.stringify({ tool_input: toolInput });
-  try {
-    const stdout = execFileSync(process.execPath, [HOOK_PATH, input], {
-      encoding: "utf-8",
-      timeout: 10000,
-      cwd: cwd || process.cwd(),
-      env: { ...process.env, PATH: process.env.PATH },
-    });
-    return { code: 0, stdout, stderr: "" };
-  } catch (err) {
-    return { code: err.status, stdout: err.stdout || "", stderr: err.stderr || "" };
-  }
+  const result = spawnSync(process.execPath, [HOOK_PATH, input], {
+    encoding: "utf-8",
+    timeout: 10000,
+    cwd: cwd || process.cwd(),
+    env: { ...process.env, PATH: process.env.PATH },
+  });
+  return { code: result.status, stdout: result.stdout || "", stderr: result.stderr || "" };
 }
 
 /**
