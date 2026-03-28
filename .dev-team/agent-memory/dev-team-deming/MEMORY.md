@@ -91,13 +91,13 @@
 - **Last-verified**: 2026-03-26
 - **Context**: Hooks replaced JS/TS-specific patterns with language-agnostic structural proxies (nesting depth, control flow density). Test file detection expanded to Go/Python/Java conventions. Complexity scoring no longer keyword-based. Key principle: hooks handle detection and gating, agents handle language-specific interpretation.
 
-### [2026-03-26] Hook code duplication: cachedGitDiff and fallback patterns
-- **Type**: RISK [open]
-- **Source**: Codebase audit (D1/D2), Issues #436, #437
-- **Tags**: hooks, duplication, maintainability, dx
-- **Outcome**: accepted — issues created for v1.7.0
-- **Last-verified**: 2026-03-26
-- **Context**: cachedGitDiff is copy-pasted across multiple hooks — extract to shared module (#436). Fallback pattern arrays in hooks duplicate agent-patterns.json — remove or extract (#437). Supersedes the earlier pattern duplication concern (resolved for review-gate in PR #344) by identifying remaining duplication in other hooks.
+### [2026-03-27] cachedGitDiff extracted to shared hook module
+- **Type**: DECISION [verified]
+- **Source**: Issue #436, branch fix/436-extract-cached-git-diff
+- **Tags**: hooks, duplication, shared-module, dx
+- **Outcome**: fixed
+- **Last-verified**: 2026-03-27
+- **Context**: cachedGitDiff was copy-pasted across 3 hooks (tdd-enforce, pre-commit-gate, review-gate). Extracted to `templates/hooks/lib/git-cache.js`. All 3 hooks now `require("./lib/git-cache")`. init.ts and update.ts updated to copy lib/ directory. Remaining duplication: fallback pattern arrays (#437, still open).
 
 ### [2026-03-26] CI gap: no npm audit step
 - **Type**: SUGGESTION [open]
