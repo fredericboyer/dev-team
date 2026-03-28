@@ -91,3 +91,18 @@ jobs:
 
       - name: Validate README accuracy
         run: node scripts/validate-readme.js
+
+  audit-dependencies:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - run: npm install
+
+      - name: Audit dependencies
+        run: npm audit --audit-level=high
