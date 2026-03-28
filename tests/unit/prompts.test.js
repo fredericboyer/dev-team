@@ -27,12 +27,15 @@ function withStubReadline(answer, fn) {
   let result;
   try {
     result = fn();
-  } finally {
-    // For sync functions, restore immediately
-    if (!result || typeof result.then !== "function") {
-      readline.createInterface = original;
-      return result;
-    }
+  } catch (err) {
+    readline.createInterface = original;
+    throw err;
+  }
+
+  // For sync functions, restore immediately
+  if (!result || typeof result.then !== "function") {
+    readline.createInterface = original;
+    return result;
   }
 
   // For async functions, restore after the promise settles
