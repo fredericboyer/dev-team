@@ -23,10 +23,28 @@ export function templateDir(): string {
 }
 
 /**
+ * Throws if the given path exists and is a symlink.
+ * Prevents symlink-following attacks in file operations.
+ */
+export function assertNotSymlink(absPath: string): void {
+  try {
+    if (fs.lstatSync(absPath).isSymbolicLink()) {
+      throw new Error(`Refusing to operate on symlink: ${absPath}`);
+    }
+  } catch (err: unknown) {
+    if ((err as NodeJS.ErrnoException).code === "ENOENT") return;
+    throw err;
+  }
+}
+
+/**
  * Copies a file from src to dest, creating parent directories as needed.
+ * Rejects symlinks at src or dest to prevent symlink-following attacks.
  * Returns true if the file was written.
  */
 export function copyFile(src: string, dest: string): boolean {
+  assertNotSymlink(src);
+  assertNotSymlink(dest);
   const dir = path.dirname(dest);
   fs.mkdirSync(dir, { recursive: true });
   fs.copyFileSync(src, dest);
@@ -240,6 +258,57 @@ export function getPackageVersion(): string {
     throw new Error("package.json missing version field");
   }
   return parsed.version;
+}
+
+/**
+ * Creates a symlink at symlinkPath pointing to symlinkTarget.
+ * Skips if a non-symlink (real file/dir) already exists at the path.
+ * Removes stale symlinks before creating. Falls back to junction on Windows
+ * when symlink creation fails due to permissions.
+ */
+export function ensureSymlink(symlinkPath: string, symlinkTarget: string): void {
+  // Skip if path exists and is NOT a symlink (user's real directory — preserve it)
+  let isNonSymlink = false;
+  try {
+    isNonSymlink = fs.existsSync(symlinkPath) && !fs.lstatSync(symlinkPath).isSymbolicLink();
+  } catch {
+    // ENOENT — path doesn't exist, proceed to create symlink
+  }
+  if (isNonSymlink) return;
+
+  try {
+    fs.mkdirSync(path.dirname(symlinkPath), { recursive: true });
+    // Remove existing symlink (broken or stale) — only unlink symlinks, not real files/dirs
+    try {
+      if (fs.lstatSync(symlinkPath).isSymbolicLink()) {
+        fs.unlinkSync(symlinkPath);
+      }
+    } catch {
+      // ENOENT is expected when no prior symlink exists
+    }
+    fs.symlinkSync(symlinkTarget, symlinkPath);
+  } catch (err) {
+    // On Windows, non-admin users get EPERM/EACCES for symlinks — fall back to junction
+    if (
+      process.platform === "win32" &&
+      ((err as NodeJS.ErrnoException).code === "EPERM" ||
+        (err as NodeJS.ErrnoException).code === "EACCES")
+    ) {
+      try {
+        fs.symlinkSync(symlinkTarget, symlinkPath, "junction");
+      } catch (junctionErr) {
+        const skillDir = path.basename(symlinkPath);
+        console.warn(
+          `  Warning: could not create skill symlink for ${skillDir}: ${(junctionErr as Error).message}`,
+        );
+      }
+    } else {
+      const skillDir = path.basename(symlinkPath);
+      console.warn(
+        `  Warning: could not create skill symlink for ${skillDir}: ${(err as Error).message}`,
+      );
+    }
+  }
 }
 
 /**

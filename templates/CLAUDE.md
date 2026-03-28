@@ -1,3 +1,17 @@
+# Project Name
+
+## Development
+<!-- Build, test, and run commands. Tool preferences agents can't discover from code. -->
+<!-- Example: "Use pnpm, not npm. Use oxlint for linting, not ESLint." -->
+
+## Test quirks
+<!-- Non-obvious testing behavior that causes false passes or confusing failures. -->
+<!-- Example: "Run integration tests with --no-cache or flaky tests pass incorrectly." -->
+
+## Legacy traps
+<!-- Code that looks correct but isn't. Patterns to avoid. -->
+<!-- Example: "Don't use the v1 auth middleware — it stores tokens non-compliantly." -->
+
 <!-- dev-team:begin -->
 
 ## Dev Team

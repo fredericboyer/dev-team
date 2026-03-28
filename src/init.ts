@@ -1,5 +1,4 @@
 import path from "path";
-import fs from "fs";
 import {
   templateDir,
   copyFile,
@@ -11,6 +10,7 @@ import {
   mergeClaudeMd,
   listSubdirectories,
   getPackageVersion,
+  ensureSymlink,
 } from "./files.js";
 import type { HookSettings, HookMatcher } from "./files.js";
 import * as prompts from "./prompts.js";
@@ -280,7 +280,7 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
     ]);
   }
 
-  // Step 6: Copy agents (renumbered after adding workflow prompts)
+  // Step 6: Copy agents
   const templates = templateDir();
   let agentCount = 0;
 
@@ -299,12 +299,12 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
     agentCount++;
   }
 
-  // Step 6b: Copy shared agent protocol
+  // Step 7: Copy shared agent protocol
   const sharedSrc = path.join(templates, "agents", "SHARED.md");
   const sharedDest = path.join(agentsDir, "SHARED.md");
   copyFile(sharedSrc, sharedDest);
 
-  // Step 7: Create agent memory directories
+  // Step 8: Create agent memory directories
   for (const agent of ALL_AGENTS) {
     if (!selectedAgents.includes(agent.label)) continue;
 
@@ -317,7 +317,7 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
     }
   }
 
-  // Step 8: Create shared team learnings (installed to .claude/rules/ for automatic agent context)
+  // Step 9: Create shared team learnings (installed to .claude/rules/ for automatic agent context)
   const rulesDir = path.join(claudeDir, "rules");
   const learningsSrc = path.join(templates, "dev-team-learnings.md");
   const learningsDest = path.join(rulesDir, "dev-team-learnings.md");
@@ -325,14 +325,14 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
     copyFile(learningsSrc, learningsDest);
   }
 
-  // Step 8b: Install process file (installed to .claude/rules/ for automatic agent context)
+  // Step 9a: Install process file (installed to .claude/rules/ for automatic agent context)
   const processSrc = path.join(templates, "dev-team-process.md");
   const processDest = path.join(rulesDir, "dev-team-process.md");
   if (!fileExists(processDest)) {
     copyFile(processSrc, processDest);
   }
 
-  // Step 8c: Create metrics log
+  // Step 9b: Create metrics log
   // Install destination must be .dev-team/metrics.md — skills (task, review, retro)
   // and agents (Borges, Drucker) reference this exact path for calibration metrics.
   const metricsSrc = path.join(templates, "dev-team-metrics.md");
@@ -341,7 +341,7 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
     copyFile(metricsSrc, metricsDest);
   }
 
-  // Step 7: Copy hooks
+  // Step 10: Copy hooks
   let hookCount = 0;
 
   for (const hook of QUALITY_HOOKS) {
@@ -359,7 +359,7 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
     hookCount++;
   }
 
-  // Step 8: Merge hook settings
+  // Step 11: Merge hook settings
   const settingsContent = readFile(path.join(templates, "settings.json"));
   if (!settingsContent) {
     throw new Error("Missing templates/settings.json");
@@ -389,7 +389,7 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
 
   mergeSettings(settingsPath, filteredSettings);
 
-  // Step 8c: Enable agent teams (experimental)
+  // Step 11a: Enable agent teams (experimental)
   const settingsData = JSON.parse(readFile(settingsPath) || "{}");
   if (!settingsData.env) {
     settingsData.env = {};
@@ -399,7 +399,7 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
   }
   writeFile(settingsPath, JSON.stringify(settingsData, null, 2) + "\n");
 
-  // Step 9: Copy framework skills (auto-discovered from templates/skills/)
+  // Step 12: Copy framework skills (auto-discovered from templates/skills/)
   const skillsSrcDir = path.join(templates, "skills");
   const skillDirs = listSubdirectories(skillsSrcDir);
   for (const skillDir of skillDirs) {
@@ -410,61 +410,22 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
     }
   }
 
-  // Step 9b: Create symlinks in .claude/skills/ so Claude Code can discover framework skills
+  // Step 12a: Create symlinks in .claude/skills/ so Claude Code can discover framework skills
   const claudeSkillsDir = path.join(claudeDir, "skills");
   for (const skillDir of skillDirs) {
     const symlinkPath = path.join(claudeSkillsDir, skillDir);
     const symlinkTarget = path.relative(claudeSkillsDir, path.join(skillsDir, skillDir));
-    // Skip if path exists and is NOT a symlink (user's real directory — preserve it)
-    let isNonSymlink = false;
-    try {
-      isNonSymlink = fs.existsSync(symlinkPath) && !fs.lstatSync(symlinkPath).isSymbolicLink();
-    } catch {
-      // ENOENT — path doesn't exist, proceed to create symlink
-    }
-    if (!isNonSymlink) {
-      try {
-        fs.mkdirSync(path.dirname(symlinkPath), { recursive: true });
-        // Remove existing symlink (broken or stale) — only unlink symlinks, not real files/dirs
-        try {
-          if (fs.lstatSync(symlinkPath).isSymbolicLink()) {
-            fs.unlinkSync(symlinkPath);
-          }
-        } catch {
-          // ENOENT is expected when no prior symlink exists
-        }
-        fs.symlinkSync(symlinkTarget, symlinkPath);
-      } catch (err) {
-        // On Windows, non-admin users get EPERM/EACCES for symlinks — fall back to junction
-        if (
-          process.platform === "win32" &&
-          ((err as NodeJS.ErrnoException).code === "EPERM" ||
-            (err as NodeJS.ErrnoException).code === "EACCES")
-        ) {
-          try {
-            fs.symlinkSync(symlinkTarget, symlinkPath, "junction");
-          } catch (junctionErr) {
-            console.warn(
-              `  Warning: could not create skill symlink for ${skillDir}: ${(junctionErr as Error).message}`,
-            );
-          }
-        } else {
-          console.warn(
-            `  Warning: could not create skill symlink for ${skillDir}: ${(err as Error).message}`,
-          );
-        }
-      }
-    }
+    ensureSymlink(symlinkPath, symlinkTarget);
   }
 
-  // Step 10: Merge CLAUDE.md
+  // Step 13: Merge CLAUDE.md
   const claudeMdTemplate = readFile(path.join(templates, "CLAUDE.md"));
   if (!claudeMdTemplate) {
     throw new Error("Missing templates/CLAUDE.md");
   }
   const claudeResult = mergeClaudeMd(claudeMdPath, claudeMdTemplate);
 
-  // Save preferences
+  // Step 14: Save preferences
   const agentTeamsEnabled = settingsData.env?.CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS === "1";
   const prefs: Record<string, unknown> = {
     version: getPackageVersion(),
@@ -481,7 +442,7 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
   }
   writeFile(prefsPath, JSON.stringify(prefs, null, 2) + "\n");
 
-  // Step 11: Print summary
+  // Step 15: Print summary
   console.log("\nDone! Installed:\n");
   console.log(`  Agents:    ${selectedAgents.join(", ")} (${agentCount} files)`);
   console.log(`  Hooks:     ${selectedHooks.join(", ")} (${hookCount} files)`);
@@ -502,7 +463,7 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
   }
   console.log("");
 
-  // Step 12: Optional Deming tooling scan
+  // Step 16: Optional Deming tooling scan
   let runScan = isAll || !!preset;
   if (!isAll && !preset) {
     runScan = await prompts.confirm(
@@ -517,7 +478,7 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
     console.log("");
   }
 
-  // Step 13: Skill recommendations
+  // Step 17: Skill recommendations
   let runSkillScan = isAll || !!preset;
   if (!isAll && !preset) {
     runSkillScan = await prompts.confirm(

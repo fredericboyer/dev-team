@@ -45,5 +45,13 @@
 - **Last-verified**: 2026-03-26
 - **Context**: User insight that reshaped product direction: "if the agent can discover it from code, delete it." Templates should only contain what agents can't discover — tool preferences, legacy traps, process decisions. This filters what goes into agent definitions, hooks, and shared context.
 
+### [2026-03-27] lstatSync guards — assertNotSymlink pattern for file operations
+- **Type**: PATTERN [implemented]
+- **Source**: Issue #433
+- **Tags**: security, symlink, file-operations
+- **Outcome**: fixed
+- **Last-verified**: 2026-03-27
+- **Context**: Added assertNotSymlink() helper to files.ts that uses lstatSync to reject symlinks before file operations. Applied to copyFile() (guards both src and dest) and all four renameSync calls in update.ts (legacy memory cleanup, migration memory rename, learnings migration, process migration). The ensureSymlink() function intentionally creates symlinks and was NOT guarded. Key insight: the linter (oxfmt) auto-removes unused imports, so the import must be added in the same edit pass as its usage — otherwise the linter strips it between edits.
+
 ## Calibration Log
 <!-- Challenges accepted/overruled — tunes adversarial intensity over time -->

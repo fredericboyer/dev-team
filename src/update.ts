@@ -11,6 +11,8 @@ import {
   listSubdirectories,
   listFilesRecursive,
   getPackageVersion,
+  ensureSymlink,
+  assertNotSymlink,
 } from "./files.js";
 import type { HookSettings, HookMatcher } from "./files.js";
 import fs from "fs";
@@ -109,6 +111,8 @@ export function cleanupLegacyMemoryDirs(devTeamDir: string): string[] {
       }
     } else if (fileExists(legacyMemoryPath) && !fileExists(currentMemoryPath)) {
       // Move legacy content to current location
+      assertNotSymlink(legacyMemoryPath);
+      assertNotSymlink(currentMemoryPath);
       fs.mkdirSync(path.join(memoryDir, currentDir), { recursive: true });
       fs.renameSync(legacyMemoryPath, currentMemoryPath);
       log.push(`Moved memory: ${legacyDir} → ${currentDir}`);
@@ -167,6 +171,8 @@ function runMigrations(prefs: Preferences, fromVersion: string, devTeamDir: stri
           !fileExists(path.join(newMemDir, "MEMORY.md"))
         ) {
           try {
+            assertNotSymlink(path.join(oldMemDir, "MEMORY.md"));
+            assertNotSymlink(path.join(newMemDir, "MEMORY.md"));
             fs.mkdirSync(newMemDir, { recursive: true });
             fs.renameSync(path.join(oldMemDir, "MEMORY.md"), path.join(newMemDir, "MEMORY.md"));
             fs.rmdirSync(oldMemDir);
@@ -522,6 +528,17 @@ export async function update(targetDir: string): Promise<void> {
     }
   }
 
+  // Copy shared hook lib modules (required by hooks at runtime)
+  const hookLibSrc = path.join(templates, "hooks", "lib", "git-cache.js");
+  if (fileExists(hookLibSrc)) {
+    const hookLibDest = path.join(hooksDir, "lib", "git-cache.js");
+    const srcContent = readFile(hookLibSrc);
+    const destContent = readFile(hookLibDest);
+    if (srcContent !== destContent) {
+      copyFile(hookLibSrc, hookLibDest);
+    }
+  }
+
   // Step 4: Update settings
   const settingsPath = path.join(claudeDir, "settings.json");
   const settingsContent = readFile(path.join(templates, "settings.json"));
@@ -592,47 +609,7 @@ export async function update(targetDir: string): Promise<void> {
   for (const skillDir of discoveredSkills) {
     const symlinkPath = path.join(claudeSkillsDir, skillDir);
     const symlinkTarget = path.relative(claudeSkillsDir, path.join(skillsDir, skillDir));
-    // Skip if path exists and is NOT a symlink (user's real directory — preserve it)
-    let isNonSymlink = false;
-    try {
-      isNonSymlink = fs.existsSync(symlinkPath) && !fs.lstatSync(symlinkPath).isSymbolicLink();
-    } catch {
-      // ENOENT — path doesn't exist, proceed to create symlink
-    }
-    if (!isNonSymlink) {
-      // Create symlink if target doesn't exist, or repair existing symlink
-      try {
-        fs.mkdirSync(path.dirname(symlinkPath), { recursive: true });
-        // Remove existing symlink (broken or stale) — only unlink symlinks, not real files/dirs
-        try {
-          if (fs.lstatSync(symlinkPath).isSymbolicLink()) {
-            fs.unlinkSync(symlinkPath);
-          }
-        } catch {
-          // ENOENT is expected when no prior symlink exists
-        }
-        fs.symlinkSync(symlinkTarget, symlinkPath);
-      } catch (err) {
-        // On Windows, non-admin users get EPERM/EACCES for symlinks — fall back to junction
-        if (
-          process.platform === "win32" &&
-          ((err as NodeJS.ErrnoException).code === "EPERM" ||
-            (err as NodeJS.ErrnoException).code === "EACCES")
-        ) {
-          try {
-            fs.symlinkSync(symlinkTarget, symlinkPath, "junction");
-          } catch (junctionErr) {
-            console.warn(
-              `  Warning: could not create skill symlink for ${skillDir}: ${(junctionErr as Error).message}`,
-            );
-          }
-        } else {
-          console.warn(
-            `  Warning: could not create skill symlink for ${skillDir}: ${(err as Error).message}`,
-          );
-        }
-      }
-    }
+    ensureSymlink(symlinkPath, symlinkTarget);
   }
 
   // Step 6: Update CLAUDE.md (preserves user content outside markers)
@@ -650,6 +627,8 @@ export async function update(targetDir: string): Promise<void> {
   // Migration: move from old .dev-team/ paths to .claude/rules/
   const oldLearningsPath = path.join(devTeamDir, "learnings.md");
   if (fileExists(oldLearningsPath) && !fileExists(learningsDest)) {
+    assertNotSymlink(oldLearningsPath);
+    assertNotSymlink(learningsDest);
     fs.mkdirSync(rulesDir, { recursive: true });
     fs.renameSync(oldLearningsPath, learningsDest);
     console.log("  Migrated learnings.md → .claude/rules/dev-team-learnings.md");
@@ -664,6 +643,8 @@ export async function update(targetDir: string): Promise<void> {
   // Migration: move from old .dev-team/ path to .claude/rules/
   const oldProcessPath = path.join(devTeamDir, "process.md");
   if (fileExists(oldProcessPath) && !fileExists(processDest)) {
+    assertNotSymlink(oldProcessPath);
+    assertNotSymlink(processDest);
     fs.mkdirSync(rulesDir, { recursive: true });
     fs.renameSync(oldProcessPath, processDest);
     console.log("  Migrated process.md → .claude/rules/dev-team-process.md");
