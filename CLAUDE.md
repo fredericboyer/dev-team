@@ -75,7 +75,7 @@ Agents challenge each other using classified findings:
 - `[DEFECT]` blocks progress. `[RISK]`, `[QUESTION]`, `[SUGGESTION]` are advisory.
 - When agents disagree, they escalate to the human after one exchange each. Human decides.
 
-See `.dev-team/process.md` for orchestration protocol, parallel execution, and agent naming conventions.
+See `.claude/rules/dev-team-process.md` for orchestration protocol, parallel execution, and agent naming conventions.
 
 ### Hook directives are MANDATORY
 
@@ -98,7 +98,7 @@ Do NOT skip this. Do NOT treat hook output as optional. If you believe a review 
 
 > **Non-GitHub platforms:** Skills and hooks reference `gh` CLI commands for GitHub. If your project uses GitLab, Bitbucket, or another platform, adapt these commands accordingly. Set the `platform` field in `.dev-team/config.json` to `"gitlab"`, `"bitbucket"`, or `"other"`.
 
-> **Non-JS/TS projects:** File patterns in `agent-patterns.json` are optimized for JavaScript/TypeScript projects. For Python, Rust, Go, Java, or other ecosystems, you may need to extend these patterns to cover language-specific test conventions, build tools, and framework structures.
+> **Non-JS/TS projects:** Hooks detect the ecosystem and delegate language-specific reasoning to agents. File patterns in `agent-patterns.json` cover common conventions; agents apply their built-in knowledge for language-specific test naming, build tools, and framework structures beyond these patterns (see ADR-034).
 
 ### Project-specific customization
 
@@ -110,7 +110,10 @@ Project-specific customization belongs in `.claude/`:
 |------|-------|
 | Custom hooks (linting, workflow enforcement) | `.claude/hooks/` |
 | Project-specific skills (merge, deploy, etc.) | `.claude/skills/` |
+| Path-scoped instructions loaded automatically into agent context | `.claude/rules/` |
 | Claude Code settings and hook wiring | `.claude/settings.json` |
+
+Rules files (`.claude/rules/*.md`) are loaded automatically by all agents including subagents. Use them for project-specific behavioral context that should be shared across all agent sessions.
 
 `.claude/hooks/` and `.claude/skills/` are not overwritten by `dev-team update` — your project-specific customizations are safe. Only `.claude/settings.json` is merged additively (new product hooks are added, but user-added entries are never removed).
 
@@ -118,15 +121,15 @@ Project-specific customization belongs in `.claude/`:
 
 All project and process learnings MUST go to in-repo files, NOT to machine-local memory (`~/.claude/projects/`). Machine-local memory is invisible to other developers, agents, and sessions.
 
-**Tier 1 — Shared team memory** (`.dev-team/learnings.md`):
-Project facts, overruled challenges, cross-agent decisions, process rules. All agents read this at session start.
+**Tier 1 — Shared team memory** (`.claude/rules/dev-team-learnings.md`):
+Project facts, overruled challenges, cross-agent decisions, process rules. Loaded automatically by all agents via rules.
 
 **Tier 2 — Agent calibration memory** (`.dev-team/agent-memory/<agent>/MEMORY.md`):
 Domain-specific findings, known patterns, active watch lists. Each agent owns its own file. Entries include `Last-verified` dates for temporal decay.
 
 | What | Where |
 |------|-------|
-| Project patterns, process rules, tech debt, overruled challenges | `.dev-team/learnings.md` (Tier 1) |
+| Project patterns, process rules, tech debt, overruled challenges | `.claude/rules/dev-team-learnings.md` (Tier 1) |
 | Agent-specific calibration | `.dev-team/agent-memory/<agent>/MEMORY.md` (Tier 2) |
 | Formal architecture decisions | `docs/adr/` |
 | User-specific preferences only | Machine-local memory |
@@ -135,8 +138,9 @@ Domain-specific findings, known patterns, active watch lists. Each agent owns it
 
 **Temporal decay:** Entries have `Last-verified` dates. Borges flags entries not verified in 30+ days and archives entries over 90 days to the `## Archive` section.
 
-When the human gives feedback about process, coding style, or tool behavior: write it to `.dev-team/learnings.md`. Only use machine-local memory for things that are truly personal and would not apply to another developer on the same project.
+When the human gives feedback about process, coding style, or tool behavior: write it to `.claude/rules/dev-team-learnings.md`. Only use machine-local memory for things that are truly personal and would not apply to another developer on the same project.
 
 <!-- dev-team:end -->
+
 
 

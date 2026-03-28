@@ -22,6 +22,8 @@
 const fs = require("fs");
 const path = require("path");
 
+const { safeRegex } = require("./lib/safe-regex");
+
 let input = {};
 try {
   input = JSON.parse(process.argv[2] || "{}");
@@ -60,8 +62,14 @@ for (const entry of watchLists) {
   if (!entry.pattern || !entry.agents) continue;
 
   try {
-    const regex = new RegExp(entry.pattern);
-    if (regex.test(filePath)) {
+    const result = safeRegex(entry.pattern);
+    if (!result.safe) {
+      console.warn(
+        `[dev-team watch-list] Skipping unsafe pattern "${entry.pattern}": ${result.reason}`,
+      );
+      continue;
+    }
+    if (result.regex.test(filePath)) {
       for (const agent of entry.agents) {
         if (!matches.some((m) => m.agent === agent)) {
           matches.push({

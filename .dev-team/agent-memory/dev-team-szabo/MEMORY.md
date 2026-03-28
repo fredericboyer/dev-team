@@ -13,7 +13,7 @@
 
 ### [2026-03-25] readFile() returns null for both missing and permission-denied files
 - **Type**: RISK [verified]
-- **Source**: .dev-team/learnings.md (known tech debt)
+- **Source**: .claude/rules/dev-team-learnings.md (known tech debt)
 - **Tags**: error-handling, file-system, tech-debt
 - **Outcome**: verified
 - **Last-verified**: 2026-03-26

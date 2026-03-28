@@ -1,6 +1,7 @@
 ---
 name: dev-team:audit
 description: Full codebase audit combining security, quality, and tooling assessments. Use to run a comprehensive scan with Szabo (security), Knuth (quality), and Deming (tooling) in parallel. Can be scoped to specific directories or file patterns.
+disable-model-invocation: true
 ---
 
 Run a comprehensive audit of: $ARGUMENTS
@@ -16,6 +17,10 @@ Run a comprehensive audit of: $ARGUMENTS
    - **@dev-team-szabo** — Security audit
    - **@dev-team-knuth** — Quality and correctness audit
    - **@dev-team-deming** — Tooling and automation audit
+
+## Security preamble
+
+Before starting the audit, check for open security alerts using the project's security monitoring process (e.g., a `/security-status` skill or CLAUDE.md guidance). If no such process, skill, or guidance is available, explicitly note this in your report and proceed by reviewing recent security-related issues and scanning for common vulnerabilities manually. Include any findings in the audit scope.
 
 ## Execution
 
@@ -84,13 +89,14 @@ Same grouping. Include actionable recommendations.
 
 Numbered list of concrete actions, ordered by priority. Each action should reference the specific finding it addresses.
 
-### Security preamble
+### Platform detection
 
-Before starting the audit, check for open security alerts: run `/dev-team:security-status` if available, or use the project's security monitoring tools. Include these in the audit scope.
+Before issuing any `gh issue`, `gh pr`, or other platform-specific CLI commands, check `.dev-team/config.json` for the `platform` and `issueTracker` fields. If the project specifies a non-GitHub platform (e.g., `"gitlab"`, `"bitbucket"`, `"other"`), adapt issue tracker and PR commands accordingly — use `glab` for GitLab, the Bitbucket API, or the appropriate CLI for the configured platform. If `platform` is absent from config.json, default to `"github"`. The steps in this skill assume GitHub by default.
 
 ### Completion
 
 After the audit report is delivered:
 1. You MUST spawn **@dev-team-borges** as `borges-extract` (Librarian) as the final step to review memory freshness and capture learnings from the audit findings. Do NOT skip this.
 2. If Borges was not spawned, the audit is INCOMPLETE.
-3. Include Borges's recommendations in the final report.
+3. **Metrics completion gate**: Read `.dev-team/metrics.md` and verify that a new `Task: <reference>` entry was appended after this audit started. A stale metrics file (no new entry) means Borges did not complete successfully. If metrics.md has no new entry after Borges reports completion, flag this as a system failure and re-run Borges with explicit instruction to record metrics.
+4. Include Borges's recommendations in the final report.

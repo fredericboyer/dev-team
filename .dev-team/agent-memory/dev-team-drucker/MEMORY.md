@@ -29,7 +29,7 @@
 
 ### [2026-03-25] Spawn reviewers as general-purpose subagents with full agent definitions
 - **Type**: PATTERN [verified]
-- **Source**: .dev-team/learnings.md
+- **Source**: .claude/rules/dev-team-learnings.md
 - **Tags**: orchestration, subagents, spawning
 - **Outcome**: verified
 - **Last-verified**: 2026-03-25

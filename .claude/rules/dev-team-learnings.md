@@ -23,8 +23,8 @@
 
 ## Known Tech Debt
 
-- `readFile()` in `src/files.ts` distinguishes ENOENT from EACCES/EPERM and logs a warning on permission errors, but still returns null in both cases — can mask security-relevant permission errors (Szabo finding, tracked).
-- `mergeClaudeMd` append-on-missing-END-marker can produce duplicate BEGIN markers on subsequent runs (Knuth finding, edge case).
+- `readFile()` in `src/files.ts` distinguishes ENOENT from EACCES/EPERM and logs a warning on permission errors, but still returns null in both cases — can mask security-relevant permission errors (#460, v1.8.0).
+- `mergeClaudeMd` append-on-missing-END-marker can produce duplicate BEGIN markers on subsequent runs (#461, v1.8.0).
 - ~~`doctor.ts` hookFileMap missing Agent teams guide hook (#431, fixed v1.6.1).~~ Resolved in PR #443.
 - ~~`status.ts` checks wrong learnings path after v1.6.0 migration (#432, fixed v1.6.1).~~ Resolved in PR #443.
 - ~~File operations (renameSync, copyFile) follow symlinks without lstat guards (#433, fixed v1.7.0).~~ Resolved: assertNotSymlink() guard added to files.ts, applied to copyFile + all renameSync calls in update.ts.
@@ -38,6 +38,7 @@
 - Pre-commit gate: blocks commits without memory updates (override via `.dev-team/.memory-reviewed`).
 - **Migration completeness**: Any change that moves/renames files must audit all modules that reference those paths. doctor.ts, status.ts, and skill definitions are recurring victims of path drift (3 instances across v1.5.0–v1.6.0).
 - **Retro must verify tech debt staleness.** v1.7.0 found 5 of 7 tech debt entries were already resolved. Retro skill should cross-check Known Tech Debt against recent PRs before reporting (#456).
+- **process.exit stubs must throw a sentinel error.** When testing functions that call `process.exit()`, a no-op stub lets execution continue past the exit point, causing false passes. Use a throw-sentinel pattern (e.g., `throw new Error('__EXIT__')`). Independently confirmed by Szabo, Knuth, and Brooks in v1.7.0 review.
 
 ## Overruled Challenges
 <!-- When the human overrules an agent, record why — prevents re-flagging -->
