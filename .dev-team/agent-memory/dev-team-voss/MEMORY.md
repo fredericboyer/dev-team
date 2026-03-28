@@ -53,5 +53,13 @@
 - **Last-verified**: 2026-03-27
 - **Context**: Added assertNotSymlink() helper to files.ts that uses lstatSync to reject symlinks before file operations. Applied to copyFile() (guards both src and dest) and all four renameSync calls in update.ts (legacy memory cleanup, migration memory rename, learnings migration, process migration). The ensureSymlink() function intentionally creates symlinks and was NOT guarded. Key insight: the linter (oxfmt) auto-removes unused imports, so the import must be added in the same edit pass as its usage — otherwise the linter strips it between edits.
 
+### [2026-03-27] v1.7.0: ensureSymlink extracted to files.ts (#441)
+- **Type**: DECISION [verified]
+- **Source**: PR #454 (#441)
+- **Tags**: deduplication, files, symlink
+- **Outcome**: fixed
+- **Last-verified**: 2026-03-27
+- **Context**: ~30 lines of identical symlink creation with Windows junction fallback existed in both init.ts and update.ts. Extracted to ensureSymlink() in files.ts. ensureSymlink intentionally creates symlinks and was NOT guarded by assertNotSymlink. Removed unused fs import from init.ts.
+
 ## Calibration Log
 <!-- Challenges accepted/overruled — tunes adversarial intensity over time -->

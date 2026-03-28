@@ -55,12 +55,28 @@
 - **Context**: When v1.6.0 migrated files from .dev-team/ to .claude/rules/, doctor.ts and status.ts were not updated to check the new paths. This is the same class of bug as the review skill path issue (PR #365). Watch for: any migration that moves files must audit all modules that reference those paths.
 
 ### [2026-03-26] Zero test coverage on doctor.ts, status.ts, prompts.ts
-- **Type**: RISK [open]
-- **Source**: Codebase audit (K4/K5), Issue #438
+- **Type**: RISK [fixed]
+- **Source**: Codebase audit (K4/K5), Issue #438, PR #453
 - **Tags**: testing, coverage, quality-gap
-- **Outcome**: accepted — issue created for v1.7.0
-- **Last-verified**: 2026-03-26
-- **Context**: Three core modules have no test coverage. doctor.ts and status.ts bugs (K1/K3) would have been caught by tests. Priority for test expansion.
+- **Outcome**: fixed — tests added in v1.7.0
+- **Last-verified**: 2026-03-27
+- **Context**: Fixed: doctor.test.js, status.test.js, prompts.test.js added. Uses sentinel-throw pattern for process.exit stubs. All three registered in package.json test script.
+
+### [2026-03-27] v1.7.0: Memory file at wrong path — dev-team-deming/ not deming/
+- **Type**: DEFECT [fixed]
+- **Source**: PR #450 (#440)
+- **Tags**: path-correctness, memory, naming-convention
+- **Outcome**: fixed
+- **Last-verified**: 2026-03-27
+- **Context**: Agent memory directory was `deming/` instead of `dev-team-deming/`. Inconsistent with naming convention used by all other agents. Path correctness pattern continues — Seen: 4 times (doctor.ts K1, status.ts K3, review skill path, memory dir). Migration-completeness learning applies beyond code to data directories.
+
+### [2026-03-27] v1.7.0: lib copy merge ordering — Chain B recursive approach supersedes Chain A
+- **Type**: SUGGESTION [accepted]
+- **Source**: PR #455 (Chain B, #434)
+- **Tags**: update, lib-copy, merge-ordering
+- **Outcome**: accepted
+- **Last-verified**: 2026-03-27
+- **Context**: Chain A added single-file lib copy for ensureSymlink; Chain B added recursive lib/ directory copy for git-cache.js + safe-regex.js. At merge, Chain B's recursive approach naturally superseded Chain A's single-file approach. No code conflict, just ordering awareness.
 
 ### [2026-03-26] Review skill had wrong path for agent-patterns.json
 - **Type**: DEFECT [fixed]
@@ -68,4 +84,4 @@
 - **Tags**: routing, review-skill, path
 - **Outcome**: fixed
 - **Last-verified**: 2026-03-26
-- **Context**: Review skill referenced agent-patterns.json at wrong path. Corrected to `.dev-team/hooks/agent-patterns.json`. Path correctness is a recurring theme — verify paths in skill definitions during review. Seen: 3 times (this + doctor.ts K1 + status.ts K3).
+- **Context**: Review skill referenced agent-patterns.json at wrong path. Corrected to `.dev-team/hooks/agent-patterns.json`. Path correctness is a recurring theme — verify paths in skill definitions during review. Seen: 4 times (this + doctor.ts K1 + status.ts K3 + memory dir deming/ v1.7.0).
