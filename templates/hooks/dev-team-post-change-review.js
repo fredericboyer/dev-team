@@ -7,8 +7,7 @@
  * After a file is modified, flags which agents should review based on
  * the file's domain. Advisory only — always exits 0.
  *
- * Patterns are loaded from agent-patterns.json (shared with dev-team-review-gate.js).
- * Falls back to hardcoded patterns if the JSON file is missing or malformed.
+ * Patterns are loaded from agent-patterns.json via the shared lib/agent-patterns module.
  */
 
 "use strict";
@@ -31,205 +30,29 @@ if (!filePath) {
   process.exit(0);
 }
 
-// ─── Load agent patterns from shared JSON ────────────────────────────────────
+// ─── Load agent patterns from shared module ─────────────────────────────────
 
-/**
- * Compile a pattern entry from the JSON into a RegExp.
- * Entries are either a string (no flags) or [source, flags].
- */
-function compilePattern(entry) {
-  if (Array.isArray(entry)) {
-    return new RegExp(entry[0], entry[1] || "");
-  }
-  return new RegExp(entry);
-}
+const {
+  loadPatterns,
+  getPatterns: gp,
+  getSinglePattern: gsp,
+  getLabel: label,
+} = require("./lib/agent-patterns");
 
-/**
- * Load pattern categories from agent-patterns.json.
- * Returns null on failure (caller falls back to hardcoded).
- */
-function loadPatternsFromJSON() {
-  try {
-    const jsonPath = path.join(__dirname, "agent-patterns.json");
-    const data = JSON.parse(fs.readFileSync(jsonPath, "utf-8"));
-    const result = {};
-    for (const [key, value] of Object.entries(data)) {
-      if (value.patterns) {
-        result[key] = {
-          agent: value.agent,
-          label: value.label,
-          matchOn: value.matchOn || ["fullPath"],
-          compiled: value.patterns.map(compilePattern),
-        };
-      } else if (value.pattern) {
-        result[key] = { compiled: compilePattern(value.pattern) };
-      }
-    }
-    return result;
-  } catch {
-    return null;
-  }
-}
+const loaded = loadPatterns();
 
-// Hardcoded fallback patterns (kept in sync with agent-patterns.json)
-const FALLBACK_SECURITY_PATTERNS = [
-  /auth/,
-  /login/,
-  /password/,
-  /token/,
-  /session/,
-  /crypto/,
-  /encrypt/,
-  /decrypt/,
-  /secret/,
-  /permission/,
-  /rbac/,
-  /acl/,
-  /oauth/,
-  /jwt/,
-  /cors/,
-  /csrf/,
-  /sanitiz/,
-  /escap/,
-];
-const FALLBACK_API_PATTERNS = [
-  /\/api\//,
-  /\/routes?\//,
-  /\/endpoints?\//,
-  /schema/,
-  /\.graphql$/,
-  /\.proto$/,
-  /openapi/,
-  /swagger/,
-];
-const FALLBACK_FRONTEND_PATTERNS = [
-  /\/components?\//,
-  /\/pages?\//,
-  /\/views?\//,
-  /\/layouts?\//,
-  /\/ui\//,
-  /\.(css|scss|sass|less|styl)$/,
-  /\.(jsx|tsx)$/,
-  /tailwind/,
-  /styled/,
-];
-const FALLBACK_APP_CONFIG_PATTERNS = [/\.env/, /config/, /migration/, /database/, /\.sql$/];
-const FALLBACK_TOOLING_PATTERNS = [
-  /eslint/,
-  /prettier/,
-  /\.github\/workflows/,
-  /\.claude\//,
-  /tsconfig/,
-  /jest\.config/,
-  /vitest/,
-  /package\.json$/,
-  /\.husky/,
-];
-const FALLBACK_DOC_PATTERNS = [
-  /readme/,
-  /changelog/,
-  /\.md$/,
-  /\.mdx$/,
-  /\/docs?\//,
-  /api-doc/,
-  /jsdoc/,
-  /typedoc/,
-];
-const FALLBACK_DOC_DRIFT_PATTERNS = [
-  /(?:^|\/)src\/.*\.(ts|js)$/,
-  /(?:^|\/)templates\/agents\//,
-  /(?:^|\/)templates\/skills\//,
-  /(?:^|\/)templates\/hooks\//,
-  /(?:^|\/)src\/init\.(ts|js)$/,
-  /(?:^|\/)src\/cli\.(ts|js)$/,
-  /(?:^|\/)bin\//,
-  /(?:^|\/)package\.json$/,
-];
-const FALLBACK_ARCH_PATTERNS = [
-  /\/adr\//,
-  /architecture/,
-  /\/modules?\//,
-  /\/layers?\//,
-  /\/core\//,
-  /\/domain\//,
-  /\/shared\//,
-  /\/lib\//,
-  /\/plugins?\//,
-  /\/middleware\//,
-  /tsconfig/,
-  /webpack|vite|rollup|esbuild/,
-];
-const FALLBACK_RELEASE_PATTERNS = [
-  /package\.json$/,
-  /pyproject\.toml$/,
-  /cargo\.toml$/i,
-  /changelog/i,
-  /version/,
-  /\.github\/workflows\/.*release/,
-  /\.github\/workflows\/.*publish/,
-  /\.github\/workflows\/.*deploy/,
-  /\.npmrc$/,
-  /\.npmignore$/,
-  /release\.config/,
-  /lerna\.json$/,
-];
-const FALLBACK_OPS_PATTERNS = [
-  /dockerfile/,
-  /docker-compose/,
-  /\.dockerignore$/,
-  /\.github\/workflows\//,
-  /\.gitlab-ci/,
-  /jenkinsfile/i,
-  /terraform\//,
-  /pulumi\//,
-  /cloudformation\//,
-  /helm\//,
-  /k8s\//,
-  /\.tf$/,
-  /\.tfvars$/,
-  /health[-_]?check/,
-  /(?:^|\/)(?:monitoring|prometheus|grafana|datadog)\.(?:ya?ml|json|conf|config|toml)$/,
-  /(?:^|\/)(?:logging|logs)\.(?:ya?ml|json|conf|config|toml)$/,
-  /(?:^|\/)(?:alerting|alerts?)\.(?:ya?ml|json|conf|config|toml)$/,
-  /(?:^|\/)(?:observability|otel|opentelemetry)\.(?:ya?ml|json|conf|config|toml)$/,
-  /(?<!\/src)\/(?:monitoring|logging|alerting|observability)\//,
-  /\.env\.example$/,
-  /\.env\.template$/,
-  /env\.template$/,
-];
-const FALLBACK_CODE_FILE = /\.(js|ts|jsx|tsx|py|rb|go|java|rs|c|cpp|cs)$/;
-const FALLBACK_TEST_FILE = /\.(test|spec)\.|_test\.|__tests__|\/tests?\//;
-
-const loaded = loadPatternsFromJSON();
-
-function getPatterns(key) {
-  return loaded && loaded[key] ? loaded[key].compiled : null;
-}
-function getCategory(key) {
-  return loaded && loaded[key] ? loaded[key] : null;
-}
-function getSinglePattern(key) {
-  return loaded && loaded[key] ? loaded[key].compiled : null;
-}
-
-const SECURITY_PATTERNS = getPatterns("security") || FALLBACK_SECURITY_PATTERNS;
-const API_PATTERNS = getPatterns("api") || FALLBACK_API_PATTERNS;
-const FRONTEND_PATTERNS = getPatterns("frontend") || FALLBACK_FRONTEND_PATTERNS;
-const APP_CONFIG_PATTERNS = getPatterns("appConfig") || FALLBACK_APP_CONFIG_PATTERNS;
-const TOOLING_PATTERNS = getPatterns("tooling") || FALLBACK_TOOLING_PATTERNS;
-const DOC_PATTERNS = getPatterns("docs") || FALLBACK_DOC_PATTERNS;
-const DOC_DRIFT_PATTERNS = getPatterns("docDrift") || FALLBACK_DOC_DRIFT_PATTERNS;
-const ARCH_PATTERNS = getPatterns("architecture") || FALLBACK_ARCH_PATTERNS;
-const RELEASE_PATTERNS = getPatterns("release") || FALLBACK_RELEASE_PATTERNS;
-const OPS_PATTERNS = getPatterns("operations") || FALLBACK_OPS_PATTERNS;
-const codeFilePattern = getSinglePattern("codeFile") || FALLBACK_CODE_FILE;
-const testFilePattern = getSinglePattern("testFile") || FALLBACK_TEST_FILE;
-
-// Resolve labels from JSON or use defaults
-function label(key, fallback) {
-  const cat = getCategory(key);
-  return cat && cat.label ? cat.label : fallback;
-}
+const SECURITY_PATTERNS = gp(loaded, "security");
+const API_PATTERNS = gp(loaded, "api");
+const FRONTEND_PATTERNS = gp(loaded, "frontend");
+const APP_CONFIG_PATTERNS = gp(loaded, "appConfig");
+const TOOLING_PATTERNS = gp(loaded, "tooling");
+const DOC_PATTERNS = gp(loaded, "docs");
+const DOC_DRIFT_PATTERNS = gp(loaded, "docDrift");
+const ARCH_PATTERNS = gp(loaded, "architecture");
+const RELEASE_PATTERNS = gp(loaded, "release");
+const OPS_PATTERNS = gp(loaded, "operations");
+const codeFilePattern = gsp(loaded, "codeFile");
+const testFilePattern = gsp(loaded, "testFile");
 
 // ─── Pattern matching ────────────────────────────────────────────────────────
 
@@ -240,32 +63,32 @@ const flags = [];
 
 // Security-sensitive patterns → flag for Szabo
 if (SECURITY_PATTERNS.some((p) => p.test(fullPath) || p.test(basename))) {
-  flags.push(`@dev-team-szabo (${label("security", "security surface changed")})`);
+  flags.push(`@dev-team-szabo (${label(loaded, "security", "security surface changed")})`);
 }
 
 // API/contract patterns → flag for Mori
 if (API_PATTERNS.some((p) => p.test(fullPath))) {
-  flags.push(`@dev-team-mori (${label("api", "API contract may affect UI")})`);
+  flags.push(`@dev-team-mori (${label(loaded, "api", "API contract may affect UI")})`);
 }
 
 // Frontend/UI component patterns → flag for Rams (design system review)
 if (FRONTEND_PATTERNS.some((p) => p.test(fullPath))) {
-  flags.push(`@dev-team-rams (${label("frontend", "design system compliance review")})`);
+  flags.push(`@dev-team-rams (${label(loaded, "frontend", "design system compliance review")})`);
 }
 
 // App config patterns → flag for Voss
 if (APP_CONFIG_PATTERNS.some((p) => p.test(fullPath))) {
-  flags.push(`@dev-team-voss (${label("appConfig", "app config/data change")})`);
+  flags.push(`@dev-team-voss (${label(loaded, "appConfig", "app config/data change")})`);
 }
 
 // Tooling patterns → flag for Deming
 if (TOOLING_PATTERNS.some((p) => p.test(fullPath))) {
-  flags.push(`@dev-team-deming (${label("tooling", "tooling change")})`);
+  flags.push(`@dev-team-deming (${label(loaded, "tooling", "tooling change")})`);
 }
 
 // Documentation patterns → flag for Tufte
 if (DOC_PATTERNS.some((p) => p.test(fullPath))) {
-  flags.push(`@dev-team-tufte (${label("docs", "documentation changed")})`);
+  flags.push(`@dev-team-tufte (${label(loaded, "docs", "documentation changed")})`);
 }
 
 // Doc-drift patterns → flag Tufte for implementation changes that may need doc updates
@@ -273,23 +96,27 @@ if (DOC_PATTERNS.some((p) => p.test(fullPath))) {
 const alreadyFlaggedTufte = flags.some((f) => f.startsWith("@dev-team-tufte"));
 if (!alreadyFlaggedTufte && DOC_DRIFT_PATTERNS.some((p) => p.test(fullPath))) {
   flags.push(
-    `@dev-team-tufte (${label("docDrift", "implementation changed — check for doc drift")})`,
+    `@dev-team-tufte (${label(loaded, "docDrift", "implementation changed — check for doc drift")})`,
   );
 }
 
 // Architecture patterns → flag for Brooks
 if (ARCH_PATTERNS.some((p) => p.test(fullPath))) {
-  flags.push(`@dev-team-brooks (${label("architecture", "architectural boundary touched")})`);
+  flags.push(
+    `@dev-team-brooks (${label(loaded, "architecture", "architectural boundary touched")})`,
+  );
 }
 
 // Release patterns → flag for Conway
 if (RELEASE_PATTERNS.some((p) => p.test(fullPath))) {
-  flags.push(`@dev-team-conway (${label("release", "version/release artifact changed")})`);
+  flags.push(`@dev-team-conway (${label(loaded, "release", "version/release artifact changed")})`);
 }
 
 // Operations/infra patterns → flag for Hamilton
 if (OPS_PATTERNS.some((p) => p.test(fullPath) || p.test(basename))) {
-  flags.push(`@dev-team-hamilton (${label("operations", "infrastructure/operations change")})`);
+  flags.push(
+    `@dev-team-hamilton (${label(loaded, "operations", "infrastructure/operations change")})`,
+  );
 }
 
 // Always flag Knuth and Brooks for non-test implementation files
