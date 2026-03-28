@@ -10,6 +10,10 @@ Follow semantic versioning (semver). Read the project's manifest file for the cu
 - **Minor** — new features, non-breaking changes
 - **Major** — breaking changes
 
+### Version targeting
+
+Every issue must target the right milestone based on its scope. This applies at all points — batch pre-assessment, ad-hoc issue creation mid-session, or backlog grooming. If obvious, just assign. Flag ambiguous cases to the human (e.g., a change that could be considered breaking).
+
 ## Branching
 <!-- What branch naming convention does this project use? -->
 
