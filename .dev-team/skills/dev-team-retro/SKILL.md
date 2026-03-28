@@ -1,6 +1,7 @@
 ---
 name: dev-team:retro
 description: Audit the health of your project's dev-team knowledge base — learnings, agent memory, and CLAUDE.md. Finds stale entries, contradictions, enforcement gaps, and promotion opportunities. Use periodically or after major changes.
+disable-model-invocation: true
 ---
 
 Assess the health of the dev-team knowledge base for: $ARGUMENTS
@@ -9,7 +10,7 @@ Assess the health of the dev-team knowledge base for: $ARGUMENTS
 
 This skill audits **only update-safe files** — files that survive `dev-team update`:
 
-- `.dev-team/learnings.md` — shared project learnings
+- `.claude/rules/dev-team-learnings.md` — shared project learnings
 - `.dev-team/agent-memory/*/MEMORY.md` — per-agent calibration memory
 - Project `CLAUDE.md` — project instructions (content outside `<!-- dev-team:begin/end -->` markers)
 
@@ -18,15 +19,16 @@ This skill audits **only update-safe files** — files that survive `dev-team up
 ## Setup
 
 1. Read the following files to build a complete picture:
-   - `.dev-team/learnings.md`
+   - `.claude/rules/dev-team-learnings.md`
    - All `.dev-team/agent-memory/*/MEMORY.md` files (use Glob to discover them)
    - The project's `CLAUDE.md` (root of repo)
    - `.dev-team/config.json` (to know which agents are installed)
+   - `.claude/rules/dev-team-process.md` (orchestration protocol and workflow rules)
    - `.dev-team/metrics.md` (if it exists — calibration metrics log)
 
 2. If `$ARGUMENTS` specifies a focus area (e.g., "learnings", "memory", "claude.md"), scope the audit to that area only. Otherwise, audit all three.
 
-## Phase 1: Learnings audit (`.dev-team/learnings.md`)
+## Phase 1: Learnings audit (`.claude/rules/dev-team-learnings.md`)
 
 Check for:
 
@@ -65,6 +67,30 @@ Apply this classification to:
 - Learnings that are really agent-specific calibration and should move to the appropriate agent's `MEMORY.md`
 - Learnings currently in `CLAUDE.md` that are purely discoverable — flag for removal
 
+## Phase 1b: Process file audit (`.claude/rules/dev-team-process.md`)
+
+Check `.claude/rules/dev-team-process.md` for:
+
+### Staleness
+- References to agent names, hook scripts, or workflow steps that no longer exist
+- Orchestration rules that describe removed or renamed commands
+- References to old file paths, deprecated tools, or outdated conventions
+
+### Contradictions
+- Rules that conflict with `.claude/rules/dev-team-learnings.md` (e.g., process says "sequential reviews" but learnings say "parallel reviews")
+- Instructions that contradict the project's `CLAUDE.md`
+- Workflow descriptions that disagree with actual hook or agent behavior
+
+### Completeness
+- Workflow rules documented in `.claude/rules/dev-team-learnings.md` that describe process but are missing from `process.md`
+- Orchestration patterns that agents follow in practice but are not documented here
+- Missing sections that a new agent or developer would need to understand the workflow
+
+### Accuracy
+- Verify orchestration claims against actual agent definitions in `.dev-team/agents/`
+- Verify hook trigger descriptions against actual hook scripts in `.dev-team/hooks/`
+- Verify naming conventions and parallel execution rules against observed behavior in recent git history
+
 ## Phase 2: Agent memory audit (`.dev-team/agent-memory/*/MEMORY.md`)
 
 Check each agent's memory file for:
@@ -76,10 +102,10 @@ Check each agent's memory file for:
 ### Staleness
 - Memory entries that reference files, patterns, or decisions that no longer exist
 - Calibration notes about overruled findings when the underlying code has since changed
-- Entries that duplicate what is already in `.dev-team/learnings.md` (should be deduplicated)
+- Entries that duplicate what is already in `.claude/rules/dev-team-learnings.md` (should be deduplicated)
 
 ### Inconsistencies
-- Agent memory that contradicts `.dev-team/learnings.md`
+- Agent memory that contradicts `.claude/rules/dev-team-learnings.md`
 - Agent memory that contradicts another agent's memory (e.g., Szabo says "auth uses sessions" but Voss says "auth uses JWT")
 - Agent memory that contradicts `CLAUDE.md`
 
@@ -91,7 +117,7 @@ Check each agent's memory file for:
 - Scan each agent's `MEMORY.md` for entries that describe project-wide patterns, conventions, or rules rather than agent-specific calibration
 - Examples of promotable entries: "all API endpoints require rate limiting" (Szabo), "we always use transactions for multi-table writes" (Voss), "components must support keyboard navigation" (Mori)
 - Examples of non-promotable entries: "I tend to over-flag SQL injection in parameterized queries" (agent-specific calibration), "coverage is weak in the parser module" (agent-specific observation)
-- Flag entries that would benefit other agents if promoted to `.dev-team/learnings.md`
+- Flag entries that would benefit other agents if promoted to `.claude/rules/dev-team-learnings.md`
 - Classify each as `[SUGGESTION]` with the specific entry text and recommended shared learning wording
 - After an entry is promoted to shared learnings, the original agent memory entry should be removed or replaced with a cross-reference to avoid the duplication that the Staleness check flags
 
@@ -105,7 +131,7 @@ Check the project's `CLAUDE.md` for:
 - Agent descriptions or hook triggers that are outdated
 
 ### Completeness
-- Important patterns from `.dev-team/learnings.md` that should be in `CLAUDE.md` but are not
+- Important patterns from `.claude/rules/dev-team-learnings.md` that should be in `CLAUDE.md` but are not
 - Missing sections that a new developer would need (build commands, test commands, architecture overview)
 - Installed agents or hooks not mentioned in `CLAUDE.md`
 
@@ -118,7 +144,7 @@ Check the project's `CLAUDE.md` for:
 
 ### Instruction surface health
 - Count lines in the CLAUDE.md managed section (between `<!-- dev-team:begin -->` and `<!-- dev-team:end -->` markers) — flag as `[RISK]` if over 100 lines
-- Scan `.dev-team/learnings.md` using the **AGENTS.md Verdict** classification (see Phase 1 table):
+- Scan `.claude/rules/dev-team-learnings.md` using the **AGENTS.md Verdict** classification (see Phase 1 table):
   - Entries in PROMOTE categories (tool preferences, test quirks, legacy traps, custom middleware warnings) belong in learnings or `CLAUDE.md` — do NOT flag these for removal
   - Entries in DO NOT PROMOTE categories (codebase structure, language/framework, directory tree, tech stack overview) are discoverable — flag each for removal
 - Report a "discoverable content ratio": number of discoverable-flagged entries / total entries (excluding tool preferences and quirks from the count)
@@ -207,6 +233,7 @@ Provide a simple health score:
 | Area | Status | Issues |
 |------|--------|--------|
 | Learnings | healthy / needs attention / unhealthy | count by severity |
+| Process | healthy / needs attention / unhealthy | count by severity |
 | Agent Memory | healthy / needs attention / unhealthy | count by severity |
 | CLAUDE.md | healthy / needs attention / unhealthy | count by severity |
 | Metrics | healthy / needs attention / unhealthy | count by severity |

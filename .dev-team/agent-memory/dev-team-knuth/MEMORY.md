@@ -13,7 +13,7 @@
 
 ### [2026-03-25] mergeClaudeMd append-on-missing-END-marker duplicate BEGIN edge case
 - **Type**: RISK [verified]
-- **Source**: .dev-team/learnings.md (known tech debt)
+- **Source**: .claude/rules/dev-team-learnings.md (known tech debt)
 - **Tags**: boundary-condition, merge-logic
 - **Outcome**: verified
 - **Last-verified**: 2026-03-25

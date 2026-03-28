@@ -9,7 +9,7 @@
 - **Tags**: documentation, structure
 - **Outcome**: verified
 - **Last-verified**: 2026-03-25
-- **Context**: README.md at root. CHANGELOG.md follows Keep a Changelog format. docs/adr/ contains ADRs with README index. CLAUDE.md serves as project instructions for Claude Code. .dev-team/learnings.md holds shared team knowledge.
+- **Context**: README.md at root. CHANGELOG.md follows Keep a Changelog format. docs/adr/ contains ADRs with README index. CLAUDE.md serves as project instructions for Claude Code. .claude/rules/dev-team-learnings.md holds shared team knowledge.
 
 ### [2026-03-25] CHANGELOG follows Keep a Changelog with semver — used in release workflow
 - **Type**: PATTERN [verified]

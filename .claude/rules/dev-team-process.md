@@ -36,6 +36,7 @@ Semantic versioning (semver). Version source: `package.json`.
 - **Aggressively parallelize independent work.** When multiple issues touch independent files, work them simultaneously. Only sequence issues that have file conflicts.
 - **Agent teams** (preferred for multi-issue batches): The main conversation loop acts as Drucker (team lead). Spawn implementation teammates via agent teams, each on its own branch. Never delegate to a Drucker subagent — the main loop IS Drucker.
 - **Worktree subagents** (fallback when agent teams are unavailable): Use the Agent tool with `isolation: "worktree"` to spawn parallel workstreams in separate worktrees.
+- **Worktree isolation for multi-branch work.** When agent teams work on multiple branches simultaneously, shared working directories cause cross-branch contamination (stray commits, reverted edits, lost work). Prefer worktree isolation when available. v1.7.0 experienced 3 stray commits and 1 agent re-spawn from this issue.
 - The main loop must stay interactive at all times. All implementation happens via background teammates or subagents.
 
 **Agent teammate naming convention:** Use `{agent}-{role}[-{qualifier}]`:

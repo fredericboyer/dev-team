@@ -45,19 +45,11 @@
 
 ### [2026-03-27] README structure guidelines (#447)
 - **Type**: RESEARCH [completed]
-- **Source**: issue #447
+- **Source**: Issue #447, PR #452
 - **Tags**: readme, documentation, scaffolding, validation
 - **Outcome**: brief written to `docs/research/447-readme-structure-guidelines-2026-03-28.md`
 - **Last-verified**: 2026-03-27
-- **Calibration**: README best practices are stable and well-documented — high-confidence research area. The tiered model (5 essential + recommended) synthesizes consensus across Make a README, Good Docs Project, and OSS survey. Key decision: validation over scaffolding — dev-team should check README quality, not generate READMEs. Established projects (Tailwind, Next.js) can get away with minimal READMEs; most projects cannot. README vs CLAUDE.md boundary is clean: humans vs agents, marketing vs directives.
-
-### [2026-03-27] README structure guidelines research (#447) — validation over scaffolding
-- **Type**: CALIBRATION [verified]
-- **Source**: Issue #447, PR #452
-- **Tags**: research, readme, validation, calibration
-- **Outcome**: accepted
-- **Last-verified**: 2026-03-27
-- **Context**: High-confidence research area — README best practices are stable and well-documented. Key calibration: tiered model (5 essential + recommended) synthesizes consensus across established sources. Established projects can deviate; most cannot. Research confirmed that dev-team should check README quality, not generate READMEs. Brief written to `docs/research/447-readme-structure-guidelines-2026-03-28.md`.
+- **Calibration**: README best practices are stable and well-documented — high-confidence research area. The tiered model (5 essential + recommended) synthesizes consensus across Make a README, Good Docs Project, and OSS survey. Key decision: validation over scaffolding — dev-team should check README quality, not generate READMEs. Established projects can get away with minimal READMEs; most projects cannot. README vs CLAUDE.md boundary is clean: humans vs agents, marketing vs directives.
 
 ### [2026-03-26] Research-first approach validated in v1.6.0
 - **Type**: PATTERN [verified]

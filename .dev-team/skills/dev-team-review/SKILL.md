@@ -1,6 +1,7 @@
 ---
 name: dev-team:review
 description: Orchestrated multi-agent parallel review. Use to review a PR, branch, or set of changes with multiple specialist agents simultaneously. Spawns agents based on changed file patterns and produces a unified review summary.
+disable-model-invocation: true
 ---
 
 Run a multi-agent parallel review of: $ARGUMENTS
@@ -12,29 +13,23 @@ Run a multi-agent parallel review of: $ARGUMENTS
    - If a directory or file pattern is given, review those files
    - If no argument, review all uncommitted changes (`git diff HEAD`)
 
-2. Categorize changed files by domain to determine which agents to spawn:
+2. Categorize changed files by domain to determine which agents to spawn. File-pattern-to-agent routing follows `.dev-team/hooks/agent-patterns.json` — the same patterns used by the post-change-review and review-gate hooks. Read that file to map changed files to the appropriate specialist agents.
 
-| File pattern | Agent | Reason |
-|---|---|---|
-| `auth`, `login`, `password`, `token`, `session`, `crypto`, `encrypt`, `decrypt`, `secret`, `permission`, `rbac`, `acl`, `oauth`, `jwt`, `cors`, `csrf`, `sanitiz`, `escap` | @dev-team-szabo | Security surface |
-| `/api/`, `/route/`, `/routes/`, `/endpoint/`, `/endpoints/`, `schema`, `.graphql`, `.proto`, `openapi`, `swagger` | @dev-team-mori | API/UI contract |
-| `docker`, `Dockerfile`, `docker-compose`, `.dockerignore`, `.env.example`, `env.template`, `deploy`, `terraform/`, `.tf`, `.tfvars`, `pulumi/`, `cloudformation/`, `helm`, `k8s`, `kubernetes`, `health-check`, `healthcheck`, `monitoring.yml`, `monitoring.yaml`, `monitoring.json`, `observability`, `otel`, `alerting.yml`, `alerting.yaml`, `alerting.json`, `logging.yml`, `logging.yaml`, `logging.json`, `.github/workflows`, `.gitlab-ci`, `jenkinsfile` | @dev-team-hamilton | Infrastructure |
-| `.env`, `config`, `migration`, `database`, `.sql` | @dev-team-voss | Backend/data layer |
-| `.github/workflows`, `.claude/`, `tsconfig`, `eslint`, `prettier`, `jest.config`, `vitest`, `.husky`, `package.json` | @dev-team-deming | Tooling |
-| `readme`, `changelog`, `.md`, `.mdx`, `/docs/`, `api-doc`, `jsdoc`, `typedoc` | @dev-team-tufte | Documentation |
-| `/adr/`, `architecture`, `/modules/`, `/layers/`, `/core/`, `/domain/`, `/shared/`, `/lib/`, `/plugins/`, `/middleware/`, `tsconfig`, `webpack`, `vite`, `rollup`, `esbuild` | @dev-team-brooks | Architecture |
-| `package.json`, `pyproject.toml`, `cargo.toml`, `version`, `changelog`, `.npmrc`, `.npmignore`, `release.config`, `lerna.json`, release/publish/deploy workflows | @dev-team-conway | Release artifacts |
-| `/components/`, `/pages/`, `/views/`, `/layouts/`, `/ui/`, `.css`, `.scss`, `.sass`, `.less`, `.jsx`, `.tsx`, `tailwind`, `styled` | @dev-team-rams | Design system compliance |
-| `*.test.*`, `*.spec.*`, `__tests__/`, `/test/`, `/tests/` (code files only) | @dev-team-beck | Test quality |
-| Any `.js`, `.ts`, `.py`, `.go`, `.java`, `.rs` (non-test) | @dev-team-knuth | Quality/coverage |
-
-3. Always include @dev-team-szabo. For non-test code changes, also always include @dev-team-knuth and @dev-team-brooks; for test-only changes, ensure @dev-team-beck is included.
+3. **Always-on reviewers** (spawn regardless of file patterns):
+   - **@dev-team-szabo** — always included (security review)
+   - **@dev-team-knuth** — included for any non-test code changes (quality/coverage)
+   - **@dev-team-brooks** — included for any non-test code changes (architecture)
+   - **@dev-team-beck** — included for test-only changes (test quality)
 
 ## Pre-review validation
 
 Before spawning reviewers, verify the changes are reviewable:
 1. **Non-empty diff**: The diff contains actual changes to review. If empty, report "nothing to review" and stop.
 2. **Tests pass**: If the project has a test command, confirm tests pass. Flag test failures in the review report header.
+
+## Security preamble
+
+Before starting the review, check for open security alerts using the project's security monitoring process (e.g., a `/security-status` skill or CLAUDE.md guidance). If no such process or tooling is available, note this explicitly in the review report and proceed with a manual review of security-sensitive changes. Flag any critical findings in the review report.
 
 ## Execution
 
@@ -51,7 +46,7 @@ Before spawning reviewers, verify the changes are reviewable:
 ## Filter findings (judge pass)
 
 Before producing the report, filter raw findings to maximize signal quality:
-1. **Remove contradictions**: Drop findings that contradict existing ADRs (`docs/adr/`), learnings (`.dev-team/learnings.md`), or agent memory (`.dev-team/agent-memory/*/MEMORY.md`)
+1. **Remove contradictions**: Drop findings that contradict existing ADRs (`docs/adr/`), learnings (`.claude/rules/dev-team-learnings.md`), or agent memory (`.dev-team/agent-memory/*/MEMORY.md`)
 2. **Deduplicate**: When multiple agents flag the same issue, keep the most specific finding
 3. **Consolidate suggestions**: Group `[SUGGESTION]`-level items into a single summary block
 4. **Suppress generated file findings**: Skip findings on generated, vendored, or build artifacts
@@ -96,9 +91,9 @@ Original finding summary.
 
 State the verdict clearly. List what must be fixed for approval if requesting changes.
 
-### Security preamble
+### Platform detection
 
-Before starting the review, check for open security alerts using the project's security monitoring process (e.g., a `/security-status` skill or CLAUDE.md guidance). If no such process or tooling is available, note this explicitly in the review report and proceed with a manual review of security-sensitive changes. Flag any critical findings in the review report.
+Before issuing any `gh issue`, `gh pr`, or other platform-specific CLI commands, check `.dev-team/config.json` for the `platform` and `issueTracker` fields. If the project specifies a non-GitHub platform (e.g., `"gitlab"`, `"bitbucket"`, `"other"`), adapt issue tracker and PR commands accordingly — use `glab` for GitLab, the Bitbucket API, or the appropriate CLI for the configured platform. If `platform` is absent from config.json, default to `"github"`. The steps in this skill assume GitHub by default.
 
 ### Completion
 
@@ -109,8 +104,9 @@ After the review report is delivered:
    - **Generate calibration rules** when 3+ findings on the same tag are overruled
    - **Record metrics** to `.dev-team/metrics.md`
    - Write entries to each participating agent's MEMORY.md using the structured format
-   - Update shared learnings in `.dev-team/learnings.md`
+   - Update shared learnings in `.claude/rules/dev-team-learnings.md`
    - Check cross-agent coherence
 2. If Borges was not spawned, the review is INCOMPLETE.
-3. **Memory formation gate**: After Borges runs, verify that each participating reviewer's MEMORY.md contains at least one new structured entry from this review.
-4. Include Borges's recommendations in the final report.
+3. **Metrics completion gate**: Read `.dev-team/metrics.md` and verify that Borges has appended a new `Task: <reference>` entry for this review. The reference should match whatever identifier the review used (PR number, branch name, directory/pattern, or a label for uncommitted changes). A stale metrics file (no new entry) means Borges did not complete successfully. If metrics.md has no new entry after Borges reports completion, flag this as a system failure and re-run Borges with explicit instruction to record metrics for this review.
+4. **Memory formation gate**: After Borges runs, verify that each participating reviewer's MEMORY.md contains at least one new structured entry from this review.
+5. Include Borges's recommendations in the final report.
