@@ -27,7 +27,7 @@
 - `status.ts` checks wrong learnings path after v1.6.0 migration (#432, v1.6.1).
 - File operations (renameSync, copyFile) follow symlinks without lstat guards (#433, v1.7.0).
 - User-controlled regex patterns lack complexity bounds — ReDoS risk (#434, v1.7.0).
-- Hook code duplication: cachedGitDiff copy-pasted, fallback patterns duplicate agent-patterns.json (#436, #437, v1.7.0).
+- Hook code duplication: fallback patterns duplicate agent-patterns.json (#437, v1.7.0). cachedGitDiff extracted to shared module (#436, fixed).
 
 ## Quality Benchmarks
 
