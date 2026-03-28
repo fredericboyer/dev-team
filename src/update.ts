@@ -522,6 +522,21 @@ export async function update(targetDir: string): Promise<void> {
     }
   }
 
+  // Copy hook support files (lib/ directory) — shared modules used by hooks
+  const hookLibSrcDir = path.join(templates, "hooks", "lib");
+  if (dirExists(hookLibSrcDir)) {
+    const libFiles = listFilesRecursive(hookLibSrcDir);
+    for (const libFile of libFiles) {
+      const relative = path.relative(hookLibSrcDir, libFile);
+      const libDest = path.join(hooksDir, "lib", relative);
+      const srcContent = readFile(libFile);
+      const destContent = readFile(libDest);
+      if (srcContent !== destContent) {
+        copyFile(libFile, libDest);
+      }
+    }
+  }
+
   // Step 4: Update settings
   const settingsPath = path.join(claudeDir, "settings.json");
   const settingsContent = readFile(path.join(templates, "settings.json"));
