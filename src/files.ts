@@ -243,6 +243,57 @@ export function getPackageVersion(): string {
 }
 
 /**
+ * Creates a symlink at symlinkPath pointing to symlinkTarget.
+ * Skips if a non-symlink (real file/dir) already exists at the path.
+ * Removes stale symlinks before creating. Falls back to junction on Windows
+ * when symlink creation fails due to permissions.
+ */
+export function ensureSymlink(symlinkPath: string, symlinkTarget: string): void {
+  // Skip if path exists and is NOT a symlink (user's real directory — preserve it)
+  let isNonSymlink = false;
+  try {
+    isNonSymlink = fs.existsSync(symlinkPath) && !fs.lstatSync(symlinkPath).isSymbolicLink();
+  } catch {
+    // ENOENT — path doesn't exist, proceed to create symlink
+  }
+  if (isNonSymlink) return;
+
+  try {
+    fs.mkdirSync(path.dirname(symlinkPath), { recursive: true });
+    // Remove existing symlink (broken or stale) — only unlink symlinks, not real files/dirs
+    try {
+      if (fs.lstatSync(symlinkPath).isSymbolicLink()) {
+        fs.unlinkSync(symlinkPath);
+      }
+    } catch {
+      // ENOENT is expected when no prior symlink exists
+    }
+    fs.symlinkSync(symlinkTarget, symlinkPath);
+  } catch (err) {
+    // On Windows, non-admin users get EPERM/EACCES for symlinks — fall back to junction
+    if (
+      process.platform === "win32" &&
+      ((err as NodeJS.ErrnoException).code === "EPERM" ||
+        (err as NodeJS.ErrnoException).code === "EACCES")
+    ) {
+      try {
+        fs.symlinkSync(symlinkTarget, symlinkPath, "junction");
+      } catch (junctionErr) {
+        const skillDir = path.basename(symlinkPath);
+        console.warn(
+          `  Warning: could not create skill symlink for ${skillDir}: ${(junctionErr as Error).message}`,
+        );
+      }
+    } else {
+      const skillDir = path.basename(symlinkPath);
+      console.warn(
+        `  Warning: could not create skill symlink for ${skillDir}: ${(err as Error).message}`,
+      );
+    }
+  }
+}
+
+/**
  * Lists all files in a directory recursively.
  */
 export function listFilesRecursive(dir: string): string[] {

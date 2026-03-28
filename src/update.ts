@@ -11,6 +11,7 @@ import {
   listSubdirectories,
   listFilesRecursive,
   getPackageVersion,
+  ensureSymlink,
 } from "./files.js";
 import type { HookSettings, HookMatcher } from "./files.js";
 import fs from "fs";
@@ -592,47 +593,7 @@ export async function update(targetDir: string): Promise<void> {
   for (const skillDir of discoveredSkills) {
     const symlinkPath = path.join(claudeSkillsDir, skillDir);
     const symlinkTarget = path.relative(claudeSkillsDir, path.join(skillsDir, skillDir));
-    // Skip if path exists and is NOT a symlink (user's real directory — preserve it)
-    let isNonSymlink = false;
-    try {
-      isNonSymlink = fs.existsSync(symlinkPath) && !fs.lstatSync(symlinkPath).isSymbolicLink();
-    } catch {
-      // ENOENT — path doesn't exist, proceed to create symlink
-    }
-    if (!isNonSymlink) {
-      // Create symlink if target doesn't exist, or repair existing symlink
-      try {
-        fs.mkdirSync(path.dirname(symlinkPath), { recursive: true });
-        // Remove existing symlink (broken or stale) — only unlink symlinks, not real files/dirs
-        try {
-          if (fs.lstatSync(symlinkPath).isSymbolicLink()) {
-            fs.unlinkSync(symlinkPath);
-          }
-        } catch {
-          // ENOENT is expected when no prior symlink exists
-        }
-        fs.symlinkSync(symlinkTarget, symlinkPath);
-      } catch (err) {
-        // On Windows, non-admin users get EPERM/EACCES for symlinks — fall back to junction
-        if (
-          process.platform === "win32" &&
-          ((err as NodeJS.ErrnoException).code === "EPERM" ||
-            (err as NodeJS.ErrnoException).code === "EACCES")
-        ) {
-          try {
-            fs.symlinkSync(symlinkTarget, symlinkPath, "junction");
-          } catch (junctionErr) {
-            console.warn(
-              `  Warning: could not create skill symlink for ${skillDir}: ${(junctionErr as Error).message}`,
-            );
-          }
-        } else {
-          console.warn(
-            `  Warning: could not create skill symlink for ${skillDir}: ${(err as Error).message}`,
-          );
-        }
-      }
-    }
+    ensureSymlink(symlinkPath, symlinkTarget);
   }
 
   // Step 6: Update CLAUDE.md (preserves user content outside markers)

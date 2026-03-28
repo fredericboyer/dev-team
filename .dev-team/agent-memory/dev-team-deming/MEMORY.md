@@ -115,6 +115,14 @@
 - **Last-verified**: 2026-03-26
 - **Context**: review-gate.test.js exists but is not included in the npm test glob. Tests are not running in CI.
 
+### [2026-03-27] Symlink creation extracted to ensureSymlink() in files.ts
+- **Type**: DECISION [verified]
+- **Source**: Issue #441
+- **Tags**: duplication, files, dx
+- **Outcome**: fixed
+- **Last-verified**: 2026-03-27
+- **Context**: ~30 lines of identical symlink creation with Windows junction fallback existed in both init.ts and update.ts. Extracted to ensureSymlink() in files.ts. Also removed unused fs import from init.ts. Part of the hook/utility dedup series (#436, #437).
+
 ## Calibration Log
 <!-- Challenges accepted/overruled — tunes adversarial intensity over time -->
 
