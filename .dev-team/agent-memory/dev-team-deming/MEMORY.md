@@ -100,12 +100,12 @@
 - **Context**: cachedGitDiff was copy-pasted across 3 hooks (tdd-enforce, pre-commit-gate, review-gate). Extracted to `templates/hooks/lib/git-cache.js`. All 3 hooks now `require("./lib/git-cache")`. init.ts and update.ts updated to copy lib/ directory. Remaining duplication: fallback pattern arrays (#437, still open).
 
 ### [2026-03-26] CI gap: no npm audit step
-- **Type**: SUGGESTION [open]
+- **Type**: SUGGESTION [resolved]
 - **Source**: Codebase audit, Issue #440
 - **Tags**: ci, security, npm, dx
-- **Outcome**: accepted — issue created for v1.7.0
-- **Last-verified**: 2026-03-26
-- **Context**: CI runs build/test/lint/validate but does not run npm audit. Adding an audit step would catch known vulnerabilities in dependencies before release.
+- **Outcome**: fixed — `audit-dependencies` job added to CI (PR for #440)
+- **Last-verified**: 2026-03-27
+- **Context**: Added `audit-dependencies` job running `npm audit --audit-level=high` as a separate CI job, consistent with one-concern-per-job pattern. Only blocks on high/critical severity.
 
 ### [2026-03-27] review-gate.test.js added to test script (Issue #435)
 - **Type**: SUGGESTION [resolved]
