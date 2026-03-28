@@ -19,6 +19,8 @@ const { execFileSync } = require("child_process");
 const fs = require("fs");
 const path = require("path");
 
+const { safeRegex } = require("./lib/safe-regex");
+
 const { cachedGitDiff } = require("./lib/git-cache");
 let stagedFiles = "";
 try {
@@ -170,7 +172,8 @@ try {
   // Config missing or invalid — use default
 }
 
-if (new RegExp("^" + taskBranchPattern).test(currentBranch)) {
+const branchResult = safeRegex("^" + taskBranchPattern);
+if (branchResult.safe && branchResult.regex.test(currentBranch)) {
   const hasMetricsUpdate = files.some((f) => f.endsWith(".dev-team/metrics.md"));
   if (!hasMetricsUpdate) {
     console.warn(

@@ -126,6 +126,14 @@
 ## Calibration Log
 <!-- Challenges accepted/overruled — tunes adversarial intensity over time -->
 
+### [2026-03-27] ReDoS guard: safe-regex.js shared module for user-controlled patterns
+- **Type**: DECISION [verified]
+- **Source**: Issue #434, branch fix/434-redos-guard
+- **Tags**: hooks, security, shared-module, regex
+- **Outcome**: fixed
+- **Last-verified**: 2026-03-27
+- **Context**: User-controlled regex from config.json (watchLists[].pattern, taskBranchPattern) was compiled without validation. Created `templates/hooks/lib/safe-regex.js` — checks for nested quantifiers and quantified backreferences, rejects patterns >1024 chars. Applied to dev-team-watch-list.js and dev-team-pre-commit-gate.js. agent-patterns.js left unchanged — it reads developer-authored agent-patterns.json (different trust boundary). Pattern: hooks should validate at system boundaries (user config) but can trust shipped data files.
+
 ### [2026-03-26] Audit baseline: 14 findings (0 DEFECT, 1 RISK, 1 QUESTION, 12 SUGGESTION)
 - **Type**: CALIBRATION
 - **Source**: Full codebase audit 2026-03-26
