@@ -23,10 +23,28 @@ export function templateDir(): string {
 }
 
 /**
+ * Throws if the given path exists and is a symlink.
+ * Prevents symlink-following attacks in file operations.
+ */
+export function assertNotSymlink(absPath: string): void {
+  try {
+    if (fs.lstatSync(absPath).isSymbolicLink()) {
+      throw new Error(`Refusing to operate on symlink: ${absPath}`);
+    }
+  } catch (err: unknown) {
+    if ((err as NodeJS.ErrnoException).code === "ENOENT") return;
+    throw err;
+  }
+}
+
+/**
  * Copies a file from src to dest, creating parent directories as needed.
+ * Rejects symlinks at src or dest to prevent symlink-following attacks.
  * Returns true if the file was written.
  */
 export function copyFile(src: string, dest: string): boolean {
+  assertNotSymlink(src);
+  assertNotSymlink(dest);
   const dir = path.dirname(dest);
   fs.mkdirSync(dir, { recursive: true });
   fs.copyFileSync(src, dest);
