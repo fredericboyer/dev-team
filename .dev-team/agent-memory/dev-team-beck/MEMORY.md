@@ -35,6 +35,14 @@
 - **Last-verified**: 2026-03-25
 - **Context**: TDD enforcement hook ensures tests exist for implementation changes. Part of the hook enforcement suite. See ADR-004 for TDD enforcement rationale.
 
+### [2026-03-27] process.exit stubs must throw to halt execution
+- **Type**: PATTERN [verified]
+- **Source**: status.test.js implementation
+- **Tags**: testing, process-exit, stub
+- **Outcome**: fixed
+- **Last-verified**: 2026-03-27
+- **Context**: When testing functions that call process.exit(), a no-op stub allows execution to continue past the exit point, causing crashes on subsequent code that assumes valid state. The stub must throw a sentinel error that the test harness catches.
+
 ## Framework and Runner Notes
 
 
