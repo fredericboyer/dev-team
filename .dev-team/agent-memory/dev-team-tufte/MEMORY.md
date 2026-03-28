@@ -43,6 +43,14 @@
 - **Last-verified**: 2026-03-26
 - **Context**: All ADRs use the Nygard lightweight format. No frontmatter, no YAML. Title line is `# ADR-NNN: Title`. Status line values: proposed, accepted, deprecated, superseded by ADR-NNN, amended by ADR-NNN.
 
+### [2026-03-27] AGENTS.md Verdict framework codified in retro skill for promotion/removal decisions
+- **Type**: DECISION [verified]
+- **Source**: Issue #445 implementation
+- **Tags**: retro, promotion, discoverable, verdict
+- **Outcome**: accepted
+- **Last-verified**: 2026-03-27
+- **Context**: Retro skill Phase 1 and Phase 3 now use an explicit classification table to distinguish PROMOTE categories (tool preferences, test quirks, legacy traps, custom middleware warnings) from DO NOT PROMOTE categories (codebase structure, language/framework, directory tree, tech stack overview). Previously the retro would flag tool preferences as discoverable, which contradicted the AGENTS.md Verdict principle already documented in design principles. oxlint/oxfmt entry was the first concrete promotion under this framework.
+
 ## Patterns to Watch For
 
 

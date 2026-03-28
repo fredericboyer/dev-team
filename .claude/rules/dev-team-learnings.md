@@ -4,7 +4,7 @@
 
 ## Coding Conventions
 
-- Use oxlint for linting, oxfmt for formatting (not ESLint/Prettier). See ADR-007.
+- oxlint/oxfmt tool preference promoted to `CLAUDE.md` Development section (see ADR-007).
 
 ## Process
 

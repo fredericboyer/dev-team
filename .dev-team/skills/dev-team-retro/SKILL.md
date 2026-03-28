@@ -45,9 +45,25 @@ Check for:
 - Learnings about process that are not reflected in `CLAUDE.md`
 
 ### Promotion opportunities
-- Learnings that are mature enough to become formal project instructions in `CLAUDE.md`
+
+Before flagging an entry as "discoverable" or recommending promotion, classify it using the **AGENTS.md Verdict** framework:
+
+| Category | Action | Examples |
+|----------|--------|----------|
+| **Tool preference** | PROMOTE to `CLAUDE.md` | "Use oxlint not ESLint", "uv not pip", "pnpm not npm" |
+| **Test quirk** | PROMOTE to `CLAUDE.md` | "Run with `--no-cache`", "Tests require Docker running" |
+| **Legacy trap** | PROMOTE to `CLAUDE.md` | "Don't touch `old_auth.py` — migrating in Q3", "v1 API routes are frozen" |
+| **Custom middleware warning** | PROMOTE to `CLAUDE.md` | "Our `withAuth` HOC requires server component", "Rate limiter reads from Redis" |
+| **Codebase structure** | DO NOT promote — discoverable | "src/ contains TypeScript source", "Tests are in `__tests__/`" |
+| **Language/framework** | DO NOT promote — discoverable | "Uses React 18", "Written in Go" |
+| **Directory tree** | DO NOT promote — discoverable | "Components are in `src/components/`" |
+| **Tech stack overview** | DO NOT promote — discoverable | "PostgreSQL database with Redis cache" |
+
+Apply this classification to:
+- Learnings that are mature enough to become formal project instructions in `CLAUDE.md` — only if they fall into the PROMOTE categories above
 - Learnings that should be elevated to an ADR in `docs/adr/`
 - Learnings that are really agent-specific calibration and should move to the appropriate agent's `MEMORY.md`
+- Learnings currently in `CLAUDE.md` that are purely discoverable — flag for removal
 
 ## Phase 2: Agent memory audit (`.dev-team/agent-memory/*/MEMORY.md`)
 
@@ -102,8 +118,10 @@ Check the project's `CLAUDE.md` for:
 
 ### Instruction surface health
 - Count lines in the CLAUDE.md managed section (between `<!-- dev-team:begin -->` and `<!-- dev-team:end -->` markers) — flag as `[RISK]` if over 100 lines
-- Scan `.dev-team/learnings.md` for entries that describe information discoverable from code or config files (e.g., tech stack, project structure, framework choices) — flag each for removal
-- Report a "discoverable content ratio": number of flagged entries / total entries
+- Scan `.dev-team/learnings.md` using the **AGENTS.md Verdict** classification (see Phase 1 table):
+  - Entries in PROMOTE categories (tool preferences, test quirks, legacy traps, custom middleware warnings) belong in learnings or `CLAUDE.md` — do NOT flag these for removal
+  - Entries in DO NOT PROMOTE categories (codebase structure, language/framework, directory tree, tech stack overview) are discoverable — flag each for removal
+- Report a "discoverable content ratio": number of discoverable-flagged entries / total entries (excluding tool preferences and quirks from the count)
 
 ## Phase 4: Calibration metrics audit (`.dev-team/metrics.md`)
 
