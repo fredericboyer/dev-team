@@ -57,7 +57,7 @@ describe("Node.js project scenario", () => {
 
     // Hooks installed in .dev-team/
     const hooks = fs.readdirSync(path.join(tmpDir, ".dev-team", "hooks"));
-    assert.equal(hooks.length, 8);
+    assert.equal(hooks.length, 9); // 8 hook files + lib/ directory
 
     // Existing CLAUDE.md preserved
     const claudeMd = fs.readFileSync(path.join(tmpDir, "CLAUDE.md"), "utf-8");
@@ -95,7 +95,9 @@ describe("Node.js project scenario", () => {
     const hookFiles = fs.readdirSync(hookDir);
 
     for (const file of hookFiles) {
-      const content = fs.readFileSync(path.join(hookDir, file), "utf-8");
+      const fullPath = path.join(hookDir, file);
+      if (fs.statSync(fullPath).isDirectory()) continue; // skip lib/ subdirectory
+      const content = fs.readFileSync(fullPath, "utf-8");
       assert.ok(content.startsWith("#!/usr/bin/env node"), `${file} should have node shebang`);
     }
   });

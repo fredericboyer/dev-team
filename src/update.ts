@@ -528,14 +528,18 @@ export async function update(targetDir: string): Promise<void> {
     }
   }
 
-  // Copy shared hook lib modules (required by hooks at runtime)
-  const hookLibSrc = path.join(templates, "hooks", "lib", "git-cache.js");
-  if (fileExists(hookLibSrc)) {
-    const hookLibDest = path.join(hooksDir, "lib", "git-cache.js");
-    const srcContent = readFile(hookLibSrc);
-    const destContent = readFile(hookLibDest);
-    if (srcContent !== destContent) {
-      copyFile(hookLibSrc, hookLibDest);
+  // Copy hook support files (lib/ directory) — shared modules used by hooks
+  const hookLibSrcDir = path.join(templates, "hooks", "lib");
+  if (dirExists(hookLibSrcDir)) {
+    const libFiles = listFilesRecursive(hookLibSrcDir);
+    for (const libFile of libFiles) {
+      const relative = path.relative(hookLibSrcDir, libFile);
+      const libDest = path.join(hooksDir, "lib", relative);
+      const srcContent = readFile(libFile);
+      const destContent = readFile(libDest);
+      if (srcContent !== destContent) {
+        copyFile(libFile, libDest);
+      }
     }
   }
 

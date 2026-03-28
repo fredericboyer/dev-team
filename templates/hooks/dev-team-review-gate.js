@@ -25,9 +25,9 @@
 const { createHash } = require("crypto");
 const { execFileSync } = require("child_process");
 const fs = require("fs");
-const os = require("os");
 const path = require("path");
 
+const { cachedGitDiff } = require("./lib/git-cache");
 let input = {};
 try {
   input = JSON.parse(process.argv[2] || "{}");
@@ -293,45 +293,6 @@ function isGatedFile(filePath) {
   const isTestFile = testFilePattern.test(fullPath);
   // Gate implementation code files, not test files or non-code files
   return isCodeFile && !isTestFile;
-}
-
-// ─── Cached git diff (shared pattern with pre-commit-gate.js) ───────────────
-
-function cachedGitDiff(args, timeoutMs) {
-  const cwdHash = createHash("md5").update(process.cwd()).digest("hex").slice(0, 8);
-  const argsKey = args.join("-").replace(/[^a-zA-Z0-9-]/g, "");
-  const cacheFile = path.join(os.tmpdir(), `dev-team-git-cache-${cwdHash}-${argsKey}.txt`);
-  let skipWrite = false;
-  try {
-    const stat = fs.lstatSync(cacheFile);
-    if (stat.isSymbolicLink()) {
-      try {
-        fs.unlinkSync(cacheFile);
-      } catch {
-        skipWrite = true;
-      }
-    } else if (Date.now() - stat.mtimeMs < 5000) {
-      return fs.readFileSync(cacheFile, "utf-8");
-    }
-  } catch {
-    // No cache or stale
-  }
-  const result = execFileSync("git", args, { encoding: "utf-8", timeout: timeoutMs });
-  if (!skipWrite) {
-    try {
-      const tmpFile = `${cacheFile}.${process.pid}.tmp`;
-      fs.writeFileSync(tmpFile, result, { mode: 0o600 });
-      fs.renameSync(tmpFile, cacheFile);
-      try {
-        fs.chmodSync(cacheFile, 0o600);
-      } catch {
-        /* best effort */
-      }
-    } catch {
-      // Best effort
-    }
-  }
-  return result;
 }
 
 /**
