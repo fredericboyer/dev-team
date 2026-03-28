@@ -6,13 +6,6 @@ user_invocable: true
 
 Merge a pull request with full monitoring: $ARGUMENTS
 
-## Release PRs
-
-**Conway/release PRs MUST use this merge skill.** Release PRs (version bumps, changelog updates, release branches) require the same Copilot review handling and CI verification as any other PR — do not bypass this process for releases. When merging a release PR, pay extra attention to:
-- Changelog completeness (all PRs since last release are documented)
-- Version bump correctness (semver compliance)
-- No draft or WIP markers left in release notes
-
 ## Setup
 
 1. Determine the PR number:
