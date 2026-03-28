@@ -28,7 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Internal
 - Add `review-gate.test.js` to test script (#435).
 - Extract `cachedGitDiff` into shared hook module `templates/hooks/lib/git-cache.js` (#436).
-- Extract fallback patterns into shared module `templates/hooks/lib/agent-patterns.js` (#437).
+- Centralize pattern loading into shared module `templates/hooks/lib/agent-patterns.js`, remove ~200 lines of inline fallback arrays (#437).
 - Extract symlink creation logic into `files.ts` helper (#441).
 
 ## [1.6.1] - 2026-03-27

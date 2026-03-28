@@ -104,5 +104,5 @@
 - **Fix rate (DEFECTs)**: 100% (2/2 unique)
 - **Defer rate (advisory)**: 0% (0/5)
 - **Duration**: single session, 7 PRs (#449-#455)
-- **Notes**: First formal review wave with in-team agents since v1.2.0 (v1.5.0-v1.6.0 used Copilot-only). 12 issues resolved, all audit-derived tech debt from v1.6.0. Key themes: symlink hardening (Szabo), path correctness (Knuth — 4th instance), process.exit stub pattern (cross-agent convergence by Szabo+Knuth+Brooks on same finding). Operational issue: agent teams sharing working directory caused cross-branch contamination — 3 stray commits on wrong branches, 1 agent re-spawn needed. Worktree isolation recommended for future multi-branch work.
+- **Notes**: First formal review wave with in-team agents since v1.2.0 (v1.5.0-v1.6.0 used Copilot-only). 12 issues addressed (10 closed via PRs, 2 moved to v1.8.0), all audit-derived tech debt from v1.6.0. Key themes: symlink hardening (Szabo), path correctness (Knuth — 4th instance), process.exit stub pattern (cross-agent convergence by Szabo+Knuth+Brooks on same finding). Operational issue: agent teams sharing working directory caused cross-branch contamination — 3 stray commits on wrong branches, 1 agent re-spawn needed. Worktree isolation recommended for future multi-branch work.
 
