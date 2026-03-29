@@ -77,7 +77,7 @@ When issues are sequenced due to file conflicts, ensure each completed change is
 ### Handling unresponsive agents
 
 Background agents can get stuck without producing output. Apply this escalation pattern:
-1. If an agent has not reported progress (status file, message, or commit) within **3 minutes**, send a status ping via `SendMessage`.
+1. If an agent has not reported progress (status file, message, or commit) within **2 minutes**, send a status ping via `SendMessage`.
 2. If no response within **1 additional minute**, terminate the agent.
 3. Assess what was completed: check for partial output (status files, commits, branch changes).
 4. Either re-spawn a fresh agent with the remaining work, or complete the work yourself.

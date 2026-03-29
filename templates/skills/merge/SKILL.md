@@ -167,6 +167,8 @@ If new comments appeared, repeat 1b. Otherwise proceed to Step 2.
 
 ## Step 2: Set auto-merge
 
+**GATE: Do NOT proceed to this step until Step 1 (Copilot review) is fully complete with all findings addressed. Setting auto-merge before addressing Copilot findings causes PRs to merge with unresolved comments.**
+
 ```bash
 gh pr merge {number} --squash --auto --delete-branch
 ```
