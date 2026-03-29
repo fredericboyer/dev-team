@@ -41,7 +41,7 @@
 - **Tags**: hooks, enforcement, review-loop, dx
 - **Outcome**: verified
 - **Last-verified**: 2026-03-26
-- **Context**: dev-team-review-gate.js is a PreToolUse hook on Bash intercepting git commit. Two gates: (1) review evidence — checks sidecar files exist in .dev-team/.reviews/ for each staged impl file, (2) findings resolution — blocks on unresolved [DEFECT] findings. Content hash in sidecar filenames ensures stale reviews don't match. LIGHT reviews are advisory only. --skip-review is the escape hatch. Supersedes ADR-013 approach (tracking file removed in PR #113).
+- **Context**: Two gates: review evidence (sidecar files in .dev-team/.reviews/) + findings resolution (blocks unresolved DEFECTs). Content hash ensures stale reviews don't match. LIGHT advisory. --skip-review escape hatch. Supersedes ADR-013.
 
 ## Hook Effectiveness
 
@@ -166,10 +166,26 @@
 - **Last-verified**: 2026-03-29
 - **Context**: Task skill Step 2 (Review) now delegates to /dev-team:review with --embedded flag instead of inlining review instructions. Review skill gains --embedded mode for compact output consumed by task orchestration. Compact summary passthrough documented for subsequent review rounds. --reviewers flag removed from review skill (breaking change — task controls reviewer selection).
 
-### [2026-03-26] Audit baseline: 14 findings (0 DEFECT, 1 RISK, 1 QUESTION, 12 SUGGESTION)
+### [2026-03-29] v1.10.0: Merge skill auto-merge timing guard (#489)
+- **Type**: DECISION [new]
+- **Source**: #489, PR #512
+- **Tags**: skills, merge, auto-merge, timing, dx
+- **Outcome**: fixed
+- **Last-verified**: 2026-03-29
+- **Context**: Merge skill now enforces: wait for Copilot review → address all findings → then set auto-merge. Previously auto-merge could be set preemptively, causing PRs to merge with unresolved Copilot findings (v1.8.0 PR #484). Guard applies to both .dev-team/ and .claude/ copies.
+
+### [2026-03-29] v1.10.0: Scorecard skill updated for /dev-team:extract awareness (#494)
+- **Type**: DECISION [new]
+- **Source**: #494, PR #510
+- **Tags**: skills, scorecard, extract, borges, dx
+- **Outcome**: fixed
+- **Last-verified**: 2026-03-29
+- **Context**: Scorecard now checks for /dev-team:extract invocation (the new Borges entry point) in addition to direct Borges agent spawning. Without this, scorecard would always report "Borges not spawned" for v1.9.0+ workflows that use the extract skill.
+
+### [2026-03-26] Audit baseline: 14 findings, 0 DEFECT, all accepted
 - **Type**: CALIBRATION
 - **Source**: Full codebase audit 2026-03-26
 - **Tags**: audit, calibration, baseline
-- **Outcome**: all accepted — 14 issues created
+- **Outcome**: all accepted
 - **Last-verified**: 2026-03-26
-- **Context**: First full tooling audit. Zero DEFECTs — tooling infrastructure is solid. High SUGGESTION count (12) reflects maturity — the codebase is past critical issues, now in refinement phase. Primary themes: hook code consolidation (D1/D2), CI hardening (npm audit), test coverage expansion, and migration completeness (cross-validates Knuth K1/K3).
+- **Context**: First full tooling audit. Zero DEFECTs. Themes: hook consolidation, CI hardening, test coverage, migration completeness. Details in metrics.md.

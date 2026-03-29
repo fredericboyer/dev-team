@@ -99,6 +99,14 @@
 - **Last-verified**: 2026-03-29
 - **Context**: First delivery with full adversarial review loop since v1.8.0 process gap. 20 raw findings (14 unique after cross-branch dedup), 0 DEFECTs, 10 accepted, 3 deferred, 7 ignored. Higher ignore rate (50%) is acceptable — all ignored findings were self-answered questions or minor wording issues with no functional impact. Skill composability pattern established (extract + review --embedded). New entries written: Szabo (1), Knuth (2), Brooks (2), Deming (2), Turing (1). Last-verified bumped on 3 existing entries (Knuth vocabulary, Deming skill invocation, Brooks task decomposition). 2 new tech debt items added to shared learnings (#493, #494). 1 new design principle added (skill composability). Retro ran pre-implementation; retro issues (#489-#491) tracked separately.
 
+### [2026-03-29] v1.10.0 extraction — 4 retro issues, 4 PRs, 12 findings, 60% acceptance
+- **Type**: MILESTONE [verified]
+- **Source**: v1.10.0 retro-derived task (#489, #490, #493, #494; PRs #509-#512)
+- **Tags**: metrics, calibration, extraction
+- **Outcome**: verified
+- **Last-verified**: 2026-03-29
+- **Context**: 4 retro-derived issues resolved. 12 raw findings (10 unique after dedup), 2 DEFECTs fixed, 4 accepted, 4 ignored, 0 overruled. 60% acceptance rate — within healthy band. Stray commits recurred (2nd time after v1.7.0). Zero-overrule alert triggered at n>=87 in-team findings. New entries: Szabo (1), Knuth (2), Brooks (1), Deming (2), Tufte (1). 1 new shared learning (parallel branch shared-file conflicts). Deming at 191 lines — approaching 200-cap, compressed 2 entries. No stale entries (all within 4 days).
+
 ### [2026-03-29] v1.8.0 post-hoc extraction — 12 issues, 12 PRs, Copilot-only review
 - **Type**: MILESTONE [verified]
 - **Source**: v1.8.0 task loop (12 issues, 12 PRs #470-#483)

@@ -102,7 +102,7 @@
 - **Context**: Task skill decomposed into 4 explicit steps with shared definitions between single-issue and parallel modes. Both modes reference the same step definitions — prevents drift. Review step changed from batched waves to per-PR-as-it-lands. This is an architectural boundary: step definitions are the contract between task orchestration and agent execution.
 
 ### [2026-03-29] v1.9.0: Skill composability pattern — extract + review as sub-skills
-- **Type**: DECISION [new]
+- **Type**: DECISION [verified]
 - **Source**: PR #492, PR #496
 - **Tags**: architecture, skills, composability, orchestration
 - **Outcome**: accepted
@@ -116,6 +116,14 @@
 - **Outcome**: accepted
 - **Last-verified**: 2026-03-29
 - **Context**: Task skill now controls reviewer selection (no longer passed via --reviewers to review skill). This is a breaking change for anyone invoking /dev-team:review directly with --reviewers. Must be called out in v1.9.0 release notes. The --embedded pattern subsumes the old --reviewers interface.
+
+### [2026-03-29] v1.10.0: 4-way learnings merge conflict — sequential merge ordering required
+- **Type**: PATTERN [new]
+- **Source**: PR #509/#510/#511/#512, findings #3/#4
+- **Tags**: orchestration, merging, learnings, parallel-branches
+- **Outcome**: accepted
+- **Last-verified**: 2026-03-29
+- **Context**: Four parallel branches all edited dev-team-learnings.md, creating a 4-way merge conflict. Resolved via sequential merge ordering with conflict resolution between each merge. Same class as "sequential chains must integrate-as-you-go" — parallel branches touching shared files require merge coordination, not just sequential chains.
 
 ## Calibration Log
 <!-- Challenges accepted/overruled — tunes adversarial intensity over time -->
