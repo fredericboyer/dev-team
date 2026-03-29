@@ -205,6 +205,33 @@ If `.dev-team/metrics.md` exists and contains entries, analyze:
 - Which implementing agents are used most frequently?
 - Are reviewers consistently finding issues in specific domains? This may indicate an implementing agent needs calibration
 
+## Phase 5: Harness assumption audit (`docs/design/harness-assumptions.md`)
+
+Each retro should include a lightweight check: "Which dev-team components compensate for model limitations that may no longer exist?"
+
+1. Read `docs/design/harness-assumptions.md`. If the file does not exist, skip this phase and flag as:
+   ```
+   **[RISK]** Harness — Missing assumptions registry: `docs/design/harness-assumptions.md` not found.
+   Why this matters: without a documented list of harness assumptions, the team cannot systematically evaluate whether components are still necessary as model capabilities evolve.
+   ```
+
+2. For each listed assumption, evaluate whether it is still valid given current model capabilities. Consider:
+   - Has the underlying model limitation been resolved or significantly improved?
+   - Does the component provide value beyond compensating for the limitation (e.g., defense-in-depth)?
+   - Would removing the component introduce regression risk?
+
+3. Flag assumptions that may be outdated as:
+   ```
+   **[SUGGESTION]** Harness — Assumption may be outdated: "<assumption summary>"
+   Current status: <why it may no longer hold>
+   Simplification path: <specific component changes or removals to consider>
+   Risk if simplified: <what could go wrong>
+   ```
+
+4. Update the `Last-validated` date on each reviewed assumption to today's date.
+
+5. Include a summary in the health report under a **Harness assumptions** row in the health score table.
+
 ## Report
 
 Produce a structured health report:
@@ -261,6 +288,7 @@ Provide a simple health score:
 | Agent Memory | healthy / needs attention / unhealthy | count by severity |
 | CLAUDE.md | healthy / needs attention / unhealthy | count by severity |
 | Metrics | healthy / needs attention / unhealthy | count by severity |
+| Harness assumptions | healthy / needs attention / unhealthy | count by severity |
 | **Overall** | **status** | **total** |
 
 Thresholds:
