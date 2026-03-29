@@ -51,6 +51,14 @@
 - **Last-verified**: 2026-03-27
 - **Calibration**: README best practices are stable and well-documented — high-confidence research area. The tiered model (5 essential + recommended) synthesizes consensus across Make a README, Good Docs Project, and OSS survey. Key decision: validation over scaffolding — dev-team should check README quality, not generate READMEs. Established projects can get away with minimal READMEs; most projects cannot. README vs CLAUDE.md boundary is clean: humans vs agents, marketing vs directives.
 
+### [2026-03-29] Adversarial review health thresholds (#490)
+- **Type**: RESEARCH [completed]
+- **Source**: Issue #490
+- **Tags**: calibration, review, metrics, thresholds, false-positive
+- **Outcome**: brief written to `docs/research/490-adversarial-review-health-2026-03-29.md`
+- **Last-verified**: 2026-03-29
+- **Calibration**: AI code review precision data is abundant (4 independent benchmarks in 2025-2026) but no study directly addresses adversarial multi-agent review with project memory. Thresholds must be synthesized from adjacent domains (SAST FP rates, human review usefulness, AI review precision). Confidence is Medium — will increase to High after 3-5 more full adversarial review cycles. Key insight: 0% overrule at n=24 is insufficient data, not a calibration signal. The 60-85% acceptance rate band and 1-10% overrule rate band are grounded in multiple independent sources but should be recalibrated against dev-team's own data.
+
 ### [2026-03-26] Research-first approach validated in v1.6.0
 - **Type**: PATTERN [verified]
 - **Source**: v1.6.0 session (#406, #407 research briefs)
