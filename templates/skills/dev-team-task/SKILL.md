@@ -62,9 +62,9 @@ At each phase boundary, emit a structured status line before proceeding. This gi
 **Parallel mode (multiple issues):**
 ```
 [dev-team:task] Parallel mode — <N> branches implementing simultaneously
-[dev-team:task] <branch>: implementation complete (waiting for <N> others)
-[dev-team:task] All implementations complete — starting review wave
-[dev-team:task] Review wave <N> complete — <N> DEFECTs across <N> branches
+[dev-team:task] <branch>: implementation complete — starting review
+[dev-team:task] <branch>: review complete — <N> DEFECTs, merging/fixing
+[dev-team:task] <branch>: merged (or: <N> DEFECTs remaining, iteration <N>)
 [dev-team:task] Done — <N> PRs created
 ```
 
@@ -133,21 +133,21 @@ Drucker spawns one implementing agent per independent issue, each on its own bra
 
 **Sequential chain gate:** When issues are sequenced due to file conflicts, verify the previous change is integrated into the shared codebase before starting the next dependent task. Do not spawn the next agent until integration is confirmed. This is a hard gate.
 
-### Phase 2: Review wave
-Reviews do **not** start until **all** implementation agents have completed (Agent tool provides completion notifications as the sync barrier). Once all are done, spawn review agents using the naming convention `{agent}-review` (e.g., `szabo-review`, `knuth-review`, `brooks-review`) in parallel across all branches simultaneously. Each reviewer receives the diff for one specific branch and produces classified findings scoped to that branch.
+### Phase 2: Review as each PR lands
+Review each branch **the moment its implementing agent finishes** — do not wait for all implementations to complete. As soon as an agent reports completion and passes validation (non-empty diff, tests pass, relevance, clean tree), immediately spawn review agents using the naming convention `{agent}-review` (e.g., `szabo-review`, `knuth-review`, `brooks-review`) for that branch. Each reviewer receives the diff for one specific branch and produces classified findings scoped to that branch.
 
-### Phase 3: Finding routing
-Collect all findings across all branches. Route **all classified findings** — `[DEFECT]`, `[RISK]`, `[QUESTION]`, `[SUGGESTION]` — back to the original implementing agent for each branch. **Implementing agents must remain alive through the review wave** — do not shut them down after implementation completes. Each agent must acknowledge every finding (address/defer/dispute) directly. If an implementer was terminated prematurely, re-spawn it with a compact context (findings + their original diff) for acknowledgment. Disputes follow the same protocol as single-issue mode: one-round escalation between implementer and reviewer, then human decides. A disputed finding blocks only the affected branch, not the entire batch. Only `[DEFECT]` findings block progress. Agents fix defects on their own branch. Before spawning the next review wave, **compact context**: produce a structured summary of all findings, their classification, and outcome (fixed/deferred/disputed/pending), plus files changed. New reviewers receive current diff + compact summary only — not full conversation history from prior waves. Continue until no `[DEFECT]` findings remain or the per-branch iteration limit is reached.
+This means reviews and implementations run concurrently: some branches are under review while others are still being implemented. For sequential chains, the first branch in a chain enters review while the next dependent branch is being implemented — though the next branch still waits for the predecessor to merge before starting.
+
+If a branch's review finds zero `[DEFECT]` findings and all advisory findings are acknowledged, proceed immediately to merge (integrate-as-you-go). Do not wait for other branches to finish their reviews. A second-round review wave still applies if defects are found and fixed — but only for the affected branch.
+
+### Phase 3: Finding routing (per-branch)
+As each branch's review completes, route **all classified findings** — `[DEFECT]`, `[RISK]`, `[QUESTION]`, `[SUGGESTION]` — back to the original implementing agent for that branch. **Implementing agents must remain alive through their review cycle** — do not shut them down after implementation completes. Each agent must acknowledge every finding (address/defer/dispute) directly. If an implementer was terminated prematurely, re-spawn it with a compact context (findings + their original diff) for acknowledgment. Disputes follow the same protocol as single-issue mode: one-round escalation between implementer and reviewer, then human decides. A disputed finding blocks only the affected branch, not the entire batch. Only `[DEFECT]` findings block progress. Agents fix defects on their own branch. Before spawning a follow-up review round for a branch, **compact context**: produce a structured summary of all findings, their classification, and outcome (fixed/deferred/disputed/pending), plus files changed. New reviewers receive current diff + compact summary only — not full conversation history from prior rounds. Continue until no `[DEFECT]` findings remain on that branch or the per-branch iteration limit is reached. Branches that clear review proceed to merge immediately — they do not wait for other branches.
 
 ### Phase 4: Borges completion
-Borges runs **once** across all branches after the final review wave clears. Pass Borges the **finding outcome log** (see Completion step 3 for format) covering all branches. This ensures cross-branch coherence: memory files are consistent, learnings are not duplicated, metrics are recorded, and system improvement recommendations consider the full batch.
+Borges runs **once** across all branches after all per-branch reviews have cleared. Pass Borges the **finding outcome log** (see Completion step 3 for format) covering all branches. This ensures cross-branch coherence: memory files are consistent, learnings are not duplicated, metrics are recorded, and system improvement recommendations consider the full batch.
 
 ### Phase 5: Merge
-After all PRs are created, merge each via the project's merge skill (e.g., `/merge`) — not raw `gh pr merge` or other git commands. The merge skill handles automated review monitoring, CI verification, and post-merge actions.
-
-**Integrate-as-you-go:** Integrate completed work promptly as agents finish. Do not batch all integrations at the end of a session. Each integration makes the next agent's baseline current, reducing rework.
-
-**Integrate-as-you-go:** Integrate completed work promptly as agents finish. Do not batch all integrations at the end of a session. Each integration makes the next agent's baseline current, reducing rework.
+Merge each branch via the project's merge skill (e.g., `/merge`) as soon as its review clears — not raw `gh pr merge` or other git commands. The merge skill handles automated review monitoring, CI verification, and post-merge actions. Do not batch merges at the end — each integration makes the next agent's baseline current, reducing rework. For sequential chains, merging promptly unblocks the next dependent issue with zero idle time.
 
 ### Convergence criteria
 Parallel mode is complete when:
