@@ -126,7 +126,7 @@ export function dirExists(absPath: string): boolean {
 
 /**
  * Reads a file and returns its content, or null if it doesn't exist.
- * Throws on permission errors (EACCES/EPERM) to surface security-relevant failures.
+ * Throws on any error other than ENOENT (including EACCES, EPERM, EISDIR, etc.).
  */
 export function readFile(absPath: string): string | null {
   try {
