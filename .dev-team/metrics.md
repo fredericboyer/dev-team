@@ -114,11 +114,11 @@
   - Knuth: 0 DEFECT, 2 RISK (2 accepted), 2 SUGGESTION (2 accepted), 1 QUESTION (1 accepted) — 5 total (after dedup across branches)
   - Brooks: 0 DEFECT, 1 RISK (1 deferred #494), 3 SUGGESTION (1 accepted / 2 deferred #493), 2 QUESTION (1 accepted / 1 ignored) — 6 total (after dedup across branches)
 - **Unique findings**: 14 (after merging cross-branch duplicates from 20 raw)
-- **Acceptance rate**: 71% (10 accepted / 14 total)
+- **Acceptance rate**: 57% (8 accepted / 14 total)
 - **Overrule rate**: 0% (0/14)
 - **Fix rate (DEFECTs)**: N/A (0 DEFECTs)
 - **Defer rate (advisory)**: 21% (3/14 — #493 x2, #494)
-- **Ignore rate (advisory)**: 50% (7/14 — self-answered questions, minor wording, low priority)
+- **Ignore rate (advisory)**: 21% (3/14 — self-answered questions, minor wording)
 - **Duration**: single session, 2 branches (feat/485-extract-skill, feat/486-review-delegation)
 - **Notes**: First v1.9.0 delivery with full adversarial review loop restored (v1.8.0 had process gap). Skill composability pattern established — /dev-team:extract and /dev-team:review --embedded are now sub-skills of /dev-team:task. Turing research brief on adversarial review health thresholds (#490) produced calibration data. Retro ran pre-implementation. 3 issues created from retro (#489, #490, #491), 2 from review (#493, #494). Clean approve from Szabo (security-neutral refactor). Higher ignore rate (50%) reflects advisory findings on minor wording — no functional issues.
 
