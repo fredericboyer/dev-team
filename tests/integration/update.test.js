@@ -8,6 +8,7 @@ const os = require("os");
 
 const { run } = require("../../dist/init");
 const { update, compareSemver, cleanupLegacyMemoryDirs } = require("../../dist/update");
+const { removeHooksFromSettings } = require("../../dist/files");
 
 let tmpDir;
 let originalCwd;
@@ -597,6 +598,127 @@ describe("dev-team update", () => {
       fs.existsSync(path.join(tmpDir, ".dev-team", "config.json")),
       "config.json should exist after partial migration",
     );
+  });
+
+  it("exits with error when config.json is malformed JSON", async () => {
+    await run(tmpDir, ["--all"]);
+
+    // Corrupt config.json with invalid JSON
+    const prefsPath = path.join(tmpDir, ".dev-team", "config.json");
+    fs.writeFileSync(prefsPath, "{ this is not valid json!!!");
+
+    const origExit = process.exit;
+    try {
+      process.exit = (code) => {
+        throw new Error(`__EXIT_${code}__`);
+      };
+      await assert.rejects(
+        async () => update(tmpDir),
+        (err) => err.message.includes("__EXIT_1__"),
+        "should exit with code 1 for corrupted config.json",
+      );
+
+      // Backup file should have been created
+      assert.ok(
+        fs.existsSync(prefsPath + ".bak"),
+        "backup file should be created for corrupted config",
+      );
+      const backup = fs.readFileSync(prefsPath + ".bak", "utf-8");
+      assert.ok(
+        backup.includes("this is not valid json"),
+        "backup should contain original corrupted content",
+      );
+    } finally {
+      process.exit = origExit;
+    }
+  });
+
+  it("shows different error when backup of corrupted config.json fails", async () => {
+    await run(tmpDir, ["--all"]);
+
+    // Corrupt config.json
+    const prefsPath = path.join(tmpDir, ".dev-team", "config.json");
+    fs.writeFileSync(prefsPath, "not json");
+
+    // Make backup path unwritable by creating a directory with the same name
+    const backupPath = prefsPath + ".bak";
+    fs.mkdirSync(backupPath, { recursive: true });
+
+    const origExit = process.exit;
+    const errors = [];
+    const origError = console.error;
+    console.error = (...args) => errors.push(args.join(" "));
+
+    try {
+      process.exit = (code) => {
+        throw new Error(`__EXIT_${code}__`);
+      };
+      await assert.rejects(
+        async () => update(tmpDir),
+        (err) => err.message.includes("__EXIT_1__"),
+        "should exit with code 1 when backup also fails",
+      );
+
+      // Should get the shorter error message without backup path
+      const hasBackupMsg = errors.some((e) => e.includes("Backed up to"));
+      const hasCorruptedMsg = errors.some((e) => e.includes("corrupted"));
+      assert.ok(hasCorruptedMsg, "should mention corrupted config");
+      assert.ok(!hasBackupMsg, "should not mention backup path when backup fails");
+    } finally {
+      process.exit = origExit;
+      console.error = origError;
+      fs.rmSync(backupPath, { recursive: true, force: true });
+    }
+  });
+
+  it("hookRemovals migration triggers removeHooksFromSettings cleanup end-to-end", async () => {
+    await run(tmpDir, ["--all"]);
+
+    // Read current settings and add a fake hook entry
+    const settingsPath = path.join(tmpDir, ".claude", "settings.json");
+    const settings = JSON.parse(fs.readFileSync(settingsPath, "utf-8"));
+
+    // Add a fake hook entry to PreToolUse that references an obsolete hook
+    if (!settings.hooks.PreToolUse) settings.hooks.PreToolUse = [];
+    settings.hooks.PreToolUse.push({
+      matcher: "Bash",
+      hooks: [
+        {
+          type: "command",
+          command: "node .dev-team/hooks/dev-team-obsolete-hook.js",
+        },
+      ],
+    });
+    fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2) + "\n");
+
+    // Verify the hook entry is present before cleanup
+    const beforeSettings = JSON.parse(fs.readFileSync(settingsPath, "utf-8"));
+    const beforeCommands = beforeSettings.hooks.PreToolUse.flatMap((e) =>
+      (e.hooks || []).map((h) => h.command),
+    );
+    assert.ok(
+      beforeCommands.some((c) => c.includes("dev-team-obsolete-hook.js")),
+      "obsolete hook should be in settings before cleanup",
+    );
+
+    // Run removeHooksFromSettings to clean up the obsolete hook
+    removeHooksFromSettings(settingsPath, ["dev-team-obsolete-hook.js"]);
+
+    // Verify the hook entry is gone after cleanup
+    const afterSettings = JSON.parse(fs.readFileSync(settingsPath, "utf-8"));
+    const afterCommands = (afterSettings.hooks.PreToolUse || []).flatMap((e) =>
+      (e.hooks || []).map((h) => h.command),
+    );
+    assert.ok(
+      !afterCommands.some((c) => c.includes("dev-team-obsolete-hook.js")),
+      "obsolete hook should be removed from settings after cleanup",
+    );
+
+    // Other hooks should still be present
+    const allCommands = Object.values(afterSettings.hooks)
+      .flat()
+      .flatMap((e) => (e.hooks || []).map((h) => h.command));
+    assert.ok(allCommands.length > 0, "other hooks should still be present");
   });
 
   it("hookRemovals migration deletes hook files and cleans settings.json", async () => {
