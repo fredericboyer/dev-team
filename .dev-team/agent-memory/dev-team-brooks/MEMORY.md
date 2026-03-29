@@ -94,12 +94,28 @@
 - **Context**: init.ts now separates INFRA_HOOKS (always installed, not user-selectable) from QUALITY_HOOKS (opt-in). WorktreeCreate/WorktreeRemove are infrastructure hooks — they serialize worktree creation to work around Claude Code bugs (#34645, #39680). This is a TEMPORARY architectural pattern; remove when upstream fixes land. Brooks should watch for INFRA_HOOKS growth — infrastructure hooks bypass user choice.
 
 ### [2026-03-29] v1.8.0: Task skill 4-step decomposition (Implement, Review, Merge, Extract)
-- **Type**: DECISION [new]
+- **Type**: DECISION [verified]
 - **Source**: #481, PR #481
 - **Tags**: architecture, skills, task, orchestration
 - **Outcome**: accepted
 - **Last-verified**: 2026-03-29
 - **Context**: Task skill decomposed into 4 explicit steps with shared definitions between single-issue and parallel modes. Both modes reference the same step definitions — prevents drift. Review step changed from batched waves to per-PR-as-it-lands. This is an architectural boundary: step definitions are the contract between task orchestration and agent execution.
+
+### [2026-03-29] v1.9.0: Skill composability pattern — extract + review as sub-skills
+- **Type**: DECISION [new]
+- **Source**: PR #492, PR #496
+- **Tags**: architecture, skills, composability, orchestration
+- **Outcome**: accepted
+- **Last-verified**: 2026-03-29
+- **Context**: Two new composability patterns established: (1) /dev-team:extract extracted from task/retro as standalone skill with disable-model-invocation:true, (2) /dev-team:review gains --embedded flag for invocation by task skill. ADR-035 deferred (#493) to formally document the skill composability pattern. Brooks should watch for: skill interface drift (extract contract vs task expectations), scorecard awareness gap (#494), and --reviewers removal as breaking change for direct review invocation.
+
+### [2026-03-29] v1.9.0: --reviewers removal is a breaking change for direct review users
+- **Type**: RISK [accepted]
+- **Source**: PR #496 finding #20
+- **Tags**: architecture, skills, breaking-change, review
+- **Outcome**: accepted
+- **Last-verified**: 2026-03-29
+- **Context**: Task skill now controls reviewer selection (no longer passed via --reviewers to review skill). This is a breaking change for anyone invoking /dev-team:review directly with --reviewers. Must be called out in v1.9.0 release notes. The --embedded pattern subsumes the old --reviewers interface.
 
 ## Calibration Log
 <!-- Challenges accepted/overruled — tunes adversarial intensity over time -->

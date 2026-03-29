@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.9.0] - 2026-03-29
+
+### Added
+- `/dev-team:extract` sub-skill — Borges memory extraction decoupled from retro, invocable standalone (#485, #492).
+- Task skill delegates review rounds to `/dev-team:review --embedded` — unified review orchestration instead of inline reviewer spawning (#486, #496).
+
+### Changed
+- **BREAKING: `--reviewers` flag removed from task skill** — reviewer selection is now automatic via the review skill's routing logic. Manual reviewer override is no longer supported.
+- Merge skill step ordering learning codified: wait for Copilot review, address all findings, then set auto-merge. Prevents premature merge with unresolved findings.
+
+### Fixed
+- Copilot findings from post-v1.8.0 retro PR addressed (#484, #487).
+- README hooks count updated from 8 to 10 to reflect worktree hooks (#488).
+
+### Internal
+- Post-v1.8.0 retro cleanup and Borges memory extraction (#484).
+- Turing research brief and retro fixes (#495).
+
 ## [1.8.0] - 2026-03-29
 
 ### Added
