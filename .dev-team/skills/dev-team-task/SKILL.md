@@ -10,7 +10,7 @@ Start a task loop for: $ARGUMENTS
 
 1. Parse the task description and any flags:
    - `--max-iterations N` (default: 10)
-   - `--reviewers` (default: @dev-team-szabo, @dev-team-knuth, @dev-team-brooks)
+   - Reviewer selection is handled by `/dev-team:review` based on changed file patterns — no `--reviewers` flag needed
 
 2. Determine the right implementing agent based on the task:
    - Backend/API/data work -> @dev-team-voss
@@ -54,7 +54,7 @@ At each phase boundary, emit a structured status line before proceeding. This gi
 **Single-issue mode:**
 ```
 [dev-team:task] Step 1/4: Implement — <agent> on <branch>...
-[dev-team:task] Step 2/4: Review — <agents> in parallel (round <N>)...
+[dev-team:task] Step 2/4: Review — /dev-team:review --embedded (round <N>)...
 [dev-team:task] Step 3/4: Merge — /merge PR #NNN...
 [dev-team:task] Step 4/4: Extract — spawning Borges...
 [dev-team:task] Done — PR #NNN merged, <N> DEFECTs fixed
@@ -91,9 +91,16 @@ The implementing agent works on the task on a feature branch.
 
 ## Step 2: Review
 
-Spawn review agents in parallel as background tasks. Each reviewer receives the diff and produces classified findings.
+Call `/dev-team:review --embedded` with the current branch or PR as the argument. The review skill handles:
+- Agent selection based on changed file patterns
+- Spawning reviewers in parallel as background tasks
+- Timeout handling for unresponsive reviewers
+- The judge pass (filter/deduplicate/validate findings)
+- Producing a structured report with classified findings
 
-**Timeout**: If a reviewer has not reported progress within 3 minutes, send a status ping. If no response within 1 additional minute, terminate the reviewer and proceed with findings from the other reviewers.
+The `--embedded` flag tells the review skill to skip its Completion section (finding outcome log + `/dev-team:extract`) — the task skill handles extraction in Step 4.
+
+Receive the review report and proceed to finding routing below.
 
 ### Finding routing
 
@@ -117,8 +124,9 @@ The orchestrator verifies that **all** findings have an explicit outcome before 
 
 After the implementer has acknowledged all findings, **compact the context** before the next review round:
 - Produce a structured summary: all findings (agent, classification, file, status/outcome), files changed, outstanding items
-- New reviewers in subsequent rounds receive: current diff + compact summary + agent definition
-- They do NOT receive raw conversation history from prior rounds
+- This compact summary is available in the task skill's context for continuity across rounds
+
+Call `/dev-team:review --embedded` again for the next round, passing the compact summary as part of the arguments so that reviewers have prior-round context (which findings were raised, how they were resolved, and what remains outstanding). The review skill spawns fresh reviewers each round — they receive the current diff, the compact summary, and their agent definition. They do NOT receive raw conversation history from prior rounds.
 
 Continue iterating until no `[DEFECT]` remains or max iterations reached. If max iterations reached without convergence, report remaining defects and exit.
 
@@ -166,7 +174,7 @@ Drucker spawns one implementing agent per independent issue, each on its own bra
 **Sequential chain gate:** When issues are sequenced due to file conflicts, verify the previous change is integrated into the shared codebase before starting the next dependent task. Do not spawn the next agent until integration is confirmed. This is a hard gate.
 
 ### Steps 2–3 (per-branch, as each PR lands)
-Review each branch **the moment its implementing agent finishes** — do not wait for all implementations to complete. As soon as an agent reports completion and passes Step 1 validation (non-empty diff, tests pass, relevance, clean tree), immediately run Step 2 (review) for that branch.
+Review each branch **the moment its implementing agent finishes** — do not wait for all implementations to complete. As soon as an agent reports completion and passes Step 1 validation (non-empty diff, tests pass, relevance, clean tree), immediately call `/dev-team:review --embedded` for that branch.
 
 This means reviews and implementations run concurrently: some branches are under review while others are still being implemented. For sequential chains, the first branch in a chain enters review while the next dependent branch is being implemented — though the next branch still waits for the predecessor to merge before starting.
 
