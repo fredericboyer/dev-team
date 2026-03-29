@@ -67,6 +67,22 @@
 - **Last-verified**: 2026-03-29
 - **Context**: No direct studies on adversarial multi-agent review with project memory. Thresholds synthesized from SAST FP rates, human review usefulness surveys, and AI code review precision benchmarks (4 independent 2025-2026 sources). Recommended bands: 60-85% acceptance rate, 1-10% overrule rate. dev-team's 0% overrule at n=24 is insufficient data, not a calibration signal. Confidence: Medium — recalibrate after 3-5 more full adversarial cycles.
 
+### [2026-03-29] Agent runtime portability research (#264)
+- **Type**: RESEARCH [completed]
+- **Source**: Issue #264
+- **Tags**: portability, multi-runtime, AGENTS.md, MCP, adapters, standards
+- **Outcome**: brief written to `docs/research/264-agent-runtime-portability-2026-03-29.md`
+- **Last-verified**: 2026-03-29
+- **Calibration**: The agent runtime landscape has two settled standards (AGENTS.md for instructions, MCP for tools) and everything else is fragmented. Hooks, skills, memory, and multi-agent are not standardized — only Claude Code and Codex CLI have hooks, and their formats differ. The hybrid architecture (AGENTS.md core + MCP enforcement + runtime adapters) is the only approach that preserves dev-team's value. Key discovery: AAIF under Linux Foundation (Dec 2025) is the strongest convergence signal — AGENTS.md, MCP, and goose under one roof. Claude Code's non-adoption of AGENTS.md is the largest single portability risk. Runtime-specific formats churn fast (Cursor and Windsurf both deprecated original formats within months).
+
+### [2026-03-29] Standards landscape for coding agent interoperability
+- **Type**: CALIBRATION [verified]
+- **Source**: Issue #264 research
+- **Tags**: standards, AAIF, W3C, IETF, A2A, ACP, ANP
+- **Outcome**: completed
+- **Last-verified**: 2026-03-29
+- **Context**: Four agent communication protocols exist (MCP, A2A, ACP, ANP) but only MCP is relevant for coding agents — the others target enterprise orchestration or decentralized networks. W3C and IETF have early-stage work (AI Agent Protocol CG, AIDIP) but nothing targeting coding agent configuration. The AAIF is the only governance body that matters for this space. When researching agent standards, focus on AAIF projects (AGENTS.md, MCP) and skip the enterprise/network protocols unless the question specifically involves agent-to-agent delegation.
+
 ### [2026-03-26] Research-first approach validated in v1.6.0
 - **Type**: PATTERN [verified]
 - **Source**: v1.6.0 session (#406, #407 research briefs)
