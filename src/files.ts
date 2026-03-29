@@ -4,6 +4,8 @@ import path from "path";
 export interface HookEntry {
   type: string;
   command: string;
+  timeout?: number;
+  blocking?: boolean;
 }
 
 export interface HookMatcher {
