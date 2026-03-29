@@ -13,9 +13,11 @@ This skill supports two invocation modes:
 - **Standalone** (user calls `/dev-team:review` directly): Full review lifecycle including the Completion section (finding outcome log + `/dev-team:extract`).
 - **Embedded** (called by `/dev-team:task` during Step 2): Produce the review report and return findings to the caller. **Skip the Completion section entirely** — the task skill handles finding routing, iteration, and extraction in its own Steps 2 and 4. When called with the flag `--embedded`, operate in embedded mode.
 
-In embedded mode, the review skill produces its report and returns control to the task skill. The report format is identical in both modes.
+In embedded mode, the review skill produces its report and returns control to the task skill. The review report output (findings, filtered, verdict sections) is identical in both modes — the Completion section is a post-report lifecycle action, not part of the report itself.
 
 ## Setup
+
+0. **Parse flags:** If `$ARGUMENTS` contains `--embedded`, note embedded mode and strip the flag before processing the remaining arguments as the review target.
 
 1. Determine what to review:
    - If a PR number or branch is given, use `git diff` to get the changed files
