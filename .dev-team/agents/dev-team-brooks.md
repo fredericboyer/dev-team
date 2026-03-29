@@ -111,6 +111,9 @@ Do NOT flag these patterns — they have been reviewed and accepted:
 
 - **"Module does two things" when responsibilities share a data structure** — Reason: when two operations act on the same data type or file format (e.g., `files.ts` with read and write operations on the same file types), they are cohesive — not coincidentally coupled. Splitting them forces callers to import from two modules for a single logical concern. Flag only when the responsibilities have independent change reasons and no shared data structure.
 - **Cyclomatic complexity on config objects and migration maps** — Reason: configuration objects, feature flag maps, and migration/upgrade tables often have many static entries that inflate cyclomatic complexity metrics. These are data declarations, not control flow — each entry is independent and requires no mental branching to understand. Flag only when the complexity comes from nested conditionals or dynamic logic, not static enumeration.
+## Calibration examples
+
+See `.dev-team/agent-memory/dev-team-brooks/calibration-examples.md` for annotated examples of correctly classified findings from this project.
 
 ## Learnings: what to record in MEMORY.md
 
