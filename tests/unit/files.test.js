@@ -427,25 +427,20 @@ describe("assertNoSymlinkInPath", () => {
     assert.doesNotThrow(() => assertNoSymlinkInPath(p));
   });
 
-  it("throws when a parent directory is a symlink above the target", () => {
-    // Create: real/sub/ and linked -> real, then check linked/sub/file.txt
-    // The symlink is ABOVE the deepest existing directory (sub/), so it
-    // won't be resolved away by realpathSync on the deepest component.
+  it("resolves symlink ancestors via realpathSync without throwing", () => {
+    // assertNoSymlinkInPath resolves the deepest existing directory with
+    // realpathSync before walking upward. This means symlinks at or below
+    // the deepest existing directory are resolved away — by design, to
+    // avoid false positives on system-level symlinks like /tmp -> /private/tmp.
     const realTmpDir = fs.realpathSync(tmpDir);
     const realDir = path.join(realTmpDir, "real");
     const subDir = path.join(realDir, "sub");
     fs.mkdirSync(subDir, { recursive: true });
     const linkDir = path.join(realTmpDir, "linked");
     fs.symlinkSync(realDir, linkDir);
-    // Target: linked/sub/nonexistent.txt — deepest existing is linked/sub
-    // realpathSync(linked/sub) = real/sub, then walk up from real/sub
-    // But linked is resolved away... the function resolves the full chain.
-    //
-    // This is the documented design tradeoff: realpathSync resolves attacker
-    // symlinks at or below the deepest existing dir. The function catches
-    // symlinks injected AFTER resolution (e.g., race conditions).
-    // For this test, verify the function at least doesn't throw on clean paths.
-    const p = path.join(subDir, "nonexistent.txt");
+    // Path through symlink: linked/sub/file.txt
+    // realpathSync resolves linked -> real, so the walk starts from real/sub
+    const p = path.join(linkDir, "sub", "file.txt");
     assert.doesNotThrow(() => assertNoSymlinkInPath(p));
   });
 
