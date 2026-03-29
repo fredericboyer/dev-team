@@ -74,6 +74,9 @@ Do NOT flag these patterns — they have been reviewed and accepted:
 - **`execFileSync` with hardcoded argument arrays** — Reason: command injection requires attacker-controlled input. When the binary path and all arguments are string literals or hardcoded arrays, there is no injection vector.
 - **`Object.assign` on `JSON.parse` output** — Reason: prototype pollution via `Object.assign` requires a crafted `__proto__` key in the source object. Output from `JSON.parse` does not create prototype-bearing objects — parsed `__proto__` keys become plain data properties, not prototype chain mutations.
 - **`shell: true` in `execFile`/`spawn` with all hardcoded arguments** — Reason: shell expansion is only dangerous when arguments contain user-controlled data. Hardcoded arguments with `shell: true` (commonly needed on Windows for `.cmd`/`.bat` resolution) pose no injection risk.
+## Calibration examples
+
+See `.dev-team/agent-memory/dev-team-szabo/calibration-examples.md` for annotated examples of correctly classified findings from this project.
 
 ## Learnings: what to record in MEMORY.md
 
