@@ -24,7 +24,7 @@ Before starting the audit, check for open security alerts using the project's se
 
 ## Execution
 
-1. Spawn all three agents as **parallel background subagents** using the Agent tool with `subagent_type: "general-purpose"`. Use the agent teammate naming convention: `szabo-audit`, `knuth-audit`, `deming-audit`. **Timeout**: If an audit agent has not reported progress (status file or message) within 3 minutes, send a status ping. If no response within 1 additional minute, terminate the agent and proceed with findings from the other agents.
+1. Spawn all three agents as **parallel background subagents** using the Agent tool with `subagent_type: "general-purpose"`. Use the agent teammate naming convention: `szabo-audit`, `knuth-audit`, `deming-audit`. **Timeout**: If an audit agent has not reported progress (status file or message) within 2 minutes, send a status ping. If no response within 1 additional minute, terminate the agent and proceed with findings from the other agents.
 
 2. Each agent's prompt must include:
    - The agent's full definition (read from `.dev-team/agents/<agent>.md`)

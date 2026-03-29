@@ -30,7 +30,7 @@ Start a task loop for: $ARGUMENTS
 
    If an ADR is needed, include "Write ADR-NNN: <title>" in the implementation task. The implementing agent writes the ADR file. Architect reviews it post-implementation alongside code review.
 
-   **Timeout**: If the pre-assessment agent has not reported progress (status file or message) within 3 minutes, send a status ping. If no response within 1 additional minute, terminate the agent and either perform the pre-assessment yourself or skip it with a note explaining why.
+   **Timeout**: If the pre-assessment agent has not reported progress (status file or message) within 2 minutes, send a status ping. If no response within 1 additional minute, terminate the agent and either perform the pre-assessment yourself or skip it with a note explaining why.
 
 ## Pre-implementation: best-practices research
 
@@ -76,7 +76,7 @@ Phase markers are consistent with agent-level progress reporting (ADR-026).
 
 The implementing agent works on the task on a feature branch.
 
-**Timeout**: If the implementing agent has not reported progress (status file, message, or commit) within 3 minutes, send a status ping. If no response within 1 additional minute, terminate the agent, assess what was completed, and either resume the work yourself or re-spawn a fresh agent with the remaining tasks.
+**Timeout**: If the implementing agent has not reported progress (status file, message, or commit) within 2 minutes, send a status ping. If no response within 1 additional minute, terminate the agent, assess what was completed, and either resume the work yourself or re-spawn a fresh agent with the remaining tasks.
 
 **Validation** — before exiting Step 1, verify:
 - Non-empty diff: `git diff` shows actual changes
