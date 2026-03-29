@@ -271,8 +271,10 @@ Thresholds:
 ## Completion
 
 After the health report is delivered:
-1. Spawn **@dev-team-borges** (Librarian) to review memory freshness and capture any learnings from the assessment findings. This is mandatory.
-2. Include Borges's recommendations in the final report.
+1. Format the **finding outcome log** with every finding's classification, source agent (retro itself), and outcome. Then call `/dev-team:extract` with the formatted log.
+2. If `/dev-team:extract` was not called, the retro is INCOMPLETE.
+3. `/dev-team:extract` handles Borges spawning, metrics verification, and memory formation gates. Do not report the retro as complete until `/dev-team:extract` reports success.
+4. Include Borges's recommendations in the final report.
 
 ## When to run
 
