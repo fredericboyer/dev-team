@@ -27,7 +27,7 @@
 ## Known Tech Debt
 
 - **ADR-035 for skill composability pattern** (#493) — formal documentation of skill-calls-skill pattern (extract, review `--embedded`). Deferred from v1.9.0 PR #492 and PR #496.
-- **Scorecard unaware of /dev-team:extract** (#494) — scorecard gates could drift now that extract is a separate skill. Deferred from v1.9.0 PR #492.
+- **INFRA_HOOKS worktree serialization is temporary** — workaround for Claude Code bugs anthropics/claude-code#34645 and #39680. Remove when upstream fixes land.
 
 ## Quality Benchmarks
 
