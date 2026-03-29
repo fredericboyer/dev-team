@@ -17,6 +17,7 @@
 - **Agent teams sharing a working directory cause cross-branch contamination.** v1.7.0 delivery had repeated issues: agents switched branches under each other, stray commits landed on wrong branches (#447→#438, #436→#446, #440→#434), stashes went stale. Worktree isolation (one worktree per agent) prevents all of these. Prefer worktree-isolated agents for multi-branch parallel work.
 - **"Require up-to-date branches" protection creates merge cascades.** Each merge makes other PRs stale, requiring sequential rebase+push. GitHub merge queues would automate this. For now, factor this into time estimates for multi-PR batches.
 - **v1.8.0 delivered without `/dev-team:task` or agent reviews — process gap.** All 12 issues implemented directly by the orchestrator with Copilot as sole reviewer. No adversarial review loop. This bypassed the dogfooding requirement. Acceptable for hotfix-level urgency, but not for feature releases. The worktree serialization hooks (#482) and task skill decomposition (#481) shipped without in-team review.
+- **Never set auto-merge before Copilot findings are addressed.** Every push triggers a Copilot re-review. Setting auto-merge preemptively causes PRs to merge with unresolved findings (v1.8.0 PR #484 merged with 3 unaddressed comments, requiring follow-up PR #487). The merge skill step order is: wait for Copilot → address all findings → then set auto-merge.
 
 ## Design Principles
 
