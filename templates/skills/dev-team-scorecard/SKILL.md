@@ -36,12 +36,12 @@ Before issuing any `gh issue`, `gh pr`, or other platform-specific CLI commands,
 
 Run each check and record pass/fail with evidence.
 
-### 1. Borges ran
+### 1. Borges ran (via `/dev-team:extract`)
 
-**Check**: Read `.dev-team/metrics.md` and search for an entry matching the workflow's issue number, PR number, or branch name.
+**Check**: Borges memory extraction is invoked via `/dev-team:extract` at the end of orchestration workflows (`/dev-team:task`, `/dev-team:review`, `/dev-team:audit`, `/dev-team:retro`). The verification artifact is a `.dev-team/metrics.md` entry. Read `.dev-team/metrics.md` and search for an entry matching the workflow's issue number, PR number, or branch name.
 
 - **Pass**: Entry exists with the workflow reference
-- **Fail**: No matching entry found
+- **Fail**: No matching entry found (Borges was not invoked, or `/dev-team:extract` was skipped)
 
 ### 2. All findings acknowledged
 
