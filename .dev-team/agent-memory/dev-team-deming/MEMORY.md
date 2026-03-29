@@ -148,7 +148,7 @@
 - **Tags**: retro, tech-debt, staleness, dx
 - **Outcome**: fixed
 - **Last-verified**: 2026-03-29
-- **Context**: Retro skill Phase 2 now cross-checks Known Tech Debt entries against closed issues/PRs before reporting. Addresses the v1.7.0 finding where 5 of 7 tech debt entries were already resolved. Platform-agnostic — uses config.platform to determine CLI tool.
+- **Context**: Retro skill Phase 1 (Learnings audit) now cross-checks Known Tech Debt entries against closed issues before reporting. Addresses the v1.7.0 finding where 5 of 7 tech debt entries were already resolved. Uses generic "check the issue tracker" language (not hardcoded gh CLI).
 
 ### [2026-03-26] Audit baseline: 14 findings (0 DEFECT, 1 RISK, 1 QUESTION, 12 SUGGESTION)
 - **Type**: CALIBRATION
