@@ -85,5 +85,21 @@
 - **Last-verified**: 2026-03-27
 - **Context**: Chain A hardcoded a single lib file copy in update.ts. Chain B replaced this with recursive lib/ directory copy. Accepted as the merge ordering naturally resolved this — no architectural debt remaining.
 
+### [2026-03-29] v1.8.0: INFRA_HOOKS array — infrastructure vs quality hook separation
+- **Type**: DECISION [new]
+- **Source**: #482, PR #482
+- **Tags**: architecture, hooks, init, infrastructure
+- **Outcome**: accepted
+- **Last-verified**: 2026-03-29
+- **Context**: init.ts now separates INFRA_HOOKS (always installed, not user-selectable) from QUALITY_HOOKS (opt-in). WorktreeCreate/WorktreeRemove are infrastructure hooks — they serialize worktree creation to work around Claude Code bugs (#34645, #39680). This is a TEMPORARY architectural pattern; remove when upstream fixes land. Brooks should watch for INFRA_HOOKS growth — infrastructure hooks bypass user choice.
+
+### [2026-03-29] v1.8.0: Task skill 4-step decomposition (Implement, Review, Merge, Extract)
+- **Type**: DECISION [new]
+- **Source**: #481, PR #481
+- **Tags**: architecture, skills, task, orchestration
+- **Outcome**: accepted
+- **Last-verified**: 2026-03-29
+- **Context**: Task skill decomposed into 4 explicit steps with shared definitions between single-issue and parallel modes. Both modes reference the same step definitions — prevents drift. Review step changed from batched waves to per-PR-as-it-lands. This is an architectural boundary: step definitions are the contract between task orchestration and agent execution.
+
 ## Calibration Log
 <!-- Challenges accepted/overruled — tunes adversarial intensity over time -->

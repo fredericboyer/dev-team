@@ -16,7 +16,7 @@
 - **Source**: templates/hooks/ analysis
 - **Tags**: hooks, enforcement, dx
 - **Outcome**: verified
-- **Last-verified**: 2026-03-26
+- **Last-verified**: 2026-03-29
 - **Context**: dev-team-tdd-enforce.js (TDD), dev-team-safety-guard.js (safety), dev-team-post-change-review.js (review spawning), dev-team-pre-commit-lint.js (lint), dev-team-pre-commit-gate.js (blocking gate), dev-team-watch-list.js (file watch triggers). ADR-001: hooks over CLAUDE.md for enforcement.
 
 ### [2026-03-25] Agent and hook validation scripts run in CI
@@ -133,6 +133,22 @@
 - **Outcome**: fixed
 - **Last-verified**: 2026-03-27
 - **Context**: User-controlled regex from config.json (watchLists[].pattern, taskBranchPattern) was compiled without validation. Created `templates/hooks/lib/safe-regex.js` — checks for nested quantifiers and quantified backreferences, rejects patterns >1024 chars. Applied to dev-team-watch-list.js and dev-team-pre-commit-gate.js. agent-patterns.js left unchanged — it reads developer-authored agent-patterns.json (different trust boundary). Pattern: hooks should validate at system boundaries (user config) but can trust shipped data files.
+
+### [2026-03-29] v1.8.0: Worktree serialization hooks — temporary infrastructure workaround
+- **Type**: DECISION [new]
+- **Source**: #482, PR #482
+- **Tags**: hooks, worktrees, infrastructure, temporary
+- **Outcome**: accepted
+- **Last-verified**: 2026-03-29
+- **Context**: WorktreeCreate/WorktreeRemove hooks use mkdir-based locking to serialize worktree creation (workaround for anthropics/claude-code#34645 and #39680). Classified as INFRA_HOOKS — always installed, not user-selectable. TEMPORARY: remove when upstream fixes land. Hooks are JS, no dependencies, cross-platform. Lock dir: `.dev-team/.worktree-lock`.
+
+### [2026-03-29] v1.8.0: Retro skill verifies tech debt against issue tracker (#473)
+- **Type**: DECISION [new]
+- **Source**: #456, PR #473
+- **Tags**: retro, tech-debt, staleness, dx
+- **Outcome**: fixed
+- **Last-verified**: 2026-03-29
+- **Context**: Retro skill Phase 2 now cross-checks Known Tech Debt entries against closed issues/PRs before reporting. Addresses the v1.7.0 finding where 5 of 7 tech debt entries were already resolved. Platform-agnostic — uses config.platform to determine CLI tool.
 
 ### [2026-03-26] Audit baseline: 14 findings (0 DEFECT, 1 RISK, 1 QUESTION, 12 SUGGESTION)
 - **Type**: CALIBRATION

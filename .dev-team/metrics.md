@@ -106,3 +106,16 @@
 - **Duration**: single session, 7 PRs (#449-#455)
 - **Notes**: First formal review wave with in-team agents since v1.2.0 (v1.5.0-v1.6.0 used Copilot-only). 12 issues addressed (10 closed via PRs, 2 moved to v1.8.0), all audit-derived tech debt from v1.6.0. Key themes: symlink hardening (Szabo), path correctness (Knuth — 4th instance), process.exit stub pattern (cross-agent convergence by Szabo+Knuth+Brooks on same finding). Operational issue: agent teams sharing working directory caused cross-branch contamination — 3 stray commits on wrong branches, 1 agent re-spawn needed. Worktree isolation recommended for future multi-branch work.
 
+### [2026-03-29] Task: v1.8.0 delivery (#447, #456, #457, #458, #459, #460, #461, #462, #465, #466, #467, #468)
+- **Agents**: implementing: orchestrator (direct), reviewers: Copilot
+- **Rounds**: 1 per branch
+- **Findings**:
+  - Copilot: ~30 inline findings across 12 PRs (all fixed or acknowledged)
+  - dev-team agents: 0 (not spawned — process gap)
+- **Acceptance rate**: 100% (all Copilot findings addressed)
+- **Overrule rate**: 0%
+- **Fix rate (DEFECTs)**: N/A (0 formal DEFECTs)
+- **Defer rate (advisory)**: 0%
+- **Duration**: single session, 12 PRs (#470-#483)
+- **Notes**: v1.8.0 delivered without `/dev-team:task` or dev-team agent reviews. All implementation by orchestrator directly. Copilot was sole reviewer. ~30 Copilot findings across 12 PRs, all addressed. Key PRs with substantive findings: #475 (8 findings on symlink guards — 5 fixed, 3 acknowledged), #479 (mergeClaudeMd edge case), #478 (readFile docstring). Process gap: no adversarial review loop, no Borges extraction during delivery. This post-hoc extraction fills the memory gap. Key deliverables: worktree serialization hooks (INFRA_HOOKS), task skill 4-step decomposition, assertNoSymlinkInPath, readFile error hardening, mergeClaudeMd boundary fix, 18 new tests.
+
