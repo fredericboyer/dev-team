@@ -26,11 +26,37 @@ Start a task loop for: $ARGUMENTS
    - Does it change module boundaries, dependency direction, or layer responsibilities?
    - Does it contradict or extend an existing ADR?
 
-   Architect returns: `ADR needed: yes/no`. If yes: `topic: <X>, proposed title: ADR-NNN: <title>`.
+   Architect returns:
+   - `ADR needed: yes/no`. If yes: `topic: <X>, proposed title: ADR-NNN: <title>`.
+   - `Complexity: SIMPLE | COMPLEX`
+
+   **Complexity classification:**
+   - **SIMPLE** — single-file changes, documentation updates, config tweaks, straightforward bug fixes, test additions for existing code
+   - **COMPLEX** — multi-file changes, new architectural patterns, ADR-needed work, new integrations, cross-module refactors
+
+   The complexity classification determines **review intensity** (see Step 2) and whether a **Definition of Done** negotiation is required (see below).
 
    If an ADR is needed, include "Write ADR-NNN: <title>" in the implementation task. The implementing agent writes the ADR file. Architect reviews it post-implementation alongside code review.
 
    **Timeout**: If the pre-assessment agent has not reported progress (status file or message) within 2 minutes, send a status ping. If no response within 1 additional minute, terminate the agent and either perform the pre-assessment yourself or skip it with a note explaining why.
+
+## Definition of Done (COMPLEX tasks only)
+
+For tasks classified as **COMPLEX**, negotiate acceptance criteria before implementation begins. Skip this step entirely for **SIMPLE** tasks.
+
+1. The implementing agent proposes **3-5 testable acceptance criteria** based on the task description and Brooks' pre-assessment. Criteria must specify **WHAT** (observable outcomes) not **HOW** (implementation details).
+
+   Example criteria format:
+   ```
+   - [ ] New API endpoint returns 200 with valid payload and 422 with invalid input
+   - [ ] Existing integration tests continue to pass without modification
+   - [ ] ADR-NNN documents the caching strategy trade-offs
+   - [ ] Config change is backward-compatible with previous schema version
+   ```
+
+2. The orchestrator reviews and confirms the criteria before proceeding to Step 1. If criteria are unclear or incomplete, request revision (one round).
+
+3. Confirmed criteria become the **exit checklist** for Step 1 validation — in addition to the standard validation checks (non-empty diff, tests pass, relevance, clean tree), the implementing agent must demonstrate each criterion is met.
 
 ## Pre-implementation: best-practices research
 
@@ -91,8 +117,14 @@ The implementing agent works on the task on a feature branch.
 
 ## Step 2: Review
 
-Call `/dev-team:review --embedded` with the current branch or PR as the argument. The review skill handles:
-- Agent selection based on changed file patterns
+**Review intensity** is determined by the complexity classification from Brooks' pre-assessment:
+
+- **SIMPLE tasks -> LIGHT review**: Call `/dev-team:review --embedded --light`. LIGHT reviews are advisory only — all findings (including `[DEFECT]`) are treated as advisory. A single reviewer is spawned. The review serves as a quality signal but does not block progress.
+- **COMPLEX tasks -> FULL review**: Call `/dev-team:review --embedded`. Full reviewer set, blocking `[DEFECT]` semantics, standard iteration loop.
+- **If pre-assessment was skipped** (bug fixes, typo fixes, config tweaks): default to LIGHT review.
+
+Call `/dev-team:review --embedded [--light]` with the current branch or PR as the argument. The review skill handles:
+- Agent selection based on changed file patterns (full set for FULL review, single reviewer for LIGHT)
 - Spawning reviewers in parallel as background tasks
 - Timeout handling for unresponsive reviewers
 - The judge pass (filter/deduplicate/validate findings)
@@ -130,6 +162,16 @@ Call `/dev-team:review --embedded` again for the next round, passing the compact
 
 Continue iterating until no `[DEFECT]` remains or max iterations reached. If max iterations reached without convergence, report remaining defects and exit.
 
+### Context management in long review loops
+
+The task skill's iteration model uses two strategies to manage context growth:
+
+1. **Fresh reviewers per round**: Each `/dev-team:review --embedded` call spawns new reviewer agents. They receive only the current diff and the compact summary — not raw conversation history from prior rounds. This provides a natural context reset that prevents reviewers from anchoring on stale findings.
+
+2. **Compact summaries between rounds**: After each round, the orchestrator produces a structured summary (findings, outcomes, files changed, outstanding items). This compressed representation replaces verbose raw findings in subsequent rounds.
+
+**Long-running loops (3+ review rounds):** If a task has gone through 3 or more review rounds without convergence, consider spawning a **fresh implementing agent** with a compact handoff. The handoff should include: the original task description, the current diff, all outstanding findings with their classifications, and a summary of what has been tried. A fresh agent avoids context fatigue and may find simpler solutions to persistent defects.
+
 ### Automated review check
 
 After creating a PR, check for automated review findings from the platform's review bot (if configured). If findings exist, route actionable ones to the implementing agent for fixes before proceeding to Step 3.
@@ -163,6 +205,7 @@ Spawn @dev-team-brooks once with all issues. Brooks identifies:
 - **File independence**: which issues touch overlapping files (conflict groups that must run sequentially)
 - **ADR needs** across the batch
 - **Architectural interactions** between issues
+- **Complexity classification** for each issue: SIMPLE or COMPLEX (determines review intensity and Definition of Done requirement per branch)
 
 Issues in the same conflict group execute sequentially. Independent issues proceed in parallel.
 
@@ -174,7 +217,7 @@ Drucker spawns one implementing agent per independent issue, each on its own bra
 **Sequential chain gate:** When issues are sequenced due to file conflicts, verify the previous change is integrated into the shared codebase before starting the next dependent task. Do not spawn the next agent until integration is confirmed. This is a hard gate.
 
 ### Steps 2–3 (per-branch, as each PR lands)
-Review each branch **the moment its implementing agent finishes** — do not wait for all implementations to complete. As soon as an agent reports completion and passes Step 1 validation (non-empty diff, tests pass, relevance, clean tree), immediately call `/dev-team:review --embedded` for that branch.
+Review each branch **the moment its implementing agent finishes** — do not wait for all implementations to complete. As soon as an agent reports completion and passes Step 1 validation (non-empty diff, tests pass, relevance, clean tree), immediately call `/dev-team:review --embedded [--light]` for that branch (using `--light` for SIMPLE branches, omitting it for COMPLEX branches).
 
 This means reviews and implementations run concurrently: some branches are under review while others are still being implemented. For sequential chains, the first branch in a chain enters review while the next dependent branch is being implemented — though the next branch still waits for the predecessor to merge before starting.
 

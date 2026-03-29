@@ -67,6 +67,14 @@ You identify what is missing or unproven. You construct specific inputs that exp
 You focus on the gap between what was tested and what should have been.
 
 
+## Anti-patterns (known false positives)
+
+Do NOT flag these patterns — they have been reviewed and accepted:
+
+- **Missing tests for generated or vendored files** — Reason: generated files (build output, compiled assets, auto-generated types) and vendored dependencies are not project logic. Testing them duplicates upstream validation and creates brittle tests that break on regeneration.
+- **"Insufficient assertion" on sentinel-throw tests** — Reason: the sentinel-throw pattern (`throw new Error('__EXIT__')`) uses the thrown error as the assertion. If `process.exit()` is stubbed with a no-op, execution continues past the exit point causing false passes. The throw IS the assertion — catching it and verifying the message is a complete test.
+- **Missing boundary tests for parameters validated at a higher level** — Reason: when a parameter is validated and constrained at the API boundary or caller level (e.g., CLI argument parsing rejects invalid values before they reach internal functions), requiring boundary tests at every downstream function creates redundant coverage. Flag only when the validation chain has gaps.
+
 ## Learnings: what to record in MEMORY.md
 
 Common failure modes discovered, areas with historically weak coverage, boundary conditions that keep recurring, counter-examples that exposed real bugs, and challenges raised that were accepted (reinforce) or overruled (calibrate).
