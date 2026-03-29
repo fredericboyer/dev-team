@@ -80,7 +80,7 @@
 - **Source**: Issue #409, PR #414
 - **Tags**: skills, invocation, dx, enforcement
 - **Outcome**: accepted
-- **Last-verified**: 2026-03-26
+- **Last-verified**: 2026-03-29
 - **Context**: Orchestration skills (task, review, audit, retro) get `disable-model-invocation: true` to prevent accidental autonomous firing. Advisory/read-only skills (scorecard, challenge) can be autonomous. This is a design principle in CLAUDE.md.
 
 ### [2026-03-26] Language delegation: hooks detect ecosystem, agents interpret
@@ -149,6 +149,22 @@
 - **Outcome**: fixed
 - **Last-verified**: 2026-03-29
 - **Context**: Retro skill Phase 1 (Learnings audit) now cross-checks Known Tech Debt entries against closed issues before reporting. Addresses the v1.7.0 finding where 5 of 7 tech debt entries were already resolved. Uses generic "check the issue tracker" language (not hardcoded gh CLI).
+
+### [2026-03-29] v1.9.0: Extract skill — Borges extraction decomposed into standalone skill
+- **Type**: DECISION [new]
+- **Source**: #485, PR #492
+- **Tags**: skills, extract, borges, dx, composability
+- **Outcome**: accepted
+- **Last-verified**: 2026-03-29
+- **Context**: Borges extraction logic extracted from task and retro skills into /dev-team:extract. Orchestration skill with disable-model-invocation:true. Reduces duplication between task and retro (both previously embedded Borges instructions). Retro now delegates to extract instead of inlining. Task Step 4 invokes extract as sub-skill. This is the first instance of the skill-calls-skill composability pattern.
+
+### [2026-03-29] v1.9.0: Review delegation — task skill delegates to /dev-team:review
+- **Type**: DECISION [new]
+- **Source**: #486, PR #496
+- **Tags**: skills, review, task, delegation, dx
+- **Outcome**: accepted
+- **Last-verified**: 2026-03-29
+- **Context**: Task skill Step 2 (Review) now delegates to /dev-team:review with --embedded flag instead of inlining review instructions. Review skill gains --embedded mode for compact output consumed by task orchestration. Compact summary passthrough documented for subsequent review rounds. --reviewers flag removed from review skill (breaking change — task controls reviewer selection).
 
 ### [2026-03-26] Audit baseline: 14 findings (0 DEFECT, 1 RISK, 1 QUESTION, 12 SUGGESTION)
 - **Type**: CALIBRATION

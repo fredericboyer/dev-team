@@ -34,7 +34,7 @@
 - **Source**: v1.2.0 Branch A (#275, #266) — task skill review
 - **Tags**: vocabulary, cross-agent, skill-definition
 - **Outcome**: verified
-- **Last-verified**: 2026-03-25
+- **Last-verified**: 2026-03-29
 - **Context**: Finding outcome vocabularies must stay aligned between skill definitions that produce outcomes (task, review) and agents that consume them (Borges). The task skill originally used "addressed/deferred/disputed" but Borges expects "accepted/overruled/fixed/ignored". Mismatches break automated memory extraction.
 
 ## Calibration Log
@@ -85,6 +85,22 @@
 - **Outcome**: accepted
 - **Last-verified**: 2026-03-27
 - **Context**: Chain A added single-file lib copy for ensureSymlink; Chain B added recursive lib/ directory copy for git-cache.js + safe-regex.js. At merge, Chain B's recursive approach naturally superseded Chain A's single-file approach. No code conflict, just ordering awareness.
+
+### [2026-03-29] v1.9.0: Skill composability — skill-calls-skill pattern verified
+- **Type**: PATTERN [new]
+- **Source**: PR #492 finding #12, PR #496 finding #17
+- **Tags**: skills, composability, architecture
+- **Outcome**: accepted
+- **Last-verified**: 2026-03-29
+- **Context**: /dev-team:extract is invoked by /dev-team:task and /dev-team:retro. /dev-team:review is invoked by /dev-team:task with --embedded flag. Skill-calls-skill runtime confirmed working. Edge cases documented: empty finding log handled, compact summary passthrough for subsequent review rounds. ADR-035 deferred to #493 for formal documentation of the composability pattern.
+
+### [2026-03-29] v1.9.0: Vocabulary alignment reinforced — "consumed programmatically" wording fixed
+- **Type**: SUGGESTION [accepted]
+- **Source**: PR #496 finding #16
+- **Tags**: vocabulary, skill-definition, review
+- **Outcome**: accepted
+- **Last-verified**: 2026-03-29
+- **Context**: Review skill SKILL.md had misleading "consumed programmatically" wording. Fixed to clarify that the output is consumed by the orchestrating skill (task), not by a machine parser. Vocabulary alignment pattern continues (Seen: 3 times — v1.2.0 task skill, v1.9.0 extract skill, v1.9.0 review skill).
 
 ### [2026-03-26] Review skill had wrong path for agent-patterns.json
 - **Type**: DEFECT [fixed]

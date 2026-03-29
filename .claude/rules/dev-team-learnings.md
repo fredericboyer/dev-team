@@ -21,10 +21,13 @@
 
 ## Design Principles
 
+- **Skill composability: orchestration skills can invoke other skills.** /dev-team:extract and /dev-team:review are invoked by /dev-team:task as sub-skills. Use `disable-model-invocation: true` on sub-skills to prevent autonomous firing. The `--embedded` flag signals compact output mode for skill-to-skill invocation. ADR-035 (#493) will formalize this pattern.
 - **Don't encode what agents already know.** AI agents have built-in knowledge of languages, frameworks, conventions, and standards. Hardcoding language-specific patterns (test file regex, linter commands, complexity keywords) into hooks or config creates static encyclopedias that are always incomplete. Instead, hooks should detect the ecosystem (read manifest files) and delegate language-specific reasoning to the agent. Include only what agents can't discover: tool preferences, legacy traps, test quirks, custom middleware warnings. (See: "AGENTS.md Verdict" — if the agent can discover it from code, delete it.)
 
 ## Known Tech Debt
-<!-- All entries resolved as of v1.8.0. Add new entries here as they are discovered. -->
+
+- **ADR-035 for skill composability pattern** (#493) — formal documentation of skill-calls-skill pattern (extract, review `--embedded`). Deferred from v1.9.0 PR #492 and PR #496.
+- **Scorecard unaware of /dev-team:extract** (#494) — scorecard gates could drift now that extract is a separate skill. Deferred from v1.9.0 PR #492.
 
 ## Quality Benchmarks
 

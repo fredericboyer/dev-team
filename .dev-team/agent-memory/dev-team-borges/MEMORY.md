@@ -91,6 +91,14 @@
 - **Last-verified**: 2026-03-27
 - **Context**: All 12 audit-derived tech debt issues resolved. 11 raw findings (7 unique after dedup), 100% acceptance, 1 round. First in-team review wave (Szabo+Knuth+Brooks) since v1.2.0. 3 agents converged independently on the same process.exit stub finding — strong cross-agent coherence signal. New entries: Szabo (2), Knuth (2), Brooks (2), Beck (1), Voss (1), Tufte (1), Turing (1), Deming already had entries from implementation. Updated 3 existing entries (Szabo symlink+ReDoS fixed, Knuth test coverage fixed). 3 tech debt items marked resolved in shared learnings. 3 new process learnings added (working dir contention, merge cascades, retro staleness). Stale `deming/` memory dir flagged and fixed (finding #5). System improvement: agent teams need worktree isolation (#456 tracked).
 
+### [2026-03-29] v1.9.0 extraction — 2 branches, 20 findings, 71% acceptance, adversarial loop restored
+- **Type**: MILESTONE [verified]
+- **Source**: v1.9.0 task loop (2 issues, 2 PRs #492, #496)
+- **Tags**: metrics, calibration, extraction, composability
+- **Outcome**: verified
+- **Last-verified**: 2026-03-29
+- **Context**: First delivery with full adversarial review loop since v1.8.0 process gap. 20 raw findings (14 unique after cross-branch dedup), 0 DEFECTs, 10 accepted, 3 deferred, 7 ignored. Higher ignore rate (50%) is acceptable — all ignored findings were self-answered questions or minor wording issues with no functional impact. Skill composability pattern established (extract + review --embedded). New entries written: Szabo (1), Knuth (2), Brooks (2), Deming (2), Turing (1). Last-verified bumped on 3 existing entries (Knuth vocabulary, Deming skill invocation, Brooks task decomposition). 2 new tech debt items added to shared learnings (#493, #494). 1 new design principle added (skill composability). Retro ran pre-implementation; retro issues (#489-#491) tracked separately.
+
 ### [2026-03-29] v1.8.0 post-hoc extraction — 12 issues, 12 PRs, Copilot-only review
 - **Type**: MILESTONE [verified]
 - **Source**: v1.8.0 task loop (12 issues, 12 PRs #470-#483)

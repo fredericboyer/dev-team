@@ -81,6 +81,14 @@
 - **Last-verified**: 2026-03-27
 - **Context**: Initial safeRegex implementation missed `{n,}` quantifier syntax in the nested-quantifier check. Inner character class updated to include `{`. Reinforces: regex validation must cover all quantifier syntaxes, not just `*+?`.
 
+### [2026-03-29] v1.9.0: Extract skill trust boundary — $ARGUMENTS acceptable
+- **Type**: CALIBRATION
+- **Source**: PR #492, finding #1
+- **Tags**: trust-boundary, skills, arguments
+- **Outcome**: ignored (self-answered)
+- **Last-verified**: 2026-03-29
+- **Context**: Szabo raised $ARGUMENTS trust boundary question for /dev-team:extract skill. Self-answered — skill is invoked only by other orchestration skills (task, review, retro), not by untrusted input. Acceptable trust boundary for skill-to-skill invocation. No action needed.
+
 ### [2026-03-26] Platform detection defaults to github — no fallback risk
 - **Type**: RISK [fixed]
 - **Source**: PR #371 (feat/358), Copilot finding

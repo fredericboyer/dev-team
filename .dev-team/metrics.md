@@ -106,6 +106,22 @@
 - **Duration**: single session, 7 PRs (#449-#455)
 - **Notes**: First formal review wave with in-team agents since v1.2.0 (v1.5.0-v1.6.0 used Copilot-only). 12 issues addressed (10 closed via PRs, 2 moved to v1.8.0), all audit-derived tech debt from v1.6.0. Key themes: symlink hardening (Szabo), path correctness (Knuth — 4th instance), process.exit stub pattern (cross-agent convergence by Szabo+Knuth+Brooks on same finding). Operational issue: agent teams sharing working directory caused cross-branch contamination — 3 stray commits on wrong branches, 1 agent re-spawn needed. Worktree isolation recommended for future multi-branch work.
 
+### [2026-03-29] Task: v1.9.0 delivery (#485, #486) — PRs #492, #496
+- **Agents**: implementing: Deming, reviewers: Szabo, Knuth, Brooks; research: Turing
+- **Rounds**: 1 per branch (2 branches)
+- **Findings**:
+  - Szabo: 0 DEFECT, 0 RISK, 1 SUGGESTION (1 accepted), 2 QUESTION (2 ignored — self-answered) — 3 total
+  - Knuth: 0 DEFECT, 2 RISK (2 accepted), 2 SUGGESTION (2 accepted), 1 QUESTION (1 accepted) — 5 total (after dedup across branches)
+  - Brooks: 0 DEFECT, 1 RISK (1 deferred #494), 3 SUGGESTION (1 accepted / 2 deferred #493), 2 QUESTION (1 accepted / 1 ignored) — 6 total (after dedup across branches)
+- **Unique findings**: 14 (after merging cross-branch duplicates from 20 raw)
+- **Acceptance rate**: 57% (8 accepted / 14 total)
+- **Overrule rate**: 0% (0/14)
+- **Fix rate (DEFECTs)**: N/A (0 DEFECTs)
+- **Defer rate (advisory)**: 21% (3/14 — #493 x2, #494)
+- **Ignore rate (advisory)**: 21% (3/14 — self-answered questions, minor wording)
+- **Duration**: single session, 2 branches (feat/485-extract-skill, feat/486-review-delegation)
+- **Notes**: First v1.9.0 delivery with full adversarial review loop restored (v1.8.0 had process gap). Skill composability pattern established — /dev-team:extract and /dev-team:review --embedded are now sub-skills of /dev-team:task. Turing research brief on adversarial review health thresholds (#490) produced calibration data. Retro ran pre-implementation. 3 issues created from retro (#489, #490, #491), 2 from review (#493, #494). Clean approve from Szabo (security-neutral refactor). Higher ignore rate (50%) reflects advisory findings on minor wording — no functional issues.
+
 ### [2026-03-29] Task: v1.8.0 delivery (#447, #456, #457, #458, #459, #460, #461, #462, #465, #466, #467, #468)
 - **Agents**: implementing: orchestrator (direct), reviewers: Copilot
 - **Rounds**: 1 per branch
