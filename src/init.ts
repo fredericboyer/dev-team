@@ -95,6 +95,21 @@ const ALL_AGENTS: AgentDefinition[] = [
   },
 ];
 
+// Infrastructure hooks — always installed, not user-selectable.
+// Workaround for upstream CC bugs (anthropics/claude-code#34645, #39680).
+const INFRA_HOOKS: HookDefinition[] = [
+  {
+    label: "Worktree create",
+    file: "dev-team-worktree-create.js",
+    description: "Serialize worktree creation to prevent git config.lock races",
+  },
+  {
+    label: "Worktree remove",
+    file: "dev-team-worktree-remove.js",
+    description: "Clean up worktrees created by the serialized create hook",
+  },
+];
+
 const QUALITY_HOOKS: HookDefinition[] = [
   {
     label: "TDD enforcement",
@@ -177,7 +192,7 @@ const PRESETS: Record<string, PresetDefinition> = {
   },
 };
 
-export { PRESETS, ALL_AGENTS, QUALITY_HOOKS };
+export { PRESETS, ALL_AGENTS, QUALITY_HOOKS, INFRA_HOOKS };
 
 /**
  * Main init flow.
@@ -360,6 +375,13 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
     hookCount++;
   }
 
+  // Copy infrastructure hooks (always installed)
+  for (const hook of INFRA_HOOKS) {
+    const src = path.join(templates, "hooks", hook.file);
+    const dest = path.join(hooksDir, hook.file);
+    copyFile(src, dest);
+  }
+
   // Copy shared hook support files (required by hooks at runtime)
   const hookLibSrc = path.join(templates, "hooks", "lib");
   if (dirExists(hookLibSrc)) {
@@ -382,11 +404,13 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
   }
   const settingsTemplate: HookSettings = JSON.parse(settingsContent);
 
-  // Filter settings to only include selected hooks
+  // Filter settings to only include selected hooks + infrastructure hooks
   const filteredSettings: HookSettings = { hooks: {} };
-  const selectedHookFiles = QUALITY_HOOKS.filter((h) => selectedHooks.includes(h.label)).map(
-    (h) => h.file,
-  );
+  const infraHookFiles = INFRA_HOOKS.map((h) => h.file);
+  const selectedHookFiles = [
+    ...infraHookFiles,
+    ...QUALITY_HOOKS.filter((h) => selectedHooks.includes(h.label)).map((h) => h.file),
+  ];
 
   for (const [event, entries] of Object.entries(settingsTemplate.hooks)) {
     const filteredEntries: HookMatcher[] = entries

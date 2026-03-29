@@ -63,6 +63,28 @@
         ]
       }
     ],
+    "WorktreeCreate": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .dev-team/hooks/dev-team-worktree-create.js",
+            "timeout": 60
+          }
+        ]
+      }
+    ],
+    "WorktreeRemove": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .dev-team/hooks/dev-team-worktree-remove.js",
+            "timeout": 15
+          }
+        ]
+      }
+    ],
     "TaskCompleted": [
       {
         "hooks": [

@@ -17,7 +17,7 @@ import {
 } from "./files.js";
 import type { HookSettings, HookMatcher } from "./files.js";
 import fs from "fs";
-import { ALL_AGENTS, QUALITY_HOOKS } from "./init.js";
+import { ALL_AGENTS, QUALITY_HOOKS, INFRA_HOOKS } from "./init.js";
 
 interface AgentRename {
   oldLabel: string;
@@ -238,7 +238,7 @@ const AGENT_FILES: Record<string, string> = Object.fromEntries(
 );
 
 const HOOK_FILES: Record<string, string> = Object.fromEntries(
-  QUALITY_HOOKS.map((h) => [h.label, h.file]),
+  [...QUALITY_HOOKS, ...INFRA_HOOKS].map((h) => [h.label, h.file]),
 );
 
 // Skills auto-discovered at runtime from templates/skills/
