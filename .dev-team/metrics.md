@@ -122,6 +122,23 @@
 - **Duration**: single session, 2 branches (feat/485-extract-skill, feat/486-review-delegation)
 - **Notes**: First v1.9.0 delivery with full adversarial review loop restored (v1.8.0 had process gap). Skill composability pattern established — /dev-team:extract and /dev-team:review --embedded are now sub-skills of /dev-team:task. Turing research brief on adversarial review health thresholds (#490) produced calibration data. Retro ran pre-implementation. 3 issues created from retro (#489, #490, #491), 2 from review (#493, #494). Clean approve from Szabo (security-neutral refactor). Higher ignore rate (50%) reflects advisory findings on minor wording — no functional issues.
 
+### [2026-03-29] Task: v1.10.0 retro-derived fixes (#489, #490, #493, #494) — PRs #509, #510, #511, #512
+- **Agents**: implementing: Deming (#489/#490/#494), Tufte (#493); reviewers: Szabo, Knuth, Brooks; research: Turing; extract: Borges
+- **Rounds**: 1 per branch (4 branches)
+- **Findings**:
+  - Szabo: 0 DEFECT, 0 RISK, 1 SUGGESTION (1 accepted) — 1 total (clean approve on all 4)
+  - Knuth: 1 DEFECT (1 fixed), 2 RISK (2 accepted), 1 SUGGESTION (1 ignored), 1 QUESTION (1 ignored) — 5 total
+  - Brooks: 1 DEFECT (1 accepted), 1 RISK (1 accepted), 2 SUGGESTION (2 ignored) — 4 total
+  - Cross-agent: 1 RISK duplicate (Knuth #12 = Brooks #3, learnings conflict) — deduplicated
+- **Unique findings**: 10 (after deduplication of 12 raw)
+- **Acceptance rate**: 60% (6 accepted-or-fixed / 10 total)
+- **Overrule rate**: 0% (0/10)
+- **Fix rate (DEFECTs)**: 100% (2/2 — merge skill .claude copy, learnings conflict)
+- **Ignore rate (advisory)**: 40% (4/10 — minor suggestions, dogfood classification, timeout rationale)
+- **Duration**: single session, 4 parallel branches
+- **Notes**: All 4 issues are retro-derived (#489-#494). Two DEFECTs fixed: missing .claude merge skill gate (Knuth #7), 4-way learnings conflict (Brooks #3). Stray commits from shared working directory recurred (Knuth #8/#9) — 2nd occurrence after v1.7.0. PR #509 closed and changes merged via #511. Zero overrule rate continues — see alert below.
+- **[RISK] Zero-overrule alert**: Rolling overrule rate is 0% at n>=87 in-team findings (v1.2.0 through v1.10.0). Per research brief #490, healthy adversarial review shows 1-10% overrule rate (acceptance rate healthy band: 60-85%). Current acceptance rate (60%) is within the healthy band but overrule rate at 0% warrants investigation: are agents pushing hard enough, or is the human accepting reflexively?
+
 ### [2026-03-29] Task: v1.8.0 delivery (#447, #456, #457, #458, #459, #460, #461, #462, #465, #466, #467, #468)
 - **Agents**: implementing: orchestrator (direct), reviewers: Copilot
 - **Rounds**: 1 per branch

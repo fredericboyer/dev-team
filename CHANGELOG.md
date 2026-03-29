@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.10.0] - 2026-03-29
+
+### Added
+- ADR-035: Skill composability via sub-skill invocation — skills can invoke other skills as building blocks (#493, #511).
+- Borges zero-overrule rate monitoring — detects calibration stagnation when no challenges are overruled (#490, #511).
+- Turing research brief on agent runtime portability (#500).
+
+### Changed
+- Merge skill auto-merge timing guard enforced as a GATE — prevents premature auto-merge before Copilot findings are addressed (#489, #512).
+- Agent timeouts aligned to 2-minute threshold across all skills and hooks (#512).
+- Scorecard skill now references `/dev-team:extract` for Borges extraction checks (#494, #510).
+
+### Fixed
+- Auto-merge timing enforcement — merge skill step ordering codified to wait for Copilot, address findings, then set auto-merge (#489, #512).
+- Scorecard extract awareness — scorecard correctly detects `/dev-team:extract` invocation (#494, #510).
+
+### Internal
+- Updated dev-team installation to v1.9.0 (#498).
+
 ## [1.9.0] - 2026-03-29
 
 ### Added

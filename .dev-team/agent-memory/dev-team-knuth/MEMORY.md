@@ -87,7 +87,7 @@
 - **Context**: Chain A added single-file lib copy for ensureSymlink; Chain B added recursive lib/ directory copy for git-cache.js + safe-regex.js. At merge, Chain B's recursive approach naturally superseded Chain A's single-file approach. No code conflict, just ordering awareness.
 
 ### [2026-03-29] v1.9.0: Skill composability — skill-calls-skill pattern verified
-- **Type**: PATTERN [new]
+- **Type**: PATTERN [verified]
 - **Source**: PR #492 finding #12, PR #496 finding #17
 - **Tags**: skills, composability, architecture
 - **Outcome**: accepted
@@ -101,6 +101,22 @@
 - **Outcome**: accepted
 - **Last-verified**: 2026-03-29
 - **Context**: Review skill SKILL.md had misleading "consumed programmatically" wording. Fixed to clarify that the output is consumed by the orchestrating skill (task), not by a machine parser. Vocabulary alignment pattern continues (Seen: 3 times — v1.2.0 task skill, v1.9.0 extract skill, v1.9.0 review skill).
+
+### [2026-03-29] v1.10.0: Missing gate in .claude copy of merge skill — FIXED
+- **Type**: DEFECT [fixed]
+- **Source**: PR #512, finding #7
+- **Tags**: path-correctness, skill-definition, merge
+- **Outcome**: fixed
+- **Last-verified**: 2026-03-29
+- **Context**: Merge skill gate logic was updated in .dev-team/skills/ but the .claude/skills/ copy was not staged. Path correctness pattern continues — Seen: 5 times (doctor.ts K1, status.ts K3, review skill path, memory dir deming/, merge skill .claude copy).
+
+### [2026-03-29] v1.10.0: Stray commits from shared working directory — bundled wrong commits into PRs
+- **Type**: RISK [accepted]
+- **Source**: PR #509 finding #8, PR #511 finding #9
+- **Tags**: agent-teams, working-directory, contention, stray-commits
+- **Outcome**: accepted
+- **Last-verified**: 2026-03-29
+- **Context**: PR #509 bundled commits from #490 + #494; PR #511 bundled #490 + #493. Both caused by agents sharing a working directory. Reinforces v1.7.0 finding — worktree isolation prevents cross-branch contamination. Seen: 2nd occurrence (v1.7.0 had 3 stray commits, v1.10.0 had 2 bundled PRs).
 
 ### [2026-03-26] Review skill had wrong path for agent-patterns.json
 - **Type**: DEFECT [fixed]

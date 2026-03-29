@@ -59,6 +59,14 @@
 - **Last-verified**: 2026-03-27
 - **Context**: Turing research brief established tiered README model (5 essential + recommended sections). Key decision: dev-team should validate README quality, not generate READMEs. README vs CLAUDE.md boundary is clean: humans vs agents, marketing vs directives.
 
+### [2026-03-29] v1.10.0: ADR-035 skill composability via sub-skill invocation (#493)
+- **Type**: DECISION [new]
+- **Source**: #493, PR #511
+- **Tags**: adr, documentation, skill-composability, architecture
+- **Outcome**: accepted
+- **Last-verified**: 2026-03-29
+- **Context**: ADR-035 formalizes the skill-calls-skill composability pattern established in v1.9.0. Documents: disable-model-invocation requirement for sub-skills, --embedded flag convention for compact output, contract boundaries between orchestrating and sub-skills. Builds on ADR-022 (agent governance) by extending governance to skills. ADR README index updated.
+
 ## Patterns to Watch For
 
 

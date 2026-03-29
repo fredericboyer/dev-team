@@ -81,6 +81,14 @@
 - **Last-verified**: 2026-03-27
 - **Context**: Initial safeRegex implementation missed `{n,}` quantifier syntax in the nested-quantifier check. Inner character class updated to include `{`. Reinforces: regex validation must cover all quantifier syntaxes, not just `*+?`.
 
+### [2026-03-29] v1.10.0: Clean approve across 4 PRs — no security findings
+- **Type**: CALIBRATION
+- **Source**: PRs #509/#510/#511/#512
+- **Tags**: calibration, security, review
+- **Outcome**: clean
+- **Last-verified**: 2026-03-29
+- **Context**: All 4 retro-derived PRs (#489/#490/#493/#494) approved with no security concerns. Changes were skill definitions, ADR, learnings, and merge timing — no new file system operations or trust boundary changes. Confirms: retro-derived work is typically low-risk from a security perspective.
+
 ### [2026-03-29] v1.9.0: Extract skill trust boundary — $ARGUMENTS acceptable
 - **Type**: CALIBRATION
 - **Source**: PR #492, finding #1
