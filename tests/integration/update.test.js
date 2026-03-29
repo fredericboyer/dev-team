@@ -276,8 +276,7 @@ describe("dev-team update", () => {
     fs.writeFileSync(prefsPath, JSON.stringify(prefs, null, 2));
 
     // Delete the hook file too
-    const hookFiles = fs.readdirSync(path.join(tmpDir, ".dev-team", "hooks"));
-    const hookCountBefore = hookFiles.length;
+    fs.readdirSync(path.join(tmpDir, ".dev-team", "hooks"));
 
     await update(tmpDir);
 
@@ -779,7 +778,7 @@ describe("cleanupLegacyMemoryDirs", () => {
       "# Architect Memory\n## Structured Entries\n### [2026-01-15] Pattern 1 discovered\n- **Type**: PATTERN\n- **Tags**: architecture\n- **Context**: Found coupling issue\n",
     );
 
-    const log = cleanupLegacyMemoryDirs(path.join(tmpDir, ".dev-team"));
+    cleanupLegacyMemoryDirs(path.join(tmpDir, ".dev-team"));
 
     // Legacy dir should be removed
     assert.ok(!fs.existsSync(legacyDir), "legacy directory should be removed");
@@ -810,7 +809,7 @@ describe("cleanupLegacyMemoryDirs", () => {
       "# Architect Memory\nImportant learnings here.\n",
     );
 
-    const log = cleanupLegacyMemoryDirs(path.join(tmpDir, ".dev-team"));
+    cleanupLegacyMemoryDirs(path.join(tmpDir, ".dev-team"));
 
     assert.ok(!fs.existsSync(legacyDir), "legacy directory should be removed");
     assert.ok(fs.existsSync(path.join(brooksDir, "MEMORY.md")), "memory should be moved to Brooks");

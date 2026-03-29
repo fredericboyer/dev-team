@@ -157,6 +157,8 @@ export function writeFile(absPath: string, content: string): void {
  * Additive only — never removes existing hooks.
  */
 export function mergeSettings(existingPath: string, newFragment: HookSettings): void {
+  assertNotSymlink(existingPath);
+  assertNoSymlinkInPath(existingPath);
   let existing: { hooks?: Record<string, HookMatcher[]> } = {};
   try {
     existing = JSON.parse(fs.readFileSync(existingPath, "utf-8"));
@@ -164,7 +166,7 @@ export function mergeSettings(existingPath: string, newFragment: HookSettings): 
     if ((err as NodeJS.ErrnoException).code !== "ENOENT") {
       const backupPath = existingPath + ".bak";
       try {
-        fs.copyFileSync(existingPath, backupPath);
+        copyFile(existingPath, backupPath);
         console.warn(
           `Warning: ${existingPath} is not valid JSON. Backed up to ${backupPath}. Starting fresh.`,
         );
@@ -228,9 +230,7 @@ export function mergeSettings(existingPath: string, newFragment: HookSettings): 
     }
   }
 
-  const dir = path.dirname(existingPath);
-  fs.mkdirSync(dir, { recursive: true });
-  fs.writeFileSync(existingPath, JSON.stringify(existing, null, 2) + "\n");
+  writeFile(existingPath, JSON.stringify(existing, null, 2) + "\n");
 }
 
 /**
@@ -238,6 +238,8 @@ export function mergeSettings(existingPath: string, newFragment: HookSettings): 
  * Used during hookRemovals migration to clean up stale entries.
  */
 export function removeHooksFromSettings(settingsPath: string, hookFiles: string[]): void {
+  assertNotSymlink(settingsPath);
+  assertNoSymlinkInPath(settingsPath);
   let existing: { hooks?: Record<string, HookMatcher[]> };
   try {
     existing = JSON.parse(fs.readFileSync(settingsPath, "utf-8"));
@@ -267,7 +269,7 @@ export function removeHooksFromSettings(settingsPath: string, hookFiles: string[
   }
 
   if (changed) {
-    fs.writeFileSync(settingsPath, JSON.stringify(existing, null, 2) + "\n");
+    writeFile(settingsPath, JSON.stringify(existing, null, 2) + "\n");
   }
 }
 

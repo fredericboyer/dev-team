@@ -18,10 +18,6 @@
           },
           {
             "type": "command",
-            "command": "node .claude/hooks/precommit-lint-format.js"
-          },
-          {
-            "type": "command",
             "command": "node .dev-team/hooks/dev-team-pre-commit-lint.js"
           },
           {

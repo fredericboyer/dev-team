@@ -20,7 +20,7 @@ const path = require("path");
 let input = {};
 try {
   input = JSON.parse(process.argv[2] || "{}");
-} catch (err) {
+} catch {
   // Not a blocking safety hook — fail open on parse error
   process.exit(0);
 }

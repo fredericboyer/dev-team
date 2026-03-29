@@ -698,7 +698,7 @@ describe("dev-team-tdd-enforce", () => {
       fs.writeFileSync(testFile, 'test("works", () => {})');
 
       const input = JSON.stringify({ tool_input: { file_path: implFile } });
-      const stdout = execFileSync(process.execPath, [path.join(HOOKS_DIR, hook), input], {
+      execFileSync(process.execPath, [path.join(HOOKS_DIR, hook), input], {
         encoding: "utf-8",
         timeout: 5000,
         cwd: tmpDir,
@@ -1782,7 +1782,7 @@ describe("dev-team-agent-teams-guide", () => {
 
   it("exits 0 on malformed input", () => {
     try {
-      const stdout = execFileSync(process.execPath, [path.join(HOOKS_DIR, hook), "not-json"], {
+      execFileSync(process.execPath, [path.join(HOOKS_DIR, hook), "not-json"], {
         encoding: "utf-8",
         timeout: 5000,
         cwd: tmpDir,

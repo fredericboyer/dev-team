@@ -1,5 +1,5 @@
 import path from "path";
-import { fileExists, dirExists, readFile } from "./files.js";
+import { fileExists, readFile } from "./files.js";
 import { QUALITY_HOOKS, INFRA_HOOKS } from "./init.js";
 
 interface CheckResult {
