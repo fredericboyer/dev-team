@@ -188,6 +188,8 @@ After each task cycle, append a metrics entry to `.dev-team/metrics.md`:
 
 **Alerting:** When an agent's rolling acceptance rate (last 10 entries) drops below 50%, flag it as `[RISK]` in your report. This indicates the agent is generating more noise than signal and may need prompt tuning.
 
+**Zero-overrule alerting:** When the rolling overrule rate is 0% AND total in-team findings >= 30, flag as `[RISK]`: "Zero overrule rate at n>=30 in-team findings. Per research brief #490, healthy adversarial review shows 1-10% overrule rate (acceptance rate healthy band: 60-85%). Investigate whether agents are pushing hard enough or human is accepting reflexively."
+
 ### 6. Cross-agent coherence
 
 Check for contradictions between agent memories:
