@@ -38,13 +38,58 @@ export function assertNotSymlink(absPath: string): void {
 }
 
 /**
+ * Walks up from absPath to the filesystem root and throws if any
+ * existing ancestor directory is a symlink. Silently skips ancestors
+ * that do not exist (ENOENT). Prevents parent-directory symlink
+ * traversal attacks where an attacker replaces an ancestor with a
+ * symlink to redirect file operations to arbitrary locations.
+ */
+export function assertNoSymlinkInPath(absPath: string): void {
+  // Find the deepest existing ancestor and resolve through system symlinks
+  // (e.g. /tmp -> /private/tmp on macOS) so they don't trigger false positives.
+  let deepest = path.resolve(absPath);
+  while (deepest !== path.parse(deepest).root) {
+    try {
+      fs.statSync(deepest);
+      break;
+    } catch (err: unknown) {
+      if ((err as NodeJS.ErrnoException).code === "ENOENT") {
+        deepest = path.dirname(deepest);
+        continue;
+      }
+      throw err;
+    }
+  }
+  // Resolve system-level symlinks on the existing portion
+  const resolved = fs.realpathSync(deepest);
+  // Reconstruct the full path: resolved existing root + remaining segments
+  const remainder = path.resolve(absPath).slice(deepest.length);
+  let current = resolved + remainder;
+  const root = path.parse(current).root;
+
+  while (current !== root) {
+    current = path.dirname(current);
+    try {
+      if (fs.lstatSync(current).isSymbolicLink()) {
+        throw new Error(`Refusing to operate through symlink ancestor: ${current}`);
+      }
+    } catch (err: unknown) {
+      if ((err as NodeJS.ErrnoException).code === "ENOENT") continue;
+      throw err;
+    }
+  }
+}
+
+/**
  * Copies a file from src to dest, creating parent directories as needed.
  * Rejects symlinks at src or dest to prevent symlink-following attacks.
  * Returns true if the file was written.
  */
 export function copyFile(src: string, dest: string): boolean {
   assertNotSymlink(src);
+  assertNoSymlinkInPath(src);
   assertNotSymlink(dest);
+  assertNoSymlinkInPath(dest);
   const dir = path.dirname(dest);
   fs.mkdirSync(dir, { recursive: true });
   fs.copyFileSync(src, dest);
@@ -102,6 +147,8 @@ export function readFile(absPath: string): string | null {
  * Writes content to a file, creating parent directories as needed.
  */
 export function writeFile(absPath: string, content: string): void {
+  assertNotSymlink(absPath);
+  assertNoSymlinkInPath(absPath);
   const dir = path.dirname(absPath);
   fs.mkdirSync(dir, { recursive: true });
   fs.writeFileSync(absPath, content);
