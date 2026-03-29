@@ -41,7 +41,7 @@ Check for:
 
 Cross-check the **Known Tech Debt** section against the issue tracker and release history to remove stale entries:
 
-1. **Closed-issue check**: For each tech debt entry that references an issue number (e.g., `#433`), run `gh issue view <number>` to check if the issue is closed. If the issue is closed, the entry is likely stale — flag as:
+1. **Closed-issue check**: For each tech debt entry that references an issue number (e.g., `#433`), check the issue tracker to see if the issue is closed (strip the `#` prefix when querying). If the issue is closed, the entry is likely stale — flag as:
    ```
    **[DEFECT]** Learnings — Stale tech debt entry: "<entry summary>" references #<number> which is closed.
    Concrete impact: developers waste time investigating already-resolved debt.
