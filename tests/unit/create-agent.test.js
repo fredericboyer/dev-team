@@ -110,5 +110,12 @@ describe('createAgent', () => {
 
     const content = fs.readFileSync(agentPath, 'utf-8');
     assert.ok(content.includes('name: dev-team-'), 'should have name with trailing dash');
+
+    // Verify the template placeholders (AGENTNAME) are replaced, not left empty
+    assert.ok(!content.includes('AGENTNAME'), 'should not have unresolved AGENTNAME placeholder');
+    assert.ok(!content.includes('FULLNAME'), 'should not have unresolved FULLNAME placeholder');
+    assert.ok(content.startsWith('---'), 'should have valid frontmatter');
+    assert.ok(content.includes('model: sonnet'), 'should have model field');
+    assert.ok(content.includes('memory: project'), 'should have memory field');
   });
 });

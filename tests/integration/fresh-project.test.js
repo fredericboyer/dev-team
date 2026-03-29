@@ -242,6 +242,33 @@ describe("fresh project installation", () => {
     assert.ok(prefs.hooks.includes("Worktree remove"), "should include Worktree remove");
   });
 
+  it("exits with code 1 for invalid preset", async () => {
+    const origExit = process.exit;
+    try {
+      process.exit = (code) => {
+        throw new Error(`__EXIT_${code}__`);
+      };
+      await assert.rejects(
+        async () => run(tmpDir, ["--preset", "nonexistent"]),
+        (err) => err.message.includes("__EXIT_1__"),
+        "should exit with code 1 for unknown preset",
+      );
+    } finally {
+      process.exit = origExit;
+    }
+  });
+
+  it("supports --preset=backend form (with =)", async () => {
+    await run(tmpDir, ["--preset=backend"]);
+
+    const prefs = JSON.parse(
+      fs.readFileSync(path.join(tmpDir, ".dev-team", "config.json"), "utf-8"),
+    );
+    assert.equal(prefs.preset, "backend");
+    assert.ok(prefs.agents.includes("Voss"), "should include Voss");
+    assert.ok(prefs.agents.includes("Szabo"), "should include Szabo");
+  });
+
   it("refuses to init when config.json already exists without --force", async () => {
     // First init
     await run(tmpDir, ["--all"]);
