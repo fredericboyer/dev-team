@@ -230,9 +230,11 @@ export function mergeSettings(existingPath: string, newFragment: HookSettings): 
 }
 
 /**
- * Appends content to a file with dev-team markers.
- * If markers already exist, replaces content between them.
- * If file doesn't exist, creates it with just the content.
+ * Manages dev-team managed content in a CLAUDE.md file.
+ * - No file: creates it with the content.
+ * - Has BEGIN+END markers: replaces content between them.
+ * - Has BEGIN but no END: replaces from BEGIN to end of file.
+ * - No markers: appends content at end.
  */
 export function mergeClaudeMd(
   filePath: string,
@@ -249,15 +251,17 @@ export function mergeClaudeMd(
   }
 
   if (existing.includes(BEGIN_MARKER)) {
-    if (!existing.includes(END_MARKER)) {
-      console.warn(
-        "Warning: Found dev-team begin marker but no end marker in CLAUDE.md. Appending instead of replacing.",
-      );
-      writeFile(filePath, existing.trimEnd() + "\n\n" + newContent + "\n");
-      return "appended";
-    }
     const firstBegin = existing.indexOf(BEGIN_MARKER);
-    const firstEnd = existing.indexOf(END_MARKER);
+    const firstEnd = existing.indexOf(END_MARKER, firstBegin);
+
+    if (firstEnd === -1) {
+      console.warn(
+        "Warning: Found dev-team begin marker but no end marker in CLAUDE.md. Replacing from begin marker to end of file.",
+      );
+      const beforeMarker = existing.substring(0, firstBegin);
+      writeFile(filePath, beforeMarker + newContent + "\n");
+      return "replaced";
+    }
 
     const secondBegin = existing.indexOf(BEGIN_MARKER, firstBegin + 1);
     if (secondBegin !== -1) {
