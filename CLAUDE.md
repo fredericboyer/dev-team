@@ -65,7 +65,7 @@ For non-trivial work: explore the area first, then implement, then review.
 
 **Automatic invocation (hooks):** Agents are auto-spawned based on changed file patterns. See `.dev-team/hooks/` for the watch-list patterns that determine which agents are triggered. Turing is on-demand only (spawned by Drucker for research tasks).
 
-**End-of-workflow agents:** Borges is mandatory at end of every `/dev-team:task`, `/dev-team:review`, `/dev-team:audit`, and `/dev-team:retro`.
+**End-of-workflow agents:** Borges is mandatory at end of every `/dev-team:task`, `/dev-team:review`, `/dev-team:audit`, and `/dev-team:retro` (invoked via `/dev-team:extract`).
 
 **Orchestration:** Drucker delegates tasks to the right implementing agent and spawns reviewers. Szabo, Knuth, and Brooks review all code changes.
 
@@ -94,6 +94,7 @@ Do NOT skip this. Do NOT treat hook output as optional. If you believe a review 
 - `/dev-team:review` — orchestrated multi-agent parallel review of changes
 - `/dev-team:audit` — full codebase security + quality + tooling audit
 - `/dev-team:retro` — audit knowledge base health (learnings, agent memory, CLAUDE.md)
+- `/dev-team:extract` — Borges memory extraction, metrics verification, and memory formation gates
 - `/dev-team:scorecard` — audit process conformance for a completed task
 
 > **Non-GitHub platforms:** Skills and hooks reference `gh` CLI commands for GitHub. If your project uses GitLab, Bitbucket, or another platform, adapt these commands accordingly. Set the `platform` field in `.dev-team/config.json` to `"gitlab"`, `"bitbucket"`, or `"other"`.
@@ -141,7 +142,4 @@ Domain-specific findings, known patterns, active watch lists. Each agent owns it
 When the human gives feedback about process, coding style, or tool behavior: write it to `.claude/rules/dev-team-learnings.md`. Only use machine-local memory for things that are truly personal and would not apply to another developer on the same project.
 
 <!-- dev-team:end -->
-
-
-
 

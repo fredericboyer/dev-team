@@ -96,7 +96,7 @@ Before issuing any `gh issue`, `gh pr`, or other platform-specific CLI commands,
 ### Completion
 
 After the audit report is delivered:
-1. You MUST spawn **@dev-team-borges** as `borges-extract` (Librarian) as the final step to review memory freshness and capture learnings from the audit findings. Do NOT skip this.
-2. If Borges was not spawned, the audit is INCOMPLETE.
-3. **Metrics completion gate**: Read `.dev-team/metrics.md` and verify that a new `Task: <reference>` entry was appended after this audit started. A stale metrics file (no new entry) means Borges did not complete successfully. If metrics.md has no new entry after Borges reports completion, flag this as a system failure and re-run Borges with explicit instruction to record metrics.
+1. Format the **finding outcome log** with every finding's classification, source agent, and outcome. Then call `/dev-team:extract` with the formatted log.
+2. If `/dev-team:extract` was not called, the audit is INCOMPLETE.
+3. `/dev-team:extract` handles Borges spawning, metrics verification, and memory formation gates. Do not report the audit as complete until `/dev-team:extract` reports success.
 4. Include Borges's recommendations in the final report.

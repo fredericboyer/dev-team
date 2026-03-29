@@ -132,73 +132,9 @@ After creating a PR, check for automated review findings from the platform's rev
 
 ## Step 4: Extract
 
-You MUST spawn **@dev-team-borges** as `borges-extract` (Librarian). Format and pass Borges the **finding outcome log** using this structured format:
+Format the **finding outcome log** from all review rounds (use single-branch or multi-branch format as appropriate — see `/dev-team:extract` for the log schema). Then call `/dev-team:extract` with the formatted log.
 
-**Single-branch format:**
-```
-## Finding Outcome Log
-Task: <issue number and title>
-Branch: <branch name>
-Review rounds: <N>
-Agents involved: <comma-separated list of all participating agents>
-
-### Findings
-| # | Agent | Classification | File | Finding summary | Outcome | Reason |
-|---|-------|---------------|------|-----------------|---------|--------|
-| 1 | szabo | [DEFECT] | src/auth.ts | Missing input validation | fixed | Fixed in round 2 |
-| 2 | knuth | [RISK] | src/parser.ts | No boundary check for empty input | deferred | Tracked in #999 |
-| 3 | brooks | [SUGGESTION] | src/core.ts | Extract to shared utility | accepted | Refactored |
-| 4 | knuth | [QUESTION] | src/config.ts | Why not use env vars? | ignored | Out of scope for this task |
-
-### Summary
-- Total findings: <N>
-- DEFECTs: <N> fixed, <N> overruled
-- Advisory (RISK/QUESTION/SUGGESTION): <N> accepted, <N> deferred, <N> overruled, <N> ignored
-- Rounds to convergence: <N>
-```
-
-**Multi-branch format** (parallel mode):
-```
-## Finding Outcome Log
-Tasks: <comma-separated issue numbers and titles>
-Branches:
-- <branch-1>: <N> review rounds
-- <branch-2>: <N> review rounds
-Agents involved: <comma-separated list of all participating agents>
-
-### Findings
-| # | Branch | Agent | Classification | File | Finding summary | Outcome | Reason |
-|---|--------|-------|---------------|------|-----------------|---------|--------|
-| 1 | feat/123-auth | szabo | [DEFECT] | src/auth.ts | Missing input validation | fixed | Fixed in round 2 |
-| 2 | feat/456-parser | knuth | [RISK] | src/parser.ts | No boundary check | deferred | Tracked in #999 |
-
-### Summary
-- Total findings: <N> across <N> branches
-- DEFECTs: <N> fixed, <N> overruled
-- Advisory (RISK/QUESTION/SUGGESTION): <N> accepted, <N> deferred, <N> overruled, <N> ignored
-- Rounds to convergence: <per-branch breakdown or max>
-```
-
-This log enables Borges to record calibration metrics. Borges will:
-- **Extract structured memory entries** from review findings and implementation decisions
-- **Reinforce accepted patterns** in the reviewer's memory (calibration feedback)
-- **Record overruled findings** with context so reviewers generate fewer false positives
-- **Generate calibration rules** when 3+ findings on the same tag are overruled
-- **Record metrics** to `.dev-team/metrics.md` (acceptance rates, rounds to convergence, per-agent stats)
-- Write entries to each participating agent's MEMORY.md using the structured format
-- Update shared learnings in `.claude/rules/dev-team-learnings.md`
-- Check cross-agent coherence
-- Report system improvement opportunities
-
-### Completion gates
-
-**Borges completion gate (HARD CHECK)**: Before emitting "Done", verify BOTH conditions:
-- (a) Borges has been spawned **and completed** (not just spawned — wait for completion)
-- (b) Read `.dev-team/metrics.md` and verify it contains a new `Task: <issue or PR reference>` entry for the current task. A stale metrics file (no new entry) means Borges did not complete successfully.
-
-**If either check fails, the task is NOT complete.** If metrics.md has no new entry after Borges reports completion, flag this as a system failure and re-run Borges with explicit instruction to record metrics. Do not emit "Done" or report task completion until both conditions are satisfied. This is a gate, not advisory — skipping it means the task loop has not finished.
-
-**Memory formation gate**: After Borges runs, verify that each participating agent's MEMORY.md contains at least one new structured entry from this task. Empty agent memory after a completed task is a system failure — Borges prevents this by automating extraction.
+`/dev-team:extract` handles Borges spawning, metrics verification, and memory formation gates. Do not emit "Done" or report task completion until `/dev-team:extract` reports success. If it reports failure, follow its guidance to retry.
 
 Summarize what was accomplished across all iterations. Report any remaining `[RISK]` or `[SUGGESTION]` items, including Borges's recommendations.
 
