@@ -221,7 +221,9 @@ describe("mergeSettings", () => {
     const settingsPath = path.join(tmpDir, "settings.json");
     const existing = { hooks: { PostToolUse: [{ matcher: "Edit", hooks: null }] } };
     fs.writeFileSync(settingsPath, JSON.stringify(existing));
-    const fragment = { hooks: { PostToolUse: [{ matcher: "Edit", hooks: [{ type: "command", command: "a" }] }] } };
+    const fragment = {
+      hooks: { PostToolUse: [{ matcher: "Edit", hooks: [{ type: "command", command: "a" }] }] },
+    };
     mergeSettings(settingsPath, fragment);
     const result = JSON.parse(fs.readFileSync(settingsPath, "utf-8"));
     assert.equal(result.hooks.PostToolUse[0].hooks.length, 1);
@@ -229,30 +231,52 @@ describe("mergeSettings", () => {
 
   it("consolidates duplicate matcher blocks from prior bug", () => {
     const settingsPath = path.join(tmpDir, "settings.json");
-    const existing = { hooks: { PostToolUse: [
-      { matcher: "Edit", hooks: [{ type: "command", command: "a" }] },
-      { matcher: "Edit", hooks: [{ type: "command", command: "b" }] }
-    ] } };
+    const existing = {
+      hooks: {
+        PostToolUse: [
+          { matcher: "Edit", hooks: [{ type: "command", command: "a" }] },
+          { matcher: "Edit", hooks: [{ type: "command", command: "b" }] },
+        ],
+      },
+    };
     fs.writeFileSync(settingsPath, JSON.stringify(existing));
-    const fragment = { hooks: { PostToolUse: [{ matcher: "Edit", hooks: [{ type: "command", command: "c" }] }] } };
+    const fragment = {
+      hooks: { PostToolUse: [{ matcher: "Edit", hooks: [{ type: "command", command: "c" }] }] },
+    };
     mergeSettings(settingsPath, fragment);
     const result = JSON.parse(fs.readFileSync(settingsPath, "utf-8"));
     assert.equal(result.hooks.PostToolUse.length, 1, "consolidates into one block");
-    const cmds = result.hooks.PostToolUse[0].hooks.map(h => h.command);
+    const cmds = result.hooks.PostToolUse[0].hooks.map((h) => h.command);
     assert.deepEqual(cmds.sort(), ["a", "b", "c"]);
   });
 
   it("deduplicates repeated commands in new entry", () => {
     const settingsPath = path.join(tmpDir, "settings.json");
-    const existing = { hooks: { PostToolUse: [{ matcher: "Edit", hooks: [{ type: "command", command: "a" }] }] } };
+    const existing = {
+      hooks: { PostToolUse: [{ matcher: "Edit", hooks: [{ type: "command", command: "a" }] }] },
+    };
     fs.writeFileSync(settingsPath, JSON.stringify(existing));
-    const fragment = { hooks: { PostToolUse: [{ matcher: "Edit", hooks: [{ type: "command", command: "b" }, { type: "command", command: "b" }] }] } };
+    const fragment = {
+      hooks: {
+        PostToolUse: [
+          {
+            matcher: "Edit",
+            hooks: [
+              { type: "command", command: "b" },
+              { type: "command", command: "b" },
+            ],
+          },
+        ],
+      },
+    };
     mergeSettings(settingsPath, fragment);
-    const cmds = JSON.parse(fs.readFileSync(settingsPath, "utf-8")).hooks.PostToolUse[0].hooks.map(h => h.command);
+    const cmds = JSON.parse(fs.readFileSync(settingsPath, "utf-8")).hooks.PostToolUse[0].hooks.map(
+      (h) => h.command,
+    );
     assert.deepEqual(cmds, ["a", "b"]);
   });
 
-    it("does not duplicate identical hooks on re-run", () => {
+  it("does not duplicate identical hooks on re-run", () => {
     const settingsPath = path.join(tmpDir, "settings.json");
     const fragment = {
       hooks: { PreToolUse: [{ matcher: "Bash", hooks: [{ type: "command", command: "same" }] }] },
@@ -345,18 +369,22 @@ describe("mergeClaudeMd", () => {
     assert.ok(content.includes("User footer"), "should preserve content after last pair");
   });
 
-  it("appends instead of corrupting when begin marker exists but end marker is missing", () => {
+  it("replaces from begin marker to EOF when end marker is missing", () => {
     const p = path.join(tmpDir, "CLAUDE.md");
     fs.writeFileSync(p, "# Project\n\n<!-- dev-team:begin -->\nold content without end marker");
 
     const result = mergeClaudeMd(p, "<!-- dev-team:begin -->\nnew\n<!-- dev-team:end -->");
-    assert.equal(result, "appended");
+    assert.equal(result, "replaced");
 
     const content = fs.readFileSync(p, "utf-8");
+    assert.ok(content.includes("# Project"), "should preserve content before begin marker");
     assert.ok(
-      content.includes("old content without end marker"),
-      "should preserve original content",
+      !content.includes("old content without end marker"),
+      "should not preserve orphaned content after begin marker",
     );
-    assert.ok(content.includes("new"), "should append new content");
+    assert.ok(content.includes("new"), "should have new content");
+    // Verify no duplicate begin markers
+    const beginCount = (content.match(/<!-- dev-team:begin -->/g) || []).length;
+    assert.equal(beginCount, 1, "should have exactly one begin marker");
   });
 });

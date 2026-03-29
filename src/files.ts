@@ -251,10 +251,12 @@ export function mergeClaudeMd(
   if (existing.includes(BEGIN_MARKER)) {
     if (!existing.includes(END_MARKER)) {
       console.warn(
-        "Warning: Found dev-team begin marker but no end marker in CLAUDE.md. Appending instead of replacing.",
+        "Warning: Found dev-team begin marker but no end marker in CLAUDE.md. Replacing from begin marker to end of file.",
       );
-      writeFile(filePath, existing.trimEnd() + "\n\n" + newContent + "\n");
-      return "appended";
+      const beginIdx = existing.indexOf(BEGIN_MARKER);
+      const beforeMarker = existing.substring(0, beginIdx);
+      writeFile(filePath, beforeMarker + newContent + "\n");
+      return "replaced";
     }
     const firstBegin = existing.indexOf(BEGIN_MARKER);
     const firstEnd = existing.indexOf(END_MARKER);
