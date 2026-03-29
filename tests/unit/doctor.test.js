@@ -19,23 +19,16 @@ afterEach(() => {
 });
 
 /**
- * Extract hookFileMap from doctor.ts source so tests stay in sync with the
- * implementation rather than hardcoding a duplicate list.
+ * Derive hookFileMap from init.ts exports (same source doctor.ts uses at runtime).
  */
 function getHookFileMapFromSource() {
-  const doctorSrc = fs.readFileSync(path.join(__dirname, "..", "..", "src", "doctor.ts"), "utf8");
-  // Match the hookFileMap object literal in the source
-  const mapMatch = doctorSrc.match(/const hookFileMap[^{]*\{([^}]+)\}/s);
-  if (!mapMatch) throw new Error("Could not extract hookFileMap from doctor.ts");
-
+  const { QUALITY_HOOKS, INFRA_HOOKS } = require("../../dist/init");
   const entries = {};
-  const entryRe = /"([^"]+)":\s*"([^"]+)"/g;
-  let m;
-  while ((m = entryRe.exec(mapMatch[1])) !== null) {
-    entries[m[1]] = m[2];
+  for (const h of [...QUALITY_HOOKS, ...INFRA_HOOKS]) {
+    entries[h.label] = h.file;
   }
   if (Object.keys(entries).length === 0) {
-    throw new Error("hookFileMap parsed from doctor.ts was empty");
+    throw new Error("hookFileMap derived from init.ts was empty");
   }
   return entries;
 }
