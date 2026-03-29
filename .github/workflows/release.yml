@@ -5,7 +5,97 @@ on:
     tags: ['v[0-9]*']
 
 jobs:
+  validate-version:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Validate semver tag matches package.json
+        run: |
+          PKG_VERSION=$(node -p "require('./package.json').version")
+          TAG_VERSION="${TAG_REF#v}"
+          if [ "$PKG_VERSION" \!= "$TAG_VERSION" ]; then
+            echo "Tag version ($TAG_VERSION) does not match package.json version ($PKG_VERSION)"
+            exit 1
+          fi
+        env:
+          TAG_REF: ${{ github.ref_name }}
+
+  test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Run full test suite
+        run: npm test
+
+  lint:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+  format:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - run: npm ci
+
+      - name: Format check
+        run: npm run format:check
+
+  validate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+
+      - name: Validate agents
+        run: node scripts/validate-agents.js
+
+      - name: Validate hooks
+        run: node scripts/validate-hooks.js
+
   publish:
+    needs: [validate-version, test, lint, format, validate]
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -19,36 +109,10 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
           cache: 'npm'
 
-      - run: npm install
-
-      - name: Validate semver tag matches package.json
-        run: |
-          PKG_VERSION=$(node -p "require('./package.json').version")
-          TAG_VERSION="${TAG_REF#v}"
-          if [ "$PKG_VERSION" != "$TAG_VERSION" ]; then
-            echo "Tag version ($TAG_VERSION) does not match package.json version ($PKG_VERSION)"
-            exit 1
-          fi
-        env:
-          TAG_REF: ${{ github.ref_name }}
+      - run: npm ci
 
       - name: Build
         run: npm run build
-
-      - name: Run full test suite
-        run: npm test
-
-      - name: Lint
-        run: npm run lint
-
-      - name: Format check
-        run: npm run format:check
-
-      - name: Validate agents
-        run: node scripts/validate-agents.js
-
-      - name: Validate hooks
-        run: node scripts/validate-hooks.js
 
       - name: Publish to npm
         run: npm publish --access public --provenance
@@ -75,7 +139,7 @@ jobs:
             echo "::warning::No changelog entry found for version ${VERSION}"
             echo "Release ${VERSION}" > /tmp/release-notes.md
           else
-            echo "$NOTES" | sed '/./,$!d' > /tmp/release-notes.md
+            echo "$NOTES" | sed '/./,$\!d' > /tmp/release-notes.md
           fi
         env:
           TAG_REF: ${{ github.ref_name }}
