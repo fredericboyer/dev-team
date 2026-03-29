@@ -24,7 +24,9 @@
     "Pre-commit lint",
     "Agent teams guide",
     "Watch list",
-    "Review gate"
+    "Review gate",
+    "Worktree create",
+    "Worktree remove"
   ],
   "issueTracker": "GitHub Issues",
   "branchConvention": "feat/123-description",

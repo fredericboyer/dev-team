@@ -231,4 +231,51 @@ describe("fresh project installation", () => {
     assert.ok(!prefs.agents.includes("Mori"), "should not include Mori");
     assert.ok(!prefs.agents.includes("Brooks"), "should not include Architect");
   });
+
+  it("includes INFRA_HOOKS labels in config.json", async () => {
+    await run(tmpDir, ["--all"]);
+
+    const prefs = JSON.parse(
+      fs.readFileSync(path.join(tmpDir, ".dev-team", "config.json"), "utf-8"),
+    );
+    assert.ok(prefs.hooks.includes("Worktree create"), "should include Worktree create");
+    assert.ok(prefs.hooks.includes("Worktree remove"), "should include Worktree remove");
+  });
+
+  it("refuses to init when config.json already exists without --force", async () => {
+    // First init
+    await run(tmpDir, ["--all"]);
+    assert.ok(fs.existsSync(path.join(tmpDir, ".dev-team", "config.json")));
+
+    // Second init should fail
+    await assert.rejects(
+      async () => {
+        const origExit = process.exit;
+        process.exit = (code) => {
+          throw new Error(`__EXIT_${code}__`);
+        };
+        try {
+          await run(tmpDir, ["--all"]);
+        } finally {
+          process.exit = origExit;
+        }
+      },
+      (err) => err.message.includes("__EXIT_1__"),
+      "should exit with code 1 when config.json exists",
+    );
+  });
+
+  it("allows re-init with --force when config.json exists", async () => {
+    // First init
+    await run(tmpDir, ["--all"]);
+
+    // Second init with --force should succeed
+    await run(tmpDir, ["--all", "--force"]);
+
+    // Verify config.json was rewritten
+    const prefs = JSON.parse(
+      fs.readFileSync(path.join(tmpDir, ".dev-team", "config.json"), "utf-8"),
+    );
+    assert.ok(prefs.version, "should have a version after --force re-init");
+  });
 });
