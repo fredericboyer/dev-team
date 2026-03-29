@@ -182,10 +182,10 @@
 - **Last-verified**: 2026-03-29
 - **Context**: Scorecard now checks for /dev-team:extract invocation (the new Borges entry point) in addition to direct Borges agent spawning. Without this, scorecard would always report "Borges not spawned" for v1.9.0+ workflows that use the extract skill.
 
-### [2026-03-26] Audit baseline: 14 findings, 0 DEFECT, all accepted
-- **Type**: CALIBRATION
-- **Source**: Full codebase audit 2026-03-26
-- **Tags**: audit, calibration, baseline
-- **Outcome**: all accepted
-- **Last-verified**: 2026-03-26
-- **Context**: First full tooling audit. Zero DEFECTs. Themes: hook consolidation, CI hardening, test coverage, migration completeness. Details in metrics.md.
+### [2026-03-29] v1.10.1: init/update bug trio — config completeness, init guard, settings merge
+- **Type**: DECISION [new]
+- **Source**: #515, PR #516
+- **Tags**: init, update, settings, hooks, dx
+- **Outcome**: fixed
+- **Last-verified**: 2026-03-29
+- **Context**: Three bugs fixed: (1) init now appends INFRA_HOOKS labels to config.json hooks array, (2) init refuses when config.json exists (use --force), (3) mergeSettings updates attributes (timeout, type) on existing hooks via Object.assign. Also added removeHooksFromSettings for hook removal cleanup and hookRemovals migration in update.ts. HookEntry interface extended with timeout/blocking fields per Brooks review.
