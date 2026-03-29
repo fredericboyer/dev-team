@@ -1,8 +1,8 @@
 {
   "version": "1.9.0",
-  "platform": "github",
   "agents": [
     "Voss",
+    "Hamilton",
     "Mori",
     "Szabo",
     "Knuth",
@@ -13,7 +13,6 @@
     "Conway",
     "Drucker",
     "Borges",
-    "Hamilton",
     "Turing",
     "Rams"
   ],
@@ -22,12 +21,14 @@
     "Safety guard",
     "Post-change review",
     "Pre-commit gate",
-    "Watch list",
     "Pre-commit lint",
     "Agent teams guide",
-    "Review gate",
-    "Worktree create",
-    "Worktree remove"
+    "Watch list",
+    "Review gate"
   ],
+  "issueTracker": "GitHub Issues",
+  "branchConvention": "feat/123-description",
+  "taskBranchPattern": "(feat|fix)\\/",
+  "platform": "github",
   "agentTeams": true
 }
