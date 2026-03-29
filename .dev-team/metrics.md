@@ -152,3 +152,19 @@
 - **Duration**: single session, 12 PRs (#470-#483)
 - **Notes**: v1.8.0 delivered without `/dev-team:task` or dev-team agent reviews. All implementation by orchestrator directly. Copilot was sole reviewer. ~30 Copilot findings across 12 PRs, all addressed. Key PRs with substantive findings: #475 (8 findings on symlink guards — 5 fixed, 3 acknowledged), #479 (mergeClaudeMd edge case), #478 (readFile docstring). Process gap: no adversarial review loop, no Borges extraction during delivery. This post-hoc extraction fills the memory gap. Key deliverables: worktree serialization hooks (INFRA_HOOKS), task skill 4-step decomposition, assertNoSymlinkInPath, readFile error hardening, mergeClaudeMd boundary fix, 18 new tests.
 
+### [2026-03-29] Task: v1.10.1 hotfix (#515) — PR #516
+- **Agents**: implementing: Deming, reviewers: Szabo, Knuth, Brooks
+- **Rounds**: 1
+- **Findings**:
+  - Szabo: 0 DEFECT, 0 RISK, 1 SUGGESTION (1 ignored)
+  - Knuth: 0 DEFECT, 0 RISK, 3 SUGGESTION (1 deferred / 2 ignored), 1 QUESTION (1 ignored)
+  - Brooks: 0 DEFECT, 1 RISK (1 accepted), 1 SUGGESTION (1 ignored)
+- **Acceptance rate**: 14% (1 accepted / 7 total)
+- **Overrule rate**: 0% (0/7)
+- **Fix rate (DEFECTs)**: N/A (0 DEFECTs)
+- **Defer rate (advisory)**: 14% (1/7)
+- **Ignore rate (advisory)**: 71% (5/7)
+- **Duration**: single session, 1 PR
+- **Notes**: Small hotfix — 3 init/update bugs fixed (config completeness, init guard, settings merge). High ignore rate reflects advisory findings on trusted internal code (Object.assign on template JSON, defense-in-depth redundancy). One accepted finding: Brooks flagged incomplete HookEntry interface, extended with timeout/blocking fields. One deferred: Knuth flagged missing settings cleanup test. Rolling zero-overrule alert continues at n>=94 in-team findings.
+- **[RISK] Zero-overrule alert**: Rolling overrule rate remains 0% at n>=94 in-team findings (v1.2.0 through v1.10.1). Per research brief #490, healthy adversarial review shows 1-10% overrule rate.
+

@@ -118,6 +118,14 @@
 - **Last-verified**: 2026-03-29
 - **Context**: PR #509 bundled commits from #490 + #494; PR #511 bundled #490 + #493. Both caused by agents sharing a working directory. Reinforces v1.7.0 finding — worktree isolation prevents cross-branch contamination. Seen: 2nd occurrence (v1.7.0 had 3 stray commits, v1.10.0 had 2 bundled PRs).
 
+### [2026-03-29] v1.10.1: 3 findings ignored — defense-in-depth, test scope, error handling
+- **Type**: CALIBRATION
+- **Source**: #515, PR #516
+- **Tags**: calibration, hotfix
+- **Outcome**: 0 accepted, 1 deferred, 2 ignored
+- **Last-verified**: 2026-03-29
+- **Context**: HOOK_FILES redundancy with ghost filter (ignored — defense in depth), hookRemovals test gap (deferred — unit tests cover it), removeHooksFromSettings swallowing invalid JSON (ignored — mergeSettings runs first). All advisory, no quality signal.
+
 ### [2026-03-26] Review skill had wrong path for agent-patterns.json
 - **Type**: DEFECT [fixed]
 - **Source**: PR #365 (fix/355), Copilot finding

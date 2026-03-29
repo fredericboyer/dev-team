@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.10.1] - 2026-03-29
+
+### Fixed
+- `INFRA_HOOKS` missing from `config.json` after `init` — config completeness now validated (#515, #516).
+- `init --all` silently overwrites existing config — now requires `--force` for re-initialization (#515, #516).
+- `mergeSettings` drops new hook attributes (`timeout`, `blocking`) — HookEntry interface extended to preserve all attributes (#515, #516).
+
+### Added
+- `hookRemovals` migration support for clean hook lifecycle management (#516).
+- `removeHooksFromSettings` cleanup utility (#516).
+- Init guard requiring `--force` for re-init over existing installation (#516).
+
 ## [1.10.0] - 2026-03-29
 
 ### Added

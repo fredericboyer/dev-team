@@ -125,5 +125,13 @@
 - **Last-verified**: 2026-03-29
 - **Context**: Four parallel branches all edited dev-team-learnings.md, creating a 4-way merge conflict. Resolved via sequential merge ordering with conflict resolution between each merge. Same class as "sequential chains must integrate-as-you-go" — parallel branches touching shared files require merge coordination, not just sequential chains.
 
+### [2026-03-29] v1.10.1: HookEntry interface extended with timeout/blocking fields
+- **Type**: RISK [accepted]
+- **Source**: #515, PR #516, finding #6
+- **Tags**: architecture, hooks, interface, typing
+- **Outcome**: accepted
+- **Last-verified**: 2026-03-29
+- **Context**: Brooks flagged HookEntry interface as incomplete — missing timeout and blocking fields that exist in settings.json hook entries. Extended to match runtime shape. mergeSettings Object.assign now correctly propagates these attributes during update.
+
 ## Calibration Log
 <!-- Challenges accepted/overruled — tunes adversarial intensity over time -->

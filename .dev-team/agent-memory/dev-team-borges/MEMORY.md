@@ -107,6 +107,14 @@
 - **Last-verified**: 2026-03-29
 - **Context**: 4 retro-derived issues resolved. 12 raw findings (10 unique after dedup), 2 DEFECTs fixed, 4 accepted, 4 ignored, 0 overruled. 60% acceptance rate — within healthy band. Stray commits recurred (2nd time after v1.7.0). Zero-overrule alert triggered at n>=87 in-team findings. New entries: Szabo (1), Knuth (2), Brooks (1), Deming (2), Tufte (1). 1 new shared learning (parallel branch shared-file conflicts). Deming at 191 lines — approaching 200-cap, compressed 2 entries. No stale entries (all within 4 days).
 
+### [2026-03-29] v1.10.1 extraction — 1 PR, 7 findings, 14% acceptance, hotfix
+- **Type**: MILESTONE [verified]
+- **Source**: v1.10.1 hotfix (#515, PR #516)
+- **Tags**: metrics, calibration, extraction, hotfix
+- **Outcome**: verified
+- **Last-verified**: 2026-03-29
+- **Context**: Small hotfix — 3 init/update bugs fixed. 7 advisory findings (0 DEFECT), 1 accepted (Brooks HookEntry interface), 1 deferred (Knuth test gap), 5 ignored (trust boundary, defense-in-depth). 1 round to convergence. Low acceptance rate (14%) reflects advisory findings on trusted internal code — not a signal quality issue.
+
 ### [2026-03-29] v1.8.0 post-hoc extraction — 12 issues, 12 PRs, Copilot-only review
 - **Type**: MILESTONE [verified]
 - **Source**: v1.8.0 task loop (12 issues, 12 PRs #470-#483)
