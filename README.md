@@ -152,7 +152,7 @@ npx @fredericboyer/dev-team create-agent <name>     # Scaffold a custom agent
 
 All hooks are Node.js scripts — work on macOS, Linux, and Windows.
 
-### Skills (7)
+### Skills (8)
 
 | Skill | What it does |
 |-------|-------------|
@@ -161,6 +161,7 @@ All hooks are Node.js scripts — work on macOS, Linux, and Windows.
 | `/dev-team:audit` | Full codebase scan — Szabo (security) + Knuth (quality) + Deming (tooling) |
 | `/dev-team:challenge` | Critical examination of a proposal or design decision |
 | `/dev-team:retro` | Audit knowledge base health — learnings, agent memory, CLAUDE.md accuracy |
+| `/dev-team:extract` | Borges memory extraction — spawns Borges, verifies metrics and memory formation |
 | `/dev-team:scorecard` | Audit process conformance — verify Borges, findings, metrics, memory, issue closure |
 | `/merge` | Merge a PR with monitoring — Copilot check, auto-merge, CI verification, deferred finding enforcement |
 

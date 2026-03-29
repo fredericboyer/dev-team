@@ -98,15 +98,7 @@ Before issuing any `gh issue`, `gh pr`, or other platform-specific CLI commands,
 ### Completion
 
 After the review report is delivered:
-1. You MUST spawn **@dev-team-borges** as `borges-extract` (Librarian) as the final step. Pass Borges the **finding outcome log**: every finding with its classification, source agent, and outcome (accepted/overruled/ignored), including reasoning for overrules. Borges will:
-   - **Extract structured memory entries** from the review findings (each classified finding becomes a memory entry for the reviewer who produced it)
-   - **Reinforce accepted patterns** and **record overruled findings** for reviewer calibration
-   - **Generate calibration rules** when 3+ findings on the same tag are overruled
-   - **Record metrics** to `.dev-team/metrics.md`
-   - Write entries to each participating agent's MEMORY.md using the structured format
-   - Update shared learnings in `.claude/rules/dev-team-learnings.md`
-   - Check cross-agent coherence
-2. If Borges was not spawned, the review is INCOMPLETE.
-3. **Metrics completion gate**: Read `.dev-team/metrics.md` and verify that Borges has appended a new `Task: <reference>` entry for this review. The reference should match whatever identifier the review used (PR number, branch name, directory/pattern, or a label for uncommitted changes). A stale metrics file (no new entry) means Borges did not complete successfully. If metrics.md has no new entry after Borges reports completion, flag this as a system failure and re-run Borges with explicit instruction to record metrics for this review.
-4. **Memory formation gate**: After Borges runs, verify that each participating reviewer's MEMORY.md contains at least one new structured entry from this review.
-5. Include Borges's recommendations in the final report.
+1. Format the **finding outcome log** with every finding's classification, source agent, and outcome (accepted/overruled/ignored), including reasoning for overrules. Then call `/dev-team:extract` with the formatted log.
+2. If `/dev-team:extract` was not called, the review is INCOMPLETE.
+3. `/dev-team:extract` handles Borges spawning, metrics verification, and memory formation gates. Do not report the review as complete until `/dev-team:extract` reports success.
+4. Include Borges's recommendations in the final report.

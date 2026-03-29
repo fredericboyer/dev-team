@@ -94,6 +94,7 @@ Do NOT skip this. Do NOT treat hook output as optional. If you believe a review 
 - `/dev-team:review` — orchestrated multi-agent parallel review of changes
 - `/dev-team:audit` — full codebase security + quality + tooling audit
 - `/dev-team:retro` — audit knowledge base health (learnings, agent memory, CLAUDE.md)
+- `/dev-team:extract` — Borges memory extraction, metrics verification, and memory formation gates
 - `/dev-team:scorecard` — audit process conformance for a completed task
 
 > **Non-GitHub platforms:** Skills and hooks reference `gh` CLI commands for GitHub. If your project uses GitLab, Bitbucket, or another platform, adapt these commands accordingly. Set the `platform` field in `.dev-team/config.json` to `"gitlab"`, `"bitbucket"`, or `"other"`.
@@ -141,7 +142,4 @@ Domain-specific findings, known patterns, active watch lists. Each agent owns it
 When the human gives feedback about process, coding style, or tool behavior: write it to `.claude/rules/dev-team-learnings.md`. Only use machine-local memory for things that are truly personal and would not apply to another developer on the same project.
 
 <!-- dev-team:end -->
-
-
-
 
