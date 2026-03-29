@@ -11,13 +11,21 @@
 - **Last-verified**: 2026-03-26
 - **Context**: No c8, istanbul, or similar coverage tool in devDependencies or scripts. Coverage gaps must be identified by code review, not metrics.
 
-### [2026-03-25] mergeClaudeMd append-on-missing-END-marker duplicate BEGIN edge case
-- **Type**: RISK [verified]
-- **Source**: .claude/rules/dev-team-learnings.md (known tech debt)
+### [2026-03-29] mergeClaudeMd duplicate BEGIN — FIXED in v1.8.0
+- **Type**: RISK [fixed]
+- **Source**: #461, PR #479
 - **Tags**: boundary-condition, merge-logic
-- **Outcome**: verified
-- **Last-verified**: 2026-03-25
-- **Context**: Known edge case where subsequent runs can produce duplicate BEGIN markers if END marker is missing. Tracked in shared learnings.
+- **Outcome**: fixed
+- **Last-verified**: 2026-03-29
+- **Context**: Missing END marker now triggers replace-from-BEGIN-to-EOF instead of append. Also fixed END-before-BEGIN edge case by searching for END only after BEGIN position. Two distinct boundary conditions fixed in same PR.
+
+### [2026-03-29] v1.8.0: 18 new tests added — assertNotSymlink, assertNoSymlinkInPath, safeRegex
+- **Type**: PATTERN [new]
+- **Source**: #480, PR #480
+- **Tags**: testing, coverage, symlink, regex
+- **Outcome**: fixed
+- **Last-verified**: 2026-03-29
+- **Context**: Test coverage expanded for security-critical functions. Tests cover: leaf symlink rejection, ancestor symlink traversal, realpathSync design tradeoff, safeRegex nested quantifier rejection. Follows sentinel-throw pattern established in v1.7.0.
 
 ## Recurring Boundary Conditions
 

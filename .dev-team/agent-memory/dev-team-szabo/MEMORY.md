@@ -11,20 +11,28 @@
 - **Last-verified**: 2026-03-26
 - **Context**: dev-team is a CLI installer that copies template files into target projects. No authentication system, no user data handling, no database, no HTTP server. Primary security concern is file system operations and template injection.
 
-### [2026-03-25] readFile() returns null for both missing and permission-denied files
-- **Type**: RISK [verified]
-- **Source**: .claude/rules/dev-team-learnings.md (known tech debt)
-- **Tags**: error-handling, file-system, tech-debt
-- **Outcome**: verified
-- **Last-verified**: 2026-03-26
-- **Context**: src/files.ts readFile distinguishes ENOENT (missing file) from EACCES/EPERM (permission errors) and logs a warning on permission issues, but still returns null in both cases, which can mask security-relevant permission errors in target project file operations.
+### [2026-03-29] assertNoSymlinkInPath() — ancestor directory traversal guard
+- **Type**: PATTERN [new]
+- **Source**: #475, PR #475
+- **Tags**: symlink, path-traversal, file-system, security, defense-in-depth
+- **Outcome**: fixed
+- **Last-verified**: 2026-03-29
+- **Context**: Extends assertNotSymlink (leaf check) with ancestor-directory traversal. Walks from target to root checking each ancestor with lstatSync. Design tradeoff: realpathSync resolves system-level symlinks first, which can resolve away attacker symlinks at the deepest level — documented and accepted. Applied in update.ts and init.ts file operations.
+
+### [2026-03-29] readFile() permission error masking — FIXED in v1.8.0
+- **Type**: RISK [fixed]
+- **Source**: #460, PR #478
+- **Tags**: error-handling, file-system
+- **Outcome**: fixed
+- **Last-verified**: 2026-03-29
+- **Context**: readFile() now throws on any error other than ENOENT. EACCES/EPERM no longer silently return null.
 
 ### [2026-03-25] Hook scripts execute in target project context
 - **Type**: PATTERN [verified]
 - **Source**: templates/hooks/ analysis
 - **Tags**: code-execution, hooks, trust-boundary
 - **Outcome**: verified
-- **Last-verified**: 2026-03-26
+- **Last-verified**: 2026-03-29
 - **Context**: Hooks shipped as plain JS run in the target project's environment. They spawn subprocesses and read/write files. Any command injection in hook logic would execute with the user's permissions.
 
 ## Known Attack Surfaces
@@ -41,9 +49,9 @@
 - **Type**: RISK [fixed]
 - **Source**: Codebase audit (S3/S4), Issue #433, PR #454
 - **Tags**: symlink, path-traversal, file-system, security
-- **Outcome**: fixed — assertNotSymlink() guard added
-- **Last-verified**: 2026-03-27
-- **Context**: Fixed: assertNotSymlink() in files.ts uses lstatSync to reject symlinks before file operations. Applied to copyFile (guards both src and dest) and all renameSync calls in update.ts. Residual TOCTOU gap accepted as inherent to POSIX.
+- **Outcome**: fixed — assertNotSymlink() + assertNoSymlinkInPath() guards added
+- **Last-verified**: 2026-03-29
+- **Context**: Fixed in two waves: v1.7.0 added assertNotSymlink() leaf check (lstatSync on target). v1.8.0 added assertNoSymlinkInPath() ancestor traversal (walks parent dirs to root). Both applied to copyFile and renameSync calls. Residual TOCTOU gap accepted as inherent to POSIX.
 
 
 ## Calibration Log

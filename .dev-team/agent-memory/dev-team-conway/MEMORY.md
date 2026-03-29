@@ -107,5 +107,13 @@
 - **Last-verified**: 2026-03-27
 - **Context**: Milestone 24 (v1.7.0) closed with 11 closed / 2 open issues. The task listed 12 issues but only 11 were closed in the milestone at release time. Always verify milestone completion counts match the release brief.
 
+### [2026-03-29] v1.8.0: INFRA_HOOKS requires init.ts awareness in release testing
+- **Type**: PATTERN [new]
+- **Source**: #482, PR #482
+- **Tags**: release, init, hooks, infrastructure
+- **Outcome**: accepted
+- **Last-verified**: 2026-03-29
+- **Context**: v1.8.0 introduced INFRA_HOOKS (always-installed, non-optional). Release testing must now verify: (1) fresh install includes infra hooks, (2) update adds infra hooks to existing projects, (3) infra hooks don't appear in user-selectable lists. This is a new install surface to validate.
+
 ## Calibration Log
 <!-- Challenges accepted/overruled — tunes adversarial intensity over time -->

@@ -24,7 +24,7 @@
 - **Source**: package.json analysis
 - **Tags**: testing, ci
 - **Outcome**: verified
-- **Last-verified**: 2026-03-25
+- **Last-verified**: 2026-03-29
 - **Context**: New test files must be added to the explicit list in package.json scripts.test. CI runs tests cross-platform (ubuntu, macos, windows) with Node 22.
 
 ### [2026-03-25] TDD enforced via hook — dev-team-tdd-enforce.js
@@ -50,6 +50,14 @@
 - **Outcome**: fixed
 - **Last-verified**: 2026-03-27
 - **Context**: Three core modules had zero test coverage. Tests added using the sentinel-throw pattern for process.exit stubs. Key finding: process.exit stub must throw to halt execution — a no-op stub lets code continue past the exit point, causing crashes. This pattern is now established for all exit-testing.
+
+### [2026-03-29] v1.8.0: 18 tests for security-critical functions (#480)
+- **Type**: DECISION [new]
+- **Source**: #480, PR #480
+- **Tags**: testing, security, symlink, regex, coverage
+- **Outcome**: fixed
+- **Last-verified**: 2026-03-29
+- **Context**: assertNotSymlink, assertNoSymlinkInPath, and safeRegex each got dedicated test suites. Tests cover: leaf rejection, ancestor traversal, realpathSync tradeoff behavior, nested quantifier patterns, length bounds. Uses the sentinel-throw pattern for process.exit. Tightened existing test assertions (#474) to reduce false positive risk — narrower assertions catch regressions that broad ones miss.
 
 ## Framework and Runner Notes
 

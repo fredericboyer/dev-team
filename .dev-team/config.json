@@ -1,5 +1,5 @@
 {
-  "version": "1.7.0",
+  "version": "1.8.0",
   "platform": "github",
   "agents": [
     "Voss",
@@ -25,7 +25,9 @@
     "Watch list",
     "Pre-commit lint",
     "Agent teams guide",
-    "Review gate"
+    "Review gate",
+    "Worktree create",
+    "Worktree remove"
   ],
   "agentTeams": true
 }

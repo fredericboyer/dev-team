@@ -61,5 +61,13 @@
 - **Last-verified**: 2026-03-27
 - **Context**: ~30 lines of identical symlink creation with Windows junction fallback existed in both init.ts and update.ts. Extracted to ensureSymlink() in files.ts. ensureSymlink intentionally creates symlinks and was NOT guarded by assertNotSymlink. Removed unused fs import from init.ts.
 
+### [2026-03-29] v1.8.0: assertNoSymlinkInPath — ancestor directory traversal
+- **Type**: PATTERN [new]
+- **Source**: #475, PR #475
+- **Tags**: security, symlink, file-operations, defense-in-depth
+- **Outcome**: fixed
+- **Last-verified**: 2026-03-29
+- **Context**: Extends the v1.7.0 assertNotSymlink leaf check. Walks from target to root checking each ancestor directory with lstatSync. realpathSync resolves system-level symlinks before the walk — design tradeoff documented (can resolve away attacker symlinks at deepest level). Applied alongside assertNotSymlink in file operation guards.
+
 ## Calibration Log
 <!-- Challenges accepted/overruled — tunes adversarial intensity over time -->

@@ -37,6 +37,30 @@ Check for:
 - Entries contradicted by current code (e.g., "We use Express" when the codebase uses Fastify)
 - Date-stamped entries older than 6 months without recent revalidation
 
+### Tech debt verification
+
+Cross-check the **Known Tech Debt** section against the issue tracker and release history to remove stale entries:
+
+1. **Closed-issue check**: For each tech debt entry that references an issue number (e.g., `#433`), check the issue tracker to see if the issue is closed (strip the `#` prefix when querying). If the issue is closed, the entry is likely stale — flag as:
+   ```
+   **[DEFECT]** Learnings — Stale tech debt entry: "<entry summary>" references #<number> which is closed.
+   Concrete impact: developers waste time investigating already-resolved debt.
+   Suggested fix: remove the entry or mark it as resolved with a strikethrough.
+   ```
+
+2. **Released-version check**: For each entry that references a target version (e.g., `v1.8.0`), check if that version has been released by running `git tag --list 'v*'` and comparing. If the version tag exists, the fix should have shipped — verify and flag as:
+   ```
+   **[DEFECT]** Learnings — Tech debt entry targets released version: "<entry summary>" targets <version> which has been released.
+   Concrete impact: entry may describe already-resolved debt, creating confusion about actual outstanding work.
+   Suggested fix: verify the fix shipped in that release, then remove or strikethrough the entry.
+   ```
+
+3. **Untracked debt check**: For each tech debt entry that does NOT reference an issue number, flag as:
+   ```
+   **[RISK]** Learnings — Untracked tech debt: "<entry summary>" has no issue reference.
+   Why this matters: tech debt without a tracking issue tends to be forgotten. It cannot be prioritized, assigned, or verified.
+   ```
+
 ### Contradictions
 - Entries that contradict each other (e.g., one says "always use snake_case" and another says "we adopted camelCase")
 - Entries that contradict the project's `CLAUDE.md` instructions

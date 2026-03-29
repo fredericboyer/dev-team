@@ -90,3 +90,11 @@
 - **Outcome**: verified
 - **Last-verified**: 2026-03-27
 - **Context**: All 12 audit-derived tech debt issues resolved. 11 raw findings (7 unique after dedup), 100% acceptance, 1 round. First in-team review wave (Szabo+Knuth+Brooks) since v1.2.0. 3 agents converged independently on the same process.exit stub finding — strong cross-agent coherence signal. New entries: Szabo (2), Knuth (2), Brooks (2), Beck (1), Voss (1), Tufte (1), Turing (1), Deming already had entries from implementation. Updated 3 existing entries (Szabo symlink+ReDoS fixed, Knuth test coverage fixed). 3 tech debt items marked resolved in shared learnings. 3 new process learnings added (working dir contention, merge cascades, retro staleness). Stale `deming/` memory dir flagged and fixed (finding #5). System improvement: agent teams need worktree isolation (#456 tracked).
+
+### [2026-03-29] v1.8.0 post-hoc extraction — 12 issues, 12 PRs, Copilot-only review
+- **Type**: MILESTONE [verified]
+- **Source**: v1.8.0 task loop (12 issues, 12 PRs #470-#483)
+- **Tags**: metrics, calibration, extraction, process-gap
+- **Outcome**: verified
+- **Last-verified**: 2026-03-29
+- **Context**: Post-hoc extraction — Borges was not spawned during delivery. v1.8.0 bypassed `/dev-team:task` and agent reviews entirely. ~30 Copilot findings, all addressed. No formal DEFECTs. New entries written: Szabo (1 new + 1 updated), Knuth (2), Brooks (2), Deming (2), Beck (1), Conway (1), Voss (1). Process learning added to shared learnings (process gap). Key architectural changes: INFRA_HOOKS separation, task skill 4-step decomposition, assertNoSymlinkInPath ancestor guard. System improvement identified: v1.8.0 process gap confirms that bypassing the adversarial loop should be reserved for hotfixes, not feature releases.
