@@ -406,15 +406,19 @@ export function ensureSymlink(symlinkPath: string, symlinkTarget: string): void 
 
 /**
  * Lists all files in a directory recursively.
+ * @param dir - Directory to scan
+ * @param maxDepth - Maximum directory depth to recurse into (default 10). Guards against
+ *   runaway recursion in deeply nested or circular filesystem structures.
  */
-export function listFilesRecursive(dir: string): string[] {
+export function listFilesRecursive(dir: string, maxDepth: number = 10): string[] {
+  if (maxDepth < 0) return [];
   const results: string[] = [];
   const entries = fs.readdirSync(dir, { withFileTypes: true });
   for (const entry of entries) {
     const fullPath = path.join(dir, entry.name);
-    if (entry.isDirectory()) {
-      results.push(...listFilesRecursive(fullPath));
-    } else {
+    if (entry.isDirectory() && !entry.isSymbolicLink()) {
+      results.push(...listFilesRecursive(fullPath, maxDepth - 1));
+    } else if (!entry.isDirectory()) {
       results.push(fullPath);
     }
   }

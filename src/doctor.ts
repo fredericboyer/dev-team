@@ -1,5 +1,6 @@
 import path from "path";
 import { fileExists, dirExists, readFile } from "./files.js";
+import { QUALITY_HOOKS, INFRA_HOOKS } from "./init.js";
 
 interface CheckResult {
   name: string;
@@ -46,18 +47,10 @@ export function doctor(targetDir: string): void {
   // 3. Hook files exist
   if (prefs?.hooks) {
     const hooksDir = path.join(devTeamDir, "hooks");
-    const hookFileMap: Record<string, string> = {
-      "TDD enforcement": "dev-team-tdd-enforce.js",
-      "Safety guard": "dev-team-safety-guard.js",
-      "Post-change review": "dev-team-post-change-review.js",
-      "Pre-commit gate": "dev-team-pre-commit-gate.js",
-      "Watch list": "dev-team-watch-list.js",
-      "Pre-commit lint": "dev-team-pre-commit-lint.js",
-      "Review gate": "dev-team-review-gate.js",
-      "Agent teams guide": "dev-team-agent-teams-guide.js",
-      "Worktree create": "dev-team-worktree-create.js",
-      "Worktree remove": "dev-team-worktree-remove.js",
-    };
+    // Derived from init.ts — single source of truth, no drift
+    const hookFileMap: Record<string, string> = Object.fromEntries(
+      [...QUALITY_HOOKS, ...INFRA_HOOKS].map((h) => [h.label, h.file]),
+    );
     for (const label of prefs.hooks) {
       const fileName = hookFileMap[label];
       if (!fileName) {
