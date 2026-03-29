@@ -14,6 +14,8 @@ const {
   writeFile,
   mergeSettings,
   mergeClaudeMd,
+  assertNotSymlink,
+  assertNoSymlinkInPath,
 } = require("../../dist/files");
 
 let tmpDir;
@@ -386,5 +388,64 @@ describe("mergeClaudeMd", () => {
     // Verify no duplicate begin markers
     const beginCount = (content.match(/<!-- dev-team:begin -->/g) || []).length;
     assert.equal(beginCount, 1, "should have exactly one begin marker");
+  });
+});
+
+describe("assertNotSymlink", () => {
+  it("does nothing for a regular file", () => {
+    const p = path.join(tmpDir, "regular.txt");
+    fs.writeFileSync(p, "content");
+    assert.doesNotThrow(() => assertNotSymlink(p));
+  });
+
+  it("does nothing for a nonexistent path (ENOENT)", () => {
+    const p = path.join(tmpDir, "does-not-exist.txt");
+    assert.doesNotThrow(() => assertNotSymlink(p));
+  });
+
+  it("throws for a symlink", () => {
+    const target = path.join(tmpDir, "target.txt");
+    const link = path.join(tmpDir, "link.txt");
+    fs.writeFileSync(target, "content");
+    fs.symlinkSync(target, link);
+    assert.throws(() => assertNotSymlink(link), /symlink/i);
+  });
+
+  it("does nothing for a directory", () => {
+    const d = path.join(tmpDir, "subdir");
+    fs.mkdirSync(d);
+    assert.doesNotThrow(() => assertNotSymlink(d));
+  });
+});
+
+describe("assertNoSymlinkInPath", () => {
+  it("does nothing for a path with no symlink ancestors", () => {
+    const d = path.join(tmpDir, "a", "b");
+    fs.mkdirSync(d, { recursive: true });
+    const p = path.join(d, "file.txt");
+    fs.writeFileSync(p, "content");
+    assert.doesNotThrow(() => assertNoSymlinkInPath(p));
+  });
+
+  it("resolves symlink ancestors via realpathSync without throwing", () => {
+    // assertNoSymlinkInPath resolves the deepest existing directory with
+    // realpathSync before walking upward. This means symlinks at or below
+    // the deepest existing directory are resolved away — by design, to
+    // avoid false positives on system-level symlinks like /tmp -> /private/tmp.
+    const realTmpDir = fs.realpathSync(tmpDir);
+    const realDir = path.join(realTmpDir, "real");
+    const subDir = path.join(realDir, "sub");
+    fs.mkdirSync(subDir, { recursive: true });
+    const linkDir = path.join(realTmpDir, "linked");
+    fs.symlinkSync(realDir, linkDir);
+    // Path through symlink: linked/sub/file.txt
+    // realpathSync resolves linked -> real, so the walk starts from real/sub
+    const p = path.join(linkDir, "sub", "file.txt");
+    assert.doesNotThrow(() => assertNoSymlinkInPath(p));
+  });
+
+  it("does nothing for nonexistent path with valid ancestors", () => {
+    const p = path.join(tmpDir, "nonexistent", "deep", "file.txt");
+    assert.doesNotThrow(() => assertNoSymlinkInPath(p));
   });
 });
