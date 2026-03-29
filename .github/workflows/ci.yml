@@ -24,7 +24,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
 
-      - run: npm install
+      - run: npm ci
 
       - name: Build
         run: npm run build
@@ -42,7 +42,7 @@ jobs:
           node-version: 22
           cache: 'npm'
 
-      - run: npm install
+      - run: npm ci
 
       - name: Lint
         run: npm run lint
@@ -54,11 +54,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 22
-          cache: 'npm'
 
       - name: Validate agent frontmatter
         run: node scripts/validate-agents.js
@@ -74,7 +69,6 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: 22
-          cache: 'npm'
 
       - name: Validate hook scripts load without errors
         run: node scripts/validate-hooks.js
@@ -92,6 +86,14 @@ jobs:
       - name: Validate README accuracy
         run: node scripts/validate-readme.js
 
+  validate-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Validate docs integrity
+        run: node scripts/validate-docs.js
+
   audit-dependencies:
     runs-on: ubuntu-latest
     steps:
@@ -102,7 +104,19 @@ jobs:
           node-version: 22
           cache: 'npm'
 
-      - run: npm install
+      - run: npm ci
 
       - name: Audit dependencies
         run: npm audit --audit-level=high
+
+  semgrep:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install Semgrep
+        run: pip install semgrep
+
+      - name: Run Semgrep SAST scan
+        run: semgrep scan --config=auto
