@@ -24,8 +24,8 @@
 - **Source**: src/files.ts HookEntry interface
 - **Tags**: schema, contracts, hooks
 - **Outcome**: verified
-- **Last-verified**: 2026-03-25
-- **Context**: Hooks are registered via HookEntry { type, command } and HookMatcher { matcher?, hooks[] } in HookSettings. This is the integration contract between dev-team and Claude Code's hook system.
+- **Last-verified**: 2026-03-29
+- **Context**: Hooks are registered via HookEntry { type, command, timeout?, blocking? } and HookMatcher { matcher?, hooks[] } in HookSettings. This is the integration contract between dev-team and Claude Code's hook system. The timeout and blocking fields were added in v1.10.1 (PR #516).
 
 ## Patterns to Watch For
 
