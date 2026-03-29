@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.8.0] - 2026-03-29
+
+### Added
+- Worktree serialization hook to prevent parallel creation races (#482).
+- Decompose task skill into four orchestrated steps for better modularity (#481).
+- Parent-directory symlink traversal guards for deeper path protection (#475).
+- Task skill reviews PRs as they land, not in batched waves (#476).
+- Retro skill verifies tech debt entries against issue tracker before reporting (#473).
+- Merge skill enforces issue creation for deferred findings (#470).
+- Version targeting guidance in process template (#477).
+
+### Fixed
+- `readFile()` throws on permission errors instead of silently masking them (#478).
+- `mergeClaudeMd` replaces from BEGIN to EOF when END marker is missing, preventing duplicate markers (#479).
+- Tighten test assertions to reduce false positive risk (#474).
+
+### Docs
+- README structure guidelines (#472).
+
+### Internal
+- Unit tests for `assertNotSymlink`, `assertNoSymlinkInPath`, and `safeRegex` (#480).
+
 ## [1.7.0] - 2026-03-27
 
 ### Security
