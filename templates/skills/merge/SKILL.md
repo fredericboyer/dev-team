@@ -6,6 +6,13 @@ user_invocable: true
 
 Merge a pull request with full monitoring: $ARGUMENTS
 
+## Release PRs
+
+**Release PRs MUST use this merge skill.** Release PRs (version bumps, changelog updates, release branches) require the same Copilot review handling and CI verification as any other PR — do not bypass this process for releases. When merging a release PR, pay extra attention to:
+- Changelog completeness (all PRs since last release are documented)
+- Version bump correctness (semver compliance)
+- No draft or WIP markers left in release notes
+
 ## Setup
 
 1. Determine the PR number:
@@ -94,7 +101,7 @@ For each Copilot comment:
 3. **Style/minor**: acknowledge but skip if not substantive
 4. **Reply to the Copilot thread** explaining what was fixed (or why it was skipped). Use the inline comment reply API:
    ```bash
-   gh api repos/{owner}/{repo}/pulls/{number}/comments/{comment_id}/replies -f body="Fixed: <brief explanation of the change>"
+   gh api repos/{owner}/{repo}/pulls/comments/{comment_id}/replies -f body="Fixed: <brief explanation of the change>"
    ```
    Note: GitHub's API does not support programmatically resolving review threads. The `minimizeComment` mutation only hides comments (collapses them), it does not mark threads as resolved. Threads must be resolved manually in the GitHub UI, or will be resolved when the PR is merged. Replying with the fix explanation is sufficient.
    To get the `node_id` for a comment, include it in the initial fetch (already updated above).
@@ -123,7 +130,7 @@ For each Copilot comment:
      ```
    - Reply to the Copilot thread with the tracking issue number:
      ```bash
-     gh api repos/{owner}/{repo}/pulls/{number}/comments/{comment_id}/replies \
+     gh api repos/{owner}/{repo}/pulls/comments/{comment_id}/replies \
        -f body="Tracked in #NNN — deferred: <brief reason>"
      ```
 6. **Validation gate before merge.** Before proceeding to Step 2 (auto-merge), verify that every Copilot inline comment has been addressed with one of:
@@ -140,7 +147,7 @@ For each Copilot comment:
 
    # For each comment, verify it has a valid reply
    for COMMENT_ID in $(echo "$COPILOT_COMMENTS" | jq -r '.[]'); do
-     REPLIES=$(gh api repos/{owner}/{repo}/pulls/{number}/comments \
+     REPLIES=$(gh api --paginate repos/{owner}/{repo}/pulls/{number}/comments \
        --jq "[.[] | select(.in_reply_to_id == ${COMMENT_ID}) | .body]")
      HAS_FIX=$(echo "$REPLIES" | jq 'any(test("Fixed:"))')
      HAS_ISSUE=$(echo "$REPLIES" | jq 'any(test("Tracked in #"))')
