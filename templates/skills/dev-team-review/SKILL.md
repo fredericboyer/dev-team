@@ -17,7 +17,7 @@ In embedded mode, the review skill produces its report and returns control to th
 
 ## Setup
 
-0. **Parse flags:** If `$ARGUMENTS` contains `--embedded`, note embedded mode and strip the flag before processing the remaining arguments as the review target.
+0. **Parse flags:** If `$ARGUMENTS` contains `--embedded`, note embedded mode and strip the flag. If `$ARGUMENTS` contains `--light`, note LIGHT review mode and strip the flag. Process the remaining arguments as the review target.
 
 1. Determine what to review:
    - If a PR number or branch is given, use `git diff` to get the changed files
@@ -31,6 +31,8 @@ In embedded mode, the review skill produces its report and returns control to th
    - **@dev-team-knuth** — included for any non-test code changes (quality/coverage)
    - **@dev-team-brooks** — included for any non-test code changes (architecture)
    - **@dev-team-beck** — included for test-only changes (test quality)
+
+   **LIGHT review mode** (`--light` flag): Spawn only **one reviewer** — the most relevant agent based on file patterns. If no pattern-based agent is determined, default to @dev-team-knuth. In LIGHT mode, all findings are **advisory only** — `[DEFECT]` findings are downgraded to `[RISK]` in the report. LIGHT reviews do not block progress. The verdict is always "Approve (advisory)" with any findings noted.
 
 ## Pre-review validation
 
@@ -51,6 +53,7 @@ Before starting the review, check for open security alerts using the project's s
    - The list of changed files relevant to their domain
    - Instruction to produce classified findings: `[DEFECT]`, `[RISK]`, `[QUESTION]`, `[SUGGESTION]`
    - Instruction to read the actual code — not just the diff — for full context
+   - In LIGHT mode: inform the reviewer that this is a LIGHT advisory review — findings will not block progress
 
 3. Wait for all agents to complete.
 
@@ -63,6 +66,7 @@ Before producing the report, filter raw findings to maximize signal quality:
 4. **Suppress generated file findings**: Skip findings on generated, vendored, or build artifacts
 5. **Validate DEFECTs**: Each `[DEFECT]` must include a concrete scenario — downgrade to `[RISK]` if not
 6. **Accept silence**: "No substantive findings" from a reviewer is a valid positive signal — do not request re-review
+7. **LIGHT mode downgrade**: In LIGHT review mode, downgrade all `[DEFECT]` findings to `[RISK]` after validation
 
 Log filtered findings in a "Filtered" section for calibration tracking.
 
@@ -73,6 +77,8 @@ Produce a unified review summary:
 ### Blocking findings ([DEFECT])
 
 List all `[DEFECT]` findings from all agents. These must be resolved before merge.
+
+In **LIGHT review mode**, this section is omitted — all findings appear under Advisory findings.
 
 Format each as:
 ```
@@ -98,6 +104,7 @@ Original finding summary.
 ### Verdict
 
 - **Approve** — No `[DEFECT]` findings. Advisory items noted.
+- **Approve (advisory)** — LIGHT review mode. All findings are advisory. Does not block progress.
 - **Request changes** — `[DEFECT]` findings must be resolved.
 
 State the verdict clearly. List what must be fixed for approval if requesting changes.
