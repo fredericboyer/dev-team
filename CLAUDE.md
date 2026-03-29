@@ -65,7 +65,7 @@ For non-trivial work: explore the area first, then implement, then review.
 
 **Automatic invocation (hooks):** Agents are auto-spawned based on changed file patterns. See `.dev-team/hooks/` for the watch-list patterns that determine which agents are triggered. Turing is on-demand only (spawned by Drucker for research tasks).
 
-**End-of-workflow agents:** Borges is mandatory at end of every `/dev-team:task`, `/dev-team:review`, `/dev-team:audit`, and `/dev-team:retro`.
+**End-of-workflow agents:** Borges is mandatory at end of every `/dev-team:task`, `/dev-team:review`, `/dev-team:audit`, and `/dev-team:retro` (invoked via `/dev-team:extract`).
 
 **Orchestration:** Drucker delegates tasks to the right implementing agent and spawns reviewers. Szabo, Knuth, and Brooks review all code changes.
 
