@@ -126,7 +126,7 @@ After the implementer has acknowledged all findings, **compact the context** bef
 - Produce a structured summary: all findings (agent, classification, file, status/outcome), files changed, outstanding items
 - This compact summary is available in the task skill's context for continuity across rounds
 
-Call `/dev-team:review --embedded` again for the next round. The review skill spawns fresh reviewers each round — they receive the current diff and produce independent findings. They do NOT receive raw conversation history from prior rounds.
+Call `/dev-team:review --embedded` again for the next round, passing the compact summary as part of the arguments so that reviewers have prior-round context (which findings were raised, how they were resolved, and what remains outstanding). The review skill spawns fresh reviewers each round — they receive the current diff, the compact summary, and their agent definition. They do NOT receive raw conversation history from prior rounds.
 
 Continue iterating until no `[DEFECT]` remains or max iterations reached. If max iterations reached without convergence, report remaining defects and exit.
 

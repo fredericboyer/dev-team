@@ -13,7 +13,7 @@ This skill supports two invocation modes:
 - **Standalone** (user calls `/dev-team:review` directly): Full review lifecycle including the Completion section (finding outcome log + `/dev-team:extract`).
 - **Embedded** (called by `/dev-team:task` during Step 2): Produce the review report and return findings to the caller. **Skip the Completion section entirely** — the task skill handles finding routing, iteration, and extraction in its own Steps 2 and 4. When called with the flag `--embedded`, operate in embedded mode.
 
-In embedded mode, the review skill's output is consumed programmatically by the task skill. The report format is identical in both modes.
+In embedded mode, the review skill produces its report and returns control to the task skill. The report format is identical in both modes.
 
 ## Setup
 
