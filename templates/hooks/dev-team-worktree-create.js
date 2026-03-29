@@ -43,6 +43,12 @@ if (!worktreeName) {
   process.exit(1);
 }
 
+// Validate basePath contains a .git directory before operating (fixes #537)
+if (!fs.existsSync(path.join(basePath, ".git"))) {
+  process.stderr.write("[dev-team worktree-create] basePath does not contain a .git directory\n");
+  process.exit(1);
+}
+
 const worktreesDir = path.join(basePath, ".claude", "worktrees");
 const worktreePath = path.join(worktreesDir, worktreeName);
 const lockFile = path.join(basePath, ".git", "worktree-create.lock");

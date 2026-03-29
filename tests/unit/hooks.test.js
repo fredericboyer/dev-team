@@ -1805,3 +1805,229 @@ describe("dev-team-agent-teams-guide", () => {
     assert.ok(!result.stderr.includes("TeamCreate"));
   });
 });
+// ─── Worktree Create Hook ───────────────────────────────────────────────────
+
+const { spawnSync } = require("child_process");
+
+/**
+ * Helper: run a worktree hook with direct JSON input (not wrapped in tool_input).
+ * Uses spawnSync to capture stderr even when exit code is 0.
+ */
+function runWorktreeHook(hookFile, input, opts = {}) {
+  const args = [path.join(HOOKS_DIR, hookFile)];
+  if (input !== undefined) {
+    args.push(JSON.stringify(input));
+  }
+  const spawnOpts = {
+    encoding: "utf-8",
+    timeout: opts.timeout || 10000,
+    env: { ...process.env, PATH: process.env.PATH },
+  };
+  if (opts.cwd) spawnOpts.cwd = opts.cwd;
+  const result = spawnSync(process.execPath, args, spawnOpts);
+  return {
+    code: result.status,
+    stdout: result.stdout || "",
+    stderr: result.stderr || "",
+  };
+}
+
+/** Initialize a minimal git repo with one commit in the given directory. */
+function initGitRepo(dir) {
+  execFileSync("git", ["init", dir], { stdio: "pipe" });
+  fs.writeFileSync(path.join(dir, "README.md"), "init");
+  execFileSync("git", ["-C", dir, "add", "."], { stdio: "pipe" });
+  execFileSync("git", ["-C", dir, "commit", "-m", "init"], {
+    stdio: "pipe",
+    env: {
+      ...process.env,
+      GIT_AUTHOR_NAME: "test",
+      GIT_AUTHOR_EMAIL: "test@test.com",
+      GIT_COMMITTER_NAME: "test",
+      GIT_COMMITTER_EMAIL: "test@test.com",
+    },
+  });
+}
+
+describe("dev-team-worktree-create", () => {
+  const hook = "dev-team-worktree-create.js";
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "wt-create-")));
+  });
+
+  afterEach(() => {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  });
+
+  it("creates worktree on first try (no lock contention)", () => {
+    initGitRepo(tmpDir);
+    const worktreeName = "test-wt-" + Date.now();
+    const result = runWorktreeHook(hook, {
+      base_path: tmpDir,
+      worktree_name: worktreeName,
+      branch_name: "test-branch-" + Date.now(),
+    });
+    assert.equal(result.code, 0, `Expected exit 0, stderr: ${result.stderr}`);
+    const expectedPath = path.join(tmpDir, ".claude", "worktrees", worktreeName);
+    assert.equal(result.stdout.trim(), expectedPath);
+    assert.ok(fs.existsSync(expectedPath), "Worktree directory should exist");
+  });
+
+  it("acquires lock after stale lock cleanup (EEXIST then success)", () => {
+    initGitRepo(tmpDir);
+    // Create a stale lock (older than 60s) — the hook should clean it up
+    const lockDir = path.join(tmpDir, ".git", "worktree-create.lock");
+    fs.mkdirSync(lockDir, { recursive: true });
+    const staleTime = new Date(Date.now() - 120000);
+    fs.utimesSync(lockDir, staleTime, staleTime);
+
+    const worktreeName = "test-wt-retry-" + Date.now();
+    const result = runWorktreeHook(hook, {
+      base_path: tmpDir,
+      worktree_name: worktreeName,
+      branch_name: "test-branch-retry-" + Date.now(),
+    });
+    assert.equal(
+      result.code,
+      0,
+      `Expected exit 0 after stale lock cleanup, stderr: ${result.stderr}`,
+    );
+    const expectedPath = path.join(tmpDir, ".claude", "worktrees", worktreeName);
+    assert.ok(fs.existsSync(expectedPath), "Worktree should be created after stale lock cleanup");
+  });
+
+  it("stale lock cleanup removes lock older than 60s", () => {
+    initGitRepo(tmpDir);
+    const lockDir = path.join(tmpDir, ".git", "worktree-create.lock");
+    fs.mkdirSync(lockDir);
+    const staleTime = new Date(Date.now() - 90000);
+    fs.utimesSync(lockDir, staleTime, staleTime);
+
+    const worktreeName = "test-wt-stale-" + Date.now();
+    const result = runWorktreeHook(hook, {
+      base_path: tmpDir,
+      worktree_name: worktreeName,
+      branch_name: "test-branch-stale-" + Date.now(),
+    });
+    assert.equal(result.code, 0, `Stale lock should be cleaned up, stderr: ${result.stderr}`);
+    // Lock should be released after hook completes
+    assert.ok(!fs.existsSync(lockDir), "Lock should be released after hook completes");
+  });
+
+  it("fails when lock is held by another process", () => {
+    initGitRepo(tmpDir);
+    // Create a fresh (non-stale) lock — hook should fail to acquire
+    const lockDir = path.join(tmpDir, ".git", "worktree-create.lock");
+    fs.mkdirSync(lockDir);
+    fs.utimesSync(lockDir, new Date(), new Date());
+
+    // The hook retries with exponential backoff; kill it after 5s to avoid
+    // waiting for all 20 retries (~600s). The key assertion is that it does
+    // NOT exit 0 — the worktree is not created while the lock is held.
+    const result = runWorktreeHook(
+      hook,
+      {
+        base_path: tmpDir,
+        worktree_name: "test-wt-timeout",
+        branch_name: "test-branch-timeout",
+      },
+      { timeout: 5000 },
+    );
+    assert.notEqual(result.code, 0, "Should not succeed when lock is held");
+    // Clean up the lock
+    try {
+      fs.rmdirSync(lockDir);
+    } catch {
+      /* already gone */
+    }
+  });
+
+  it("exits 1 when worktree_name is missing", () => {
+    const result = runWorktreeHook(hook, { base_path: tmpDir });
+    assert.equal(result.code, 1);
+    assert.ok(result.stderr.includes("Missing worktree_name"));
+  });
+
+  it("exits 1 when basePath has no .git directory (#537)", () => {
+    const result = runWorktreeHook(hook, {
+      base_path: tmpDir,
+      worktree_name: "test-wt",
+    });
+    assert.equal(result.code, 1);
+    assert.ok(result.stderr.includes(".git directory"));
+  });
+
+  it("exits 1 on malformed JSON input", () => {
+    const result = spawnSync(process.execPath, [path.join(HOOKS_DIR, hook), "not-json"], {
+      encoding: "utf-8",
+      timeout: 5000,
+    });
+    assert.equal(result.status, 1);
+    assert.ok(result.stderr.includes("Failed to parse"));
+  });
+});
+
+// ─── Worktree Remove Hook ──────────────────────────────────────────────────
+
+describe("dev-team-worktree-remove", () => {
+  const hook = "dev-team-worktree-remove.js";
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "wt-remove-")));
+  });
+
+  afterEach(() => {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  });
+
+  it("successfully removes a worktree", () => {
+    initGitRepo(tmpDir);
+    const wtPath = path.join(tmpDir, "test-wt-remove");
+    execFileSync("git", ["-C", tmpDir, "worktree", "add", "-b", "remove-branch", wtPath], {
+      stdio: "pipe",
+    });
+    assert.ok(fs.existsSync(wtPath), "Worktree should exist before removal");
+
+    const result = runWorktreeHook(hook, { worktree_path: wtPath }, { cwd: tmpDir });
+    assert.equal(result.code, 0);
+    assert.ok(!fs.existsSync(wtPath), "Worktree should be removed");
+  });
+
+  it("exits 0 even on error (silent failure)", () => {
+    const result = runWorktreeHook(
+      hook,
+      { worktree_path: path.join(tmpDir, "nonexistent-worktree") },
+      { cwd: tmpDir },
+    );
+    assert.equal(result.code, 0, "Should exit 0 even when removal fails");
+  });
+
+  it("exits 0 when worktree_path is missing", () => {
+    const result = runWorktreeHook(hook, {});
+    assert.equal(result.code, 0, "Should exit 0 on missing input");
+    assert.ok(result.stderr.includes("Missing worktree_path"));
+  });
+
+  it("exits 0 when worktree_path is relative (#537)", () => {
+    const result = runWorktreeHook(hook, { worktree_path: "relative/path" });
+    assert.equal(result.code, 0, "Should exit 0 on relative path (non-fatal)");
+    assert.ok(result.stderr.includes("absolute path"));
+  });
+
+  it("exits 0 on malformed JSON input", () => {
+    const result = spawnSync(process.execPath, [path.join(HOOKS_DIR, hook), "not-json"], {
+      encoding: "utf-8",
+      timeout: 5000,
+    });
+    assert.equal(result.status, 0, "Should exit 0 even on malformed JSON");
+  });
+
+  it("exits 0 with no input", () => {
+    const result = runWorktreeHook(hook, undefined);
+    assert.equal(result.code, 0, "Should exit 0 with no input");
+  });
+});
+
