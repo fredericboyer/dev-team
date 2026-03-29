@@ -19,6 +19,30 @@ afterEach(() => {
 });
 
 /**
+ * Extract hookFileMap from doctor.ts source so tests stay in sync with the
+ * implementation rather than hardcoding a duplicate list.
+ */
+function getHookFileMapFromSource() {
+  const doctorSrc = fs.readFileSync(path.join(__dirname, "..", "..", "src", "doctor.ts"), "utf8");
+  // Match the hookFileMap object literal in the source
+  const mapMatch = doctorSrc.match(/const hookFileMap[^{]*\{([^}]+)\}/s);
+  if (!mapMatch) throw new Error("Could not extract hookFileMap from doctor.ts");
+
+  const entries = {};
+  const entryRe = /"([^"]+)":\s*"([^"]+)"/g;
+  let m;
+  while ((m = entryRe.exec(mapMatch[1])) !== null) {
+    entries[m[1]] = m[2];
+  }
+  if (Object.keys(entries).length === 0) {
+    throw new Error("hookFileMap parsed from doctor.ts was empty");
+  }
+  return entries;
+}
+
+const SOURCE_HOOK_FILE_MAP = getHookFileMapFromSource();
+
+/**
  * Helper: create a minimal dev-team project layout for doctor checks.
  */
 function scaffold(opts = {}) {
@@ -50,18 +74,8 @@ function scaffold(opts = {}) {
   if (!opts.skipHooks) {
     const hooksDir = path.join(devTeam, "hooks");
     fs.mkdirSync(hooksDir, { recursive: true });
-    const hookFileMap = {
-      "TDD enforcement": "dev-team-tdd-enforce.js",
-      "Safety guard": "dev-team-safety-guard.js",
-      "Post-change review": "dev-team-post-change-review.js",
-      "Pre-commit gate": "dev-team-pre-commit-gate.js",
-      "Watch list": "dev-team-watch-list.js",
-      "Pre-commit lint": "dev-team-pre-commit-lint.js",
-      "Review gate": "dev-team-review-gate.js",
-      "Agent teams guide": "dev-team-agent-teams-guide.js",
-    };
     for (const label of hooks) {
-      const fileName = hookFileMap[label];
+      const fileName = SOURCE_HOOK_FILE_MAP[label];
       if (fileName) {
         fs.writeFileSync(path.join(hooksDir, fileName), "// hook");
       }
@@ -150,7 +164,7 @@ describe("doctor — config.json", () => {
   it("reports valid config.json with version", () => {
     scaffold();
     const { output } = runDoctor(tmpDir);
-    assert.ok(output.includes("OK") && output.includes("v1.0.0"));
+    assert.match(output, /OK\s+config\.json\s+—\s+v1\.0\.0/);
   });
 });
 
@@ -160,14 +174,14 @@ describe("doctor — agent files", () => {
   it("passes when agent files exist", () => {
     scaffold({ agents: ["Voss", "Szabo"] });
     const { output } = runDoctor(tmpDir);
-    assert.ok(output.includes("OK") && output.includes("Agent: Voss"));
-    assert.ok(output.includes("OK") && output.includes("Agent: Szabo"));
+    assert.match(output, /OK\s+Agent: Voss\s+—\s+dev-team-voss\.md/);
+    assert.match(output, /OK\s+Agent: Szabo\s+—\s+dev-team-szabo\.md/);
   });
 
   it("fails when agent file is missing", () => {
     scaffold({ agents: ["Voss"], skipAgents: true });
     const { output, exitCode } = runDoctor(tmpDir);
-    assert.ok(output.includes("FAIL") && output.includes("Agent: Voss"));
+    assert.match(output, /FAIL\s+Agent: Voss\s+—\s+dev-team-voss\.md missing/);
     assert.equal(exitCode, 1);
   });
 });
@@ -178,14 +192,14 @@ describe("doctor — hookFileMap", () => {
   it("passes when hook files exist", () => {
     scaffold({ hooks: ["TDD enforcement", "Post-change review"] });
     const { output } = runDoctor(tmpDir);
-    assert.ok(output.includes("OK") && output.includes("Hook: TDD enforcement"));
-    assert.ok(output.includes("OK") && output.includes("Hook: Post-change review"));
+    assert.match(output, /OK\s+Hook: TDD enforcement\s+—\s+dev-team-tdd-enforce\.js/);
+    assert.match(output, /OK\s+Hook: Post-change review\s+—\s+dev-team-post-change-review\.js/);
   });
 
   it("fails when hook file is missing", () => {
     scaffold({ hooks: ["TDD enforcement"], skipHooks: true });
     const { output, exitCode } = runDoctor(tmpDir);
-    assert.ok(output.includes("FAIL") && output.includes("Hook: TDD enforcement"));
+    assert.match(output, /FAIL\s+Hook: TDD enforcement\s+—\s+dev-team-tdd-enforce\.js missing/);
     assert.equal(exitCode, 1);
   });
 
@@ -197,20 +211,15 @@ describe("doctor — hookFileMap", () => {
   });
 
   it("maps every known hook label to the correct file", () => {
-    const allHooks = [
-      "TDD enforcement",
-      "Safety guard",
-      "Post-change review",
-      "Pre-commit gate",
-      "Watch list",
-      "Pre-commit lint",
-      "Review gate",
-      "Agent teams guide",
-    ];
+    const allHooks = Object.keys(SOURCE_HOOK_FILE_MAP);
     scaffold({ hooks: allHooks });
     const { output, exitCode } = runDoctor(tmpDir);
     for (const label of allHooks) {
-      assert.ok(output.includes(`Hook: ${label}`) && output.includes("OK"), `${label} should pass`);
+      const expectedFile = SOURCE_HOOK_FILE_MAP[label];
+      const pattern = new RegExp(
+        `OK\\s+Hook: ${label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s+—\\s+${expectedFile.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`,
+      );
+      assert.match(output, pattern, `${label} should pass with file ${expectedFile}`);
     }
     assert.equal(exitCode, 0);
   });
@@ -236,7 +245,7 @@ describe("doctor — CLAUDE.md", () => {
   it("passes when CLAUDE.md has dev-team markers", () => {
     scaffold();
     const { output } = runDoctor(tmpDir);
-    assert.ok(output.includes("OK") && output.includes("Markers present"));
+    assert.match(output, /OK\s+CLAUDE\.md\s+—\s+Markers present/);
   });
 });
 
@@ -246,13 +255,13 @@ describe("doctor — agent memory", () => {
   it("passes when MEMORY.md exists", () => {
     scaffold();
     const { output } = runDoctor(tmpDir);
-    assert.ok(output.includes("OK") && output.includes("Memory: Voss"));
+    assert.match(output, /OK\s+Memory: Voss\s+—\s+MEMORY\.md present/);
   });
 
   it("fails when MEMORY.md is missing", () => {
     scaffold({ skipMemory: true });
     const { output, exitCode } = runDoctor(tmpDir);
-    assert.ok(output.includes("FAIL") && output.includes("Memory: Voss"));
+    assert.match(output, /FAIL\s+Memory: Voss\s+—\s+MEMORY\.md missing/);
     assert.equal(exitCode, 1);
   });
 });

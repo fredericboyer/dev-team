@@ -236,8 +236,13 @@ describe("status — shared learnings", () => {
       legacyLearnings: "# Learnings\n\n## Process\n\n- Legacy content.",
     });
     const { output } = runStatus(tmpDir);
-    // Should use rules path — both have content, but only one should be checked
-    assert.ok(output.includes("has content"));
+    assert.ok(output.includes("has content"), "should report learnings has content");
+    // Verify it read the rules path by removing it and confirming legacy is used as fallback
+    const rulesPath = path.join(tmpDir, ".claude", "rules", "dev-team-learnings.md");
+    assert.ok(fs.existsSync(rulesPath), "rules path should exist for precedence test");
+    fs.unlinkSync(rulesPath);
+    const { output: fallbackOutput } = runStatus(tmpDir);
+    assert.ok(fallbackOutput.includes("has content"), "legacy path should work as fallback");
   });
 
   it("reports 'template only' for headers-only learnings file", () => {
