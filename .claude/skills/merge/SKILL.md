@@ -8,7 +8,7 @@ Merge a pull request with full monitoring: $ARGUMENTS
 
 ## Release PRs
 
-**Conway/release PRs MUST use this merge skill.** Release PRs (version bumps, changelog updates, release branches) require the same Copilot review handling and CI verification as any other PR — do not bypass this process for releases. When merging a release PR, pay extra attention to:
+**Release PRs MUST use this merge skill.** Release PRs (version bumps, changelog updates, release branches) require the same Copilot review handling and CI verification as any other PR — do not bypass this process for releases. When merging a release PR, pay extra attention to:
 - Changelog completeness (all PRs since last release are documented)
 - Version bump correctness (semver compliance)
 - No draft or WIP markers left in release notes
@@ -166,6 +166,8 @@ If you pushed fixes, Copilot may re-review. Re-run the check run monitoring from
 If new comments appeared, repeat 1b. Otherwise proceed to Step 2.
 
 ## Step 2: Set auto-merge
+
+**GATE: Do NOT proceed to this step until Step 1 (Copilot review) is fully complete with all findings addressed. Setting auto-merge before addressing Copilot findings causes PRs to merge with unresolved comments.**
 
 ```bash
 gh pr merge {number} --squash --auto --delete-branch
