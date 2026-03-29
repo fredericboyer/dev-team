@@ -7,6 +7,7 @@ import {
   readFile,
   writeFile,
   mergeSettings,
+  removeHooksFromSettings,
   mergeClaudeMd,
   listSubdirectories,
   listFilesRecursive,
@@ -30,6 +31,7 @@ interface Migration {
   version: string;
   agentRenames?: AgentRename[];
   skillRemovals?: string[];
+  hookRemovals?: string[];
 }
 
 const MIGRATIONS: Migration[] = [
@@ -209,9 +211,48 @@ function runMigrations(prefs: Preferences, fromVersion: string, devTeamDir: stri
         }
       }
     }
+
+    if (migration.hookRemovals) {
+      const hooksDir = path.join(devTeamDir, "hooks");
+      for (const hookFile of migration.hookRemovals) {
+        const hookPath = path.join(hooksDir, hookFile);
+        if (fileExists(hookPath)) {
+          try {
+            fs.unlinkSync(hookPath);
+            log.push(`Removed obsolete hook: ${hookFile}`);
+          } catch {
+            // Best effort — hook file may already be gone
+          }
+        }
+
+        // Remove the hook's label from config.json hooks array
+        // Find the label by looking up HOOK_FILES in reverse
+        const hookLabel = Object.entries(HOOK_FILES).find(([, f]) => f === hookFile)?.[0];
+        if (hookLabel) {
+          const idx = prefs.hooks.indexOf(hookLabel);
+          if (idx !== -1) {
+            prefs.hooks.splice(idx, 1);
+          }
+        }
+      }
+    }
   }
 
   return log;
+}
+
+/**
+ * Collects all hook files to be removed across migrations applicable from fromVersion.
+ */
+function collectRemovedHookFiles(fromVersion: string): string[] {
+  const files: string[] = [];
+  for (const migration of MIGRATIONS) {
+    if (compareSemver(fromVersion, migration.version) >= 0) continue;
+    if (migration.hookRemovals) {
+      files.push(...migration.hookRemovals);
+    }
+  }
+  return files;
 }
 
 interface Preferences {
@@ -411,6 +452,13 @@ export async function update(targetDir: string): Promise<void> {
       console.log(`  ${entry}`);
     }
     console.log("");
+  }
+
+  // Clean up settings.json for any hooks removed by migrations
+  const removedHookFiles = collectRemovedHookFiles(prefs.version || "0.0.0");
+  if (removedHookFiles.length > 0) {
+    const settingsPath = path.join(claudeDir, "settings.json");
+    removeHooksFromSettings(settingsPath, removedHookFiles);
   }
 
   // Clean up legacy agent memory directories from pre-rename agents

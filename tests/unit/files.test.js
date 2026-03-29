@@ -13,6 +13,7 @@ const {
   readFile,
   writeFile,
   mergeSettings,
+  removeHooksFromSettings,
   mergeClaudeMd,
   assertNotSymlink,
   assertNoSymlinkInPath,
@@ -317,6 +318,92 @@ describe("mergeSettings", () => {
     const backupPath = settingsPath + ".bak";
     assert.ok(fs.existsSync(backupPath), "backup file should exist");
     assert.equal(fs.readFileSync(backupPath, "utf-8"), corruptContent);
+  });
+
+  it("updates attributes on existing hooks with the same command", () => {
+    const settingsPath = path.join(tmpDir, "settings.json");
+    const existing = {
+      hooks: {
+        PostToolUse: [
+          {
+            matcher: "Edit",
+            hooks: [{ type: "command", command: "node hooks/test.js", timeout: 5000 }],
+          },
+        ],
+      },
+    };
+    fs.writeFileSync(settingsPath, JSON.stringify(existing));
+
+    const fragment = {
+      hooks: {
+        PostToolUse: [
+          {
+            matcher: "Edit",
+            hooks: [{ type: "command", command: "node hooks/test.js", timeout: 10000 }],
+          },
+        ],
+      },
+    };
+    mergeSettings(settingsPath, fragment);
+
+    const result = JSON.parse(fs.readFileSync(settingsPath, "utf-8"));
+    assert.equal(result.hooks.PostToolUse[0].hooks.length, 1, "should still have one hook");
+    assert.equal(
+      result.hooks.PostToolUse[0].hooks[0].timeout,
+      10000,
+      "timeout should be updated from template",
+    );
+  });
+});
+
+describe("removeHooksFromSettings", () => {
+  it("removes hooks referencing deleted files", () => {
+    const settingsPath = path.join(tmpDir, "settings.json");
+    const existing = {
+      hooks: {
+        PreToolUse: [
+          {
+            matcher: "Bash",
+            hooks: [
+              { type: "command", command: "node .dev-team/hooks/keep.js" },
+              { type: "command", command: "node .dev-team/hooks/remove-me.js" },
+            ],
+          },
+        ],
+      },
+    };
+    fs.writeFileSync(settingsPath, JSON.stringify(existing));
+
+    removeHooksFromSettings(settingsPath, ["remove-me.js"]);
+
+    const result = JSON.parse(fs.readFileSync(settingsPath, "utf-8"));
+    assert.equal(result.hooks.PreToolUse[0].hooks.length, 1);
+    assert.equal(result.hooks.PreToolUse[0].hooks[0].command, "node .dev-team/hooks/keep.js");
+  });
+
+  it("removes empty event keys after hook removal", () => {
+    const settingsPath = path.join(tmpDir, "settings.json");
+    const existing = {
+      hooks: {
+        PreToolUse: [
+          {
+            matcher: "Bash",
+            hooks: [{ type: "command", command: "node .dev-team/hooks/remove-me.js" }],
+          },
+        ],
+      },
+    };
+    fs.writeFileSync(settingsPath, JSON.stringify(existing));
+
+    removeHooksFromSettings(settingsPath, ["remove-me.js"]);
+
+    const result = JSON.parse(fs.readFileSync(settingsPath, "utf-8"));
+    assert.equal(result.hooks.PreToolUse, undefined, "empty event key should be removed");
+  });
+
+  it("does nothing when settings file does not exist", () => {
+    const settingsPath = path.join(tmpDir, "nonexistent.json");
+    assert.doesNotThrow(() => removeHooksFromSettings(settingsPath, ["some-hook.js"]));
   });
 });
 

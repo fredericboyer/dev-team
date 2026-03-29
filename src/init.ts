@@ -211,6 +211,15 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
     process.exit(1);
   }
 
+  // Guard: refuse to re-init if config already exists (use --force to override)
+  const existingConfig = path.join(targetDir, ".dev-team", "config.json");
+  if (fileExists(existingConfig) && !flags.includes("--force")) {
+    console.error("Error: .dev-team/config.json already exists.");
+    console.error("Use `npx dev-team update` to upgrade templates.");
+    console.error("Pass `--force` to reinitialize (this will overwrite config).");
+    process.exit(1);
+  }
+
   console.log("\ndev-team — Adversarial AI agent team\n");
   if (preset) {
     console.log(`Using preset: ${preset.label} — ${preset.description}\n`);
@@ -263,6 +272,9 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
       })),
     );
   }
+
+  // Always include infrastructure hooks in config (they're always installed)
+  selectedHooks.push(...INFRA_HOOKS.map((h) => h.label));
 
   // Step 4: Issue tracker preference
   let issueTracker: string;

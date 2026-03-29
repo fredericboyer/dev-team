@@ -4,6 +4,8 @@ import path from "path";
 export interface HookEntry {
   type: string;
   command: string;
+  timeout?: number;
+  blocking?: boolean;
 }
 
 export interface HookMatcher {
@@ -211,6 +213,12 @@ export function mergeSettings(existingPath: string, newFragment: HookSettings): 
             if (!existingCommands.has(hook.command)) {
               matchedExisting.hooks.push(hook);
               existingCommands.add(hook.command);
+            } else {
+              // Update attributes (timeout, type, etc.) on existing commands
+              const existingHook = matchedExisting.hooks.find((h) => h.command === hook.command);
+              if (existingHook) {
+                Object.assign(existingHook, hook);
+              }
             }
           }
         } else {
@@ -223,6 +231,44 @@ export function mergeSettings(existingPath: string, newFragment: HookSettings): 
   const dir = path.dirname(existingPath);
   fs.mkdirSync(dir, { recursive: true });
   fs.writeFileSync(existingPath, JSON.stringify(existing, null, 2) + "\n");
+}
+
+/**
+ * Removes hooks from settings.json whose commands reference any of the given file names.
+ * Used during hookRemovals migration to clean up stale entries.
+ */
+export function removeHooksFromSettings(settingsPath: string, hookFiles: string[]): void {
+  let existing: { hooks?: Record<string, HookMatcher[]> };
+  try {
+    existing = JSON.parse(fs.readFileSync(settingsPath, "utf-8"));
+  } catch {
+    return; // No settings file or invalid JSON — nothing to clean
+  }
+
+  if (!existing.hooks) return;
+
+  let changed = false;
+  for (const [event, entries] of Object.entries(existing.hooks)) {
+    for (const entry of entries) {
+      if (!entry.hooks) continue;
+      const before = entry.hooks.length;
+      entry.hooks = entry.hooks.filter(
+        (h) => !hookFiles.some((f) => h.command && h.command.includes(f)),
+      );
+      if (entry.hooks.length < before) changed = true;
+    }
+    // Remove empty matcher blocks
+    existing.hooks[event] = entries.filter((e) => (e.hooks ?? []).length > 0);
+    // Remove empty event keys
+    if (existing.hooks[event].length === 0) {
+      delete existing.hooks[event];
+      changed = true;
+    }
+  }
+
+  if (changed) {
+    fs.writeFileSync(settingsPath, JSON.stringify(existing, null, 2) + "\n");
+  }
 }
 
 /**

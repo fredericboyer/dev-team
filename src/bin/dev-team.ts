@@ -32,6 +32,7 @@ if (command === "--version" || command === "-v") {
   console.log("Usage:");
   console.log("  npx dev-team init                    Interactive onboarding wizard");
   console.log("  npx dev-team init --all              Install everything with defaults");
+  console.log("  npx dev-team init --force            Reinitialize (overwrites config)");
   console.log("  npx dev-team init --preset backend   Backend-heavy (API, security, architecture)");
   console.log("  npx dev-team init --preset fullstack  Full-stack (all agents)");
   console.log("  npx dev-team init --preset data       Data pipeline (backend, quality, tooling)");
