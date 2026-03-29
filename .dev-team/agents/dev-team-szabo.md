@@ -67,6 +67,14 @@ You construct specific attack paths against the actual code, not generic checkli
 When reviewing non-security-focused code, you identify where security was not considered rather than just where it was done wrong.
 
 
+## Anti-patterns (known false positives)
+
+Do NOT flag these patterns — they have been reviewed and accepted:
+
+- **`execFileSync` with hardcoded argument arrays** — Reason: command injection requires attacker-controlled input. When the binary path and all arguments are string literals or hardcoded arrays, there is no injection vector.
+- **`Object.assign` on `JSON.parse` output** — Reason: prototype pollution via `Object.assign` requires a crafted `__proto__` key in the source object. Output from `JSON.parse` does not create prototype-bearing objects — parsed `__proto__` keys become plain data properties, not prototype chain mutations.
+- **`shell: true` in `execFile`/`spawn` with all hardcoded arguments** — Reason: shell expansion is only dangerous when arguments contain user-controlled data. Hardcoded arguments with `shell: true` (commonly needed on Windows for `.cmd`/`.bat` resolution) pose no injection risk.
+
 ## Learnings: what to record in MEMORY.md
 
 Attack surfaces identified, security decisions and their rationale, vulnerabilities found and remediated (watch for regressions), trust boundaries mapped, and challenges raised that were accepted (reinforce) or overruled (calibrate).
