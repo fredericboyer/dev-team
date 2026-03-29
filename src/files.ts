@@ -87,6 +87,7 @@ export function assertNoSymlinkInPath(absPath: string): void {
  */
 export function copyFile(src: string, dest: string): boolean {
   assertNotSymlink(src);
+  assertNoSymlinkInPath(src);
   assertNotSymlink(dest);
   assertNoSymlinkInPath(dest);
   const dir = path.dirname(dest);
@@ -146,6 +147,7 @@ export function readFile(absPath: string): string | null {
  * Writes content to a file, creating parent directories as needed.
  */
 export function writeFile(absPath: string, content: string): void {
+  assertNotSymlink(absPath);
   assertNoSymlinkInPath(absPath);
   const dir = path.dirname(absPath);
   fs.mkdirSync(dir, { recursive: true });

@@ -113,6 +113,7 @@ export function cleanupLegacyMemoryDirs(devTeamDir: string): string[] {
     } else if (fileExists(legacyMemoryPath) && !fileExists(currentMemoryPath)) {
       // Move legacy content to current location
       assertNotSymlink(legacyMemoryPath);
+      assertNoSymlinkInPath(legacyMemoryPath);
       assertNotSymlink(currentMemoryPath);
       assertNoSymlinkInPath(currentMemoryPath);
       fs.mkdirSync(path.join(memoryDir, currentDir), { recursive: true });
@@ -174,6 +175,7 @@ function runMigrations(prefs: Preferences, fromVersion: string, devTeamDir: stri
         ) {
           try {
             assertNotSymlink(path.join(oldMemDir, "MEMORY.md"));
+            assertNoSymlinkInPath(path.join(oldMemDir, "MEMORY.md"));
             assertNotSymlink(path.join(newMemDir, "MEMORY.md"));
             assertNoSymlinkInPath(path.join(newMemDir, "MEMORY.md"));
             fs.mkdirSync(newMemDir, { recursive: true });
@@ -643,6 +645,7 @@ export async function update(targetDir: string): Promise<void> {
   const oldLearningsPath = path.join(devTeamDir, "learnings.md");
   if (fileExists(oldLearningsPath) && !fileExists(learningsDest)) {
     assertNotSymlink(oldLearningsPath);
+    assertNoSymlinkInPath(oldLearningsPath);
     assertNotSymlink(learningsDest);
     assertNoSymlinkInPath(learningsDest);
     fs.mkdirSync(rulesDir, { recursive: true });
@@ -660,6 +663,7 @@ export async function update(targetDir: string): Promise<void> {
   const oldProcessPath = path.join(devTeamDir, "process.md");
   if (fileExists(oldProcessPath) && !fileExists(processDest)) {
     assertNotSymlink(oldProcessPath);
+    assertNoSymlinkInPath(oldProcessPath);
     assertNotSymlink(processDest);
     assertNoSymlinkInPath(processDest);
     fs.mkdirSync(rulesDir, { recursive: true });
