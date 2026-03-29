@@ -23,7 +23,7 @@
 
 ## Known Tech Debt
 
-- `readFile()` in `src/files.ts` distinguishes ENOENT from EACCES/EPERM and logs a warning on permission errors, but still returns null in both cases — can mask security-relevant permission errors (#460, v1.8.0).
+- ~~`readFile()` in `src/files.ts` masks permission errors (#460, fixed v1.8.0).~~ Resolved: now throws on EACCES/EPERM instead of returning null.
 - ~~`mergeClaudeMd` duplicate BEGIN markers (#461, fixed v1.8.0).~~ Resolved: missing END marker now replaces from BEGIN to EOF instead of appending.
 - ~~`doctor.ts` hookFileMap missing Agent teams guide hook (#431, fixed v1.6.1).~~ Resolved in PR #443.
 - ~~`status.ts` checks wrong learnings path after v1.6.0 migration (#432, fixed v1.6.1).~~ Resolved in PR #443.

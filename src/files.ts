@@ -126,17 +126,13 @@ export function dirExists(absPath: string): boolean {
 
 /**
  * Reads a file and returns its content, or null if it doesn't exist.
+ * Throws on any error other than ENOENT (including EACCES, EPERM, EISDIR, etc.).
  */
 export function readFile(absPath: string): string | null {
   try {
     return fs.readFileSync(absPath, "utf-8");
   } catch (err: unknown) {
-    const code = (err as NodeJS.ErrnoException).code;
-    if (code === "ENOENT") {
-      return null;
-    }
-    if (code === "EACCES" || code === "EPERM") {
-      console.warn(`Warning: permission denied reading ${absPath}`);
+    if ((err as NodeJS.ErrnoException).code === "ENOENT") {
       return null;
     }
     throw err;
