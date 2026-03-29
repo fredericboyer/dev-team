@@ -24,9 +24,7 @@ while ((match = indexPattern.exec(readmeContent)) !== null) {
 }
 
 // Get all ADR .md files on disk (excluding README.md)
-const adrFiles = fs
-  .readdirSync(adrDir)
-  .filter((f) => f.endsWith(".md") && f !== "README.md");
+const adrFiles = fs.readdirSync(adrDir).filter((f) => f.endsWith(".md") && f !== "README.md");
 
 // Check (a): every ADR file on disk has an entry in the index
 for (const file of adrFiles) {
@@ -41,16 +39,12 @@ for (const file of adrFiles) {
 for (const entry of indexEntries) {
   const filePath = path.join(adrDir, entry.filename);
   if (!fs.existsSync(filePath)) {
-    console.error(
-      `FAIL: Index entry [${entry.number}](${entry.filename}) has no file on disk`,
-    );
+    console.error(`FAIL: Index entry [${entry.number}](${entry.filename}) has no file on disk`);
     errors++;
   }
 }
 
-console.log(
-  `  ADRs: ${adrFiles.length} files, ${indexEntries.length} index entries checked`,
-);
+console.log(`  ADRs: ${adrFiles.length} files, ${indexEntries.length} index entries checked`);
 
 // --- Research brief validation ---
 
