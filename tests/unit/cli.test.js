@@ -26,6 +26,7 @@ describe("CLI --help flag", () => {
     assert.ok(output.includes("create-agent"), "help should mention create-agent");
     assert.ok(output.includes("doctor"), "help should mention doctor");
     assert.ok(output.includes("status"), "help should mention status");
+    assert.ok(output.includes("mcp"), "help should mention mcp");
   });
 
   it("exits with code 1 for unknown command", () => {
