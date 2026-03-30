@@ -19,8 +19,7 @@ import { scanProject, formatScanReport } from "./scan.js";
 import { scanSkillRecommendations, formatRecommendations } from "./skill-recommendations.js";
 import { parseAgentDefinition } from "./formats/canonical.js";
 import { getAdaptersForRuntimes } from "./formats/adapters.js";
-import "./adapters/agents-md.js";
-import "./adapters/copilot.js";
+import "./adapters/index.js";
 
 interface AgentDefinition {
   label: string;
