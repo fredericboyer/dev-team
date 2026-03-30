@@ -23,10 +23,7 @@ import { parseAgentDefinition } from "./formats/canonical.js";
 import { getAdaptersForRuntimes } from "./formats/adapters.js";
 import "./adapters/index.js";
 
-// Side-effect imports: register runtime adapters at module load time
-import "./adapters/codex.js";
-import "./adapters/cursor.js";
-import "./adapters/windsurf.js";
+import "./adapters/index.js";
 
 interface AgentRename {
   oldLabel: string;
