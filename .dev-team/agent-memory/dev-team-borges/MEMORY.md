@@ -130,3 +130,11 @@
 - **Outcome**: verified
 - **Last-verified**: 2026-03-29
 - **Context**: Largest release to date. 0 DEFECTs across all 8 PRs. ~18 unique findings (all advisory), 1 accepted, 3 deferred, 14 ignored. Low acceptance rate (6%) is not a signal quality issue — reflects hardening scope (CI, tests, docs, symlink guards). Deming memory compressed (191→~165 lines) by consolidating 4 v1.5.0-era entries and 3 v1.7.0-era entries into summaries. New entries written: Deming (1), Szabo (1), Knuth (1), Brooks (2), Beck (2), Tufte (1). Last-verified bumped on Deming CI entry and Beck test-listing entry. Zero-overrule alert continues at n>=112. No new shared learnings needed — release was hardening, not new process/principles.
+
+### [2026-03-30] v1.11.1 extraction — 1 PR, 1 finding, 0% acceptance, hotfix
+- **Type**: MILESTONE [verified]
+- **Source**: v1.11.1 hotfix (#563, PR #565)
+- **Tags**: metrics, calibration, extraction, hotfix
+- **Outcome**: verified
+- **Last-verified**: 2026-03-30
+- **Context**: Small hotfix — mergeClaudeMd duplicate scaffolding fix. 1 advisory finding (Knuth SUGGESTION, ignored). No new memory entries needed — bumped Last-verified on Knuth's related mergeClaudeMd boundary condition entry. Zero-overrule alert continues at n>=113. No new shared learnings. Proportional extraction for hotfix scope.
