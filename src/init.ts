@@ -21,6 +21,8 @@ import { parseAgentDefinition } from "./formats/canonical.js";
 import { getAdaptersForRuntimes } from "./formats/adapters.js";
 import "./adapters/index.js";
 
+import "./adapters/index.js";
+
 interface AgentDefinition {
   label: string;
   file: string;
