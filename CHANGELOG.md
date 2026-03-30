@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.11.1] - 2026-03-30
+
+### Fixed
+- `mergeClaudeMd` no longer re-injects template scaffolding on update (#563, #565).
+- `release.yml` unnecessary `\!` escaping removed (#562).
+
+### Dependencies
+- oxfmt 0.41.0 → 0.42.0 (#558).
+- oxlint 1.56.0 → 1.57.0 (#559).
+
 ## [1.11.0] - 2026-03-29
 
 ### Added

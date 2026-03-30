@@ -16,7 +16,7 @@
 - **Source**: #461, PR #479
 - **Tags**: boundary-condition, merge-logic
 - **Outcome**: fixed
-- **Last-verified**: 2026-03-29
+- **Last-verified**: 2026-03-30
 - **Context**: Missing END marker now triggers replace-from-BEGIN-to-EOF instead of append. Also fixed END-before-BEGIN edge case by searching for END only after BEGIN position. Two distinct boundary conditions fixed in same PR.
 
 ### [2026-03-29] v1.8.0: 18 new tests added — assertNotSymlink, assertNoSymlinkInPath, safeRegex

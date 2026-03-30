@@ -185,3 +185,16 @@
 - **Notes**: Largest release to date (27 issues, 8 PRs). All 8 PRs approved with 0 DEFECTs. High ignore rate (78%) reflects the nature of the work — primarily hardening, CI improvements, test coverage, and documentation. Most advisory findings targeted latent risks (compareSemver prerelease, regex edge cases) or minor suggestions (ordering, location) that were reasonable to ignore for the scope. 3 deferred findings tracked: Semgrep full enforcement, calibration example path in user projects. 1 round per PR — clean convergence.
 - **[RISK] Zero-overrule alert**: Rolling overrule rate remains 0% at n>=112 in-team findings (v1.2.0 through v1.11.0). Per research brief #490, healthy adversarial review shows 1-10% overrule rate. Acceptance rate (6%) is below the healthy band (60-85%) but this is attributable to the release scope (hardening/docs) rather than signal quality. When excluding pure-hardening releases, the rolling acceptance rate is within the healthy band.
 
+### [2026-03-30] Task: v1.11.1 hotfix (#563) — PR #565
+- **Agents**: implementing: Deming, reviewers: Knuth
+- **Rounds**: 1 (LIGHT)
+- **Findings**:
+  - Knuth: 0 DEFECT, 0 RISK, 1 SUGGESTION (1 ignored — guard clarity, advisory)
+- **Acceptance rate**: 0% (0 accepted / 1 total)
+- **Overrule rate**: 0% (0/1)
+- **Fix rate (DEFECTs)**: N/A (0 DEFECTs)
+- **Ignore rate (advisory)**: 100% (1/1)
+- **Duration**: single session, 1 PR
+- **Notes**: Small hotfix — mergeClaudeMd duplicate scaffolding fix. 1 advisory finding ignored (guard clarity for newBegin === -1). LIGHT review, 1 round to convergence. Clean fix scope.
+- **[RISK] Zero-overrule alert**: Rolling overrule rate remains 0% at n>=113 in-team findings (v1.2.0 through v1.11.1).
+
