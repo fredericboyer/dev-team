@@ -60,3 +60,4 @@ What becomes easier or more difficult?
 | [033](033-rules-based-context.md) | Rules-based context for shared files | accepted |
 | [034](034-delegate-language-knowledge.md) | Delegate language-specific knowledge to agents, not hooks | accepted |
 | [035](035-skill-composability.md) | Skill composability via sub-skill invocation | accepted |
+| [036](036-canonical-format-adapter-registry.md) | Canonical agent definition format and multi-runtime adapter registry | accepted |

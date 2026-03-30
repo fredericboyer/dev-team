@@ -36,6 +36,7 @@ if (command === "--version" || command === "-v") {
   console.log("  npx dev-team init --preset backend   Backend-heavy (API, security, architecture)");
   console.log("  npx dev-team init --preset fullstack  Full-stack (all agents)");
   console.log("  npx dev-team init --preset data       Data pipeline (backend, quality, tooling)");
+  console.log("  npx dev-team init --runtime claude    Target runtime(s) (default: claude)");
   console.log("  npx dev-team update                  Update agents, hooks, and skills to latest");
   console.log("  npx dev-team create-agent <name>     Scaffold a new custom agent");
   console.log("  npx dev-team doctor                  Check installation health");

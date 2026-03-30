@@ -19,6 +19,8 @@ import {
 import type { HookSettings, HookMatcher } from "./files.js";
 import fs from "fs";
 import { ALL_AGENTS, QUALITY_HOOKS, INFRA_HOOKS } from "./init.js";
+import { parseAgentDefinition } from "./formats/canonical.js";
+import { getAdaptersForRuntimes } from "./formats/adapters.js";
 
 interface AgentRename {
   oldLabel: string;
@@ -259,6 +261,7 @@ interface Preferences {
   version: string;
   agents: string[];
   hooks: string[];
+  runtimes?: string[];
   issueTracker: string;
   branchConvention: string;
   platform?: string;
@@ -484,32 +487,58 @@ export async function update(targetDir: string): Promise<void> {
     settings: false,
   };
 
-  // Step 2: Update agents
+  // Step 2: Update agents via adapter registry
   const agentsDir = path.join(devTeamDir, "agents");
   const memoryDir = path.join(devTeamDir, "agent-memory");
 
-  for (const label of prefs.agents) {
+  // Build canonical definitions for all agents (installed + newly discovered)
+  const allAgentLabels = new Set(prefs.agents);
+  for (const [label] of Object.entries(AGENT_FILES)) {
+    allAgentLabels.add(label);
+  }
+
+  const canonicalDefs = [];
+  for (const label of allAgentLabels) {
     const file = AGENT_FILES[label];
     if (!file) continue;
-
     const src = path.join(templates, "agents", file);
-    const dest = path.join(agentsDir, file);
+    const content = readFile(src);
+    if (!content) continue;
+    canonicalDefs.push({ label, def: parseAgentDefinition(content), file });
+  }
 
-    if (!fileExists(src)) continue;
-
-    if (fileExists(dest)) {
-      const srcContent = readFile(src);
-      const destContent = readFile(dest);
-      if (srcContent !== destContent) {
-        copyFile(src, dest);
-        summary.agents.updated.push(label);
-      }
-    } else {
-      copyFile(src, dest);
-      summary.agents.added.push(label);
+  // Ensure all discovered agents are in prefs.agents (auto-discovery for new agents)
+  for (const { label } of canonicalDefs) {
+    if (!prefs.agents.includes(label)) {
+      prefs.agents.push(label);
     }
+  }
 
-    // Create memory template if missing (never overwrite existing memory)
+  // Run adapters for configured runtimes (default: ["claude"])
+  const runtimes = prefs.runtimes || ["claude"];
+  const adapters = getAdaptersForRuntimes(runtimes);
+  for (const adapter of adapters) {
+    const result = adapter.update(
+      canonicalDefs.map((c) => c.def),
+      targetDir,
+    );
+    // Map agent names back to labels for summary reporting
+    for (const name of result.updated) {
+      const entry = canonicalDefs.find((c) => c.def.name === name);
+      if (entry && !summary.agents.updated.includes(entry.label)) {
+        summary.agents.updated.push(entry.label);
+      }
+    }
+    for (const name of result.added) {
+      const entry = canonicalDefs.find((c) => c.def.name === name);
+      if (entry && !summary.agents.added.includes(entry.label)) {
+        summary.agents.added.push(entry.label);
+      }
+    }
+  }
+
+  // Create memory templates for all agents (never overwrite existing memory)
+  for (const { file } of canonicalDefs) {
     const agentName = file.replace(".md", "");
     const memorySrc = path.join(templates, "agent-memory", agentName, "MEMORY.md");
     const memoryDest = path.join(memoryDir, agentName, "MEMORY.md");
@@ -523,25 +552,6 @@ export async function update(targetDir: string): Promise<void> {
   const sharedDest = path.join(agentsDir, "SHARED.md");
   if (fileExists(sharedSrc)) {
     copyFile(sharedSrc, sharedDest);
-  }
-
-  // Detect new agents available in templates but not in preferences
-  for (const [label, file] of Object.entries(AGENT_FILES)) {
-    if (prefs.agents.includes(label)) continue;
-    const src = path.join(templates, "agents", file);
-    if (fileExists(src)) {
-      const dest = path.join(agentsDir, file);
-      copyFile(src, dest);
-      summary.agents.added.push(label);
-      prefs.agents.push(label);
-
-      const agentName = file.replace(".md", "");
-      const memorySrc = path.join(templates, "agent-memory", agentName, "MEMORY.md");
-      const memoryDest = path.join(memoryDir, agentName, "MEMORY.md");
-      if (!fileExists(memoryDest) && fileExists(memorySrc)) {
-        copyFile(memorySrc, memoryDest);
-      }
-    }
   }
 
   // Step 3: Update hooks
