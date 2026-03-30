@@ -1,68 +1,68 @@
-'use strict';
+"use strict";
 
-const { describe, it } = require('node:test');
-const assert = require('node:assert/strict');
-const { execFileSync } = require('child_process');
-const path = require('path');
+const { describe, it } = require("node:test");
+const assert = require("node:assert/strict");
+const { execFileSync } = require("child_process");
+const path = require("path");
 
-const bin = path.join(__dirname, '..', '..', 'bin', 'dev-team.js');
-const pkg = require('../../package.json');
+const bin = path.join(__dirname, "..", "..", "bin", "dev-team.js");
+const pkg = require("../../package.json");
 
-describe('CLI --help flag', () => {
-  it('exits with code 0 for --help', () => {
-    const output = execFileSync(process.execPath, [bin, '--help'], {
-      encoding: 'utf-8',
+describe("CLI --help flag", () => {
+  it("exits with code 0 for --help", () => {
+    const output = execFileSync(process.execPath, [bin, "--help"], {
+      encoding: "utf-8",
     });
     // If we reach here, exit code was 0
-    assert.ok(output.length > 0, 'should produce help output');
+    assert.ok(output.length > 0, "should produce help output");
   });
 
-  it('help text contains all subcommands', () => {
-    const output = execFileSync(process.execPath, [bin, '--help'], {
-      encoding: 'utf-8',
+  it("help text contains all subcommands", () => {
+    const output = execFileSync(process.execPath, [bin, "--help"], {
+      encoding: "utf-8",
     });
-    assert.ok(output.includes('init'), 'help should mention init');
-    assert.ok(output.includes('update'), 'help should mention update');
-    assert.ok(output.includes('create-agent'), 'help should mention create-agent');
-    assert.ok(output.includes('doctor'), 'help should mention doctor');
-    assert.ok(output.includes('status'), 'help should mention status');
+    assert.ok(output.includes("init"), "help should mention init");
+    assert.ok(output.includes("update"), "help should mention update");
+    assert.ok(output.includes("create-agent"), "help should mention create-agent");
+    assert.ok(output.includes("doctor"), "help should mention doctor");
+    assert.ok(output.includes("status"), "help should mention status");
   });
 
-  it('exits with code 1 for unknown command', () => {
+  it("exits with code 1 for unknown command", () => {
     assert.throws(
       () => {
-        execFileSync(process.execPath, [bin, 'nonexistent-command'], {
-          encoding: 'utf-8',
+        execFileSync(process.execPath, [bin, "nonexistent-command"], {
+          encoding: "utf-8",
         });
       },
       (err) => {
-        assert.equal(err.status, 1, 'should exit with code 1');
+        assert.equal(err.status, 1, "should exit with code 1");
         return true;
       },
-      'unknown command should exit with code 1',
+      "unknown command should exit with code 1",
     );
   });
 });
 
-describe('CLI --version flag', () => {
-  it('prints the version from package.json with --version', () => {
-    const output = execFileSync(process.execPath, [bin, '--version'], {
-      encoding: 'utf-8',
+describe("CLI --version flag", () => {
+  it("prints the version from package.json with --version", () => {
+    const output = execFileSync(process.execPath, [bin, "--version"], {
+      encoding: "utf-8",
     });
     assert.equal(output.trim(), pkg.version);
   });
 
-  it('prints the version from package.json with -v', () => {
-    const output = execFileSync(process.execPath, [bin, '-v'], {
-      encoding: 'utf-8',
+  it("prints the version from package.json with -v", () => {
+    const output = execFileSync(process.execPath, [bin, "-v"], {
+      encoding: "utf-8",
     });
     assert.equal(output.trim(), pkg.version);
   });
 
-  it('exits with code 0', () => {
+  it("exits with code 0", () => {
     // execFileSync throws on non-zero exit, so reaching here means exit 0
-    execFileSync(process.execPath, [bin, '--version'], {
-      encoding: 'utf-8',
+    execFileSync(process.execPath, [bin, "--version"], {
+      encoding: "utf-8",
     });
   });
 });

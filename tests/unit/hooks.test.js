@@ -2030,4 +2030,3 @@ describe("dev-team-worktree-remove", () => {
     assert.equal(result.code, 0, "Should exit 0 with no input");
   });
 });
-
