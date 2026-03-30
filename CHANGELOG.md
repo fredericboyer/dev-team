@@ -7,6 +7,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.11.0] - 2026-03-29
+
+### Added
+- Review intensity tiers (LIGHT/FULL) with explicit selection criteria and reviewer routing (#519, #551).
+- Definition of Done (DoD) negotiation protocol for task skill — agents and humans agree on acceptance criteria upfront (#520, #551).
+- Harness assumption audit in retro skill — retro now validates that hook/skill assumptions still hold (#521, #550).
+- Anti-pattern sections for reviewer agents — calibration examples of what NOT to flag (#523, #551).
+- Calibration examples for Szabo, Knuth, and Brooks reviewers — concrete accept/flag/skip examples (#522, #553).
+- `validate-docs` CI job — catches stale doc references and broken links (#546, #552).
+- Semgrep SAST (non-blocking) added to CI pipeline (#533, #552).
+- `.nvmrc` pinning Node.js version for consistent local development (#535, #554).
+- Context documentation for review skill — explains what context reviewers receive (#524, #551).
+
+### Changed
+- Agent timeouts aligned to 2-minute threshold across all skills (#519, #551).
+- Release workflow parallelized — independent CI jobs run concurrently (#547, #552).
+- `npm ci` replaces `npm install` in CI for deterministic installs (#528, #552).
+- Lint and format checks extended to `tests/` directory (#534, #555).
+- `validate-agents` and `validate-hooks` CI jobs optimized (#530, #552).
+
+### Fixed
+- Symlink guards added to `mergeSettings` and `removeHooksFromSettings` — prevents symlink-following attacks (#531, #555).
+- `compareSemver` prerelease handling — correctly orders prerelease vs release versions (#538, #554).
+- `doctor.ts` `hookFileMap` deduplication — no longer reports false failures for hooks with multiple files (#539, #554).
+- `listFilesRecursive` depth and symlink guard — bounded traversal prevents runaway recursion (#543, #554).
+- Worktree hook input validation hardened — rejects malformed JSON gracefully (#537, #556).
+- Safety guard and `shell:true` documentation clarified (#536, #554).
+- Duplicate pre-commit hook entry removed from settings template (#532, #555).
+- Retro CLAUDE.md template duplication removed (#549).
+- Mori `HookEntry` memory corrected (#549).
+- Docs aligned with guidelines — ADR index, research brief naming (#527).
+
+### Tests
+- 23+ new tests: worktree hook tests (13) (#529, #556), init error paths (#540, #557), update backup (#541, #557), `createAgent` validation (#542, #557), CLI help (#545, #557), `hookRemovals` integration (#548, #557).
+
 ## [1.10.1] - 2026-03-29
 
 ### Fixed

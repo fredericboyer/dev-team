@@ -133,3 +133,11 @@
 - **Outcome**: fixed
 - **Last-verified**: 2026-03-26
 - **Context**: Review skill referenced agent-patterns.json at wrong path. Corrected to `.dev-team/hooks/agent-patterns.json`. Path correctness is a recurring theme — verify paths in skill definitions during review. Seen: 4 times (this + doctor.ts K1 + status.ts K3 + memory dir deming/ v1.7.0).
+
+### [2026-03-29] v1.11.0: Test coverage expanded — init error paths, update backup, createAgent, CLI help
+- **Type**: PATTERN [new]
+- **Source**: #540, #541, #542, #545, #548, PR #557
+- **Tags**: testing, coverage, init, update, cli
+- **Outcome**: fixed
+- **Last-verified**: 2026-03-29
+- **Context**: 5 test coverage issues addressed in single PR. New tests for: init error paths (missing package.json, invalid config), update backup flow, createAgent validation (empty name, missing fields), CLI --help output, hookRemovals integration. Continues the coverage expansion pattern from v1.7.0 (#438) and v1.8.0 (#480).

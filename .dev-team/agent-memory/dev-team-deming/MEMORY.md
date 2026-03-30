@@ -24,7 +24,7 @@
 - **Source**: .github/workflows/ci.yml analysis
 - **Tags**: ci, validation, agents, hooks
 - **Outcome**: verified
-- **Last-verified**: 2026-03-25
+- **Last-verified**: 2026-03-29
 - **Context**: scripts/validate-agents.js checks agent frontmatter. scripts/validate-hooks.js verifies hook scripts load without errors. Both are separate CI jobs. Hook validation runs cross-platform.
 
 ### [2026-03-25] TypeScript with NodeNext resolution — pretest builds before test
@@ -45,35 +45,11 @@
 
 ## Hook Effectiveness
 
-### [2026-03-26] Review gate pattern duplication with post-change-review
-- **Type**: RISK [resolved]
-- **Tags**: hooks, maintenance
+### [2026-03-26] v1.5.0 era — pattern extraction and template organization (consolidated)
+- **Type**: PATTERN [verified]
+- **Tags**: hooks, templates, shared-protocol, guarded-files, dx
 - **Last-verified**: 2026-03-26
-- **Context**: Pattern duplication was resolved by extracting shared patterns to `.dev-team/hooks/agent-patterns.json` (PR #344). Both hooks now import from a single source. Superseded by the shared pattern extraction approach.
-
-### [2026-03-26] SHARED.md protocol reduces agent definition duplication by ~16%
-- **Type**: DECISION [verified]
-- **Source**: PR #376 (feat/353), ADR-030
-- **Tags**: agents, templates, shared-protocol, dx
-- **Outcome**: accepted
-- **Last-verified**: 2026-03-26
-- **Context**: Common agent sections (progress reporting, memory hygiene, challenge protocol) extracted to SHARED.md. Agent definitions include it via reference. Reduces 1873→1574 total lines. ADR-030 governs the shared protocol pattern.
-
-### [2026-03-26] Process rules extracted from CLAUDE.md to dev-team-process.md
-- **Type**: DECISION [verified]
-- **Source**: PR #373, ADR-031
-- **Tags**: process, dx, claude-md, templates, guarded-files
-- **Outcome**: accepted
-- **Last-verified**: 2026-03-26
-- **Context**: CLAUDE.md was growing unwieldy. Process rules now live in a dedicated file, keeping CLAUDE.md under 100 lines. ADR-031 governs the extraction.
-
-### [2026-03-26] process.md is a guarded file — never overwritten on update
-- **Type**: DECISION [verified]
-- **Source**: PR #398 (fix/397)
-- **Tags**: update, guarded-files, process
-- **Outcome**: accepted
-- **Last-verified**: 2026-03-26
-- **Context**: process.md joins learnings.md and metrics.md as files that are never overwritten by `dev-team update`. update.ts only installs process.md if missing (for pre-v1.5.0 projects). The contradiction between "Never modify .dev-team/" and process.md being user-editable was resolved by clarifying which files are preserved vs overwritten.
+- **Context**: Several foundational DX decisions consolidated: (1) Review gate pattern duplication resolved via agent-patterns.json extraction (PR #344). (2) SHARED.md protocol reduces agent definition duplication ~16% (ADR-030). (3) Process rules extracted from CLAUDE.md to dev-team-process.md (ADR-031). (4) process.md, learnings.md, metrics.md are guarded files — never overwritten on update (PR #398).
 
 ### [2026-03-26] Skill invocation control: orchestration vs advisory skills
 - **Type**: DECISION [verified]
@@ -99,29 +75,11 @@
 - **Last-verified**: 2026-03-27
 - **Context**: cachedGitDiff was copy-pasted across 3 hooks (tdd-enforce, pre-commit-gate, review-gate). Extracted to `templates/hooks/lib/git-cache.js`. All 3 hooks now `require("./lib/git-cache")`. init.ts and update.ts updated to copy lib/ directory. Remaining duplication: fallback pattern arrays (#437, still open).
 
-### [2026-03-26] CI gap: no npm audit step
-- **Type**: SUGGESTION [resolved]
-- **Source**: Codebase audit, Issue #440
-- **Tags**: ci, security, npm, dx
-- **Outcome**: fixed — `audit-dependencies` job added to CI (PR for #440)
+### [2026-03-27] v1.7.0 era — audit-derived fixes (consolidated)
+- **Type**: PATTERN [verified]
+- **Tags**: ci, testing, duplication, dx
 - **Last-verified**: 2026-03-27
-- **Context**: Added `audit-dependencies` job running `npm audit --audit-level=high` as a separate CI job, consistent with one-concern-per-job pattern. Only blocks on high/critical severity.
-
-### [2026-03-27] review-gate.test.js added to test script (Issue #435)
-- **Type**: SUGGESTION [resolved]
-- **Source**: Codebase audit, Issue #435
-- **Tags**: testing, hooks, dx
-- **Outcome**: fixed
-- **Last-verified**: 2026-03-27
-- **Context**: review-gate.test.js was not in the npm test script. Added to package.json. Also fixed the runGate test helper: it used execFileSync which swallows stderr on exit 0 — switched to spawnSync to capture stderr in all cases. The --skip-review test was failing because the hook outputs via console.warn (stderr) but the helper only captured stderr on error paths.
-
-### [2026-03-27] Symlink creation extracted to ensureSymlink() in files.ts
-- **Type**: DECISION [verified]
-- **Source**: Issue #441
-- **Tags**: duplication, files, dx
-- **Outcome**: fixed
-- **Last-verified**: 2026-03-27
-- **Context**: ~30 lines of identical symlink creation with Windows junction fallback existed in both init.ts and update.ts. Extracted to ensureSymlink() in files.ts. Also removed unused fs import from init.ts. Part of the hook/utility dedup series (#436, #437).
+- **Context**: Three audit-derived improvements consolidated: (1) npm audit CI step added (#440). (2) review-gate.test.js added to test script, runGate helper switched from execFileSync to spawnSync (#435). (3) ensureSymlink() extracted from init.ts/update.ts to files.ts (#441).
 
 ## Calibration Log
 <!-- Challenges accepted/overruled — tunes adversarial intensity over time -->
@@ -189,3 +147,11 @@
 - **Outcome**: fixed
 - **Last-verified**: 2026-03-29
 - **Context**: Three bugs fixed: (1) init now appends INFRA_HOOKS labels to config.json hooks array, (2) init refuses when config.json exists (use --force), (3) mergeSettings updates attributes (timeout, type) on existing hooks via Object.assign. Also added removeHooksFromSettings for hook removal cleanup and hookRemovals migration in update.ts. HookEntry interface extended with timeout/blocking fields per Brooks review.
+
+### [2026-03-29] v1.11.0: CI hardening — npm ci, Semgrep, release parallelization, validate-docs
+- **Type**: DECISION [new]
+- **Source**: #528, #530, #533, #546, #547, PR #552
+- **Tags**: ci, security, dx, semgrep, validation
+- **Outcome**: fixed
+- **Last-verified**: 2026-03-29
+- **Context**: CI improvements: npm ci replaces npm install for reproducible builds, Semgrep SAST added (silent on failure per Brooks — deferred to full enforcement), release workflow parallelized, validate-docs job added. Lint scope extended to tests/ directory (#555). Duplicate hook removed (dev-team-watch-list.js had redundant copy).

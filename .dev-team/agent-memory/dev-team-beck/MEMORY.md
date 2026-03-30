@@ -24,7 +24,7 @@
 - **Source**: package.json analysis
 - **Tags**: testing, ci
 - **Outcome**: verified
-- **Last-verified**: 2026-03-29
+- **Last-verified**: 2026-03-29 (confirmed: PR #557 added 5 new test files to scripts.test)
 - **Context**: New test files must be added to the explicit list in package.json scripts.test. CI runs tests cross-platform (ubuntu, macos, windows) with Node 22.
 
 ### [2026-03-25] TDD enforced via hook — dev-team-tdd-enforce.js
@@ -58,6 +58,22 @@
 - **Outcome**: fixed
 - **Last-verified**: 2026-03-29
 - **Context**: assertNotSymlink, assertNoSymlinkInPath, and safeRegex each got dedicated test suites. Tests cover: leaf rejection, ancestor traversal, realpathSync tradeoff behavior, nested quantifier patterns, length bounds. Uses the sentinel-throw pattern for process.exit. Tightened existing test assertions (#474) to reduce false positive risk — narrower assertions catch regressions that broad ones miss.
+
+### [2026-03-29] v1.11.0: Worktree hook tests and input validation (#529, #537)
+- **Type**: DECISION [new]
+- **Source**: #529, #537, PR #556
+- **Tags**: testing, hooks, worktree, input-validation
+- **Outcome**: fixed
+- **Last-verified**: 2026-03-29
+- **Context**: Worktree serialization hooks (WorktreeCreate/WorktreeRemove) gained proper test coverage and input validation. Tests verify lock acquisition, timeout behavior, and cleanup. Input validation guards against missing/invalid worktree paths.
+
+### [2026-03-29] v1.11.0: Test coverage batch — init error paths, update backup, createAgent, CLI help
+- **Type**: DECISION [new]
+- **Source**: #540, #541, #542, #545, #548, PR #557
+- **Tags**: testing, coverage, init, update, cli, createAgent
+- **Outcome**: fixed
+- **Last-verified**: 2026-03-29
+- **Context**: Five coverage gaps closed in single PR: init error paths (missing package.json, config already exists), update backup flow, createAgent validation (empty name, missing fields), CLI --help output verification, hookRemovals integration test. Continues systematic coverage expansion pattern.
 
 ## Framework and Runner Notes
 

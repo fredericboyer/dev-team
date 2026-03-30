@@ -112,3 +112,11 @@
 - **Outcome**: accepted
 - **Last-verified**: 2026-03-26
 - **Context**: Seven design principles codified: workflow-agnostic, platform-neutral, language-neutral, discoverable-only, process-driven, rules for shared context, skill invocation control. These are the product's template design contract — all future template changes must comply.
+
+### [2026-03-29] v1.11.0: Review tiers, DoD, context docs, and anti-pattern sections added
+- **Type**: DECISION [new]
+- **Source**: #519, #520, #523, #524, PR #551
+- **Tags**: documentation, review, anti-patterns, templates
+- **Outcome**: accepted
+- **Last-verified**: 2026-03-29
+- **Context**: Review skill documentation expanded: explicit tier definitions (LIGHT/STANDARD/DEEP), Definition of Done criteria, context documentation sections. Anti-pattern sections added to reviewer agent definitions (Szabo, Knuth, Brooks) with calibration examples. Safety guard and shell:true documentation updated (#536, #538, PR #554). ADR index and research brief naming aligned with guidelines (#527, PR for docs alignment).
