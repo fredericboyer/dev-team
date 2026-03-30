@@ -24,7 +24,7 @@
 - **Source**: CLAUDE.md + package.json files array
 - **Tags**: architecture, boundaries
 - **Outcome**: verified
-- **Last-verified**: 2026-03-26
+- **Last-verified**: 2026-03-30
 - **Context**: templates/ contains what gets installed in target projects. .dev-team/ contains dev-team's own agents/hooks/skills for dogfooding. Improvements must target templates/ to ship in releases — never modify .dev-team/ for improvements (overwritten by update).
 
 ### [2026-03-25] Agent proliferation governed by ADR-022 — soft cap of 15
@@ -148,6 +148,38 @@
 - **Outcome**: deferred
 - **Last-verified**: 2026-03-29
 - **Context**: Calibration examples directory exists in templates but init/update may not copy it to user projects. Path correctness pattern continues (Seen: 6th instance). Deferred — not blocking, examples are reference material.
+
+### [2026-03-30] v2.0: Adapter registry architecture (ADR-036) — modular multi-runtime support
+- **Type**: DECISION [new]
+- **Source**: #501, PR #569
+- **Tags**: architecture, adapters, multi-runtime, registry-pattern
+- **Outcome**: accepted
+- **Last-verified**: 2026-03-30
+- **Context**: RuntimeAdapter interface (generate + update) with central registry. ClaudeCodeAdapter is identity transform. init.ts and update.ts iterate adapters instead of inline copy logic. Config field `runtimes` (default: `["claude"]`) controls which adapters fire. This is the multi-runtime foundation — adding a new runtime requires only implementing RuntimeAdapter and registering it. No changes to init.ts or update.ts.
+
+### [2026-03-30] v2.0: Side-effect imports fixed with barrel file (S2)
+- **Type**: DEFECT [fixed]
+- **Source**: PR #569, Brooks finding S2
+- **Tags**: architecture, imports, side-effects, barrel-file
+- **Outcome**: fixed
+- **Last-verified**: 2026-03-30
+- **Context**: Initial adapter registration used side-effect imports (import for registration side effect only). Brooks flagged this as violating ADR-036 principle of explicit registration. Fixed: barrel file `src/adapters/index.ts` consolidates all adapter imports. Importing the barrel registers all adapters. Note: init.ts has a duplicate `import "./adapters/index.js"` line that should be cleaned up.
+
+### [2026-03-30] v2.0: MCP server as enforcement portability layer (ADR-037)
+- **Type**: DECISION [new]
+- **Source**: #503, PR #572
+- **Tags**: architecture, mcp, enforcement, portability
+- **Outcome**: accepted
+- **Last-verified**: 2026-03-30
+- **Context**: Hooks are Claude Code-proprietary. MCP is the only cross-runtime enforcement mechanism. Server exposes read-only tools (review_gate first). Zero dependencies per ADR-002. Stdio transport (one server per session). Architectural risk: two code paths for same logic (hook + MCP tool) — must keep in sync. Tool registry pattern allows adding more enforcement tools without modifying server core.
+
+### [2026-03-30] v2.0: Dual code path sync risk — hook vs MCP enforcement
+- **Type**: RISK [accepted]
+- **Source**: PRs #569, #572, ADR-037
+- **Tags**: architecture, code-sync, hooks, mcp, risk
+- **Outcome**: accepted
+- **Last-verified**: 2026-03-30
+- **Context**: review_gate logic now exists in two places: dev-team-review-gate.js (hook) and src/mcp/tools/review-gate.ts (MCP tool). K10 finding showed they had already diverged during initial implementation. Extraction to shared module is the long-term fix but adds complexity. For now, accepted as architectural debt — the two implementations must be tested and reviewed together.
 
 ## Calibration Log
 <!-- Challenges accepted/overruled — tunes adversarial intensity over time -->

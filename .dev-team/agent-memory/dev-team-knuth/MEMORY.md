@@ -141,3 +141,19 @@
 - **Outcome**: fixed
 - **Last-verified**: 2026-03-29
 - **Context**: 5 test coverage issues addressed in single PR. New tests for: init error paths (missing package.json, invalid config), update backup flow, createAgent validation (empty name, missing fields), CLI --help output, hookRemovals integration. Continues the coverage expansion pattern from v1.7.0 (#438) and v1.8.0 (#480).
+
+### [2026-03-30] v2.0: MCP deriveRequiredAgents diverged from hook — FIXED (K10)
+- **Type**: DEFECT [fixed]
+- **Source**: PR #572, Knuth finding K10
+- **Tags**: mcp, review-gate, agent-patterns, code-sync, quality
+- **Outcome**: fixed
+- **Last-verified**: 2026-03-30
+- **Context**: Initial MCP review_gate implementation used hardcoded agent routing instead of loading from agent-patterns.json. This diverged from the hook's approach and would drift as patterns evolve. Fixed: MCP tool now loads and parses agent-patterns.json with proper fallback. This is the dual-code-path sync risk noted in ADR-037 — first instance of the pattern drifting.
+
+### [2026-03-30] v2.0: Comprehensive test suites for canonical format and all adapters
+- **Type**: PATTERN [new]
+- **Source**: PRs #569, #570, #571, #572
+- **Tags**: testing, adapters, canonical, mcp, coverage
+- **Outcome**: fixed
+- **Last-verified**: 2026-03-30
+- **Context**: 8 new test files added: canonical.test.js (264 lines), agents-md-adapter.test.js, copilot-adapter.test.js, codex-adapter.test.js, cursor-adapter.test.js, windsurf-adapter.test.js, mcp-server.test.js, mcp-review-gate.test.js. Total test count now 554 (up from ~430). Each adapter has generate+update tests. MCP tests cover protocol handling, tool dispatch, and review gate logic.
