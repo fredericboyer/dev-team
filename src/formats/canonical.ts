@@ -89,6 +89,11 @@ export function parseAgentDefinition(content: string): CanonicalAgentDefinition 
   if (!fields.name) {
     throw new Error("Invalid agent definition: missing required field 'name'");
   }
+  if (!/^[a-zA-Z0-9][a-zA-Z0-9._-]*$/.test(fields.name)) {
+    throw new Error(
+      `Invalid agent name "${fields.name}": must be alphanumeric with hyphens/dots/underscores only`,
+    );
+  }
   if (!fields.description) {
     throw new Error("Invalid agent definition: missing required field 'description'");
   }

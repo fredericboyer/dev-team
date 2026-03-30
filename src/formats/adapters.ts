@@ -10,7 +10,7 @@
 
 import path from "path";
 import type { CanonicalAgentDefinition } from "./canonical.js";
-import { copyFile, fileExists, readFile } from "../files.js";
+import { copyFile, fileExists, readFile, templateDir } from "../files.js";
 
 /**
  * Adapter interface. Each runtime adapter implements generate() for
@@ -56,7 +56,7 @@ export class ClaudeCodeAdapter implements RuntimeAdapter {
 
   generate(definitions: CanonicalAgentDefinition[], targetDir: string): void {
     const agentsDir = path.join(targetDir, ".dev-team", "agents");
-    const templatesAgentsDir = this.resolveTemplatesDir();
+    const templatesAgentsDir = path.join(templateDir(), "agents");
 
     for (const def of definitions) {
       const filename = `${def.name}.md`;
@@ -71,7 +71,7 @@ export class ClaudeCodeAdapter implements RuntimeAdapter {
     targetDir: string,
   ): { updated: string[]; added: string[] } {
     const agentsDir = path.join(targetDir, ".dev-team", "agents");
-    const templatesAgentsDir = this.resolveTemplatesDir();
+    const templatesAgentsDir = path.join(templateDir(), "agents");
     const updated: string[] = [];
     const added: string[] = [];
 
@@ -97,11 +97,6 @@ export class ClaudeCodeAdapter implements RuntimeAdapter {
 
     return { updated, added };
   }
-
-  private resolveTemplatesDir(): string {
-    // Resolve relative to the compiled output (dist/formats/adapters.js)
-    return path.join(__dirname, "..", "..", "templates", "agents");
-  }
 }
 
 // ---------------------------------------------------------------------------
@@ -110,10 +105,16 @@ export class ClaudeCodeAdapter implements RuntimeAdapter {
 
 const registry = new Map<string, RuntimeAdapter>();
 
+const BUILTIN_IDS = new Set(["claude"]);
+
 /**
- * Register a runtime adapter. Replaces any existing adapter with the same id.
+ * Register a runtime adapter. Replaces any existing adapter with the same id,
+ * unless the id is a built-in adapter that is already registered.
  */
 export function registerAdapter(adapter: RuntimeAdapter): void {
+  if (BUILTIN_IDS.has(adapter.id) && registry.has(adapter.id)) {
+    throw new Error(`Cannot replace built-in adapter "${adapter.id}"`);
+  }
   registry.set(adapter.id, adapter);
 }
 

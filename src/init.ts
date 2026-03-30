@@ -333,7 +333,7 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
   }
 
   // Resolve runtimes from preferences (default: ["claude"])
-  const runtimeFlag = flags.find((f) => f.startsWith("--runtime"));
+  const runtimeFlag = flags.find((f) => f === "--runtime" || f.startsWith("--runtime="));
   let runtimes = ["claude"];
   if (runtimeFlag) {
     const idx = flags.indexOf(runtimeFlag);

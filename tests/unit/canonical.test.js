@@ -80,6 +80,55 @@ describe("parseAgentDefinition", () => {
     assert.throws(() => parseAgentDefinition(content), /missing required field 'description'/);
   });
 
+  it("throws on name with invalid characters", () => {
+    const content = [
+      "---",
+      "name: ../etc/passwd",
+      "description: Malicious.",
+      "---",
+      "",
+      "Body.",
+    ].join("\n");
+    assert.throws(() => parseAgentDefinition(content), /Invalid agent name/);
+  });
+
+  it("throws on name with path traversal", () => {
+    const content = [
+      "---",
+      "name: ../../secrets",
+      "description: Path traversal attempt.",
+      "---",
+      "",
+      "Body.",
+    ].join("\n");
+    assert.throws(() => parseAgentDefinition(content), /Invalid agent name/);
+  });
+
+  it("throws on name with spaces", () => {
+    const content = [
+      "---",
+      "name: bad agent name",
+      "description: Spaces not allowed.",
+      "---",
+      "",
+      "Body.",
+    ].join("\n");
+    assert.throws(() => parseAgentDefinition(content), /Invalid agent name/);
+  });
+
+  it("allows valid names with dots, hyphens, and underscores", () => {
+    const content = [
+      "---",
+      "name: dev-team_agent.v2",
+      "description: Valid name with allowed chars.",
+      "---",
+      "",
+      "Body.",
+    ].join("\n");
+    const def = parseAgentDefinition(content);
+    assert.equal(def.name, "dev-team_agent.v2");
+  });
+
   it("handles descriptions containing colons", () => {
     const content = [
       "---",
@@ -173,7 +222,7 @@ describe("adapter registry", () => {
     );
   });
 
-  it("registerAdapter replaces existing adapter", () => {
+  it("registerAdapter adds a new custom adapter", () => {
     const mockAdapter = {
       id: "test-runtime",
       name: "Test Runtime",
@@ -186,6 +235,19 @@ describe("adapter registry", () => {
     registerAdapter(mockAdapter);
     const retrieved = getAdapter("test-runtime");
     assert.equal(retrieved.name, "Test Runtime");
+  });
+
+  it("registerAdapter throws when replacing built-in claude adapter", () => {
+    const fakeAdapter = {
+      id: "claude",
+      name: "Fake Claude",
+      generate() {},
+      update() {
+        return { updated: [], added: [] };
+      },
+    };
+
+    assert.throws(() => registerAdapter(fakeAdapter), /Cannot replace built-in adapter "claude"/);
   });
 });
 
