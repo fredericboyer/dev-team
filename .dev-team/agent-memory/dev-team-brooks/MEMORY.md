@@ -133,5 +133,21 @@
 - **Last-verified**: 2026-03-29
 - **Context**: Brooks flagged HookEntry interface as incomplete — missing timeout and blocking fields that exist in settings.json hook entries. Extended to match runtime shape. mergeSettings Object.assign now correctly propagates these attributes during update.
 
+### [2026-03-29] v1.11.0: Review tiers and DoD formalized in review/task skills
+- **Type**: DECISION [new]
+- **Source**: #519, #520, PR #551
+- **Tags**: architecture, skills, review, anti-patterns
+- **Outcome**: accepted
+- **Last-verified**: 2026-03-29
+- **Context**: Review skill now defines explicit tiers (LIGHT/STANDARD/DEEP) and Definition of Done criteria. Anti-pattern sections added to reviewer agent definitions. Harness assumption audit added to retro skill (#521, PR #550). Calibration examples shipped for reviewer agents (#522, PR #553). These are template improvements — shipped to all users.
+
+### [2026-03-29] v1.11.0: Calibration examples path missing in user projects
+- **Type**: RISK [deferred]
+- **Source**: PR #553, Brooks finding
+- **Tags**: architecture, calibration, init, path
+- **Outcome**: deferred
+- **Last-verified**: 2026-03-29
+- **Context**: Calibration examples directory exists in templates but init/update may not copy it to user projects. Path correctness pattern continues (Seen: 6th instance). Deferred — not blocking, examples are reference material.
+
 ## Calibration Log
 <!-- Challenges accepted/overruled — tunes adversarial intensity over time -->

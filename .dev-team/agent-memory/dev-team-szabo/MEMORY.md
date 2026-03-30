@@ -104,3 +104,11 @@
 - **Outcome**: fixed
 - **Last-verified**: 2026-03-26
 - **Context**: Skills now detect platform from config (default: github). When platform field is absent (pre-v1.5 installs), skills default to github rather than failing. update.ts backfills the platform field on upgrade.
+
+### [2026-03-29] v1.11.0: Semgrep SAST deferred to full enforcement
+- **Type**: SUGGESTION [deferred]
+- **Source**: PR #552, Szabo finding
+- **Tags**: ci, sast, semgrep, security
+- **Outcome**: deferred
+- **Last-verified**: 2026-03-29
+- **Context**: Semgrep SAST added to CI but configured as silent (non-blocking) on failure per Brooks suggestion. Szabo recommended full Semgrep config with custom rules. Deferred — current setup provides visibility without blocking CI. Full enforcement tracked for future hardening pass.

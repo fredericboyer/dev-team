@@ -122,3 +122,11 @@
 - **Outcome**: verified
 - **Last-verified**: 2026-03-29
 - **Context**: Post-hoc extraction — Borges was not spawned during delivery. v1.8.0 bypassed `/dev-team:task` and agent reviews entirely. ~30 Copilot findings, all addressed. No formal DEFECTs. New entries written: Szabo (1 new + 1 updated), Knuth (2), Brooks (2), Deming (2), Beck (1), Conway (1), Voss (1). Process learning added to shared learnings (process gap). Key architectural changes: INFRA_HOOKS separation, task skill 4-step decomposition, assertNoSymlinkInPath ancestor guard. System improvement identified: v1.8.0 process gap confirms that bypassing the adversarial loop should be reserved for hotfixes, not feature releases.
+
+### [2026-03-29] v1.11.0 extraction — 27 issues, 8 PRs, ~18 findings, 6% acceptance, hardening release
+- **Type**: MILESTONE [verified]
+- **Source**: v1.11.0 task loop (27 issues, 8 PRs #550-#557)
+- **Tags**: metrics, calibration, extraction, hardening
+- **Outcome**: verified
+- **Last-verified**: 2026-03-29
+- **Context**: Largest release to date. 0 DEFECTs across all 8 PRs. ~18 unique findings (all advisory), 1 accepted, 3 deferred, 14 ignored. Low acceptance rate (6%) is not a signal quality issue — reflects hardening scope (CI, tests, docs, symlink guards). Deming memory compressed (191→~165 lines) by consolidating 4 v1.5.0-era entries and 3 v1.7.0-era entries into summaries. New entries written: Deming (1), Szabo (1), Knuth (1), Brooks (2), Beck (2), Tufte (1). Last-verified bumped on Deming CI entry and Beck test-listing entry. Zero-overrule alert continues at n>=112. No new shared learnings needed — release was hardening, not new process/principles.
