@@ -115,5 +115,13 @@
 - **Last-verified**: 2026-03-29
 - **Context**: v1.8.0 introduced INFRA_HOOKS (always-installed, non-optional). Release testing must now verify: (1) fresh install includes infra hooks, (2) update adds infra hooks to existing projects, (3) infra hooks don't appear in user-selectable lists. This is a new install surface to validate.
 
+### [2026-03-30] v2.0: Major version — multi-runtime adapter registry + MCP enforcement
+- **Type**: DECISION [new]
+- **Source**: #501-#506, #508, #525, PRs #569-#572
+- **Tags**: release, major, multi-runtime, breaking-change
+- **Outcome**: accepted
+- **Last-verified**: 2026-03-30
+- **Context**: Major version justified by: new `runtimes` config field changes config schema, `--runtime` CLI flag adds new CLI surface, MCP server adds new subcommand (`dev-team mcp`). Not backward-breaking for existing Claude-only installs (default runtime is "claude", adapter is identity transform). 2 ADRs (036, 037), 2 research briefs (#508, #525), 5 adapters, 8 new test files, ~3,300 new lines. 4 DEFECTs fixed during review.
+
 ## Calibration Log
 <!-- Challenges accepted/overruled — tunes adversarial intensity over time -->

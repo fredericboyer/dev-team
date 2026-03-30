@@ -112,3 +112,27 @@
 - **Outcome**: deferred
 - **Last-verified**: 2026-03-29
 - **Context**: Semgrep SAST added to CI but configured as silent (non-blocking) on failure per Brooks suggestion. Szabo recommended full Semgrep config with custom rules. Deferred — current setup provides visibility without blocking CI. Full enforcement tracked for future hardening pass.
+
+### [2026-03-30] v2.0: Path traversal via adapter name field — FIXED (F-01)
+- **Type**: DEFECT [fixed]
+- **Source**: PR #569, Szabo finding F-01
+- **Tags**: path-traversal, adapters, input-validation, security
+- **Outcome**: fixed
+- **Last-verified**: 2026-03-30
+- **Context**: parseAgentDefinition name field is used to construct file paths in adapters. Unrestricted names like `../../etc/passwd` could write outside target directories. Fixed: regex validation `/^[a-zA-Z0-9][a-zA-Z0-9._-]*$/` added to parseAgentDefinition. Reinforces pattern: all user-facing string-to-path conversions need validation at the parsing boundary.
+
+### [2026-03-30] v2.0: registerAdapter replacement guard — FIXED (F-02)
+- **Type**: DEFECT [fixed]
+- **Source**: PR #569, Szabo finding F-02
+- **Tags**: adapters, registry, security, defense-in-depth
+- **Outcome**: fixed
+- **Last-verified**: 2026-03-30
+- **Context**: registerAdapter allowed replacing built-in adapters with user-registered ones, potentially masking the Claude Code identity transform with a malicious adapter. Fixed: BUILTIN_IDS set prevents replacement of built-in adapters.
+
+### [2026-03-30] v2.0: MCP filePath traversal validation — FIXED (R-02)
+- **Type**: RISK [fixed]
+- **Source**: PR #572, Szabo finding R-02
+- **Tags**: mcp, path-traversal, input-validation, security
+- **Outcome**: fixed
+- **Last-verified**: 2026-03-30
+- **Context**: MCP review_gate tool accepts filePath from MCP client. Without validation, absolute paths or `..` traversals could check files outside the project. Fixed: path.normalize + reject if starts with `..` or is absolute. Same pattern as the adapter name validation (F-01) — validate at the input boundary.

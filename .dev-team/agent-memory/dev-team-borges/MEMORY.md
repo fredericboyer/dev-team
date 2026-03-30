@@ -138,3 +138,11 @@
 - **Outcome**: verified
 - **Last-verified**: 2026-03-30
 - **Context**: Small hotfix — mergeClaudeMd duplicate scaffolding fix. 1 advisory finding (Knuth SUGGESTION, ignored). No new memory entries needed — bumped Last-verified on Knuth's related mergeClaudeMd boundary condition entry. Zero-overrule alert continues at n>=113. No new shared learnings. Proportional extraction for hotfix scope.
+
+### [2026-03-30] v2.0 extraction — 4 PRs, ~35 findings, 4 DEFECTs, major release
+- **Type**: MILESTONE [verified]
+- **Source**: v2.0 multi-runtime portability (#501-#506, #508, #525, PRs #569-#572)
+- **Tags**: metrics, calibration, extraction, major-release, multi-runtime
+- **Outcome**: verified
+- **Last-verified**: 2026-03-30
+- **Context**: First major version release extraction. 4 branches, 4 PRs, ~35 findings across 3 review rounds. 4 DEFECTs (all fixed): path traversal via name (F-01), registerAdapter replacement (F-02), side-effect imports (S2), MCP deriveRequiredAgents divergence (K10). Research-first pattern validated again (2 briefs → 2 ADRs). New entries written: Deming (3), Szabo (3), Knuth (2), Brooks (4), Turing (1), Conway (1). Last-verified bumped on 3 existing entries. 3 new shared learnings: adapter registry design principle, dual code path tech debt, input boundary validation benchmark. Brooks at 185 lines — monitor for next release. All agents remain under 200-line cap.

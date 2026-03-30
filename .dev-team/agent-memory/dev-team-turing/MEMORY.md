@@ -72,15 +72,15 @@
 - **Source**: Issue #264
 - **Tags**: portability, multi-runtime, AGENTS.md, MCP, adapters, standards
 - **Outcome**: brief written to `docs/research/264-agent-runtime-portability-2026-03-29.md`
-- **Last-verified**: 2026-03-29
+- **Last-verified**: 2026-03-30
 - **Calibration**: The agent runtime landscape has two settled standards (AGENTS.md for instructions, MCP for tools) and everything else is fragmented. Hooks, skills, memory, and multi-agent are not standardized — only Claude Code and Codex CLI have hooks, and their formats differ. The hybrid architecture (AGENTS.md core + MCP enforcement + runtime adapters) is the only approach that preserves dev-team's value. Key discovery: AAIF under Linux Foundation (Dec 2025) is the strongest convergence signal — AGENTS.md, MCP, and goose under one roof. Claude Code's non-adoption of AGENTS.md is the largest single portability risk. Runtime-specific formats churn fast (Cursor and Windsurf both deprecated original formats within months).
 
-### [2026-03-29] Standards landscape for coding agent interoperability
+### [2026-03-30] Standards landscape for coding agent interoperability
 - **Type**: CALIBRATION [verified]
 - **Source**: Issue #264 research
 - **Tags**: standards, AAIF, W3C, IETF, A2A, ACP, ANP
 - **Outcome**: completed
-- **Last-verified**: 2026-03-29
+- **Last-verified**: 2026-03-30
 - **Context**: Four agent communication protocols exist (MCP, A2A, ACP, ANP) but only MCP is relevant for coding agents — the others target enterprise orchestration or decentralized networks. W3C and IETF have early-stage work (AI Agent Protocol CG, AIDIP) but nothing targeting coding agent configuration. The AAIF is the only governance body that matters for this space. When researching agent standards, focus on AAIF projects (AGENTS.md, MCP) and skip the enterprise/network protocols unless the question specifically involves agent-to-agent delegation.
 
 ### [2026-03-30] Runtime verification for review step (#525)
@@ -98,6 +98,14 @@
 - **Outcome**: completed
 - **Last-verified**: 2026-03-30
 - **Context**: `skill-recommendations.json` is an underappreciated integration point. Rather than building tool-specific subsystems, dev-team can influence which tools agents have available by recommending skills for detected ecosystems. This is lighter than hooks, cheaper than custom integration code, and respects Claude Code's native skill discovery. For future tool integration questions (linters, formatters, browser tools), consider "add a skill recommendation" before "build a wrapper."
+
+### [2026-03-30] Codex CLI evaluation (#508) — skills transfer well, hooks do not
+- **Type**: RESEARCH [completed]
+- **Source**: Issue #508
+- **Tags**: codex, multi-runtime, adapters, portability, evaluation
+- **Outcome**: brief written to `docs/research/508-codex-cli-evaluation-2026-03-30.md`
+- **Last-verified**: 2026-03-30
+- **Calibration**: Codex CLI has near-identical skill format (~95% transfer rate) but experimental hook system with limited Bash scope (~30% coverage). The recommendation is: adapt skills and instructions fully, skip hooks. Hooks are Claude Code's differentiator — MCP enforcement is the cross-runtime replacement. This research directly shaped the Codex adapter implementation (skills + AGENTS.md, no hooks).
 
 ### [2026-03-26] Research-first approach validated in v1.6.0
 - **Type**: PATTERN [verified]

@@ -198,3 +198,20 @@
 - **Notes**: Small hotfix — mergeClaudeMd duplicate scaffolding fix. 1 advisory finding ignored (guard clarity for newBegin === -1). LIGHT review, 1 round to convergence. Clean fix scope.
 - **[RISK] Zero-overrule alert**: Rolling overrule rate remains 0% at n>=113 in-team findings (v1.2.0 through v1.11.1).
 
+### [2026-03-30] Task: v2.0 multi-runtime portability (#501, #502, #503, #504, #505, #506, #508, #525) — PRs #569, #570, #571, #572
+- **Agents**: implementing: Deming; reviewers: Szabo, Knuth, Brooks; research: Turing; extract: Borges
+- **Rounds**: 1 per branch (4 branches)
+- **Findings**:
+  - Szabo: 2 DEFECT (2 fixed — F-01 path traversal, F-02 registerAdapter), 1 RISK (1 fixed — R-02 MCP filePath), ~5 advisory (accepted/noted)
+  - Knuth: 1 DEFECT (1 fixed — K10 MCP deriveRequiredAgents), ~8 advisory (accepted/noted)
+  - Brooks: 1 DEFECT (1 fixed — S2 side-effect imports), ~12 advisory (accepted/deferred/noted)
+  - Cross-branch: ~5 duplicates merged
+- **Unique findings**: ~35 (after deduplication)
+- **Acceptance rate**: ~75% (estimated — 4 DEFECTs fixed, majority of advisory accepted or noted)
+- **Overrule rate**: 0% (0/~35)
+- **Fix rate (DEFECTs)**: 100% (4/4)
+- **Defer rate (advisory)**: ~15% (YAML quoting, test gap details)
+- **Duration**: single session, 4 branches
+- **Notes**: First MAJOR release. Research-first (Turing #508, #525) → 2 ADRs (036, 037). 5 runtime adapters (claude, agents-md, copilot, codex, cursor, windsurf) + MCP enforcement server. ~3,300 new lines, 8 new test files, 554 total tests. Key architectural patterns: adapter registry (ADR-036), MCP enforcement (ADR-037), canonical format as identity of current format. Dual code path (hook vs MCP) flagged as tech debt. Duplicate import in init.ts noted for cleanup.
+- **[RISK] Zero-overrule alert**: Rolling overrule rate remains 0% at n>=148 in-team findings (v1.2.0 through v2.0). Per research brief #490, healthy adversarial review shows 1-10% overrule rate. Acceptance rate (~75%) is within the healthy band (60-85%).
+
