@@ -35,6 +35,7 @@ node tests/evals/eval-runner.js szabo tests/evals/samples/sql-injection.js
 ```
 
 This prints a complete prompt to stdout that includes:
+
 - The agent's full definition (from `.dev-team/agents/` if present, falling back to `templates/agents/`)
 - The code sample to review
 - Instructions to produce classified findings
@@ -62,19 +63,19 @@ Open the corresponding file in `expected/` and compare:
 
 ### Per-run metrics
 
-| Metric | Definition |
-|--------|------------|
-| **True positives** | Agent found an issue listed in "must detect" |
-| **False negatives** | Agent missed an issue listed in "must detect" |
-| **True extras** | Agent found a real issue not in expected (beyond "may detect") |
-| **False positives** | Agent flagged something that is not actually an issue |
+| Metric              | Definition                                                     |
+| ------------------- | -------------------------------------------------------------- |
+| **True positives**  | Agent found an issue listed in "must detect"                   |
+| **False negatives** | Agent missed an issue listed in "must detect"                  |
+| **True extras**     | Agent found a real issue not in expected (beyond "may detect") |
+| **False positives** | Agent flagged something that is not actually an issue          |
 
 ### Per-sample metrics
 
-| Metric | Formula |
-|--------|---------|
+| Metric        | Formula                                             |
+| ------------- | --------------------------------------------------- |
 | **Precision** | true positives / (true positives + false positives) |
-| **Recall** | true positives / (true positives + false negatives) |
+| **Recall**    | true positives / (true positives + false negatives) |
 
 ### Variance measurement
 
@@ -91,11 +92,11 @@ Open the corresponding file in `expected/` and compare:
 
 **Interpreting results**:
 
-| Overall consistency | Assessment |
-|--------------------|------------|
-| 90-100% | Low variance -- agent reliably detects known issues |
-| 70-89% | Moderate variance -- some findings are inconsistently detected |
-| Below 70% | High variance -- agent behavior is unreliable for this sample |
+| Overall consistency | Assessment                                                     |
+| ------------------- | -------------------------------------------------------------- |
+| 90-100%             | Low variance -- agent reliably detects known issues            |
+| 70-89%              | Moderate variance -- some findings are inconsistently detected |
+| Below 70%           | High variance -- agent behavior is unreliable for this sample  |
 
 **What to track across runs**:
 
