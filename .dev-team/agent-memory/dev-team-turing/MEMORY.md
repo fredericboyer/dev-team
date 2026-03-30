@@ -83,6 +83,22 @@
 - **Last-verified**: 2026-03-29
 - **Context**: Four agent communication protocols exist (MCP, A2A, ACP, ANP) but only MCP is relevant for coding agents — the others target enterprise orchestration or decentralized networks. W3C and IETF have early-stage work (AI Agent Protocol CG, AIDIP) but nothing targeting coding agent configuration. The AAIF is the only governance body that matters for this space. When researching agent standards, focus on AAIF projects (AGENTS.md, MCP) and skip the enterprise/network protocols unless the question specifically involves agent-to-agent delegation.
 
+### [2026-03-30] Runtime verification for review step (#525)
+- **Type**: RESEARCH [completed]
+- **Source**: Issue #525
+- **Tags**: browser-testing, playwright, agent-browser, review, runtime-verification
+- **Outcome**: brief written to `docs/research/525-runtime-verification-2026-03-30.md`
+- **Last-verified**: 2026-03-30
+- **Calibration**: Browser tool landscape for AI agents is maturing fast (6+ tools in 2026). Key differentiation is token efficiency: Playwright CLI ~27k/session, agent-browser ~3-5k/page, MCP ~114k/session. The recommendation is tool-agnostic — leverage Claude Code's skill discovery rather than binding dev-team to a specific browser tool. This aligns with the "don't encode what agents already know" principle. When user asks about tool binding, the correct answer is usually "let the agent discover and use available tools" rather than building an abstraction layer.
+
+### [2026-03-30] Skill recommendations as the integration seam
+- **Type**: CALIBRATION [verified]
+- **Source**: Issue #525 research
+- **Tags**: skills, integration, tool-agnostic, design-principle
+- **Outcome**: completed
+- **Last-verified**: 2026-03-30
+- **Context**: `skill-recommendations.json` is an underappreciated integration point. Rather than building tool-specific subsystems, dev-team can influence which tools agents have available by recommending skills for detected ecosystems. This is lighter than hooks, cheaper than custom integration code, and respects Claude Code's native skill discovery. For future tool integration questions (linters, formatters, browser tools), consider "add a skill recommendation" before "build a wrapper."
+
 ### [2026-03-26] Research-first approach validated in v1.6.0
 - **Type**: PATTERN [verified]
 - **Source**: v1.6.0 session (#406, #407 research briefs)
