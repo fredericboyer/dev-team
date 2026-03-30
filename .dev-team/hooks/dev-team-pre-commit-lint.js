@@ -20,7 +20,7 @@ const path = require("path");
 let input = {};
 try {
   input = JSON.parse(process.argv[2] || "{}");
-} catch (err) {
+} catch {
   // Not a blocking safety hook — fail open on parse error
   process.exit(0);
 }
@@ -81,7 +81,9 @@ if (checks.length === 0) {
 
 const failures = [];
 
-// On Windows, npm is a .cmd file — execFileSync needs shell: true to find it
+// On Windows, npm is a .cmd file — execFileSync needs shell: true to find it.
+// SAFETY: shell: true is only safe here because all arguments are hardcoded
+// constants (e.g. ["run", "lint"]). Never use shell: true with user-supplied input.
 const isWindows = process.platform === "win32";
 
 for (const check of checks) {

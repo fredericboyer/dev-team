@@ -185,12 +185,12 @@ if (gatedFiles.length === 0) {
 }
 
 // Read configurable thresholds from config.json
-let lightThreshold = 10;
+let _lightThreshold = 10;
 try {
   const configPath = path.join(process.cwd(), ".dev-team", "config.json");
   const config = JSON.parse(fs.readFileSync(configPath, "utf-8"));
   if (config.reviewThresholds && config.reviewThresholds.light) {
-    lightThreshold = config.reviewThresholds.light;
+    _lightThreshold = config.reviewThresholds.light;
   }
 } catch {
   // Use defaults

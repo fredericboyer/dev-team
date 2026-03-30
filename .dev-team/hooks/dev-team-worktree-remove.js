@@ -30,6 +30,12 @@ if (!worktreePath) {
   process.exit(0);
 }
 
+// Validate worktree_path is an absolute path (fixes #537)
+if (!require("path").isAbsolute(worktreePath)) {
+  process.stderr.write("[dev-team worktree-remove] worktree_path must be an absolute path\n");
+  process.exit(0);
+}
+
 try {
   execFileSync("git", ["worktree", "remove", "--force", worktreePath], {
     stdio: ["pipe", "pipe", "pipe"],
