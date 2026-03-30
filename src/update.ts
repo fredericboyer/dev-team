@@ -21,6 +21,8 @@ import fs from "fs";
 import { ALL_AGENTS, QUALITY_HOOKS, INFRA_HOOKS } from "./init.js";
 import { parseAgentDefinition } from "./formats/canonical.js";
 import { getAdaptersForRuntimes } from "./formats/adapters.js";
+import "./adapters/agents-md.js";
+import "./adapters/copilot.js";
 
 interface AgentRename {
   oldLabel: string;
