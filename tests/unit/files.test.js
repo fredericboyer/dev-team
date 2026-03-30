@@ -458,6 +458,66 @@ describe("mergeClaudeMd", () => {
     assert.ok(content.includes("User footer"), "should preserve content after last pair");
   });
 
+  it("does not re-inject template scaffolding on update when user has content above markers", () => {
+    const p = path.join(tmpDir, "CLAUDE.md");
+    // Simulate an existing CLAUDE.md where user has their own content above the markers
+    fs.writeFileSync(
+      p,
+      "# My Real Project\n\nCustom dev notes here.\n\n<!-- dev-team:begin -->\nold managed\n<!-- dev-team:end -->\n",
+    );
+
+    // Pass the full template (scaffolding + managed section) as newContent, like init/update do
+    const fullTemplate =
+      "# Project Name\n\n## Development\n\n## Test quirks\n\n<!-- dev-team:begin -->\nupdated managed\n<!-- dev-team:end -->\n";
+    const result = mergeClaudeMd(p, fullTemplate);
+    assert.equal(result, "replaced");
+
+    const content = fs.readFileSync(p, "utf-8");
+    assert.ok(content.includes("# My Real Project"), "should preserve user content above markers");
+    assert.ok(content.includes("Custom dev notes here."), "should preserve user notes");
+    assert.ok(content.includes("updated managed"), "should have updated managed content");
+    assert.ok(!content.includes("# Project Name"), "should NOT re-inject template scaffolding");
+    assert.ok(
+      !content.includes("## Test quirks"),
+      "should NOT re-inject template scaffolding sections",
+    );
+  });
+
+  it("writes full template including scaffolding on fresh install", () => {
+    const p = path.join(tmpDir, "CLAUDE-fresh.md");
+    const fullTemplate =
+      "# Project Name\n\n## Development\n\n<!-- dev-team:begin -->\nmanaged\n<!-- dev-team:end -->\n";
+    const result = mergeClaudeMd(p, fullTemplate);
+    assert.equal(result, "created");
+
+    const content = fs.readFileSync(p, "utf-8");
+    assert.ok(content.includes("# Project Name"), "should include scaffolding on fresh install");
+    assert.ok(content.includes("## Development"), "should include scaffolding sections");
+    assert.ok(content.includes("managed"), "should include managed content");
+  });
+
+  it("preserves scaffolding if user kept it above markers", () => {
+    const p = path.join(tmpDir, "CLAUDE.md");
+    // User kept the original scaffolding as their content
+    fs.writeFileSync(
+      p,
+      "# Project Name\n\n## Development\n\n## Test quirks\n\n<!-- dev-team:begin -->\nold managed\n<!-- dev-team:end -->\n",
+    );
+
+    const fullTemplate =
+      "# Project Name\n\n## Development\n\n## Test quirks\n\n<!-- dev-team:begin -->\nupdated managed\n<!-- dev-team:end -->\n";
+    const result = mergeClaudeMd(p, fullTemplate);
+    assert.equal(result, "replaced");
+
+    const content = fs.readFileSync(p, "utf-8");
+    assert.ok(content.includes("# Project Name"), "should keep user's scaffolding");
+    assert.ok(content.includes("## Test quirks"), "should keep user's scaffolding sections");
+    assert.ok(content.includes("updated managed"), "should have updated managed content");
+    // Crucially: should NOT have duplicate scaffolding
+    const nameCount = (content.match(/# Project Name/g) || []).length;
+    assert.equal(nameCount, 1, "should have exactly one instance of scaffolding");
+  });
+
   it("replaces from begin marker to EOF when end marker is missing", () => {
     const p = path.join(tmpDir, "CLAUDE.md");
     fs.writeFileSync(p, "# Project\n\n<!-- dev-team:begin -->\nold content without end marker");
