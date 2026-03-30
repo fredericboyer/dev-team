@@ -41,25 +41,75 @@ export const reviewGateTool: McpTool = {
   },
 };
 
+// ─── Agent pattern loading (mirrors hook lib/agent-patterns.js) ────────────
+// Loads patterns from agent-patterns.json — the single source of truth for
+// file-to-agent routing (K10). Falls back to hardcoded defaults only if the
+// JSON file is missing (e.g., running outside a dev-team project).
+
+interface PatternCategory {
+  agent?: string;
+  label?: string;
+  matchOn?: string[];
+  compiled: RegExp[] | RegExp;
+}
+
+type LoadedPatterns = Record<string, PatternCategory>;
+
+function compilePattern(entry: string | [string, string]): RegExp {
+  if (Array.isArray(entry)) {
+    return new RegExp(entry[0], entry[1] || "");
+  }
+  return new RegExp(entry);
+}
+
+function loadAgentPatterns(projectDir: string): LoadedPatterns | null {
+  const jsonPath = nodePath.join(projectDir, ".dev-team", "hooks", "agent-patterns.json");
+  try {
+    const data = JSON.parse(fs.readFileSync(jsonPath, "utf-8"));
+    const result: LoadedPatterns = {};
+    for (const [key, value] of Object.entries(data) as Array<[string, Record<string, unknown>]>) {
+      if (Array.isArray(value.patterns)) {
+        result[key] = {
+          agent: value.agent as string | undefined,
+          label: value.label as string | undefined,
+          matchOn: (value.matchOn as string[] | undefined) || ["fullPath"],
+          compiled: (value.patterns as Array<string | [string, string]>).map(compilePattern),
+        };
+      } else if (typeof value.pattern === "string") {
+        result[key] = { compiled: compilePattern(value.pattern as string) };
+      }
+    }
+    return result;
+  } catch {
+    return null;
+  }
+}
+
+function getPatterns(loaded: LoadedPatterns, key: string): RegExp[] {
+  const cat = loaded[key];
+  if (!cat) return [];
+  return Array.isArray(cat.compiled) ? cat.compiled : [];
+}
+
+function getSinglePattern(loaded: LoadedPatterns, key: string): RegExp | null {
+  const cat = loaded[key];
+  if (!cat) return null;
+  return cat.compiled instanceof RegExp ? cat.compiled : null;
+}
+
 // ─── Code file detection ────────────────────────────────────────────────────
-// Simplified pattern matching — checks if a file is a code file that would
-// require review gating. Mirrors the codeFile/testFile patterns from
-// agent-patterns.json without requiring the JSON file at runtime.
 
-const CODE_EXTENSIONS =
-  /\.(ts|tsx|js|jsx|mjs|cjs|py|rb|go|rs|java|kt|swift|c|cpp|h|cs|php|scala|ex|exs|clj|hs|ml|vue|svelte)$/i;
-const TEST_PATTERNS = /[/\\](tests?|__tests?__|spec)[/\\]|\.(?:test|spec|e2e)\./i;
+// Fallback patterns used only when agent-patterns.json is unavailable
+const FALLBACK_CODE_PATTERN = /\.(js|ts|jsx|tsx|py|rb|go|java|rs|c|cpp|cs)$/;
+const FALLBACK_TEST_PATTERN = /\.(test|spec)\.|_test\.|__tests__|\/tests?\//;
 
-function isCodeFile(filePath: string): boolean {
-  return CODE_EXTENSIONS.test(filePath);
-}
-
-function isTestFile(filePath: string): boolean {
-  return TEST_PATTERNS.test(filePath);
-}
-
-function isGatedFile(filePath: string): boolean {
-  return isCodeFile(filePath) && !isTestFile(filePath);
+function isGatedFile(filePath: string, loaded: LoadedPatterns | null): boolean {
+  const fullPath = filePath.split("\\").join("/").toLowerCase();
+  const codePattern = loaded ? getSinglePattern(loaded, "codeFile") : null;
+  const testPattern = loaded ? getSinglePattern(loaded, "testFile") : null;
+  const isCode = (codePattern || FALLBACK_CODE_PATTERN).test(fullPath);
+  const isTest = (testPattern || FALLBACK_TEST_PATTERN).test(fullPath);
+  return isCode && !isTest;
 }
 
 // ─── Review sidecar helpers ─────────────────────────────────────────────────
@@ -105,21 +155,64 @@ function findSidecar(reviewsDir: string, agent: string, contentHash: string): Re
 
 /**
  * Derive which agents are required to review a given file.
- * Simplified version of the hook's deriveRequiredAgents — always requires
- * knuth and brooks for non-test implementation code.
+ * Uses agent-patterns.json (same source as the hook) to determine the full
+ * set of required agents, not just a hardcoded subset.
  */
-function deriveRequiredAgents(filePath: string): string[] {
+function deriveRequiredAgents(filePath: string, loaded: LoadedPatterns | null): string[] {
+  const basename = nodePath.basename(filePath).toLowerCase();
+  const fullPath = filePath.split("\\").join("/").toLowerCase();
   const agents: string[] = [];
-  const lowerPath = filePath.toLowerCase().replace(/\\/g, "/");
 
-  // Security-related files
-  if (/auth|security|crypto|secret|token|password|session|oauth|jwt|cred/i.test(lowerPath)) {
-    agents.push("dev-team-szabo");
+  // Pattern categories that map to specific agents
+  const categories = [
+    "security",
+    "api",
+    "frontend",
+    "appConfig",
+    "tooling",
+    "docs",
+    "architecture",
+    "release",
+    "operations",
+  ];
+
+  if (loaded) {
+    for (const category of categories) {
+      const cat = loaded[category];
+      if (!cat || !cat.agent) continue;
+      const patterns = getPatterns(loaded, category);
+      const matchTargets = cat.matchOn || ["fullPath"];
+      const matched = patterns.some((p: RegExp) => {
+        return matchTargets.some((target: string) => {
+          if (target === "basename") return p.test(basename);
+          return p.test(fullPath);
+        });
+      });
+      if (matched && !agents.includes(cat.agent)) {
+        agents.push(cat.agent);
+      }
+    }
+  } else {
+    // Fallback: basic security detection when patterns unavailable
+    if (/auth|security|crypto|secret|token|password|session|oauth|jwt|cred/i.test(fullPath)) {
+      agents.push("dev-team-szabo");
+    }
   }
 
-  // Always require knuth and brooks for implementation code
-  if (!agents.includes("dev-team-knuth")) agents.push("dev-team-knuth");
-  if (!agents.includes("dev-team-brooks")) agents.push("dev-team-brooks");
+  // Always require knuth and brooks for non-test implementation code
+  const codePattern = loaded ? getSinglePattern(loaded, "codeFile") : null;
+  const testPattern = loaded ? getSinglePattern(loaded, "testFile") : null;
+  const isCode = (codePattern || FALLBACK_CODE_PATTERN).test(fullPath);
+  const isTest = (testPattern || FALLBACK_TEST_PATTERN).test(fullPath);
+
+  if (isCode && !isTest) {
+    if (!agents.includes("dev-team-knuth")) agents.push("dev-team-knuth");
+    if (!agents.includes("dev-team-brooks")) agents.push("dev-team-brooks");
+  }
+
+  if (isTest && isCode) {
+    if (!agents.includes("dev-team-beck")) agents.push("dev-team-beck");
+  }
 
   return agents;
 }
@@ -136,8 +229,27 @@ export const reviewGateHandler: McpToolHandler = async (
     return { allowed: false, reason: "Missing required parameter: path" };
   }
 
+  // R-02: Path traversal validation — reject absolute or escaping paths
+  const normalized = nodePath.normalize(filePath);
+  if (normalized.startsWith("..") || nodePath.isAbsolute(normalized)) {
+    return {
+      content: [
+        {
+          type: "text",
+          text: JSON.stringify({
+            allowed: false,
+            reason: "Invalid path: must be relative to project root",
+          }),
+        },
+      ],
+    };
+  }
+
+  // Load agent patterns from the project's agent-patterns.json
+  const loadedPatterns = loadAgentPatterns(projectDir);
+
   // Non-code files and test files are not gated
-  if (!isGatedFile(filePath)) {
+  if (!isGatedFile(filePath, loadedPatterns)) {
     return {
       allowed: true,
       reason: "File is not gated (non-code or test file)",
@@ -155,7 +267,7 @@ export const reviewGateHandler: McpToolHandler = async (
   }
 
   // Gate 1: Review evidence
-  const requiredAgents = deriveRequiredAgents(filePath);
+  const requiredAgents = deriveRequiredAgents(filePath, loadedPatterns);
   const missingReviews: Array<{ file: string; agent: string }> = [];
 
   for (const agent of requiredAgents) {

@@ -10,6 +10,7 @@
 
 import * as readline from "readline";
 import type { McpTool, McpToolHandler, JsonRpcRequest, JsonRpcResponse } from "./types.js";
+import { getPackageVersion } from "../files.js";
 
 // ─── Tool registry ──────────────────────────────────────────────────────────
 
@@ -43,7 +44,7 @@ function makeError(id: string | number | null, code: number, message: string): J
 
 const SERVER_INFO = {
   name: "dev-team",
-  version: "0.1.0",
+  version: getPackageVersion(),
 };
 
 const SERVER_CAPABILITIES = {
