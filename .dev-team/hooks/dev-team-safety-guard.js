@@ -4,7 +4,12 @@
  * dev-team-safety-guard.js
  * PreToolUse hook on Bash.
  *
- * Blocks dangerous commands before they execute.
+ * Best-effort heuristic that blocks obviously dangerous commands before
+ * they execute. This is NOT a security boundary — the Claude Code sandbox
+ * is the actual enforcement layer. This hook catches common foot-guns
+ * (recursive deletes, force pushes) that the sandbox would allow but
+ * that are almost never intentional.
+ *
  * Exit 2 = block, exit 0 = allow.
  */
 
