@@ -294,6 +294,15 @@ export function mergeClaudeMd(
     return "created";
   }
 
+  // Extract only the managed section (begin→end markers inclusive) from newContent.
+  // This prevents re-injecting template scaffolding above the markers on every update.
+  const newBegin = newContent.indexOf(BEGIN_MARKER);
+  const newEnd = newContent.indexOf(END_MARKER, newBegin);
+  const managedSection =
+    newBegin !== -1 && newEnd !== -1
+      ? newContent.substring(newBegin, newEnd + END_MARKER.length)
+      : newContent;
+
   if (existing.includes(BEGIN_MARKER)) {
     const firstBegin = existing.indexOf(BEGIN_MARKER);
     const firstEnd = existing.indexOf(END_MARKER, firstBegin);
@@ -303,7 +312,7 @@ export function mergeClaudeMd(
         "Warning: Found dev-team begin marker but no end marker in CLAUDE.md. Replacing from begin marker to end of file.",
       );
       const beforeMarker = existing.substring(0, firstBegin);
-      writeFile(filePath, beforeMarker + newContent + "\n");
+      writeFile(filePath, beforeMarker + managedSection + "\n");
       return "replaced";
     }
 
@@ -316,7 +325,7 @@ export function mergeClaudeMd(
 
     const beforeMarker = existing.substring(0, firstBegin);
     const afterMarker = existing.substring(firstEnd + END_MARKER.length);
-    writeFile(filePath, beforeMarker + newContent + afterMarker);
+    writeFile(filePath, beforeMarker + managedSection + afterMarker);
     return "replaced";
   }
 
