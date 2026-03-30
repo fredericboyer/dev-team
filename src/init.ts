@@ -17,6 +17,8 @@ import type { HookSettings, HookMatcher } from "./files.js";
 import * as prompts from "./prompts.js";
 import { scanProject, formatScanReport } from "./scan.js";
 import { scanSkillRecommendations, formatRecommendations } from "./skill-recommendations.js";
+import { parseAgentDefinition } from "./formats/canonical.js";
+import { getAdaptersForRuntimes } from "./formats/adapters.js";
 
 interface AgentDefinition {
   label: string;
@@ -308,23 +310,43 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
     ]);
   }
 
-  // Step 6: Copy agents
+  // Step 6: Copy agents via adapter registry
   const templates = templateDir();
   let agentCount = 0;
 
+  // Parse canonical definitions for selected agents
+  const canonicalDefs = [];
   for (const agent of ALL_AGENTS) {
     if (!selectedAgents.includes(agent.label)) continue;
 
     const src = path.join(templates, "agents", agent.file);
-    const dest = path.join(agentsDir, agent.file);
+    const content = readFile(src);
+    if (!content) continue;
 
-    if (fileExists(dest) && !isAll && !preset) {
+    if (fileExists(path.join(agentsDir, agent.file)) && !isAll && !preset) {
       const overwrite = await prompts.confirm(`  ${agent.file} already exists. Overwrite?`, false);
       if (!overwrite) continue;
     }
 
-    copyFile(src, dest);
+    canonicalDefs.push(parseAgentDefinition(content));
     agentCount++;
+  }
+
+  // Resolve runtimes from preferences (default: ["claude"])
+  const runtimeFlag = flags.find((f) => f === "--runtime" || f.startsWith("--runtime="));
+  let runtimes = ["claude"];
+  if (runtimeFlag) {
+    const idx = flags.indexOf(runtimeFlag);
+    const runtimeValue = runtimeFlag.includes("=") ? runtimeFlag.split("=")[1] : flags[idx + 1];
+    if (runtimeValue) {
+      runtimes = runtimeValue.split(",").map((r) => r.trim());
+    }
+  }
+
+  // Generate agent files for each configured runtime adapter
+  const adapters = getAdaptersForRuntimes(runtimes);
+  for (const adapter of adapters) {
+    adapter.generate(canonicalDefs, targetDir);
   }
 
   // Step 7: Copy shared agent protocol
@@ -483,6 +505,7 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
     version: getPackageVersion(),
     agents: selectedAgents,
     hooks: selectedHooks,
+    runtimes,
     issueTracker,
     branchConvention,
     taskBranchPattern: "(feat|fix)\\/",
