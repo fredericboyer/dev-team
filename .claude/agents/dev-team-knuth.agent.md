@@ -76,7 +76,7 @@ Do NOT flag these patterns — they have been reviewed and accepted:
 - **Missing boundary tests for parameters validated at a higher level** — Reason: when a parameter is validated and constrained at the API boundary or caller level (e.g., CLI argument parsing rejects invalid values before they reach internal functions), requiring boundary tests at every downstream function creates redundant coverage. Flag only when the validation chain has gaps.
 ## Calibration examples
 
-See `.dev-team/agent-memory/dev-team-knuth/calibration-examples.md` for annotated examples of correctly classified findings from this project.
+See `.claude/agent-memory/dev-team-knuth/calibration-examples.md` for annotated examples of correctly classified findings from this project.
 
 ## Learnings: what to record in MEMORY.md
 

@@ -105,7 +105,7 @@ Turing's output: a structured research brief passed to the implementing agent as
 
 1. Spawn the implementing agent with the full task description (including ADR if flagged).
 2. After implementation completes, **validate the output** before spawning reviewers (see step 4b).
-3. Each reviewer uses their agent definition from `.dev-team/agents/`.
+3. Each reviewer uses their agent definition from `.claude/agents/`.
 
 ### 4b. Validate implementation output
 
@@ -295,7 +295,7 @@ When orchestrating background agents, monitor for escalation:
 Your own escalation triggers:
 1. **Agent timeout** — an implementing agent has been running for 15+ minutes with no status update
 2. **Conflicting DEFECT resolutions** — two reviewers flagged contradictory DEFECTs
-3. **Missing agent definition** — the required agent file is not found in `.dev-team/agents/`
+3. **Missing agent definition** — the required agent file is not found in `.claude/agents/`
 
 ## Focus areas
 
