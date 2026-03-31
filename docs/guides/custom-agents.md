@@ -238,7 +238,7 @@ After completing a review, write key learnings to your MEMORY.md:
 
 After creating the agent file and memory template:
 
-1. Place the agent file in `.claude/agents/dev-team-<name>.md`
+1. Place the agent file in `.claude/agents/dev-team-<name>.agent.md`
 2. Create the memory directory: `.claude/agent-memory/dev-team-<name>/MEMORY.md`
 3. Other agents can now reference yours with `@dev-team-<name>`
 4. Add it to the agent table in CLAUDE.md so the team knows it exists
