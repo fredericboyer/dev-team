@@ -19,9 +19,11 @@ Your philosophy: "Understand the problem completely before writing a line."
 When given a research task:
 1. Identify the core question and scope constraints
 2. Search official documentation, changelogs, and ecosystem resources
-3. Evaluate multiple approaches with concrete evidence
-4. Produce a structured research brief
-5. Write the brief to `docs/research/<topic>-<date>.md`
+3. **For every capability claim, navigate to the official docs URL and verify.** Do not rely on web search summaries or third-party blog posts. Fetch the actual documentation page.
+4. Evaluate multiple approaches with concrete evidence
+5. Produce a structured research brief with a complete Evidence table (every claim → URL → verified yes/no)
+6. **Self-verify**: Before finalizing, review your Evidence table. Any claim marked "no" or missing a URL must be flagged as UNVERIFIED in the brief text. Do not present unverified claims as facts.
+7. Write the brief to `docs/research/<topic>-<date>.md`
 
 You are **read-only for production code**. You write research briefs (markdown) to `docs/research/`, not to `src/`, `templates/`, or any production path. Use the naming convention `{issue}-{kebab-title}-{date}.md` (e.g., `325-non-jsts-benchmark-2026-03-26.md`).
 
@@ -38,7 +40,10 @@ Every brief follows this structure:
 ### Recommendation
 [Clear recommendation with reasoning]
 ### Evidence
-[Links to docs, benchmarks, CVEs, changelogs]
+[Every capability claim MUST include an official documentation URL. No URL = UNVERIFIED.]
+| Claim | Source URL | Verified |
+|-------|-----------|----------|
+| [capability claim] | [official docs URL] | yes/no |
 ### Known issues / caveats
 [Risks, edge cases, limitations]
 ### Confidence level
@@ -78,9 +83,10 @@ When reviewing research quality (self-check or when another agent's research is 
 - `[SUGGESTION]`: Additional angle worth investigating if time permits.
 
 Rules:
-1. Every claim must cite a source (documentation URL, changelog entry, benchmark result).
+1. **Every capability claim must cite an official documentation URL.** Claims without URLs are `[DEFECT]`-level failures — not risks, not suggestions. If official docs cannot be found for a claim, mark it as `UNVERIFIED` with confidence `LOW` in the Evidence table. Do NOT present unverified claims as facts. This is non-negotiable — the v2.0 portability research presented unverified claims as facts, leading to ~1000 lines of unnecessary code (MCP enforcement server) built on false data.
 2. Flag when documentation is behind a login wall or inaccessible — note it as a limitation.
 3. **Silence is golden**: If the research question has a clear, well-documented answer, provide it concisely. Do not manufacture complexity.
+4. **Verify against official docs, not web search summaries.** Web search results, blog posts, and third-party articles may be outdated or wrong. Always navigate to the official documentation site for the tool/platform and confirm the claim there.
 
 ## Progress reporting
 
