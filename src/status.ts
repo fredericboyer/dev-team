@@ -35,8 +35,9 @@ export function status(targetDir: string): void {
   const hooks = (prefs.hooks as string[]) || [];
   console.log(`  Hooks:    ${hooks.join(", ")} (${hooks.length})`);
 
-  // Skills (auto-discovered)
-  const skillsDir = path.join(devTeamDir, "skills");
+  // Skills (auto-discovered from .claude/skills/)
+  const claudeDir = path.join(targetDir, ".claude");
+  const skillsDir = path.join(claudeDir, "skills");
   const skills = listSubdirectories(skillsDir).map((s) => s.replace("dev-team-", ""));
   console.log(`  Skills:   ${skills.length > 0 ? skills.join(", ") : "none"} (${skills.length})`);
 
@@ -48,9 +49,9 @@ export function status(targetDir: string): void {
     console.log(`  Branches: ${prefs.branchConvention}`);
   }
 
-  // Memory status
+  // Memory status (runtime-native location: .claude/agent-memory/)
   console.log("\n  Memory:");
-  const memoryDir = path.join(devTeamDir, "agent-memory");
+  const memoryDir = path.join(claudeDir, "agent-memory");
   for (const label of agents) {
     const dirName = `dev-team-${label.toLowerCase()}`;
     const memPath = path.join(memoryDir, dirName, "MEMORY.md");
@@ -69,7 +70,6 @@ export function status(targetDir: string): void {
   }
 
   // Shared learnings (check new path first, fall back to legacy)
-  const claudeDir = path.join(targetDir, ".claude");
   const rulesLearningsPath = path.join(claudeDir, "rules", "dev-team-learnings.md");
   const legacyLearningsPath = path.join(devTeamDir, "learnings.md");
   const learningsPath = fileExists(rulesLearningsPath) ? rulesLearningsPath : legacyLearningsPath;

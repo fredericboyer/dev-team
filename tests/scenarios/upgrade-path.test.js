@@ -33,7 +33,7 @@ describe("upgrade path scenario", () => {
     fs.writeFileSync(claudeMdPath, "# My Custom Rules\n\nDo X not Y.\n\n" + originalClaudeMd);
 
     // Simulate agent memory accumulation
-    const memoryPath = path.join(tmpDir, ".dev-team", "agent-memory", "dev-team-voss", "MEMORY.md");
+    const memoryPath = path.join(tmpDir, ".claude", "agent-memory", "dev-team-voss", "MEMORY.md");
     fs.writeFileSync(memoryPath, "# Voss Memory\n\n- Uses PostgreSQL\n- REST API with Express\n");
 
     // Simulate custom settings additions
@@ -96,14 +96,14 @@ describe("upgrade path scenario", () => {
 
     await run(tmpDir, ["--all"]);
 
-    // Custom agent in .claude/ preserved (dev-team doesn't touch .claude/agents/ anymore)
+    // Custom agent in .claude/ preserved (dev-team only manages dev-team-* files)
     assert.ok(
       fs.existsSync(path.join(tmpDir, ".claude", "agents", "custom-agent.md")),
       "should not delete custom agents in .claude/",
     );
 
-    // Dev-team agents in .dev-team/
-    assert.ok(fs.existsSync(path.join(tmpDir, ".dev-team", "agents", "dev-team-voss.md")));
+    // Dev-team agents in .claude/agents/ (runtime-native)
+    assert.ok(fs.existsSync(path.join(tmpDir, ".claude", "agents", "dev-team-voss.agent.md")));
 
     // Custom hooks preserved alongside dev-team hooks
     const settings = JSON.parse(

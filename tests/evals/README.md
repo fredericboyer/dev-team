@@ -36,7 +36,7 @@ node tests/evals/eval-runner.js szabo tests/evals/samples/sql-injection.js
 
 This prints a complete prompt to stdout that includes:
 
-- The agent's full definition (from `.dev-team/agents/` if present, falling back to `templates/agents/`)
+- The agent's full definition (from `.claude/agents/` if present, falling back to `templates/agents/`)
 - The code sample to review
 - Instructions to produce classified findings
 

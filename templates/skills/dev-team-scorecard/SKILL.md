@@ -66,7 +66,7 @@ Run each check and record pass/fail with evidence.
 
 ### 5. Memory updated
 
-**Check**: For each agent listed as a participant in the metrics entry, read `.dev-team/agent-memory/<agent>/MEMORY.md` and verify it contains at least one entry dated on or after the workflow completion date, or referencing the workflow's issue/PR number.
+**Check**: For each agent listed as a participant in the metrics entry, read `.claude/agent-memory/<agent>/MEMORY.md` and verify it contains at least one entry dated on or after the workflow completion date, or referencing the workflow's issue/PR number.
 
 - **Pass**: All participating agents have a relevant memory entry
 - **Fail**: One or more agents have no memory entry from this workflow (list them)

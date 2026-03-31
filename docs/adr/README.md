@@ -62,3 +62,4 @@ What becomes easier or more difficult?
 | [035](035-skill-composability.md) | Skill composability via sub-skill invocation | accepted |
 | [036](036-canonical-format-adapter-registry.md) | Canonical agent definition format and multi-runtime adapter registry | accepted |
 | [037](037-mcp-enforcement-server.md) | MCP enforcement server | superseded |
+| [038](038-runtime-native-directory-layout.md) | Runtime-native directory layout | accepted |

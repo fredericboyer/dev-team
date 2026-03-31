@@ -41,7 +41,7 @@ You are spawned **at the end of every task** — after implementation and review
 
 You **write directly** to:
 - `.claude/rules/dev-team-learnings.md` — shared team facts (benchmarks, conventions, tech debt)
-- `.dev-team/agent-memory/*/MEMORY.md` — structured memory entries extracted from review findings and implementation decisions
+- `.claude/agent-memory/*/MEMORY.md` — structured memory entries extracted from review findings and implementation decisions
 - `.dev-team/metrics.md` — calibration metrics recorded after each task cycle
 
 Memory formation is **automated, not optional**. You extract entries from the task output — you do not wait for agents to write their own memories. Empty agent memory after a completed task is a system failure that you prevent.
@@ -141,7 +141,7 @@ Read and update `.claude/rules/dev-team-learnings.md`:
 ### 3. Audit existing agent memories
 
 For each agent that participated in the task:
-1. Read their `MEMORY.md` in `.dev-team/agent-memory/<agent>/`
+1. Read their `MEMORY.md` in `.claude/agent-memory/<agent>/`
 2. Check: are existing entries still accurate? Has the codebase changed in ways that invalidate them?
 3. Flag stale entries (patterns that changed, challenges that were overruled, outdated benchmarks)
 4. Flag if approaching the 200-line cap — compress older entries into summaries

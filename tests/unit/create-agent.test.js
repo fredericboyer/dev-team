@@ -12,7 +12,7 @@ let tmpDir;
 
 beforeEach(() => {
   tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "dev-team-create-agent-"));
-  fs.mkdirSync(path.join(tmpDir, ".dev-team", "agents"), { recursive: true });
+  fs.mkdirSync(path.join(tmpDir, ".claude", "agents"), { recursive: true });
 });
 
 afterEach(() => {
@@ -23,8 +23,8 @@ describe("createAgent", () => {
   it("creates agent file and memory template for valid name", () => {
     createAgent(tmpDir, "codd");
 
-    const agentPath = path.join(tmpDir, ".dev-team", "agents", "dev-team-codd.md");
-    const memoryPath = path.join(tmpDir, ".dev-team", "agent-memory", "dev-team-codd", "MEMORY.md");
+    const agentPath = path.join(tmpDir, ".claude", "agents", "dev-team-codd.agent.md");
+    const memoryPath = path.join(tmpDir, ".claude", "agent-memory", "dev-team-codd", "MEMORY.md");
 
     assert.ok(fs.existsSync(agentPath), "agent file should exist");
     assert.ok(fs.existsSync(memoryPath), "memory file should exist");
@@ -45,14 +45,14 @@ describe("createAgent", () => {
   it("sanitizes special characters in name", () => {
     createAgent(tmpDir, "My Agent!@#");
 
-    const agentPath = path.join(tmpDir, ".dev-team", "agents", "dev-team-my-agent---.md");
+    const agentPath = path.join(tmpDir, ".claude", "agents", "dev-team-my-agent---.agent.md");
     assert.ok(fs.existsSync(agentPath), "agent file should exist with sanitized name");
   });
 
   it("handles dev-team- prefix in name without doubling", () => {
     createAgent(tmpDir, "dev-team-codd");
 
-    const agentPath = path.join(tmpDir, ".dev-team", "agents", "dev-team-codd.md");
+    const agentPath = path.join(tmpDir, ".claude", "agents", "dev-team-codd.agent.md");
     assert.ok(fs.existsSync(agentPath), "should not double the prefix");
 
     const content = fs.readFileSync(agentPath, "utf-8");
@@ -89,7 +89,7 @@ describe("createAgent", () => {
     createAgent(tmpDir, "perf");
 
     const content = fs.readFileSync(
-      path.join(tmpDir, ".dev-team", "agents", "dev-team-perf.md"),
+      path.join(tmpDir, ".claude", "agents", "dev-team-perf.agent.md"),
       "utf-8",
     );
 
@@ -103,7 +103,7 @@ describe("createAgent", () => {
   it("lowercases uppercase characters in name", () => {
     createAgent(tmpDir, "MyAgent");
 
-    const agentPath = path.join(tmpDir, ".dev-team", "agents", "dev-team-myagent.md");
+    const agentPath = path.join(tmpDir, ".claude", "agents", "dev-team-myagent.agent.md");
     assert.ok(fs.existsSync(agentPath), "agent file should exist with lowercased name");
 
     const content = fs.readFileSync(agentPath, "utf-8");
@@ -117,7 +117,7 @@ describe("createAgent", () => {
   it('handles name that is just "dev-team-" prefix with nothing after', () => {
     createAgent(tmpDir, "dev-team-");
 
-    const agentPath = path.join(tmpDir, ".dev-team", "agents", "dev-team-.md");
+    const agentPath = path.join(tmpDir, ".claude", "agents", "dev-team-.agent.md");
     assert.ok(fs.existsSync(agentPath), "agent file should exist even with empty suffix");
 
     const content = fs.readFileSync(agentPath, "utf-8");

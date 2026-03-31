@@ -11,7 +11,6 @@ import {
   listSubdirectories,
   listFilesRecursive,
   getPackageVersion,
-  ensureSymlink,
 } from "./files.js";
 import type { HookSettings, HookMatcher } from "./files.js";
 import * as prompts from "./prompts.js";
@@ -231,10 +230,9 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
   // Step 1: Detect existing state
   const claudeDir = path.join(targetDir, ".claude");
   const devTeamDir = path.join(targetDir, ".dev-team");
-  const agentsDir = path.join(devTeamDir, "agents");
+  const agentsDir = path.join(claudeDir, "agents");
   const hooksDir = path.join(devTeamDir, "hooks");
-  const skillsDir = path.join(devTeamDir, "skills");
-  const memoryDir = path.join(devTeamDir, "agent-memory");
+  const memoryDir = path.join(claudeDir, "agent-memory");
   const settingsPath = path.join(claudeDir, "settings.json");
   const claudeMdPath = path.join(targetDir, "CLAUDE.md");
   const prefsPath = path.join(devTeamDir, "config.json");
@@ -324,7 +322,11 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
     const content = readFile(src);
     if (!content) continue;
 
-    if (fileExists(path.join(agentsDir, agent.file)) && !isAll && !preset) {
+    if (
+      fileExists(path.join(agentsDir, agent.file.replace(".md", ".agent.md"))) &&
+      !isAll &&
+      !preset
+    ) {
       const overwrite = await prompts.confirm(`  ${agent.file} already exists. Overwrite?`, false);
       if (!overwrite) continue;
     }
@@ -350,7 +352,7 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
     adapter.generate(canonicalDefs, targetDir);
   }
 
-  // Step 7: Copy shared agent protocol
+  // Step 7: Copy shared agent protocol (to runtime-native agents dir)
   const sharedSrc = path.join(templates, "agents", "SHARED.md");
   const sharedDest = path.join(agentsDir, "SHARED.md");
   copyFile(sharedSrc, sharedDest);
@@ -474,23 +476,16 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
   }
   writeFile(settingsPath, JSON.stringify(settingsData, null, 2) + "\n");
 
-  // Step 12: Copy framework skills (auto-discovered from templates/skills/)
+  // Step 12: Copy framework skills directly to .claude/skills/ (no symlinks — ADR-038)
   const skillsSrcDir = path.join(templates, "skills");
+  const claudeSkillsDir = path.join(claudeDir, "skills");
   const skillDirs = listSubdirectories(skillsSrcDir);
   for (const skillDir of skillDirs) {
     const src = path.join(skillsSrcDir, skillDir, "SKILL.md");
-    const dest = path.join(skillsDir, skillDir, "SKILL.md");
+    const dest = path.join(claudeSkillsDir, skillDir, "SKILL.md");
     if (!fileExists(dest) || isAll) {
       copyFile(src, dest);
     }
-  }
-
-  // Step 12a: Create symlinks in .claude/skills/ so Claude Code can discover framework skills
-  const claudeSkillsDir = path.join(claudeDir, "skills");
-  for (const skillDir of skillDirs) {
-    const symlinkPath = path.join(claudeSkillsDir, skillDir);
-    const symlinkTarget = path.relative(claudeSkillsDir, path.join(skillsDir, skillDir));
-    ensureSymlink(symlinkPath, symlinkTarget);
   }
 
   // Step 13: Merge CLAUDE.md
@@ -578,7 +573,7 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
   }
 
   console.log("Next steps:");
-  console.log("  1. Review installed agents in .dev-team/agents/");
+  console.log("  1. Review installed agents in .claude/agents/");
   console.log("  2. Customize agent personas and focus areas to fit your project");
   if (!runScan) {
     console.log("  3. Run @dev-team-deming to scan for additional tooling recommendations");

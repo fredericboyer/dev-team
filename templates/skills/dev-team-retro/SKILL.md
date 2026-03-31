@@ -11,16 +11,16 @@ Assess the health of the dev-team knowledge base for: $ARGUMENTS
 This skill audits **only update-safe files** — files that survive `dev-team update`:
 
 - `.claude/rules/dev-team-learnings.md` — shared project learnings
-- `.dev-team/agent-memory/*/MEMORY.md` — per-agent calibration memory
+- `.claude/agent-memory/*/MEMORY.md` — per-agent calibration memory
 - Project `CLAUDE.md` — project instructions (content outside `<!-- dev-team:begin/end -->` markers)
 
-**NEVER modify** agent definitions (`.dev-team/agents/`), hook scripts (`.dev-team/hooks/`), skill definitions (`.dev-team/skills/`), or settings (`.claude/settings.json`). These are managed by templates and get overwritten on `dev-team update`.
+**NEVER modify** agent definitions (`.claude/agents/`), hook scripts (`.dev-team/hooks/`), skill definitions (`.claude/skills/`), or settings (`.claude/settings.json`). These are managed by templates and get overwritten on `dev-team update`.
 
 ## Setup
 
 1. Read the following files to build a complete picture:
    - `.claude/rules/dev-team-learnings.md`
-   - All `.dev-team/agent-memory/*/MEMORY.md` files (use Glob to discover them)
+   - All `.claude/agent-memory/*/MEMORY.md` files (use Glob to discover them)
    - The project's `CLAUDE.md` (root of repo)
    - `.dev-team/config.json` (to know which agents are installed)
    - `.claude/rules/dev-team-process.md` (orchestration protocol and workflow rules)
@@ -111,11 +111,11 @@ Check `.claude/rules/dev-team-process.md` for:
 - Missing sections that a new agent or developer would need to understand the workflow
 
 ### Accuracy
-- Verify orchestration claims against actual agent definitions in `.dev-team/agents/`
+- Verify orchestration claims against actual agent definitions in `.claude/agents/`
 - Verify hook trigger descriptions against actual hook scripts in `.dev-team/hooks/`
 - Verify naming conventions and parallel execution rules against observed behavior in recent git history
 
-## Phase 2: Agent memory audit (`.dev-team/agent-memory/*/MEMORY.md`)
+## Phase 2: Agent memory audit (`.claude/agent-memory/*/MEMORY.md`)
 
 Check each agent's memory file for:
 

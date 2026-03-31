@@ -43,9 +43,9 @@ describe("Python project scenario", () => {
   it("installs into a Python project without Node artifacts", async () => {
     await run(tmpDir, ["--all"]);
 
-    // Agents installed in .dev-team/
-    assert.ok(fs.existsSync(path.join(tmpDir, ".dev-team", "agents", "dev-team-szabo.md")));
-    assert.ok(fs.existsSync(path.join(tmpDir, ".dev-team", "agents", "dev-team-knuth.md")));
+    // Agents installed in .claude/agents/ (runtime-native)
+    assert.ok(fs.existsSync(path.join(tmpDir, ".claude", "agents", "dev-team-szabo.agent.md")));
+    assert.ok(fs.existsSync(path.join(tmpDir, ".claude", "agents", "dev-team-knuth.agent.md")));
 
     // No package.json created (dev-team should not add Node artifacts to Python projects)
     assert.ok(!fs.existsSync(path.join(tmpDir, "package.json")), "should not create package.json");

@@ -12,7 +12,6 @@ import {
   listSubdirectories,
   listFilesRecursive,
   getPackageVersion,
-  ensureSymlink,
   assertNotSymlink,
   assertNoSymlinkInPath,
 } from "./files.js";
@@ -89,9 +88,9 @@ const LEGACY_MEMORY_DIRS: Record<string, string> = {
  * Merges any content from legacy dirs into the new agent's memory,
  * then removes the legacy directories.
  */
-export function cleanupLegacyMemoryDirs(devTeamDir: string): string[] {
+export function cleanupLegacyMemoryDirs(claudeDir: string): string[] {
   const log: string[] = [];
-  const memoryDir = path.join(devTeamDir, "agent-memory");
+  const memoryDir = path.join(claudeDir, "agent-memory");
 
   if (!dirExists(memoryDir)) return log;
 
@@ -148,7 +147,12 @@ export function compareSemver(a: string, b: string): number {
   return 0;
 }
 
-function runMigrations(prefs: Preferences, fromVersion: string, devTeamDir: string): string[] {
+function runMigrations(
+  prefs: Preferences,
+  fromVersion: string,
+  _devTeamDir: string,
+  claudeDir: string,
+): string[] {
   const log: string[] = [];
 
   for (const migration of MIGRATIONS) {
@@ -157,14 +161,20 @@ function runMigrations(prefs: Preferences, fromVersion: string, devTeamDir: stri
 
     if (migration.agentRenames) {
       for (const rename of migration.agentRenames) {
-        const agentsDir = path.join(devTeamDir, "agents");
-        const memoryDir = path.join(devTeamDir, "agent-memory");
+        const agentsDir = path.join(claudeDir, "agents");
+        const memoryDir = path.join(claudeDir, "agent-memory");
 
-        // Rename agent file
-        const oldAgentPath = path.join(agentsDir, rename.oldFile);
-        if (fileExists(oldAgentPath)) {
+        // Rename agent file (check both .agent.md and legacy .md extensions)
+        const oldAgentPath = path.join(agentsDir, rename.oldFile.replace(".md", ".agent.md"));
+        const oldAgentPathLegacy = path.join(agentsDir, rename.oldFile);
+        const pathToRemove = fileExists(oldAgentPath)
+          ? oldAgentPath
+          : fileExists(oldAgentPathLegacy)
+            ? oldAgentPathLegacy
+            : null;
+        if (pathToRemove) {
           try {
-            fs.unlinkSync(oldAgentPath);
+            fs.unlinkSync(pathToRemove);
           } catch {
             // ignore
           }
@@ -201,7 +211,7 @@ function runMigrations(prefs: Preferences, fromVersion: string, devTeamDir: stri
     }
 
     if (migration.skillRemovals) {
-      const skillsDir = path.join(devTeamDir, "skills");
+      const skillsDir = path.join(claudeDir, "skills");
       for (const skillName of migration.skillRemovals) {
         const skillDir = path.join(skillsDir, skillName);
         if (dirExists(skillDir)) {
@@ -216,7 +226,7 @@ function runMigrations(prefs: Preferences, fromVersion: string, devTeamDir: stri
     }
 
     if (migration.hookRemovals) {
-      const hooksDir = path.join(devTeamDir, "hooks");
+      const hooksDir = path.join(_devTeamDir, "hooks");
       for (const hookFile of migration.hookRemovals) {
         const hookPath = path.join(hooksDir, hookFile);
         if (fileExists(hookPath)) {
@@ -293,7 +303,8 @@ const HOOK_FILES: Record<string, string> = Object.fromEntries(
  * Preserves user customizations in CLAUDE.md and agent memory files.
  */
 /**
- * Migrates files from .claude/ to .dev-team/ directory structure.
+ * Migrates files from old .claude/dev-team.json layout to .dev-team/ directory structure.
+ * In v3.0+, agents and memory stay in .claude/; only hooks and config go to .dev-team/.
  * Preserves all user content (memories, learnings).
  */
 function migrateFromClaude(targetDir: string): string[] {
@@ -301,49 +312,57 @@ function migrateFromClaude(targetDir: string): string[] {
   const claudeDir = path.join(targetDir, ".claude");
   const devTeamDir = path.join(targetDir, ".dev-team");
 
-  // Directories to move
-  const dirMappings: Array<{ from: string; to: string }> = [
-    { from: path.join(claudeDir, "agents"), to: path.join(devTeamDir, "agents") },
-    { from: path.join(claudeDir, "agent-memory"), to: path.join(devTeamDir, "agent-memory") },
-    { from: path.join(claudeDir, "hooks"), to: path.join(devTeamDir, "hooks") },
-    { from: path.join(claudeDir, "skills"), to: path.join(devTeamDir, "skills") },
-  ];
+  // Hooks move to .dev-team/hooks/ (agents and memory stay in .claude/)
+  const hooksMigration = {
+    from: path.join(claudeDir, "hooks"),
+    to: path.join(devTeamDir, "hooks"),
+  };
 
-  // Protected files that must never be overwritten during migration
-  const protectedPatterns = ["learnings.md", "MEMORY.md"];
-
-  for (const { from, to } of dirMappings) {
-    if (dirExists(from)) {
-      const files = listFilesRecursive(from);
-      for (const filePath of files) {
-        const relativePath = path.relative(from, filePath);
-        const destPath = path.join(to, relativePath);
-        // Never overwrite existing files in .dev-team/ (partial migration safety)
-        if (!fileExists(destPath)) {
-          copyFile(filePath, destPath);
-        }
+  if (dirExists(hooksMigration.from)) {
+    const files = listFilesRecursive(hooksMigration.from);
+    for (const filePath of files) {
+      const relativePath = path.relative(hooksMigration.from, filePath);
+      const destPath = path.join(hooksMigration.to, relativePath);
+      if (!fileExists(destPath)) {
+        copyFile(filePath, destPath);
       }
-      log.push(`Migrated ${path.basename(from)}/ → .dev-team/${path.basename(to)}/`);
+    }
+    log.push("Migrated hooks/ → .dev-team/hooks/");
+    try {
+      fs.rmSync(hooksMigration.from, { recursive: true });
+    } catch {
+      // best effort
     }
   }
 
-  // File mappings
-  const fileMappings: Array<{ from: string; to: string }> = [
-    {
-      from: path.join(claudeDir, "dev-team-learnings.md"),
-      to: path.join(devTeamDir, "learnings.md"),
-    },
-    { from: path.join(claudeDir, "dev-team.json"), to: path.join(devTeamDir, "config.json") },
-  ];
+  // Config file migration
+  const oldPrefs = path.join(claudeDir, "dev-team.json");
+  if (fileExists(oldPrefs)) {
+    const configDest = path.join(devTeamDir, "config.json");
+    if (!fileExists(configDest)) {
+      copyFile(oldPrefs, configDest);
+    }
+    log.push("Migrated dev-team.json → .dev-team/config.json");
+    try {
+      fs.unlinkSync(oldPrefs);
+    } catch {
+      // best effort
+    }
+  }
 
-  for (const { from, to } of fileMappings) {
-    if (fileExists(from)) {
-      const isProtected = protectedPatterns.some((p) => to.endsWith(p));
-      // Never overwrite protected files (learnings, memory)
-      if (!isProtected || !fileExists(to)) {
-        copyFile(from, to);
-      }
-      log.push(`Migrated ${path.basename(from)} → .dev-team/${path.basename(to)}`);
+  // Learnings migration (old .claude/dev-team-learnings.md → .claude/rules/)
+  const oldLearnings = path.join(claudeDir, "dev-team-learnings.md");
+  if (fileExists(oldLearnings)) {
+    const rulesDir = path.join(claudeDir, "rules");
+    const learningsDest = path.join(rulesDir, "dev-team-learnings.md");
+    if (!fileExists(learningsDest)) {
+      copyFile(oldLearnings, learningsDest);
+    }
+    log.push("Migrated dev-team-learnings.md → .claude/rules/dev-team-learnings.md");
+    try {
+      fs.unlinkSync(oldLearnings);
+    } catch {
+      // best effort
     }
   }
 
@@ -354,26 +373,6 @@ function migrateFromClaude(targetDir: string): string[] {
     const updated = settingsContent.replace(/\.claude\/hooks\//g, ".dev-team/hooks/");
     writeFile(settingsPath, updated);
     log.push("Rewrote settings.json hook paths to .dev-team/hooks/");
-  }
-
-  // Clean up old .claude/ files (except settings.json and settings.local.json)
-  for (const { from } of dirMappings) {
-    if (dirExists(from)) {
-      try {
-        fs.rmSync(from, { recursive: true });
-      } catch {
-        // best effort
-      }
-    }
-  }
-  for (const { from } of fileMappings) {
-    if (fileExists(from)) {
-      try {
-        fs.unlinkSync(from);
-      } catch {
-        // best effort
-      }
-    }
   }
 
   // Clean up other dev-team files in .claude/
@@ -388,6 +387,129 @@ function migrateFromClaude(targetDir: string): string[] {
       } catch {
         // best effort
       }
+    }
+  }
+
+  return log;
+}
+
+/**
+ * Migrates v2.x installations to v3.0 runtime-native layout (ADR-038).
+ * Moves agents from .dev-team/agents/ → .claude/agents/ (renaming .md → .agent.md)
+ * Moves agent-memory from .dev-team/agent-memory/ → .claude/agent-memory/
+ * Removes .dev-team/skills/ symlinks (skills already in .claude/skills/)
+ * Removes .dev-team/learnings.md if .claude/rules/dev-team-learnings.md exists
+ * Idempotent — safe to run multiple times.
+ */
+function migrateToV3Layout(targetDir: string): string[] {
+  const log: string[] = [];
+  const claudeDir = path.join(targetDir, ".claude");
+  const devTeamDir = path.join(targetDir, ".dev-team");
+
+  // 1. Migrate agents: .dev-team/agents/ → .claude/agents/ (rename .md → .agent.md)
+  const oldAgentsDir = path.join(devTeamDir, "agents");
+  if (dirExists(oldAgentsDir)) {
+    const newAgentsDir = path.join(claudeDir, "agents");
+    const files = listFilesRecursive(oldAgentsDir);
+    let migrated = 0;
+    for (const filePath of files) {
+      const relativePath = path.relative(oldAgentsDir, filePath);
+      // Rename dev-team-*.md to dev-team-*.agent.md (but not SHARED.md — keep as-is)
+      let destRelative = relativePath;
+      if (
+        relativePath.startsWith("dev-team-") &&
+        relativePath.endsWith(".md") &&
+        !relativePath.endsWith(".agent.md")
+      ) {
+        destRelative = relativePath.replace(/\.md$/, ".agent.md");
+      }
+      const destPath = path.join(newAgentsDir, destRelative);
+      if (!fileExists(destPath)) {
+        copyFile(filePath, destPath);
+        migrated++;
+      }
+    }
+    if (migrated > 0) {
+      log.push(`Migrated ${migrated} agents: .dev-team/agents/ → .claude/agents/`);
+    }
+    // Clean up old directory
+    try {
+      fs.rmSync(oldAgentsDir, { recursive: true });
+    } catch {
+      // best effort
+    }
+  }
+
+  // 2. Migrate agent-memory: .dev-team/agent-memory/ → .claude/agent-memory/
+  const oldMemoryDir = path.join(devTeamDir, "agent-memory");
+  if (dirExists(oldMemoryDir)) {
+    const newMemoryDir = path.join(claudeDir, "agent-memory");
+    const files = listFilesRecursive(oldMemoryDir);
+    let migrated = 0;
+    for (const filePath of files) {
+      const relativePath = path.relative(oldMemoryDir, filePath);
+      const destPath = path.join(newMemoryDir, relativePath);
+      // Never overwrite existing memory files (preserve user content)
+      if (!fileExists(destPath)) {
+        copyFile(filePath, destPath);
+        migrated++;
+      }
+    }
+    if (migrated > 0) {
+      log.push(
+        `Migrated ${migrated} memory files: .dev-team/agent-memory/ → .claude/agent-memory/`,
+      );
+    }
+    // Clean up old directory
+    try {
+      fs.rmSync(oldMemoryDir, { recursive: true });
+    } catch {
+      // best effort
+    }
+  }
+
+  // 3. Remove .dev-team/skills/ (skills now install directly to .claude/skills/)
+  const oldSkillsDir = path.join(devTeamDir, "skills");
+  if (dirExists(oldSkillsDir)) {
+    try {
+      fs.rmSync(oldSkillsDir, { recursive: true });
+      log.push("Removed .dev-team/skills/ (skills now in .claude/skills/)");
+    } catch {
+      // best effort
+    }
+  }
+
+  // 4. Remove .dev-team/learnings.md if .claude/rules/dev-team-learnings.md exists
+  const oldLearningsPath = path.join(devTeamDir, "learnings.md");
+  const rulesLearningsPath = path.join(claudeDir, "rules", "dev-team-learnings.md");
+  if (fileExists(oldLearningsPath) && fileExists(rulesLearningsPath)) {
+    try {
+      fs.unlinkSync(oldLearningsPath);
+      log.push("Removed .dev-team/learnings.md (already in .claude/rules/)");
+    } catch {
+      // best effort
+    }
+  }
+
+  // 5. Remove stale symlinks in .claude/skills/ (from old symlink-based layout)
+  const claudeSkillsDir = path.join(claudeDir, "skills");
+  if (dirExists(claudeSkillsDir)) {
+    try {
+      const entries = fs.readdirSync(claudeSkillsDir);
+      for (const entry of entries) {
+        const entryPath = path.join(claudeSkillsDir, entry);
+        try {
+          const stat = fs.lstatSync(entryPath);
+          if (stat.isSymbolicLink()) {
+            fs.unlinkSync(entryPath);
+            log.push(`Removed stale symlink: .claude/skills/${entry}`);
+          }
+        } catch {
+          // best effort
+        }
+      }
+    } catch {
+      // best effort
     }
   }
 
@@ -448,8 +570,18 @@ export async function update(targetDir: string): Promise<void> {
     console.log(`Upgrading from v${prefs.version} to v${packageVersion}`);
   }
 
+  // Run v3.0 layout migration (ADR-038): agents/memory → .claude/, remove .dev-team/skills/
+  const v3MigrationLog = migrateToV3Layout(targetDir);
+  if (v3MigrationLog.length > 0) {
+    console.log("v3.0 layout migration:");
+    for (const entry of v3MigrationLog) {
+      console.log(`  ${entry}`);
+    }
+    console.log("");
+  }
+
   // Run version migrations before updating agents
-  const agentMigrationLog = runMigrations(prefs, prefs.version || "0.0.0", devTeamDir);
+  const agentMigrationLog = runMigrations(prefs, prefs.version || "0.0.0", devTeamDir, claudeDir);
   if (agentMigrationLog.length > 0) {
     console.log("Migrations:");
     for (const entry of agentMigrationLog) {
@@ -466,7 +598,7 @@ export async function update(targetDir: string): Promise<void> {
   }
 
   // Clean up legacy agent memory directories from pre-rename agents
-  const legacyCleanupLog = cleanupLegacyMemoryDirs(devTeamDir);
+  const legacyCleanupLog = cleanupLegacyMemoryDirs(claudeDir);
   if (legacyCleanupLog.length > 0) {
     console.log("Legacy cleanup:");
     for (const entry of legacyCleanupLog) {
@@ -488,9 +620,9 @@ export async function update(targetDir: string): Promise<void> {
     settings: false,
   };
 
-  // Step 2: Update agents via adapter registry
-  const agentsDir = path.join(devTeamDir, "agents");
-  const memoryDir = path.join(devTeamDir, "agent-memory");
+  // Step 2: Update agents via adapter registry (runtime-native: .claude/agents/)
+  const agentsDir = path.join(claudeDir, "agents");
+  const memoryDir = path.join(claudeDir, "agent-memory");
 
   // Build canonical definitions for all agents (installed + newly discovered)
   const allAgentLabels = new Set(prefs.agents);
@@ -656,14 +788,14 @@ export async function update(targetDir: string): Promise<void> {
   const agentTeamsEnabled = settingsData.env.CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS === "1";
   prefs.agentTeams = agentTeamsEnabled;
 
-  // Step 5: Update skills (auto-discovered from templates/skills/)
-  const skillsDir = path.join(devTeamDir, "skills");
+  // Step 5: Update skills directly in .claude/skills/ (no symlinks — ADR-038)
+  const claudeSkillsDir = path.join(claudeDir, "skills");
   const skillsSrcDir = path.join(templates, "skills");
   const discoveredSkills = listSubdirectories(skillsSrcDir);
 
   for (const skillDir of discoveredSkills) {
     const src = path.join(skillsSrcDir, skillDir, "SKILL.md");
-    const dest = path.join(skillsDir, skillDir, "SKILL.md");
+    const dest = path.join(claudeSkillsDir, skillDir, "SKILL.md");
 
     if (!fileExists(src)) continue;
 
@@ -678,14 +810,6 @@ export async function update(targetDir: string): Promise<void> {
       copyFile(src, dest);
       summary.skills.added.push(skillDir.replace("dev-team-", ""));
     }
-  }
-
-  // Step 5b: Create/repair symlinks in .claude/skills/ for framework skill discovery
-  const claudeSkillsDir = path.join(claudeDir, "skills");
-  for (const skillDir of discoveredSkills) {
-    const symlinkPath = path.join(claudeSkillsDir, skillDir);
-    const symlinkTarget = path.relative(claudeSkillsDir, path.join(skillsDir, skillDir));
-    ensureSymlink(symlinkPath, symlinkTarget);
   }
 
   // Step 6: Update CLAUDE.md (preserves user content outside markers)

@@ -30,7 +30,7 @@ describe("dev-team update", () => {
     await run(tmpDir, ["--all"]);
 
     // Modify an installed agent to simulate a stale version
-    const agentPath = path.join(tmpDir, ".dev-team", "agents", "dev-team-voss.md");
+    const agentPath = path.join(tmpDir, ".claude", "agents", "dev-team-voss.agent.md");
     fs.writeFileSync(agentPath, "old content");
 
     // Run update
@@ -46,7 +46,7 @@ describe("dev-team update", () => {
     await run(tmpDir, ["--all"]);
 
     // Add custom content to agent memory
-    const memoryPath = path.join(tmpDir, ".dev-team", "agent-memory", "dev-team-voss", "MEMORY.md");
+    const memoryPath = path.join(tmpDir, ".claude", "agent-memory", "dev-team-voss", "MEMORY.md");
     fs.writeFileSync(memoryPath, "# Custom learnings\nVoss learned something important.");
 
     await update(tmpDir);
@@ -91,7 +91,7 @@ describe("dev-team update", () => {
   it("updates skill files when template content changes", async () => {
     await run(tmpDir, ["--all"]);
 
-    const skillPath = path.join(tmpDir, ".dev-team", "skills", "dev-team-challenge", "SKILL.md");
+    const skillPath = path.join(tmpDir, ".claude", "skills", "dev-team-challenge", "SKILL.md");
     fs.writeFileSync(skillPath, "old skill");
 
     await update(tmpDir);
@@ -222,7 +222,7 @@ describe("dev-team update", () => {
     await run(tmpDir, ["--all"]);
 
     // Stale every agent file
-    const agentsDir = path.join(tmpDir, ".dev-team", "agents");
+    const agentsDir = path.join(tmpDir, ".claude", "agents");
     const agentFiles = fs.readdirSync(agentsDir);
     for (const f of agentFiles) {
       fs.writeFileSync(path.join(agentsDir, f), "stale");
@@ -302,18 +302,24 @@ describe("dev-team update", () => {
       return a;
     });
 
-    // Create old agent files to simulate old install
-    const agentsDir = path.join(tmpDir, ".dev-team", "agents");
+    // Create old agent files to simulate old install (in runtime-native location)
+    const agentsDir = path.join(tmpDir, ".claude", "agents");
     fs.writeFileSync(
-      path.join(agentsDir, "dev-team-architect.md"),
+      path.join(agentsDir, "dev-team-architect.agent.md"),
       "---\nname: dev-team-architect\n---",
     );
-    fs.writeFileSync(path.join(agentsDir, "dev-team-docs.md"), "---\nname: dev-team-docs\n---");
     fs.writeFileSync(
-      path.join(agentsDir, "dev-team-release.md"),
+      path.join(agentsDir, "dev-team-docs.agent.md"),
+      "---\nname: dev-team-docs\n---",
+    );
+    fs.writeFileSync(
+      path.join(agentsDir, "dev-team-release.agent.md"),
       "---\nname: dev-team-release\n---",
     );
-    fs.writeFileSync(path.join(agentsDir, "dev-team-lead.md"), "---\nname: dev-team-lead\n---");
+    fs.writeFileSync(
+      path.join(agentsDir, "dev-team-lead.agent.md"),
+      "---\nname: dev-team-lead\n---",
+    );
 
     fs.writeFileSync(prefsPath, JSON.stringify(prefs, null, 2));
 
@@ -332,21 +338,21 @@ describe("dev-team update", () => {
 
     // Verify old agent files removed
     assert.ok(
-      !fs.existsSync(path.join(agentsDir, "dev-team-architect.md")),
+      !fs.existsSync(path.join(agentsDir, "dev-team-architect.agent.md")),
       "old architect file should be removed",
     );
     assert.ok(
-      !fs.existsSync(path.join(agentsDir, "dev-team-docs.md")),
+      !fs.existsSync(path.join(agentsDir, "dev-team-docs.agent.md")),
       "old docs file should be removed",
     );
 
     // Verify new agent files exist
     assert.ok(
-      fs.existsSync(path.join(agentsDir, "dev-team-brooks.md")),
+      fs.existsSync(path.join(agentsDir, "dev-team-brooks.agent.md")),
       "new brooks file should exist",
     );
     assert.ok(
-      fs.existsSync(path.join(agentsDir, "dev-team-tufte.md")),
+      fs.existsSync(path.join(agentsDir, "dev-team-tufte.agent.md")),
       "new tufte file should exist",
     );
   });
@@ -392,15 +398,15 @@ describe("dev-team update", () => {
     assert.ok(updated.agents.length > 0, "agents should be repopulated via auto-discovery");
   });
 
-  it("migrates from .claude/ to .dev-team/ on update", async () => {
-    // Simulate a pre-migration install (files in .claude/)
+  it("migrates from old .claude/dev-team.json layout on update", async () => {
+    // Simulate a pre-migration install (files in .claude/ with dev-team.json)
     fs.mkdirSync(path.join(tmpDir, ".claude", "agents"), { recursive: true });
     fs.mkdirSync(path.join(tmpDir, ".claude", "hooks"), { recursive: true });
     fs.mkdirSync(path.join(tmpDir, ".claude", "agent-memory", "dev-team-voss"), {
       recursive: true,
     });
     fs.writeFileSync(
-      path.join(tmpDir, ".claude", "agents", "dev-team-voss.md"),
+      path.join(tmpDir, ".claude", "agents", "dev-team-voss.agent.md"),
       "---\nname: dev-team-voss\n---",
     );
     fs.writeFileSync(
@@ -445,28 +451,30 @@ describe("dev-team update", () => {
 
     await update(tmpDir);
 
-    // Files should be in .dev-team/
+    // Config should be in .dev-team/
     assert.ok(
       fs.existsSync(path.join(tmpDir, ".dev-team", "config.json")),
       "config should be in .dev-team/",
     );
+    // Learnings should be in .claude/rules/
     assert.ok(
       fs.existsSync(path.join(tmpDir, ".claude", "rules", "dev-team-learnings.md")),
       "learnings should be in .claude/rules/",
     );
+    // Agent memory should stay in .claude/agent-memory/ (runtime-native)
     assert.ok(
-      fs.existsSync(path.join(tmpDir, ".dev-team", "agent-memory", "dev-team-voss", "MEMORY.md")),
-      "memory should be in .dev-team/",
+      fs.existsSync(path.join(tmpDir, ".claude", "agent-memory", "dev-team-voss", "MEMORY.md")),
+      "memory should be in .claude/agent-memory/",
     );
 
     // Memory content preserved
     const memory = fs.readFileSync(
-      path.join(tmpDir, ".dev-team", "agent-memory", "dev-team-voss", "MEMORY.md"),
+      path.join(tmpDir, ".claude", "agent-memory", "dev-team-voss", "MEMORY.md"),
       "utf-8",
     );
     assert.ok(memory.includes("Custom learnings"), "memory content should be preserved");
 
-    // Learnings content preserved (migrated from .claude/ → .dev-team/ → .claude/rules/)
+    // Learnings content preserved
     const learnings = fs.readFileSync(
       path.join(tmpDir, ".claude", "rules", "dev-team-learnings.md"),
       "utf-8",
@@ -486,14 +494,10 @@ describe("dev-team update", () => {
     );
     assert.ok(
       !commands.some((c) => c.includes(".claude/hooks/")),
-      "no hook paths should reference .claude/",
+      "no hook paths should reference .claude/hooks/",
     );
 
-    // Old .claude/ files cleaned up
-    assert.ok(
-      !fs.existsSync(path.join(tmpDir, ".claude", "agents")),
-      "old agents dir should be removed",
-    );
+    // Old .claude/ prefs cleaned up
     assert.ok(
       !fs.existsSync(path.join(tmpDir, ".claude", "dev-team.json")),
       "old prefs should be removed",
@@ -503,17 +507,17 @@ describe("dev-team update", () => {
       "old learnings should be removed",
     );
 
-    // settings.json and settings.local.json should remain
+    // settings.json should remain
     assert.ok(
       fs.existsSync(path.join(tmpDir, ".claude", "settings.json")),
       "settings.json should remain in .claude/",
     );
   });
 
-  it("creates skill symlinks in .claude/skills/ during update", async () => {
+  it("installs skills directly to .claude/skills/ during update (no symlinks)", async () => {
     await run(tmpDir, ["--all"]);
 
-    // Remove .claude/skills/ symlinks to simulate pre-symlink install
+    // Remove .claude/skills/ to simulate missing skills
     const claudeSkillsDir = path.join(tmpDir, ".claude", "skills");
     if (fs.existsSync(claudeSkillsDir)) {
       fs.rmSync(claudeSkillsDir, { recursive: true });
@@ -521,58 +525,25 @@ describe("dev-team update", () => {
 
     await update(tmpDir);
 
-    // Symlinks should be recreated
-    const devTeamSkillsDir = path.join(tmpDir, ".dev-team", "skills");
-    const skillDirs = fs.readdirSync(devTeamSkillsDir);
+    // Skills should be directly installed (not symlinks)
+    const skillDirs = fs.readdirSync(claudeSkillsDir);
     for (const skillDir of skillDirs) {
-      const symlinkPath = path.join(claudeSkillsDir, skillDir);
-      assert.ok(fs.existsSync(symlinkPath), `symlink should exist for ${skillDir}`);
-      const stat = fs.lstatSync(symlinkPath);
-      assert.ok(stat.isSymbolicLink(), `${skillDir} should be a symlink`);
+      const skillPath = path.join(claudeSkillsDir, skillDir);
+      const stat = fs.lstatSync(skillPath);
+      assert.ok(!stat.isSymbolicLink(), `${skillDir} should NOT be a symlink`);
+      assert.ok(stat.isDirectory(), `${skillDir} should be a real directory`);
     }
-  });
 
-  it("repairs broken symlinks in .claude/skills/ during update", async () => {
-    await run(tmpDir, ["--all"]);
-
-    const claudeSkillsDir = path.join(tmpDir, ".claude", "skills");
-    const devTeamSkillsDir = path.join(tmpDir, ".dev-team", "skills");
-    const skillDirs = fs.readdirSync(devTeamSkillsDir);
-    const testSkill = skillDirs[0];
-    const symlinkPath = path.join(claudeSkillsDir, testSkill);
-
-    // Create a broken symlink: point to a real directory first, then remove the target.
-    // On Windows, junctions require the target to exist at creation time, so we cannot
-    // create a junction directly to a nonexistent path.
-    fs.unlinkSync(symlinkPath);
-    const tempTarget = path.join(tmpDir, "temp-symlink-target", testSkill);
-    fs.mkdirSync(tempTarget, { recursive: true });
-    fs.symlinkSync(
-      path.relative(claudeSkillsDir, tempTarget),
-      symlinkPath,
-      process.platform === "win32" ? "junction" : "dir",
-    );
-    // Now break the symlink by removing the target directory
-    fs.rmSync(path.join(tmpDir, "temp-symlink-target"), { recursive: true, force: true });
-
-    // Verify it's broken (lstat succeeds but existsSync follows symlink and fails)
-    assert.ok(fs.lstatSync(symlinkPath).isSymbolicLink(), "should be a symlink");
-    assert.ok(!fs.existsSync(symlinkPath), "symlink target should not exist (broken)");
-
-    await update(tmpDir);
-
-    // Symlink should be repaired — valid and pointing to the right place
-    assert.ok(fs.existsSync(symlinkPath), `symlink should be repaired for ${testSkill}`);
-    assert.ok(fs.lstatSync(symlinkPath).isSymbolicLink(), `${testSkill} should still be a symlink`);
+    // .dev-team/skills/ should NOT exist
     assert.ok(
-      fs.existsSync(path.join(symlinkPath, "SKILL.md")),
-      `repaired symlink should resolve to SKILL.md`,
+      !fs.existsSync(path.join(tmpDir, ".dev-team", "skills")),
+      ".dev-team/skills/ should not exist",
     );
   });
 
   it("migrates when .dev-team/ exists but config.json is missing (partial migration)", async () => {
     // Simulate partial migration: .dev-team/ dir exists but no config.json
-    fs.mkdirSync(path.join(tmpDir, ".dev-team", "agents"), { recursive: true });
+    fs.mkdirSync(path.join(tmpDir, ".dev-team"), { recursive: true });
     fs.mkdirSync(path.join(tmpDir, ".claude"), { recursive: true });
     fs.writeFileSync(
       path.join(tmpDir, ".claude", "dev-team.json"),
@@ -754,11 +725,11 @@ describe("cleanupLegacyMemoryDirs", () => {
     await run(tmpDir, ["--all"]);
 
     // Create legacy directories with boilerplate content
-    const legacyDir = path.join(tmpDir, ".dev-team", "agent-memory", "dev-team-architect");
+    const legacyDir = path.join(tmpDir, ".claude", "agent-memory", "dev-team-architect");
     fs.mkdirSync(legacyDir, { recursive: true });
     fs.writeFileSync(path.join(legacyDir, "MEMORY.md"), "# Agent Memory\n<!-- boilerplate -->\n");
 
-    const log = cleanupLegacyMemoryDirs(path.join(tmpDir, ".dev-team"));
+    const log = cleanupLegacyMemoryDirs(path.join(tmpDir, ".claude"));
 
     assert.ok(!fs.existsSync(legacyDir), "legacy directory should be removed");
     assert.ok(
@@ -771,21 +742,21 @@ describe("cleanupLegacyMemoryDirs", () => {
     await run(tmpDir, ["--all"]);
 
     // Create legacy directory with substantive content (structured entries)
-    const legacyDir = path.join(tmpDir, ".dev-team", "agent-memory", "dev-team-architect");
+    const legacyDir = path.join(tmpDir, ".claude", "agent-memory", "dev-team-architect");
     fs.mkdirSync(legacyDir, { recursive: true });
     fs.writeFileSync(
       path.join(legacyDir, "MEMORY.md"),
       "# Architect Memory\n## Structured Entries\n### [2026-01-15] Pattern 1 discovered\n- **Type**: PATTERN\n- **Tags**: architecture\n- **Context**: Found coupling issue\n",
     );
 
-    cleanupLegacyMemoryDirs(path.join(tmpDir, ".dev-team"));
+    cleanupLegacyMemoryDirs(path.join(tmpDir, ".claude"));
 
     // Legacy dir should be removed
     assert.ok(!fs.existsSync(legacyDir), "legacy directory should be removed");
 
     // Content should be merged into Brooks (new name for Architect)
     const brooksMemory = fs.readFileSync(
-      path.join(tmpDir, ".dev-team", "agent-memory", "dev-team-brooks", "MEMORY.md"),
+      path.join(tmpDir, ".claude", "agent-memory", "dev-team-brooks", "MEMORY.md"),
       "utf-8",
     );
     assert.ok(
@@ -799,19 +770,19 @@ describe("cleanupLegacyMemoryDirs", () => {
     await run(tmpDir, ["--all"]);
 
     // Delete the current Brooks memory and create a legacy architect one
-    const brooksDir = path.join(tmpDir, ".dev-team", "agent-memory", "dev-team-brooks");
+    const brooksDir = path.join(tmpDir, ".claude", "agent-memory", "dev-team-brooks");
     fs.rmSync(brooksDir, { recursive: true });
 
-    const legacyDir = path.join(tmpDir, ".dev-team", "agent-memory", "dev-team-architect");
+    const legacyDir = path.join(tmpDir, ".claude", "agent-memory", "dev-team-architect");
     fs.mkdirSync(legacyDir, { recursive: true });
     fs.writeFileSync(
       path.join(legacyDir, "MEMORY.md"),
       "# Architect Memory\nImportant learnings here.\n",
     );
 
-    cleanupLegacyMemoryDirs(path.join(tmpDir, ".dev-team"));
+    cleanupLegacyMemoryDirs(path.join(tmpDir, ".claude"));
 
-    assert.ok(!fs.existsSync(legacyDir), "legacy directory should be removed");
+    assert.ok(!fs.existsSync(legacyDir), "legacy directory should be removed after cleanup");
     assert.ok(fs.existsSync(path.join(brooksDir, "MEMORY.md")), "memory should be moved to Brooks");
     const content = fs.readFileSync(path.join(brooksDir, "MEMORY.md"), "utf-8");
     assert.ok(content.includes("Important learnings"), "content should be preserved");
@@ -828,16 +799,16 @@ describe("cleanupLegacyMemoryDirs", () => {
     ];
 
     for (const name of legacyNames) {
-      const dir = path.join(tmpDir, ".dev-team", "agent-memory", name);
+      const dir = path.join(tmpDir, ".claude", "agent-memory", name);
       fs.mkdirSync(dir, { recursive: true });
       fs.writeFileSync(path.join(dir, "MEMORY.md"), "# Legacy\nBoilerplate\n");
     }
 
-    cleanupLegacyMemoryDirs(path.join(tmpDir, ".dev-team"));
+    cleanupLegacyMemoryDirs(path.join(tmpDir, ".claude"));
 
     for (const name of legacyNames) {
       assert.ok(
-        !fs.existsSync(path.join(tmpDir, ".dev-team", "agent-memory", name)),
+        !fs.existsSync(path.join(tmpDir, ".claude", "agent-memory", name)),
         `${name} should be removed`,
       );
     }
@@ -847,7 +818,7 @@ describe("cleanupLegacyMemoryDirs", () => {
     await run(tmpDir, ["--all"]);
 
     // Create a legacy directory
-    const legacyDir = path.join(tmpDir, ".dev-team", "agent-memory", "dev-team-architect");
+    const legacyDir = path.join(tmpDir, ".claude", "agent-memory", "dev-team-architect");
     fs.mkdirSync(legacyDir, { recursive: true });
     fs.writeFileSync(path.join(legacyDir, "MEMORY.md"), "# Legacy\nBoilerplate\n");
 

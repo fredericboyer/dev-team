@@ -49,7 +49,7 @@ Before starting the review, check for open security alerts using the project's s
 1. Spawn each selected agent as a **parallel background subagent** using the Agent tool with `subagent_type: "general-purpose"`. Use the agent teammate naming convention: `{agent}-review` (e.g., `szabo-review`, `knuth-review`, `brooks-review`). **Timeout**: If a reviewer has not reported progress (status file or message) within 2 minutes, send a status ping. If no response within 1 additional minute, terminate the reviewer and proceed with findings from the other reviewers.
 
 2. Each agent's prompt must include:
-   - The agent's full definition (read from `.dev-team/agents/<agent>.md`)
+   - The agent's full definition (read from `.claude/agents/<agent>.agent.md`)
    - The list of changed files relevant to their domain
    - Instruction to produce classified findings: `[DEFECT]`, `[RISK]`, `[QUESTION]`, `[SUGGESTION]`
    - Instruction to read the actual code — not just the diff — for full context
@@ -60,7 +60,7 @@ Before starting the review, check for open security alerts using the project's s
 ## Filter findings (judge pass)
 
 Before producing the report, filter raw findings to maximize signal quality:
-1. **Remove contradictions**: Drop findings that contradict existing ADRs (`docs/adr/`), learnings (`.claude/rules/dev-team-learnings.md`), or agent memory (`.dev-team/agent-memory/*/MEMORY.md`)
+1. **Remove contradictions**: Drop findings that contradict existing ADRs (`docs/adr/`), learnings (`.claude/rules/dev-team-learnings.md`), or agent memory (`.claude/agent-memory/*/MEMORY.md`)
 2. **Deduplicate**: When multiple agents flag the same issue, keep the most specific finding
 3. **Consolidate suggestions**: Group `[SUGGESTION]`-level items into a single summary block
 4. **Suppress generated file findings**: Skip findings on generated, vendored, or build artifacts
