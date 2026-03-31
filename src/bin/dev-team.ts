@@ -4,8 +4,6 @@ import { createAgent } from "../create-agent.js";
 import { doctor } from "../doctor.js";
 import { status } from "../status.js";
 import { getPackageVersion } from "../files.js";
-import { startMcpServer } from "../mcp/index.js";
-
 const args = process.argv.slice(2);
 const command = args[0];
 
@@ -28,8 +26,6 @@ if (command === "--version" || command === "-v") {
   doctor(process.cwd());
 } else if (command === "status") {
   status(process.cwd());
-} else if (command === "mcp") {
-  startMcpServer();
 } else {
   console.log("dev-team — Adversarial AI agent team for any project\n");
   console.log("Usage:");
@@ -44,7 +40,6 @@ if (command === "--version" || command === "-v") {
   console.log("  npx dev-team create-agent <name>     Scaffold a new custom agent");
   console.log("  npx dev-team doctor                  Check installation health");
   console.log("  npx dev-team status                  Show installed agents, hooks, and memory");
-  console.log("  npx dev-team mcp                     Start MCP enforcement server (stdio)");
   console.log("  npx dev-team --version               Print version");
   console.log("");
   process.exit(command === "--help" || command === "-h" ? 0 : 1);

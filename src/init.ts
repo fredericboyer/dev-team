@@ -571,9 +571,7 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
       console.log(formatRecommendations(recommendations, ecosystems, catalog));
 
       if (!isAll && !preset) {
-        console.log(
-          "  Install recommended skills from your Claude Code settings or MCP configuration.",
-        );
+        console.log("  Install recommended skills from your Claude Code settings.");
         console.log("  These are suggestions only — skip any that don't apply.\n");
       }
     } else if (ecosystems.length > 0) {

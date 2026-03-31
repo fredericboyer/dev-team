@@ -24,12 +24,11 @@
 
 - **Skill composability: orchestration skills can invoke other skills.** /dev-team:extract and /dev-team:review are invoked by /dev-team:task as sub-skills. Use `disable-model-invocation: true` on sub-skills to prevent autonomous firing. The `--embedded` flag signals compact output mode for skill-to-skill invocation. See ADR-035 for the formal pattern.
 - **Don't encode what agents already know.** AI agents have built-in knowledge of languages, frameworks, conventions, and standards. Hardcoding language-specific patterns (test file regex, linter commands, complexity keywords) into hooks or config creates static encyclopedias that are always incomplete. Instead, hooks should detect the ecosystem (read manifest files) and delegate language-specific reasoning to the agent. Include only what agents can't discover: tool preferences, legacy traps, test quirks, custom middleware warnings. (See: "AGENTS.md Verdict" — if the agent can discover it from code, delete it.)
-- **Adapter registry for multi-runtime portability (ADR-036).** Canonical format = current dev-team format. Adapters translate to runtime-native formats. Adding a runtime = implementing RuntimeAdapter + registering it. No changes to init.ts or update.ts. MCP is the cross-runtime enforcement layer (ADR-037).
+- **Adapter registry for multi-runtime portability (ADR-036).** Canonical format = current dev-team format. Adapters translate to runtime-native formats. Adding a runtime = implementing RuntimeAdapter + registering it. No changes to init.ts or update.ts. Native runtime hooks (Copilot, Codex) handle enforcement per-runtime.
 
 ## Known Tech Debt
 
 - **INFRA_HOOKS worktree serialization is temporary** — workaround for Claude Code bugs anthropics/claude-code#34645 and #39680. Remove when upstream fixes land.
-- **Dual code paths: hook vs MCP review gate.** review_gate logic exists in both `dev-team-review-gate.js` (hook) and `src/mcp/tools/review-gate.ts` (MCP tool). K10 finding in v2.0 showed they diverged during initial implementation. Must be tested and reviewed together until extracted to shared module. See ADR-037.
 - **Duplicate import in init.ts.** `import "./adapters/index.js"` appears twice (lines 23-24). Harmless but should be cleaned up.
 
 ## Quality Benchmarks
@@ -43,4 +42,3 @@
 
 ## Overruled Challenges
 <\!-- When the human overrules an agent, record why — prevents re-flagging -->
-
