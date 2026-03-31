@@ -110,7 +110,7 @@ Asks:
 - Issue/PR workflow preferences (GitHub Issues, Jira, Linear, Other, None)
 - Branch naming convention (or None)
 
-Creates `.claude/agents/`, `.dev-team/hooks/`, `.dev-team/skills/`, `.claude/agent-memory/`, updates `CLAUDE.md` and `.claude/settings.json`.
+Creates `.claude/agents/`, `.claude/skills/`, `.claude/agent-memory/`, `.dev-team/hooks/`, updates `CLAUDE.md` and `.claude/settings.json`.
 
 ### 7. Skills
 
