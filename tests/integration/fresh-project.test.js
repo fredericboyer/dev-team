@@ -305,4 +305,95 @@ describe("fresh project installation", () => {
     );
     assert.ok(prefs.version, "should have a version after --force re-init");
   });
+
+  it("--runtime claude produces standard output (default behavior)", async () => {
+    await run(tmpDir, ["--all", "--runtime", "claude"]);
+
+    // Standard Claude Code files
+    assert.ok(fs.existsSync(path.join(tmpDir, ".dev-team", "agents", "dev-team-voss.md")));
+    assert.ok(fs.existsSync(path.join(tmpDir, ".claude", "settings.json")));
+    assert.ok(fs.existsSync(path.join(tmpDir, "CLAUDE.md")));
+
+    const prefs = JSON.parse(
+      fs.readFileSync(path.join(tmpDir, ".dev-team", "config.json"), "utf-8"),
+    );
+    assert.deepEqual(prefs.runtimes, ["claude"]);
+  });
+
+  it("--runtime copilot generates Copilot files", async () => {
+    await run(tmpDir, ["--all", "--runtime", "copilot"]);
+
+    assert.ok(
+      fs.existsSync(path.join(tmpDir, ".github", "copilot-instructions.md")),
+      "should generate .github/copilot-instructions.md",
+    );
+    assert.ok(
+      fs.existsSync(path.join(tmpDir, ".github", "hooks", "hooks.json")),
+      "should generate .github/hooks/hooks.json",
+    );
+
+    const prefs = JSON.parse(
+      fs.readFileSync(path.join(tmpDir, ".dev-team", "config.json"), "utf-8"),
+    );
+    assert.deepEqual(prefs.runtimes, ["copilot"]);
+  });
+
+  it("--runtime claude,copilot generates both Claude and Copilot files", async () => {
+    await run(tmpDir, ["--all", "--runtime", "claude,copilot"]);
+
+    // Claude Code files
+    assert.ok(fs.existsSync(path.join(tmpDir, ".dev-team", "agents", "dev-team-voss.md")));
+    assert.ok(fs.existsSync(path.join(tmpDir, "CLAUDE.md")));
+
+    // Copilot files
+    assert.ok(
+      fs.existsSync(path.join(tmpDir, ".github", "copilot-instructions.md")),
+      "should generate Copilot instructions",
+    );
+    assert.ok(
+      fs.existsSync(path.join(tmpDir, ".github", "hooks", "hooks.json")),
+      "should generate Copilot hooks",
+    );
+
+    const prefs = JSON.parse(
+      fs.readFileSync(path.join(tmpDir, ".dev-team", "config.json"), "utf-8"),
+    );
+    assert.deepEqual(prefs.runtimes, ["claude", "copilot"]);
+  });
+
+  it("--runtime with invalid value produces an error", async () => {
+    const origExit = process.exit;
+    let exitCalled = false;
+    try {
+      process.exit = (code) => {
+        exitCalled = true;
+        throw new Error(`__EXIT_${code}__`);
+      };
+      // Invalid runtime should cause adapter lookup failure
+      await assert.rejects(
+        async () => run(tmpDir, ["--all", "--runtime", "foo"]),
+        (err) => {
+          // Accept either exit code 1 or an error about unknown runtime
+          return (
+            err.message.includes("__EXIT_") ||
+            err.message.toLowerCase().includes("unknown") ||
+            err.message.toLowerCase().includes("adapter") ||
+            err.message.toLowerCase().includes("foo")
+          );
+        },
+        "should error for invalid runtime",
+      );
+    } catch (e) {
+      // If run() throws directly (not via process.exit), that's also acceptable
+      assert.ok(
+        e.message.includes("foo") ||
+          e.message.includes("unknown") ||
+          e.message.includes("adapter") ||
+          exitCalled,
+        "should fail for unknown runtime 'foo'",
+      );
+    } finally {
+      process.exit = origExit;
+    }
+  });
 });

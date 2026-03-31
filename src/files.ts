@@ -131,6 +131,8 @@ export function dirExists(absPath: string): boolean {
  * Throws on any error other than ENOENT (including EACCES, EPERM, EISDIR, etc.).
  */
 export function readFile(absPath: string): string | null {
+  assertNotSymlink(absPath);
+  assertNoSymlinkInPath(absPath);
   try {
     return fs.readFileSync(absPath, "utf-8");
   } catch (err: unknown) {

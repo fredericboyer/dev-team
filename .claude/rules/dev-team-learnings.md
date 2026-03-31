@@ -29,7 +29,6 @@
 ## Known Tech Debt
 
 - **INFRA_HOOKS worktree serialization is temporary** — workaround for Claude Code bugs anthropics/claude-code#34645 and #39680. Remove when upstream fixes land.
-- **Duplicate import in init.ts.** `import "./adapters/index.js"` appears twice (lines 23-24). Harmless but should be cleaned up.
 
 ## Quality Benchmarks
 
@@ -38,7 +37,7 @@
 - Pre-commit gate: blocks commits without memory updates (override via `.dev-team/.memory-reviewed`).
 - **Migration completeness**: Any change that moves/renames files must audit all modules that reference those paths. doctor.ts, status.ts, and skill definitions are recurring victims of path drift (3 instances across v1.5.0–v1.6.0).
 - **process.exit stubs must throw a sentinel error.** When testing functions that call `process.exit()`, a no-op stub lets execution continue past the exit point, causing false passes. Use a throw-sentinel pattern (e.g., `throw new Error('__EXIT__')`). Independently confirmed by Szabo, Knuth, and Brooks in v1.7.0 review.
-- **Input boundary validation for string-to-path conversions.** v2.0 had two path traversal findings (F-01 adapter name, R-02 MCP filePath). All user-facing strings that become file paths must be validated at the parsing/input boundary — not deeper in the call stack.
+- **Input boundary validation for string-to-path conversions.** v2.0 had two path traversal findings (F-01 adapter name, R-02 Copilot hook filePath). All user-facing strings that become file paths must be validated at the parsing/input boundary — not deeper in the call stack.
 
 ## Overruled Challenges
 <\!-- When the human overrules an agent, record why — prevents re-flagging -->

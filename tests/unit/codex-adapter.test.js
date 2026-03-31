@@ -6,7 +6,7 @@ const fs = require("fs");
 const path = require("path");
 const os = require("os");
 
-const { CodexAdapter } = require("../../dist/adapters/codex");
+const { CodexAdapter, parseSkillFrontmatter } = require("../../dist/adapters/codex");
 const { getAdapter } = require("../../dist/formats/adapters");
 
 function makeTmpDir() {
@@ -124,5 +124,101 @@ describe("CodexAdapter", () => {
 
     assert.equal(result.updated.length, 0);
     assert.equal(result.added.length, 0);
+  });
+});
+
+describe("parseSkillFrontmatter", () => {
+  it("parses valid SKILL.md content", () => {
+    const content = [
+      "---",
+      "name: dev-team-task",
+      "description: Start an iterative task loop",
+      "disable-model-invocation: true",
+      "---",
+      "",
+      "# Task skill body",
+    ].join("\n");
+
+    const result = parseSkillFrontmatter(content);
+    assert.ok(result, "should parse successfully");
+    assert.equal(result.name, "dev-team-task");
+    assert.equal(result.description, "Start an iterative task loop");
+    assert.equal(result.disableModelInvocation, true);
+    assert.ok(result.body.includes("# Task skill body"));
+  });
+
+  it("returns null for content without frontmatter", () => {
+    const result = parseSkillFrontmatter("# Just a heading\n\nNo frontmatter here.");
+    assert.equal(result, null);
+  });
+
+  it("returns null when required fields are missing", () => {
+    const content = ["---", "name: dev-team-task", "---", "", "Body"].join("\n");
+    const result = parseSkillFrontmatter(content);
+    assert.equal(result, null, "should return null without description");
+  });
+
+  it("defaults disableModelInvocation to false when not present", () => {
+    const content = [
+      "---",
+      "name: dev-team-challenge",
+      "description: Challenge a proposal",
+      "---",
+      "",
+      "Body",
+    ].join("\n");
+
+    const result = parseSkillFrontmatter(content);
+    assert.ok(result);
+    assert.equal(result.disableModelInvocation, false);
+  });
+});
+
+describe("CodexAdapter copySkills", () => {
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = makeTmpDir();
+  });
+
+  afterEach(() => {
+    cleanup(tmpDir);
+  });
+
+  it("generate() creates .agents/skills/ with skill files", () => {
+    const adapter = new CodexAdapter();
+    adapter.generate(SAMPLE_DEFS, tmpDir);
+
+    const skillsDir = path.join(tmpDir, ".agents", "skills");
+    assert.ok(fs.existsSync(skillsDir), ".agents/skills/ should exist");
+
+    // At least one skill directory should be created
+    const entries = fs.readdirSync(skillsDir);
+    assert.ok(entries.length > 0, "should have at least one skill directory");
+  });
+
+  it("generate() creates openai.yaml for orchestration skills", () => {
+    const adapter = new CodexAdapter();
+    adapter.generate(SAMPLE_DEFS, tmpDir);
+
+    const skillsDir = path.join(tmpDir, ".agents", "skills");
+    if (!fs.existsSync(skillsDir)) return;
+
+    // Look for any openai.yaml in skill subdirectories
+    const entries = fs.readdirSync(skillsDir);
+    let foundYaml = false;
+    for (const entry of entries) {
+      const yamlPath = path.join(skillsDir, entry, "agents", "openai.yaml");
+      if (fs.existsSync(yamlPath)) {
+        foundYaml = true;
+        const content = fs.readFileSync(yamlPath, "utf-8");
+        assert.ok(
+          content.includes("allow_implicit_invocation: false"),
+          "openai.yaml should disable implicit invocation",
+        );
+      }
+    }
+    // Orchestration skills (task, review, etc.) should have openai.yaml
+    assert.ok(foundYaml, "should generate openai.yaml for at least one orchestration skill");
   });
 });

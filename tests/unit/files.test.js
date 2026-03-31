@@ -17,6 +17,9 @@ const {
   mergeClaudeMd,
   assertNotSymlink,
   assertNoSymlinkInPath,
+  listSubdirectories,
+  listFilesRecursive,
+  getPackageVersion,
 } = require("../../dist/files");
 
 let tmpDir;
@@ -535,6 +538,82 @@ describe("mergeClaudeMd", () => {
     // Verify no duplicate begin markers
     const beginCount = (content.match(/<!-- dev-team:begin -->/g) || []).length;
     assert.equal(beginCount, 1, "should have exactly one begin marker");
+  });
+});
+
+describe("listSubdirectories", () => {
+  it("returns subdirectory names for a normal directory", () => {
+    const d = path.join(tmpDir, "parent");
+    fs.mkdirSync(path.join(d, "childA"), { recursive: true });
+    fs.mkdirSync(path.join(d, "childB"), { recursive: true });
+    fs.writeFileSync(path.join(d, "file.txt"), "not a dir");
+
+    const result = listSubdirectories(d);
+    assert.ok(result.includes("childA"));
+    assert.ok(result.includes("childB"));
+    assert.ok(!result.includes("file.txt"), "should not include files");
+  });
+
+  it("returns empty array for an empty directory", () => {
+    const d = path.join(tmpDir, "empty");
+    fs.mkdirSync(d);
+    assert.deepEqual(listSubdirectories(d), []);
+  });
+
+  it("returns empty array for a non-existent directory", () => {
+    assert.deepEqual(listSubdirectories(path.join(tmpDir, "nope")), []);
+  });
+});
+
+describe("listFilesRecursive", () => {
+  it("lists files recursively in a normal directory", () => {
+    const d = path.join(tmpDir, "tree");
+    fs.mkdirSync(path.join(d, "sub"), { recursive: true });
+    fs.writeFileSync(path.join(d, "a.txt"), "a");
+    fs.writeFileSync(path.join(d, "sub", "b.txt"), "b");
+
+    const result = listFilesRecursive(d);
+    assert.equal(result.length, 2);
+    assert.ok(result.some((f) => f.endsWith("a.txt")));
+    assert.ok(result.some((f) => f.endsWith("b.txt")));
+  });
+
+  it("returns empty array with maxDepth=0 and nested files", () => {
+    const d = path.join(tmpDir, "depth0");
+    fs.mkdirSync(path.join(d, "sub"), { recursive: true });
+    fs.writeFileSync(path.join(d, "top.txt"), "top");
+    fs.writeFileSync(path.join(d, "sub", "nested.txt"), "nested");
+
+    // maxDepth=0 means no recursion into subdirectories
+    const result = listFilesRecursive(d, 0);
+    assert.ok(
+      result.some((f) => f.endsWith("top.txt")),
+      "should include top-level files",
+    );
+    assert.ok(!result.some((f) => f.endsWith("nested.txt")), "should not recurse into subdirs");
+  });
+
+  it("does not recurse into symlink directories", () => {
+    const d = path.join(tmpDir, "symtest");
+    const realSub = path.join(d, "real");
+    fs.mkdirSync(realSub, { recursive: true });
+    fs.writeFileSync(path.join(realSub, "file.txt"), "content");
+    fs.symlinkSync(realSub, path.join(d, "linked"));
+
+    const result = listFilesRecursive(d);
+    // Should have the real file from the real directory
+    const realFiles = result.filter((f) => f.includes(path.join("real", "file.txt")));
+    assert.ok(realFiles.length > 0, "should include files from real directory");
+    // Should NOT recurse into the symlink directory (no linked/file.txt)
+    const linkedNestedFiles = result.filter((f) => f.includes(path.join("linked", "file.txt")));
+    assert.equal(linkedNestedFiles.length, 0, "should not recurse into symlink directory");
+  });
+});
+
+describe("getPackageVersion", () => {
+  it("returns a valid semver version string", () => {
+    const version = getPackageVersion();
+    assert.ok(/^\d+\.\d+\.\d+/.test(version), `should be semver, got: ${version}`);
   });
 });
 

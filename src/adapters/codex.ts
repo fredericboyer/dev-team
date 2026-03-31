@@ -26,7 +26,7 @@ function renderAgentInstruction(def: CanonicalAgentDefinition): string {
 /**
  * Reads a SKILL.md file and extracts frontmatter fields.
  */
-function parseSkillFrontmatter(
+export function parseSkillFrontmatter(
   content: string,
 ): { name: string; description: string; disableModelInvocation: boolean; body: string } | null {
   const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);

@@ -66,6 +66,8 @@ Do NOT skip this. Do NOT treat hook output as optional. If you believe a review 
 
 > **Non-JS/TS projects:** Hooks detect the ecosystem and delegate language-specific reasoning to agents. File patterns in `agent-patterns.json` cover common conventions; agents apply their built-in knowledge for language-specific test naming, build tools, and framework structures beyond these patterns (see ADR-034).
 
+> **Multi-runtime support:** Use `--runtime` flag during `dev-team init` to target additional runtimes (e.g., `--runtime claude,copilot` or `--runtime codex`). Each runtime adapter generates native configuration files. Run `dev-team update` after changing runtimes to regenerate all adapter output.
+
 ### Project-specific customization
 
 `.dev-team/` is managed by dev-team and updated by `dev-team update`. Do not add project-specific files here.
