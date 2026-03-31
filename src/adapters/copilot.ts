@@ -5,6 +5,7 @@
  * - `.github/copilot-instructions.md` — general instructions (all agents combined)
  * - `.github/instructions/{name}.instructions.md` — per-agent instruction files
  *   with optional `applyTo` frontmatter for path scoping
+ * - `.github/hooks/hooks.json` — Copilot native hook configuration
  *
  * See ADR-036 for the multi-runtime adapter architecture.
  */
@@ -40,6 +41,78 @@ function renderAgentInstruction(def: CanonicalAgentDefinition): string {
   return lines.join("\n");
 }
 
+/**
+ * Copilot hook event types.
+ * See: https://docs.github.com/en/copilot/customizing-copilot/extending-copilot-coding-agent-with-hooks
+ */
+interface CopilotHookEntry {
+  command: string;
+  description?: string;
+}
+
+interface CopilotHookEvent {
+  matchers?: string[];
+  hooks: CopilotHookEntry[];
+}
+
+interface CopilotHooksConfig {
+  hooks: Record<string, CopilotHookEvent[]>;
+}
+
+/**
+ * Builds the Copilot hooks.json configuration.
+ *
+ * Maps dev-team hooks to Copilot's 6 native hook events:
+ * - preToolUse: safety guard (bash/shell), pre-commit lint, review gate (git commit)
+ * - postToolUse: TDD enforcement, post-change review (file edit tools)
+ */
+export function buildHooksConfig(): CopilotHooksConfig {
+  return {
+    hooks: {
+      preToolUse: [
+        {
+          matchers: ["bash", "shell", "terminal"],
+          hooks: [
+            {
+              command: 'node .dev-team/hooks/dev-team-safety-guard.js "$TOOL_NAME" "$TOOL_INPUT"',
+              description: "Safety guard — blocks dangerous shell commands",
+            },
+          ],
+        },
+        {
+          matchers: ["git_commit", "git"],
+          hooks: [
+            {
+              command: "node .dev-team/hooks/dev-team-pre-commit-lint.js",
+              description: "Pre-commit lint — runs linter before commit",
+            },
+            {
+              command: "node .dev-team/hooks/dev-team-review-gate.js",
+              description: "Review gate — blocks commits without review evidence",
+            },
+          ],
+        },
+      ],
+      postToolUse: [
+        {
+          matchers: ["edit_file", "write_file", "insert_code"],
+          hooks: [
+            {
+              command: 'node .dev-team/hooks/dev-team-tdd-enforce.js "$TOOL_NAME" "$TOOL_INPUT"',
+              description: "TDD enforcement — checks test exists for changed code",
+            },
+            {
+              command:
+                'node .dev-team/hooks/dev-team-post-change-review.js "$TOOL_NAME" "$TOOL_INPUT"',
+              description: "Post-change review — triggers review for significant changes",
+            },
+          ],
+        },
+      ],
+    },
+  };
+}
+
 export class CopilotAdapter implements RuntimeAdapter {
   readonly id = "copilot";
   readonly name = "GitHub Copilot";
@@ -61,6 +134,9 @@ export class CopilotAdapter implements RuntimeAdapter {
         renderAgentInstruction(def),
       );
     }
+
+    // Native Copilot hooks
+    this.generateHooks(targetDir);
   }
 
   update(
@@ -97,7 +173,20 @@ export class CopilotAdapter implements RuntimeAdapter {
       }
     }
 
+    // Update native Copilot hooks
+    this.generateHooks(targetDir);
+
     return { updated, added };
+  }
+
+  /**
+   * Generates `.github/hooks/hooks.json` with dev-team hook mappings
+   * for Copilot's native hook system.
+   */
+  generateHooks(targetDir: string): void {
+    const hooksPath = path.join(targetDir, ".github", "hooks", "hooks.json");
+    const config = buildHooksConfig();
+    writeFile(hooksPath, JSON.stringify(config, null, 2) + "\n");
   }
 }
 

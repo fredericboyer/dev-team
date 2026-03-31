@@ -6,7 +6,7 @@ const fs = require("fs");
 const path = require("path");
 const os = require("os");
 
-const { CopilotAdapter } = require("../../dist/adapters/copilot");
+const { CopilotAdapter, buildHooksConfig } = require("../../dist/adapters/copilot");
 
 function makeTmpDir() {
   return fs.mkdtempSync(path.join(os.tmpdir(), "copilot-test-"));
@@ -132,5 +132,95 @@ describe("CopilotAdapter", () => {
 
     assert.ok(result.added.includes("dev-team-szabo"), "szabo should be added");
     assert.ok(!result.updated.includes("dev-team-voss"), "voss unchanged, should not be updated");
+  });
+
+  it("generate() creates hooks.json", () => {
+    const defs = makeDefs();
+    adapter.generate(defs, tmpDir);
+
+    const hooksPath = path.join(tmpDir, ".github", "hooks", "hooks.json");
+    assert.ok(fs.existsSync(hooksPath), "hooks.json should exist");
+
+    const config = JSON.parse(fs.readFileSync(hooksPath, "utf-8"));
+    assert.ok(config.hooks, "should have hooks key");
+    assert.ok(Array.isArray(config.hooks.preToolUse), "should have preToolUse array");
+    assert.ok(Array.isArray(config.hooks.postToolUse), "should have postToolUse array");
+  });
+
+  it("update() also writes hooks.json", () => {
+    const defs = makeDefs();
+    adapter.update(defs, tmpDir);
+
+    const hooksPath = path.join(tmpDir, ".github", "hooks", "hooks.json");
+    assert.ok(fs.existsSync(hooksPath), "hooks.json should exist after update");
+  });
+});
+
+describe("buildHooksConfig", () => {
+  it("returns preToolUse with safety guard matcher for bash/shell", () => {
+    const config = buildHooksConfig();
+    const preToolUse = config.hooks.preToolUse;
+
+    const bashEntry = preToolUse.find((e) => e.matchers && e.matchers.includes("bash"));
+    assert.ok(bashEntry, "should have a bash matcher entry");
+    assert.ok(
+      bashEntry.hooks.some((h) => h.command.includes("safety-guard")),
+      "bash matcher should include safety guard",
+    );
+  });
+
+  it("returns preToolUse with review gate and lint for git commit", () => {
+    const config = buildHooksConfig();
+    const preToolUse = config.hooks.preToolUse;
+
+    const gitEntry = preToolUse.find((e) => e.matchers && e.matchers.includes("git_commit"));
+    assert.ok(gitEntry, "should have a git_commit matcher entry");
+
+    const commands = gitEntry.hooks.map((h) => h.command);
+    assert.ok(
+      commands.some((c) => c.includes("pre-commit-lint")),
+      "git commit matcher should include lint",
+    );
+    assert.ok(
+      commands.some((c) => c.includes("review-gate")),
+      "git commit matcher should include review gate",
+    );
+  });
+
+  it("returns postToolUse with TDD and post-change review for file edits", () => {
+    const config = buildHooksConfig();
+    const postToolUse = config.hooks.postToolUse;
+
+    const editEntry = postToolUse.find((e) => e.matchers && e.matchers.includes("edit_file"));
+    assert.ok(editEntry, "should have an edit_file matcher entry");
+
+    const commands = editEntry.hooks.map((h) => h.command);
+    assert.ok(
+      commands.some((c) => c.includes("tdd-enforce")),
+      "file edit matcher should include TDD enforcement",
+    );
+    assert.ok(
+      commands.some((c) => c.includes("post-change-review")),
+      "file edit matcher should include post-change review",
+    );
+  });
+
+  it("all hook entries have descriptions", () => {
+    const config = buildHooksConfig();
+    const allEvents = [...config.hooks.preToolUse, ...config.hooks.postToolUse];
+
+    for (const event of allEvents) {
+      for (const hook of event.hooks) {
+        assert.ok(hook.description, `hook "${hook.command}" should have a description`);
+        assert.ok(hook.description.length > 0, "description should not be empty");
+      }
+    }
+  });
+
+  it("does not include sessionStart, sessionEnd, or errorOccurred events", () => {
+    const config = buildHooksConfig();
+    assert.equal(config.hooks.sessionStart, undefined, "no sessionStart hooks");
+    assert.equal(config.hooks.sessionEnd, undefined, "no sessionEnd hooks");
+    assert.equal(config.hooks.errorOccurred, undefined, "no errorOccurred hooks");
   });
 });

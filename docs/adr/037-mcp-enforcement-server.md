@@ -1,7 +1,7 @@
 # ADR-037: MCP enforcement server
 
 Date: 2026-03-30
-Status: accepted
+Status: superseded — removed in v2.0.1; native runtime hooks (Copilot, Codex) replace MCP enforcement
 
 ## Context
 
