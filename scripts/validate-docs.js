@@ -86,6 +86,74 @@ if (fs.existsSync(researchDir)) {
   console.log(`  Research briefs: ${researchFiles.length} files checked`);
 }
 
+// --- Stale path validation ---
+// Deprecated paths from v3.0 migration (ADR-038). Any .md file referencing these is stale.
+
+const DEPRECATED_PATHS = [
+  { pattern: /\.dev-team\/agents\//g, replacement: ".claude/agents/", since: "v3.0.0" },
+  { pattern: /\.dev-team\/agent-memory\//g, replacement: ".claude/agent-memory/", since: "v3.0.0" },
+  { pattern: /\.dev-team\/skills\//g, replacement: ".claude/skills/", since: "v3.0.0" },
+];
+
+// Directories to scan for stale references
+const SCAN_DIRS = ["docs", "templates", ".claude/rules", ".claude/skills"];
+const SCAN_ROOT_FILES = ["CLAUDE.md", "README.md"];
+
+// Files to skip (historical records that legitimately reference old paths)
+const SKIP_PATTERNS = [
+  /docs\/research\//, // Research briefs are historical
+  /docs\/adr\//, // ADRs are immutable records
+  /CHANGELOG\.md$/, // Changelog is historical
+  /metrics\.md$/, // Metrics are historical
+  /agent-memory\//, // Memory files may reference old paths in historical entries
+];
+
+function shouldSkip(filePath) {
+  return SKIP_PATTERNS.some((p) => p.test(filePath));
+}
+
+function scanFileForStalePaths(filePath) {
+  const content = fs.readFileSync(filePath, "utf-8");
+  for (const dep of DEPRECATED_PATHS) {
+    const matches = content.match(dep.pattern);
+    if (matches) {
+      console.error(
+        `FAIL: "${filePath}" has ${matches.length} stale reference(s) to "${dep.pattern.source}" (deprecated since ${dep.since}, use "${dep.replacement}")`,
+      );
+      errors++;
+    }
+  }
+}
+
+function scanDirectory(dirPath) {
+  if (!fs.existsSync(dirPath)) return;
+  const entries = fs.readdirSync(dirPath, { withFileTypes: true });
+  for (const entry of entries) {
+    const fullPath = path.join(dirPath, entry.name);
+    if (shouldSkip(fullPath)) continue;
+    if (entry.isDirectory()) {
+      scanDirectory(fullPath);
+    } else if (entry.name.endsWith(".md")) {
+      scanFileForStalePaths(fullPath);
+    }
+  }
+}
+
+const root = path.join(__dirname, "..");
+for (const dir of SCAN_DIRS) {
+  scanDirectory(path.join(root, dir));
+}
+for (const file of SCAN_ROOT_FILES) {
+  const filePath = path.join(root, file);
+  if (fs.existsSync(filePath) && !shouldSkip(filePath)) {
+    scanFileForStalePaths(filePath);
+  }
+}
+
+console.log(
+  `  Stale paths: ${DEPRECATED_PATHS.length} patterns checked across ${SCAN_DIRS.length} directories + ${SCAN_ROOT_FILES.length} root files`,
+);
+
 // --- Summary ---
 
 if (errors > 0) {
