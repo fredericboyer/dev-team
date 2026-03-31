@@ -501,8 +501,14 @@ function migrateToV3Layout(targetDir: string): string[] {
         try {
           const stat = fs.lstatSync(entryPath);
           if (stat.isSymbolicLink()) {
-            fs.unlinkSync(entryPath);
-            log.push(`Removed stale symlink: .claude/skills/${entry}`);
+            const linkTarget = fs.readlinkSync(entryPath);
+            if (
+              linkTarget.includes(".dev-team/skills/") ||
+              linkTarget.includes(".dev-team\\skills\\")
+            ) {
+              fs.unlinkSync(entryPath);
+              log.push(`Removed stale symlink: .claude/skills/${entry}`);
+            }
           }
         } catch {
           // best effort

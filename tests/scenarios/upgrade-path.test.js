@@ -82,7 +82,7 @@ describe("upgrade path scenario", () => {
     // Pre-existing .claude directory with custom agents
     fs.mkdirSync(path.join(tmpDir, ".claude", "agents"), { recursive: true });
     fs.writeFileSync(
-      path.join(tmpDir, ".claude", "agents", "custom-agent.md"),
+      path.join(tmpDir, ".claude", "agents", "custom-agent.agent.md"),
       "---\nname: custom\n---\nMy agent",
     );
     fs.writeFileSync(
@@ -98,7 +98,7 @@ describe("upgrade path scenario", () => {
 
     // Custom agent in .claude/ preserved (dev-team only manages dev-team-* files)
     assert.ok(
-      fs.existsSync(path.join(tmpDir, ".claude", "agents", "custom-agent.md")),
+      fs.existsSync(path.join(tmpDir, ".claude", "agents", "custom-agent.agent.md")),
       "should not delete custom agents in .claude/",
     );
 
