@@ -322,12 +322,12 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
     const content = readFile(src);
     if (!content) continue;
 
-    if (
-      fileExists(path.join(agentsDir, agent.file.replace(".md", ".agent.md"))) &&
-      !isAll &&
-      !preset
-    ) {
-      const overwrite = await prompts.confirm(`  ${agent.file} already exists. Overwrite?`, false);
+    const agentFileName = agent.file.replace(/\.md$/, ".agent.md");
+    if (fileExists(path.join(agentsDir, agentFileName)) && !isAll && !preset) {
+      const overwrite = await prompts.confirm(
+        `  ${agentFileName} already exists. Overwrite?`,
+        false,
+      );
       if (!overwrite) continue;
     }
 

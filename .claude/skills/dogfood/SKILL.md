@@ -17,7 +17,7 @@ Audit `.dev-team/learnings.md`, agent memories, and `templates/CLAUDE.md` to ide
 ### 1. Read current state
 
 - Read `.dev-team/learnings.md` — shared team learnings
-- Read all `.dev-team/agent-memory/*/MEMORY.md` — agent calibration data
+- Read all `.claude/agent-memory/*/MEMORY.md` — agent calibration data
 - Read `templates/CLAUDE.md` — the primary instruction surface shipped to all projects
 - Read `CLAUDE.md` (project root) — includes both the dev-team managed section AND project-specific sections outside `<!-- dev-team:begin/end -->` markers
 - Read `package.json` — for version, engines, dependencies, scripts
@@ -60,7 +60,7 @@ The primary instruction surface shipped to all projects. Check:
 - Does the "Hook directives are MANDATORY" section reflect current enforcement mechanisms?
 - Is the memory architecture table still accurate?
 - Does the skills list match what's actually in `templates/skills/`?
-- **Template bloat audit:** Does `templates/CLAUDE.md` contain information discoverable from a fresh project install? Count lines in the managed section — flag if over 100. Check for content that duplicates what agents can find by reading `.dev-team/agents/`, `.dev-team/hooks/`, or config files.
+- **Template bloat audit:** Does `templates/CLAUDE.md` contain information discoverable from a fresh project install? Count lines in the managed section — flag if over 100. Check for content that duplicates what agents can find by reading `.claude/agents/`, `.dev-team/hooks/`, or config files.
 
 #### 4b. Project CLAUDE.md — section OUTSIDE dev-team markers
 

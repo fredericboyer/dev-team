@@ -150,7 +150,7 @@ export function compareSemver(a: string, b: string): number {
 function runMigrations(
   prefs: Preferences,
   fromVersion: string,
-  _devTeamDir: string,
+  devTeamDir: string,
   claudeDir: string,
 ): string[] {
   const log: string[] = [];
@@ -165,7 +165,7 @@ function runMigrations(
         const memoryDir = path.join(claudeDir, "agent-memory");
 
         // Rename agent file (check both .agent.md and legacy .md extensions)
-        const oldAgentPath = path.join(agentsDir, rename.oldFile.replace(".md", ".agent.md"));
+        const oldAgentPath = path.join(agentsDir, rename.oldFile.replace(/\.md$/, ".agent.md"));
         const oldAgentPathLegacy = path.join(agentsDir, rename.oldFile);
         const pathToRemove = fileExists(oldAgentPath)
           ? oldAgentPath
@@ -226,7 +226,7 @@ function runMigrations(
     }
 
     if (migration.hookRemovals) {
-      const hooksDir = path.join(_devTeamDir, "hooks");
+      const hooksDir = path.join(devTeamDir, "hooks");
       for (const hookFile of migration.hookRemovals) {
         const hookPath = path.join(hooksDir, hookFile);
         if (fileExists(hookPath)) {
