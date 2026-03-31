@@ -44,6 +44,24 @@ for (const entry of indexEntries) {
   }
 }
 
+// Check (c): ADRs marked "superseded" in README index have matching status in file header
+const supersededPattern = /\| [^|]+ \| superseded/i;
+for (const line of readmeContent.split("\n")) {
+  if (!supersededPattern.test(line)) continue;
+  const fileMatch = line.match(/\[(\d+)\]\(([^)]+)\)/);
+  if (!fileMatch) continue;
+  const [, number, filename] = fileMatch;
+  const filePath = path.join(adrDir, filename);
+  if (!fs.existsSync(filePath)) continue; // already caught by check (b)
+  const fileContent = fs.readFileSync(filePath, "utf-8");
+  if (!/status:\s*superseded/i.test(fileContent)) {
+    console.error(
+      `FAIL: ADR [${number}](${filename}) is "superseded" in index but file header does not have "Status: superseded"`,
+    );
+    errors++;
+  }
+}
+
 console.log(`  ADRs: ${adrFiles.length} files, ${indexEntries.length} index entries checked`);
 
 // --- Research brief validation ---

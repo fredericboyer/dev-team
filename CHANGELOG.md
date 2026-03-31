@@ -7,10 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.1] - 2026-03-30
+
+### Removed
+- MCP enforcement server and `npx dev-team mcp` CLI command — replaced by native Copilot hooks (#581).
+- Cursor and Windsurf adapters — insufficient runtime maturity for reliable adapter support (#581).
+
+### Added
+- Copilot native hooks for enforcement — replaces MCP-based approach (#581).
+- Turing verification gate for research brief validation (#581).
+
 ## [2.0.0] - 2026-03-30
 
 ### BREAKING
-- New `--runtime` flag changes `init` behavior — selects target runtime (claude-code, copilot, codex, cursor, windsurf) during initialization.
+- New `--runtime` flag changes `init` behavior — selects target runtime (claude, copilot, codex) during initialization.
 - `runtimes` field added to `config.json` — tracks which runtime adapters are active.
 - Adapter registry replaces inline agent copy logic — agent installation now routes through runtime-specific adapters.
 
@@ -20,10 +30,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - AGENTS.md export adapter — generates consolidated `AGENTS.md` from canonical definitions (#502, #570).
 - GitHub Copilot adapter — translates agent definitions for Copilot CLI consumption (#504, #570).
 - Codex CLI adapter — skills-focused translation for OpenAI Codex CLI (#505, #571).
-- Cursor adapter — agent definitions adapted for Cursor AI runtime (#506, #571).
-- Windsurf adapter — agent definitions adapted for Windsurf runtime (#506, #571).
-- MCP enforcement server with review-gate tool (ADR-037, #503, #572).
-- `npx dev-team mcp` CLI command to start the MCP enforcement server (#503, #572).
 - Barrel file for adapter imports (`src/adapters/index.ts`) (#569).
 - Path traversal validation on adapter file operations (#569).
 - Input boundary validation for adapter registry (#569).
