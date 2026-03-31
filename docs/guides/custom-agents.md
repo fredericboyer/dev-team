@@ -4,7 +4,7 @@ This guide explains how to create your own dev-team agents following the establi
 
 ## Agent file format
 
-Each agent is a Markdown file with YAML frontmatter, stored in `.dev-team/agents/`. The file has two parts: machine-readable metadata (frontmatter) and the agent's persona definition (body).
+Each agent is a Markdown file with YAML frontmatter, stored in `.claude/agents/`. The file has two parts: machine-readable metadata (frontmatter) and the agent's persona definition (body).
 
 ### Frontmatter
 
@@ -24,7 +24,7 @@ memory: project
 | `description` | Yes | String | Shown in agent selection UI. Include role and trigger conditions. |
 | `tools` | Yes | Comma-separated | `Read, Grep, Glob, Bash, Agent` for read-only auditors. Add `Edit, Write` for agents that modify code. |
 | `model` | Yes | `sonnet` or `opus` | Use `opus` for read-only analysis agents (deeper reasoning). Use `sonnet` for implementation agents (faster, can write code). |
-| `memory` | Yes | `project` | Always `project` — enables per-project memory in `.dev-team/agent-memory/`. |
+| `memory` | Yes | `project` | Always `project` — enables per-project memory in `.claude/agent-memory/`. |
 
 ### Body sections
 
@@ -140,7 +140,7 @@ After completing work, write key learnings to your MEMORY.md:
 
 ## Memory management
 
-Each agent gets a memory file at `.dev-team/agent-memory/dev-team-<name>/MEMORY.md`. The first 200 lines are loaded into the agent's context at session start.
+Each agent gets a memory file at `.claude/agent-memory/dev-team-<name>/MEMORY.md`. The first 200 lines are loaded into the agent's context at session start.
 
 ### Memory template
 
@@ -238,7 +238,7 @@ After completing a review, write key learnings to your MEMORY.md:
 
 After creating the agent file and memory template:
 
-1. Place the agent file in `.dev-team/agents/dev-team-<name>.md`
-2. Create the memory directory: `.dev-team/agent-memory/dev-team-<name>/MEMORY.md`
+1. Place the agent file in `.claude/agents/dev-team-<name>.md`
+2. Create the memory directory: `.claude/agent-memory/dev-team-<name>/MEMORY.md`
 3. Other agents can now reference yours with `@dev-team-<name>`
 4. Add it to the agent table in CLAUDE.md so the team knows it exists

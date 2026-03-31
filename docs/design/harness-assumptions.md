@@ -29,7 +29,7 @@ Components in dev-team that compensate for model limitations. Each retro evaluat
 
 - **Assumption:** Models cannot maintain context across sessions, requiring explicit persistence of learnings and calibration data.
 - **Current status:** Still valid. Claude Code sessions are stateless between invocations. Without persisted memory, agents repeat mistakes and lose calibration across sessions.
-- **Component:** `.dev-team/agent-memory/`, `.claude/rules/dev-team-learnings.md`
+- **Component:** `.claude/agent-memory/`, `.claude/rules/dev-team-learnings.md`
 - **Last-validated:** 2026-03-29
 
 ### Structured finding classifications

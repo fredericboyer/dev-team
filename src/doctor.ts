@@ -12,6 +12,7 @@ export function doctor(targetDir: string): void {
   console.log("\ndev-team doctor — Installation health check\n");
 
   const devTeamDir = path.join(targetDir, ".dev-team");
+  const claudeDir = path.join(targetDir, ".claude");
   const results: CheckResult[] = [];
 
   // 1. config.json exists and is valid
@@ -29,12 +30,12 @@ export function doctor(targetDir: string): void {
     }
   }
 
-  // 2. Agent files exist
+  // 2. Agent files exist (runtime-native location: .claude/agents/)
   if (prefs?.agents) {
-    const agentsDir = path.join(devTeamDir, "agents");
+    const agentsDir = path.join(claudeDir, "agents");
     for (const label of prefs.agents) {
-      // Convert label to filename pattern
-      const fileName = `dev-team-${label.toLowerCase()}.md`;
+      // Convert label to filename pattern (.agent.md extension — ADR-038)
+      const fileName = `dev-team-${label.toLowerCase()}.agent.md`;
       const exists = fileExists(path.join(agentsDir, fileName));
       results.push({
         name: `Agent: ${label}`,
@@ -77,9 +78,9 @@ export function doctor(targetDir: string): void {
     results.push({ name: "CLAUDE.md", pass: true, detail: "Markers present" });
   }
 
-  // 5. Agent memory directories
+  // 5. Agent memory directories (runtime-native location: .claude/agent-memory/)
   if (prefs?.agents) {
-    const memoryDir = path.join(devTeamDir, "agent-memory");
+    const memoryDir = path.join(claudeDir, "agent-memory");
     for (const label of prefs.agents) {
       const dirName = `dev-team-${label.toLowerCase()}`;
       const memPath = path.join(memoryDir, dirName, "MEMORY.md");

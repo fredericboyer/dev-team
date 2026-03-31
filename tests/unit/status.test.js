@@ -65,19 +65,24 @@ function scaffold(opts = {}) {
 
   fs.writeFileSync(path.join(devTeam, "config.json"), JSON.stringify(config));
 
-  // Skills directories
+  // Skills directories (in .claude/skills/)
   if (opts.skills) {
-    const skillsDir = path.join(devTeam, "skills");
+    const skillsDir = path.join(tmpDir, ".claude", "skills");
     fs.mkdirSync(skillsDir, { recursive: true });
     for (const skill of opts.skills) {
       fs.mkdirSync(path.join(skillsDir, skill), { recursive: true });
     }
   }
 
-  // Agent memory
+  // Agent memory (in .claude/agent-memory/)
   if (opts.memory) {
     for (const [label, content] of Object.entries(opts.memory)) {
-      const memDir = path.join(devTeam, "agent-memory", `dev-team-${label.toLowerCase()}`);
+      const memDir = path.join(
+        tmpDir,
+        ".claude",
+        "agent-memory",
+        `dev-team-${label.toLowerCase()}`,
+      );
       fs.mkdirSync(memDir, { recursive: true });
       fs.writeFileSync(path.join(memDir, "MEMORY.md"), content);
     }

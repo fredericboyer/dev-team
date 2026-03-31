@@ -1252,15 +1252,15 @@ describe("dev-team-pre-commit-gate", () => {
         encoding: "utf-8",
       });
       execFileSync("git", ["config", "user.name", "Test"], { cwd: tmpDir, encoding: "utf-8" });
-      fs.mkdirSync(path.join(tmpDir, ".dev-team", "agent-memory", "dev-team-voss"), {
+      fs.mkdirSync(path.join(tmpDir, ".claude", "agent-memory", "dev-team-voss"), {
         recursive: true,
       });
       fs.writeFileSync(path.join(tmpDir, "handler.js"), "module.exports = {}");
       fs.writeFileSync(
-        path.join(tmpDir, ".dev-team", "agent-memory", "dev-team-voss", "MEMORY.md"),
+        path.join(tmpDir, ".claude", "agent-memory", "dev-team-voss", "MEMORY.md"),
         "# Updated\nDiscovered that error handling uses custom Result type.",
       );
-      execFileSync("git", ["add", "handler.js", ".dev-team/agent-memory/dev-team-voss/MEMORY.md"], {
+      execFileSync("git", ["add", "handler.js", ".claude/agent-memory/dev-team-voss/MEMORY.md"], {
         cwd: tmpDir,
         encoding: "utf-8",
       });
@@ -1285,15 +1285,15 @@ describe("dev-team-pre-commit-gate", () => {
         encoding: "utf-8",
       });
       execFileSync("git", ["config", "user.name", "Test"], { cwd: tmpDir, encoding: "utf-8" });
-      fs.mkdirSync(path.join(tmpDir, ".dev-team", "agent-memory", "dev-team-voss"), {
+      fs.mkdirSync(path.join(tmpDir, ".claude", "agent-memory", "dev-team-voss"), {
         recursive: true,
       });
       fs.writeFileSync(path.join(tmpDir, "handler.js"), "module.exports = {}");
       fs.writeFileSync(
-        path.join(tmpDir, ".dev-team", "agent-memory", "dev-team-voss", "MEMORY.md"),
+        path.join(tmpDir, ".claude", "agent-memory", "dev-team-voss", "MEMORY.md"),
         "# Voss Memory\n\n## Learnings\n\n",
       );
-      execFileSync("git", ["add", "handler.js", ".dev-team/agent-memory/dev-team-voss/MEMORY.md"], {
+      execFileSync("git", ["add", "handler.js", ".claude/agent-memory/dev-team-voss/MEMORY.md"], {
         cwd: tmpDir,
         encoding: "utf-8",
       });

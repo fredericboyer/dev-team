@@ -26,13 +26,13 @@ describe("fresh project installation", () => {
   it("creates all expected files with --all", async () => {
     await run(tmpDir, ["--all"]);
 
-    // Agents
-    assert.ok(fs.existsSync(path.join(tmpDir, ".dev-team", "agents", "dev-team-voss.md")));
-    assert.ok(fs.existsSync(path.join(tmpDir, ".dev-team", "agents", "dev-team-mori.md")));
-    assert.ok(fs.existsSync(path.join(tmpDir, ".dev-team", "agents", "dev-team-szabo.md")));
-    assert.ok(fs.existsSync(path.join(tmpDir, ".dev-team", "agents", "dev-team-knuth.md")));
-    assert.ok(fs.existsSync(path.join(tmpDir, ".dev-team", "agents", "dev-team-beck.md")));
-    assert.ok(fs.existsSync(path.join(tmpDir, ".dev-team", "agents", "dev-team-deming.md")));
+    // Agents (runtime-native: .claude/agents/*.agent.md)
+    assert.ok(fs.existsSync(path.join(tmpDir, ".claude", "agents", "dev-team-voss.agent.md")));
+    assert.ok(fs.existsSync(path.join(tmpDir, ".claude", "agents", "dev-team-mori.agent.md")));
+    assert.ok(fs.existsSync(path.join(tmpDir, ".claude", "agents", "dev-team-szabo.agent.md")));
+    assert.ok(fs.existsSync(path.join(tmpDir, ".claude", "agents", "dev-team-knuth.agent.md")));
+    assert.ok(fs.existsSync(path.join(tmpDir, ".claude", "agents", "dev-team-beck.agent.md")));
+    assert.ok(fs.existsSync(path.join(tmpDir, ".claude", "agents", "dev-team-deming.agent.md")));
 
     // Hooks
     assert.ok(fs.existsSync(path.join(tmpDir, ".dev-team", "hooks", "dev-team-safety-guard.js")));
@@ -44,20 +44,18 @@ describe("fresh project installation", () => {
       fs.existsSync(path.join(tmpDir, ".dev-team", "hooks", "dev-team-pre-commit-gate.js")),
     );
 
-    // Framework skills (always installed to .dev-team/skills/)
+    // Framework skills (directly in .claude/skills/)
     assert.ok(
-      fs.existsSync(path.join(tmpDir, ".dev-team", "skills", "dev-team-challenge", "SKILL.md")),
+      fs.existsSync(path.join(tmpDir, ".claude", "skills", "dev-team-challenge", "SKILL.md")),
     );
-    assert.ok(fs.existsSync(path.join(tmpDir, ".dev-team", "skills", "dev-team-task", "SKILL.md")));
+    assert.ok(fs.existsSync(path.join(tmpDir, ".claude", "skills", "dev-team-task", "SKILL.md")));
+    assert.ok(fs.existsSync(path.join(tmpDir, ".claude", "skills", "dev-team-retro", "SKILL.md")));
+    // Memory (runtime-native: .claude/agent-memory/)
     assert.ok(
-      fs.existsSync(path.join(tmpDir, ".dev-team", "skills", "dev-team-retro", "SKILL.md")),
-    );
-    // Memory
-    assert.ok(
-      fs.existsSync(path.join(tmpDir, ".dev-team", "agent-memory", "dev-team-voss", "MEMORY.md")),
+      fs.existsSync(path.join(tmpDir, ".claude", "agent-memory", "dev-team-voss", "MEMORY.md")),
     );
     assert.ok(
-      fs.existsSync(path.join(tmpDir, ".dev-team", "agent-memory", "dev-team-beck", "MEMORY.md")),
+      fs.existsSync(path.join(tmpDir, ".claude", "agent-memory", "dev-team-beck", "MEMORY.md")),
     );
     assert.ok(fs.existsSync(path.join(tmpDir, ".claude", "rules", "dev-team-learnings.md")));
     assert.ok(fs.existsSync(path.join(tmpDir, ".dev-team", "metrics.md")));
@@ -76,9 +74,9 @@ describe("fresh project installation", () => {
   it("agent files have valid YAML frontmatter", async () => {
     await run(tmpDir, ["--all"]);
 
-    const agentFiles = fs.readdirSync(path.join(tmpDir, ".dev-team", "agents"));
+    const agentFiles = fs.readdirSync(path.join(tmpDir, ".claude", "agents"));
     for (const file of agentFiles) {
-      const content = fs.readFileSync(path.join(tmpDir, ".dev-team", "agents", file), "utf-8");
+      const content = fs.readFileSync(path.join(tmpDir, ".claude", "agents", file), "utf-8");
       assert.ok(content.startsWith("---"), `${file} should start with YAML frontmatter`);
       assert.ok(content.includes("name:"), `${file} should have a name field`);
       assert.ok(content.includes("description:"), `${file} should have a description field`);
@@ -141,50 +139,33 @@ describe("fresh project installation", () => {
     assert.equal(prefs.platform, "github", "should have platform field");
   });
 
-  it("creates symlinks in .claude/skills/ pointing to .dev-team/skills/", async () => {
+  it("installs skills directly to .claude/skills/ (no symlinks)", async () => {
     await run(tmpDir, ["--all"]);
 
     const claudeSkillsDir = path.join(tmpDir, ".claude", "skills");
-    const devTeamSkillsDir = path.join(tmpDir, ".dev-team", "skills");
 
-    // Framework skills should exist in .dev-team/skills/
-    const skillDirs = fs.readdirSync(devTeamSkillsDir);
+    // Framework skills should exist directly in .claude/skills/
+    const skillDirs = fs.readdirSync(claudeSkillsDir);
     assert.ok(skillDirs.length > 0, "should have framework skills installed");
 
-    // Each framework skill should have a symlink in .claude/skills/
+    // Each framework skill should be a real directory (not a symlink)
     for (const skillDir of skillDirs) {
-      const symlinkPath = path.join(claudeSkillsDir, skillDir);
-      assert.ok(fs.existsSync(symlinkPath), `symlink should exist for ${skillDir}`);
-      const stat = fs.lstatSync(symlinkPath);
-      assert.ok(stat.isSymbolicLink(), `${skillDir} should be a symlink`);
+      const skillPath = path.join(claudeSkillsDir, skillDir);
+      const stat = fs.lstatSync(skillPath);
+      assert.ok(!stat.isSymbolicLink(), `${skillDir} should NOT be a symlink`);
+      assert.ok(stat.isDirectory(), `${skillDir} should be a real directory`);
 
-      // Symlink target should be relative
-      const target = fs.readlinkSync(symlinkPath);
-      assert.ok(!path.isAbsolute(target), `symlink target should be relative, got: ${target}`);
-
-      // Should resolve to the actual SKILL.md
+      // Should contain SKILL.md
       assert.ok(
-        fs.existsSync(path.join(symlinkPath, "SKILL.md")),
-        `symlink for ${skillDir} should resolve to a directory with SKILL.md`,
+        fs.existsSync(path.join(skillPath, "SKILL.md")),
+        `${skillDir} should contain SKILL.md`,
       );
     }
-  });
 
-  it("does not overwrite real directories in .claude/skills/ with symlinks", async () => {
-    // Create a real directory in .claude/skills/ before init
-    const realSkillDir = path.join(tmpDir, ".claude", "skills", "dev-team-challenge");
-    fs.mkdirSync(realSkillDir, { recursive: true });
-    fs.writeFileSync(path.join(realSkillDir, "SKILL.md"), "# Custom skill override");
-
-    await run(tmpDir, ["--all"]);
-
-    // The real directory should NOT be replaced by a symlink
-    const stat = fs.lstatSync(realSkillDir);
-    assert.ok(!stat.isSymbolicLink(), "should not replace real directory with symlink");
-    const content = fs.readFileSync(path.join(realSkillDir, "SKILL.md"), "utf-8");
+    // .dev-team/skills/ should NOT exist
     assert.ok(
-      content.includes("Custom skill override"),
-      "real directory content should be preserved",
+      !fs.existsSync(path.join(tmpDir, ".dev-team", "skills")),
+      ".dev-team/skills/ should not exist",
     );
   });
 
@@ -204,7 +185,7 @@ describe("fresh project installation", () => {
     assert.ok(!prefs.agents.includes("Tufte"), "should not include Docs");
 
     // Only selected agents should have files (plus SHARED.md)
-    const agents = fs.readdirSync(path.join(tmpDir, ".dev-team", "agents"));
+    const agents = fs.readdirSync(path.join(tmpDir, ".claude", "agents"));
     assert.equal(agents.length, prefs.agents.length + 1);
     assert.ok(agents.includes("SHARED.md"));
   });
@@ -310,7 +291,7 @@ describe("fresh project installation", () => {
     await run(tmpDir, ["--all", "--runtime", "claude"]);
 
     // Standard Claude Code files
-    assert.ok(fs.existsSync(path.join(tmpDir, ".dev-team", "agents", "dev-team-voss.md")));
+    assert.ok(fs.existsSync(path.join(tmpDir, ".claude", "agents", "dev-team-voss.agent.md")));
     assert.ok(fs.existsSync(path.join(tmpDir, ".claude", "settings.json")));
     assert.ok(fs.existsSync(path.join(tmpDir, "CLAUDE.md")));
 
@@ -342,7 +323,7 @@ describe("fresh project installation", () => {
     await run(tmpDir, ["--all", "--runtime", "claude,copilot"]);
 
     // Claude Code files
-    assert.ok(fs.existsSync(path.join(tmpDir, ".dev-team", "agents", "dev-team-voss.md")));
+    assert.ok(fs.existsSync(path.join(tmpDir, ".claude", "agents", "dev-team-voss.agent.md")));
     assert.ok(fs.existsSync(path.join(tmpDir, "CLAUDE.md")));
 
     // Copilot files

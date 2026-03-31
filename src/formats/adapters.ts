@@ -44,24 +44,24 @@ export interface RuntimeAdapter {
 }
 
 /**
- * Claude Code adapter — identity transform.
+ * Claude Code adapter — runtime-native installation.
  *
- * The canonical format IS the Claude Code format (Markdown + YAML frontmatter),
- * so this adapter simply copies .md files into the .dev-team/agents/ directory.
- * This preserves the exact behavior of the pre-adapter init/update logic.
+ * Generates agent files to `.claude/agents/` using the `.agent.md` extension
+ * (Claude Code's native agent file format). See ADR-038.
  */
 export class ClaudeCodeAdapter implements RuntimeAdapter {
   readonly id = "claude";
   readonly name = "Claude Code";
 
   generate(definitions: CanonicalAgentDefinition[], targetDir: string): void {
-    const agentsDir = path.join(targetDir, ".dev-team", "agents");
+    const agentsDir = path.join(targetDir, ".claude", "agents");
     const templatesAgentsDir = path.join(templateDir(), "agents");
 
     for (const def of definitions) {
-      const filename = `${def.name}.md`;
-      const src = path.join(templatesAgentsDir, filename);
-      const dest = path.join(agentsDir, filename);
+      const srcFilename = `${def.name}.md`;
+      const destFilename = `${def.name}.agent.md`;
+      const src = path.join(templatesAgentsDir, srcFilename);
+      const dest = path.join(agentsDir, destFilename);
       copyFile(src, dest);
     }
   }
@@ -70,15 +70,16 @@ export class ClaudeCodeAdapter implements RuntimeAdapter {
     definitions: CanonicalAgentDefinition[],
     targetDir: string,
   ): { updated: string[]; added: string[] } {
-    const agentsDir = path.join(targetDir, ".dev-team", "agents");
+    const agentsDir = path.join(targetDir, ".claude", "agents");
     const templatesAgentsDir = path.join(templateDir(), "agents");
     const updated: string[] = [];
     const added: string[] = [];
 
     for (const def of definitions) {
-      const filename = `${def.name}.md`;
-      const src = path.join(templatesAgentsDir, filename);
-      const dest = path.join(agentsDir, filename);
+      const srcFilename = `${def.name}.md`;
+      const destFilename = `${def.name}.agent.md`;
+      const src = path.join(templatesAgentsDir, srcFilename);
+      const dest = path.join(agentsDir, destFilename);
 
       if (!fileExists(src)) continue;
 

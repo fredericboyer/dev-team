@@ -49,10 +49,10 @@ describe("Node.js project scenario", () => {
   it("installs into a project with existing package.json and CLAUDE.md", async () => {
     await run(tmpDir, ["--all"]);
 
-    // Agents installed in .dev-team/
-    const agents = fs.readdirSync(path.join(tmpDir, ".dev-team", "agents"));
+    // Agents installed in .claude/agents/ (runtime-native)
+    const agents = fs.readdirSync(path.join(tmpDir, ".claude", "agents"));
     assert.equal(agents.length, 15); // 14 agents + SHARED.md
-    assert.ok(agents.includes("dev-team-voss.md"));
+    assert.ok(agents.includes("dev-team-voss.agent.md"));
     assert.ok(agents.includes("SHARED.md"));
 
     // Hooks installed in .dev-team/
@@ -81,7 +81,7 @@ describe("Node.js project scenario", () => {
 
     // Voss agent should not be Node-specific
     const voss = fs.readFileSync(
-      path.join(tmpDir, ".dev-team", "agents", "dev-team-voss.md"),
+      path.join(tmpDir, ".claude", "agents", "dev-team-voss.agent.md"),
       "utf-8",
     );
     assert.ok(!voss.includes("require("), "agent should not contain Node-specific code");

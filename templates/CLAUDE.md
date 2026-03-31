@@ -20,7 +20,7 @@ This project uses [dev-team](https://github.com/dev-team) — adversarial AI age
 
 ### Agents
 
-Available agents: `@dev-team-voss`, `@dev-team-hamilton`, `@dev-team-mori`, `@dev-team-szabo`, `@dev-team-knuth`, `@dev-team-beck`, `@dev-team-deming`, `@dev-team-tufte`, `@dev-team-brooks`, `@dev-team-conway`, `@dev-team-drucker`, `@dev-team-turing`, `@dev-team-rams`, `@dev-team-borges`. See `.dev-team/agents/` for full definitions, roles, and when to use each agent.
+Available agents: `@dev-team-voss`, `@dev-team-hamilton`, `@dev-team-mori`, `@dev-team-szabo`, `@dev-team-knuth`, `@dev-team-beck`, `@dev-team-deming`, `@dev-team-tufte`, `@dev-team-brooks`, `@dev-team-conway`, `@dev-team-drucker`, `@dev-team-turing`, `@dev-team-rams`, `@dev-team-borges`. See `.claude/agents/` for full definitions, roles, and when to use each agent.
 
 ### Capabilities
 
@@ -46,7 +46,7 @@ See `.claude/rules/dev-team-process.md` for orchestration protocol, parallel exe
 
 When a dev-team hook outputs `ACTION REQUIRED — spawn these agents`, you MUST:
 1. Spawn each listed agent as a **background** subagent using the Agent tool with `subagent_type: "general-purpose"`
-2. Include the agent's full definition by reading from `.dev-team/agents/<agent>.md`
+2. Include the agent's full definition by reading from `.claude/agents/<agent>.agent.md`
 3. Include the changed file path and instruction to produce classified findings
 
 Do NOT skip this. Do NOT treat hook output as optional. If you believe a review is unnecessary for trivial changes, explain why to the user.
@@ -92,13 +92,13 @@ All project and process learnings MUST go to in-repo files, NOT to machine-local
 **Tier 1 — Shared team memory** (`.claude/rules/dev-team-learnings.md`):
 Project facts, overruled challenges, cross-agent decisions, process rules. Loaded automatically by all agents via rules.
 
-**Tier 2 — Agent calibration memory** (`.dev-team/agent-memory/<agent>/MEMORY.md`):
+**Tier 2 — Agent calibration memory** (`.claude/agent-memory/<agent>/MEMORY.md`):
 Domain-specific findings, known patterns, active watch lists. Each agent owns its own file. Entries include `Last-verified` dates for temporal decay.
 
 | What | Where |
 |------|-------|
 | Project patterns, process rules, tech debt, overruled challenges | `.claude/rules/dev-team-learnings.md` (Tier 1) |
-| Agent-specific calibration | `.dev-team/agent-memory/<agent>/MEMORY.md` (Tier 2) |
+| Agent-specific calibration | `.claude/agent-memory/<agent>/MEMORY.md` (Tier 2) |
 | Formal architecture decisions | `docs/adr/` |
 | User-specific preferences only | Machine-local memory |
 

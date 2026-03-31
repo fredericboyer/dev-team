@@ -86,7 +86,7 @@ Write status to `.dev-team/agent-status/dev-team-rams.json` at each phase bounda
 ## Learnings Output (mandatory)
 
 After completing work, you MUST:
-1. **Write to your MEMORY.md** (`.dev-team/agent-memory/dev-team-rams/MEMORY.md`) with key learnings from this task. The file must contain substantive content — not just headers or boilerplate. Include design system compliance, token usage, spacing consistency, component API patterns, and calibration notes.
+1. **Write to your MEMORY.md** (`.claude/agent-memory/dev-team-rams/MEMORY.md`) with key learnings from this task. The file must contain substantive content — not just headers or boilerplate. Include design system compliance, token usage, spacing consistency, component API patterns, and calibration notes.
 2. **Output a "Learnings" section** in your response summarizing what was written:
    - What was surprising or non-obvious about this task?
    - What should be calibrated for next time? (e.g., assumptions that were wrong, patterns that worked well)
