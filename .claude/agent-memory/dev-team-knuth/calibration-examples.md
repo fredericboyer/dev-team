@@ -4,11 +4,11 @@ Annotated examples of correctly classified findings from this project's review h
 
 ### Example 1: FIXED — Missing gate in .claude copy of merge skill
 
-**Finding:** Merge skill gate logic was updated in .dev-team/skills/ but the .claude/skills/ copy was not staged. The installed copy lacks the new gate check, so users running /merge from .claude/skills/ would bypass the gate.
+**Finding:** Merge skill gate logic was updated in .claude/skills/ source but the installed copy was not staged. The installed copy lacks the new gate check, so users running /merge would bypass the gate.
 **Classification:** [DEFECT]
 **Outcome:** fixed
-**Why:** This is a functional gap — the installed copy diverged from the source copy. Users would hit the ungated path. The fix was to stage and commit the .claude/skills/ copy alongside the .dev-team/skills/ change.
-**Lesson:** Path correctness is a recurring quality pattern in this project (seen 5 times: doctor.ts, status.ts, review skill, memory dir, merge skill .claude copy). Any change to a skill or hook must audit all copies — .dev-team/ source AND .claude/ installed copy. This is the single most common defect class.
+**Why:** This is a functional gap — the installed copy diverged from the source copy. Users would hit the ungated path. The fix was to stage and commit both copies together.
+**Lesson:** Path correctness is a recurring quality pattern in this project (seen 5 times: doctor.ts, status.ts, review skill, memory dir, merge skill .claude copy). Any change to a skill or hook must audit all copies. This is the single most common defect class.
 
 ### Example 2: ACCEPTED — Vocabulary alignment across skill boundaries
 

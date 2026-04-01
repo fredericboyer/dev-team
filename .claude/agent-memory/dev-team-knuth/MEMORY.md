@@ -108,7 +108,7 @@
 - **Tags**: path-correctness, skill-definition, merge
 - **Outcome**: fixed
 - **Last-verified**: 2026-03-29
-- **Context**: Merge skill gate logic was updated in .dev-team/skills/ but the .claude/skills/ copy was not staged. Path correctness pattern continues — Seen: 5 times (doctor.ts K1, status.ts K3, review skill path, memory dir deming/, merge skill .claude copy).
+- **Context**: Merge skill gate logic was updated in .claude/skills/ source but the installed copy was not staged. Path correctness pattern continues — Seen: 5 times (doctor.ts K1, status.ts K3, review skill path, memory dir deming/, merge skill .claude copy).
 
 ### [2026-03-29] v1.10.0: Stray commits from shared working directory — bundled wrong commits into PRs
 - **Type**: RISK [accepted]
@@ -156,4 +156,4 @@
 - **Tags**: testing, adapters, canonical, mcp, coverage
 - **Outcome**: fixed
 - **Last-verified**: 2026-03-30
-- **Context**: 8 new test files added: canonical.test.js (264 lines), agents-md-adapter.test.js, copilot-adapter.test.js, codex-adapter.test.js, cursor-adapter.test.js, windsurf-adapter.test.js, mcp-server.test.js, mcp-review-gate.test.js. Total test count now 554 (up from ~430). Each adapter has generate+update tests. MCP tests cover protocol handling, tool dispatch, and review gate logic.
+- **Context**: Test suites added for canonical format and adapters. cursor-adapter.test.js, windsurf-adapter.test.js, mcp-server.test.js, and mcp-review-gate.test.js removed in v2.0.1. Current adapter test files: canonical.test.js, agents-md-adapter.test.js, copilot-adapter.test.js, codex-adapter.test.js. Each adapter has generate+update tests.

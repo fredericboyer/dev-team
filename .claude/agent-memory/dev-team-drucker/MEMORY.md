@@ -33,7 +33,7 @@
 - **Tags**: orchestration, subagents, spawning
 - **Outcome**: verified
 - **Last-verified**: 2026-03-25
-- **Context**: Must load actual agent definition from .dev-team/agents/dev-team-*.md when spawning. Do NOT use pr-review-toolkit proxies — different behavior. Use subagent_type: "general-purpose".
+- **Context**: Must load actual agent definition from .claude/agents/dev-team-*.agent.md when spawning. Do NOT use pr-review-toolkit proxies — different behavior. Use subagent_type: "general-purpose".
 
 ### [2026-03-26] Sequential chains require merge-as-you-go orchestration
 - **Type**: PATTERN [verified]

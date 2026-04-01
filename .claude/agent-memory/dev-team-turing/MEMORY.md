@@ -73,7 +73,7 @@
 - **Tags**: portability, multi-runtime, AGENTS.md, MCP, adapters, standards
 - **Outcome**: brief written to `docs/research/264-agent-runtime-portability-2026-03-29.md`
 - **Last-verified**: 2026-03-30
-- **Calibration**: The agent runtime landscape has two settled standards (AGENTS.md for instructions, MCP for tools) and everything else is fragmented. Hooks, skills, memory, and multi-agent are not standardized — only Claude Code and Codex CLI have hooks, and their formats differ. The hybrid architecture (AGENTS.md core + MCP enforcement + runtime adapters) is the only approach that preserves dev-team's value. Key discovery: AAIF under Linux Foundation (Dec 2025) is the strongest convergence signal — AGENTS.md, MCP, and goose under one roof. Claude Code's non-adoption of AGENTS.md is the largest single portability risk. Runtime-specific formats churn fast (Cursor and Windsurf both deprecated original formats within months).
+- **Calibration**: The agent runtime landscape has two settled standards (AGENTS.md for instructions, MCP for tools) and everything else is fragmented. Hooks, skills, memory, and multi-agent are not standardized — only Claude Code and Codex CLI have hooks, and their formats differ. The hybrid architecture (AGENTS.md core + runtime adapters) preserves dev-team's value. MCP enforcement server was removed in v2.0.1 — hooks remain primary. Key discovery: AAIF under Linux Foundation (Dec 2025) is the strongest convergence signal — AGENTS.md, MCP, and goose under one roof. Claude Code's non-adoption of AGENTS.md is the largest single portability risk. Cursor and Windsurf adapters removed in v2.0.1 — format churn validated the risk.
 
 ### [2026-03-30] Standards landscape for coding agent interoperability
 - **Type**: CALIBRATION [verified]
@@ -105,7 +105,7 @@
 - **Tags**: codex, multi-runtime, adapters, portability, evaluation
 - **Outcome**: brief written to `docs/research/508-codex-cli-evaluation-2026-03-30.md`
 - **Last-verified**: 2026-03-30
-- **Calibration**: Codex CLI has near-identical skill format (~95% transfer rate) but experimental hook system with limited Bash scope (~30% coverage). The recommendation is: adapt skills and instructions fully, skip hooks. Hooks are Claude Code's differentiator — MCP enforcement is the cross-runtime replacement. This research directly shaped the Codex adapter implementation (skills + AGENTS.md, no hooks).
+- **Calibration**: Codex CLI has near-identical skill format (~95% transfer rate) but experimental hook system with limited Bash scope (~30% coverage). The recommendation is: adapt skills and instructions fully, skip hooks. Hooks are Claude Code's differentiator. MCP enforcement was removed in v2.0.1 — hooks remain primary enforcement mechanism. This research directly shaped the Codex adapter implementation (skills + AGENTS.md, no hooks).
 
 ### [2026-03-26] Research-first approach validated in v1.6.0
 - **Type**: PATTERN [verified]

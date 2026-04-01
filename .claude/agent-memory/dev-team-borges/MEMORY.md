@@ -17,7 +17,7 @@
 - **Tags**: memory, architecture, tiers
 - **Outcome**: verified
 - **Last-verified**: 2026-03-25
-- **Context**: Tier 1 is .claude/rules/dev-team-learnings.md (shared facts, conventions). Tier 2 is .dev-team/agent-memory/*/MEMORY.md (agent-specific calibration). First 200 lines loaded into context. Formal decisions go to docs/adr/. Avoid copying volatile counts into agent memories — derive from source.
+- **Context**: Tier 1 is .claude/rules/dev-team-learnings.md (shared facts, conventions). Tier 2 is .claude/agent-memory/*/MEMORY.md (agent-specific calibration). First 200 lines loaded into context. Formal decisions go to docs/adr/. Avoid copying volatile counts into agent memories — derive from source.
 
 ## System Improvement Log
 

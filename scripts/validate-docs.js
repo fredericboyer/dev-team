@@ -96,7 +96,14 @@ const DEPRECATED_PATHS = [
 ];
 
 // Directories to scan for stale references
-const SCAN_DIRS = ["docs", "templates", ".claude/rules", ".claude/skills"];
+const SCAN_DIRS = [
+  "docs",
+  "templates",
+  ".claude/rules",
+  ".claude/skills",
+  ".claude/agents",
+  ".claude/agent-memory",
+];
 const SCAN_ROOT_FILES = ["CLAUDE.md", "README.md"];
 
 // Files to skip (historical records that legitimately reference old paths)
@@ -105,8 +112,10 @@ const SKIP_PATTERNS = [
   /docs\/adr\//, // ADRs are immutable records
   /CHANGELOG\.md$/, // Changelog is historical
   /metrics\.md$/, // Metrics are historical
-  /agent-memory\//, // Memory files may reference old paths in historical entries
 ];
+
+// Lines matching these patterns are skipped inside agent-memory files
+const MEMORY_LINE_SKIP = /Last-verified|## Archive/;
 
 function shouldSkip(filePath) {
   return SKIP_PATTERNS.some((p) => p.test(filePath));
@@ -114,11 +123,19 @@ function shouldSkip(filePath) {
 
 function scanFileForStalePaths(filePath) {
   const content = fs.readFileSync(filePath, "utf-8");
+  const isMemoryFile = /agent-memory\//.test(filePath);
   for (const dep of DEPRECATED_PATHS) {
-    const matches = content.match(dep.pattern);
-    if (matches) {
+    dep.pattern.lastIndex = 0;
+    const lines = content.split("\n");
+    let matchCount = 0;
+    for (const line of lines) {
+      if (isMemoryFile && MEMORY_LINE_SKIP.test(line)) continue;
+      const lineMatches = line.match(new RegExp(dep.pattern.source, "g"));
+      if (lineMatches) matchCount += lineMatches.length;
+    }
+    if (matchCount > 0) {
       console.error(
-        `FAIL: "${filePath}" has ${matches.length} stale reference(s) to "${dep.pattern.source}" (deprecated since ${dep.since}, use "${dep.replacement}")`,
+        `FAIL: "${filePath}" has ${matchCount} stale reference(s) to "${dep.pattern.source}" (deprecated since ${dep.since}, use "${dep.replacement}")`,
       );
       errors++;
     }
