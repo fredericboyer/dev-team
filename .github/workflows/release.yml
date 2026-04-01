@@ -4,6 +4,10 @@ on:
   push:
     tags: ['v[0-9]*']
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   validate-version:
     runs-on: ubuntu-latest

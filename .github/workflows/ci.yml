@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 permissions:
   contents: read
 
@@ -50,13 +54,23 @@ jobs:
       - name: Format check
         run: npm run format:check
 
-  validate-agents:
+  validate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
 
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+
       - name: Validate agent frontmatter
         run: node scripts/validate-agents.js
+
+      - name: Validate docs integrity
+        run: node scripts/validate-docs.js
+
+      - name: Validate README accuracy
+        run: node scripts/validate-readme.js
 
   validate-hooks:
     runs-on: ${{ matrix.os }}
@@ -72,27 +86,6 @@ jobs:
 
       - name: Validate hook scripts load without errors
         run: node scripts/validate-hooks.js
-
-  validate-readme:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 22
-          cache: 'npm'
-
-      - name: Validate README accuracy
-        run: node scripts/validate-readme.js
-
-  validate-docs:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-
-      - name: Validate docs integrity
-        run: node scripts/validate-docs.js
 
   audit-dependencies:
     runs-on: ubuntu-latest
@@ -114,8 +107,12 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
       - name: Install Semgrep
-        run: pip install semgrep
+        run: pip install semgrep==1.112.0
 
       - name: Run Semgrep SAST scan
         run: semgrep scan --config=auto
