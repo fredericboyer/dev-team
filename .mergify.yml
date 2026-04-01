@@ -1,6 +1,9 @@
 queue_rules:
   - name: default
     merge_method: squash
+    merge_conditions:
+      - "#check-pending = 0"
+      - "#check-failure = 0"
     commit_message_template: |
       {{ title }} (#{{ number }})
 
