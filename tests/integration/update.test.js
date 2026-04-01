@@ -7,7 +7,12 @@ const path = require("path");
 const os = require("os");
 
 const { run } = require("../../dist/init");
-const { update, compareSemver, cleanupLegacyMemoryDirs } = require("../../dist/update");
+const {
+  update,
+  compareSemver,
+  cleanupLegacyMemoryDirs,
+  migrateToV3Layout,
+} = require("../../dist/update");
 const { removeHooksFromSettings } = require("../../dist/files");
 
 let tmpDir;
@@ -825,6 +830,142 @@ describe("cleanupLegacyMemoryDirs", () => {
     await update(tmpDir);
 
     assert.ok(!fs.existsSync(legacyDir), "legacy directory should be cleaned up during update");
+  });
+});
+
+describe("migrateToV3Layout", () => {
+  it("migrates agents from .dev-team/agents/ to .claude/agents/ with rename", async () => {
+    await run(tmpDir, ["--all"]);
+    const oldAgentsDir = path.join(tmpDir, ".dev-team", "agents");
+    fs.mkdirSync(oldAgentsDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(oldAgentsDir, "dev-team-voss.md"),
+      "---\nname: dev-team-voss\n---\n# Voss agent definition",
+    );
+    const newAgentPath = path.join(tmpDir, ".claude", "agents", "dev-team-voss.agent.md");
+    fs.unlinkSync(newAgentPath);
+    const log = migrateToV3Layout(tmpDir);
+    assert.ok(
+      fs.existsSync(newAgentPath),
+      "agent should be at .claude/agents/dev-team-voss.agent.md",
+    );
+    const content = fs.readFileSync(newAgentPath, "utf-8");
+    assert.ok(content.includes("Voss agent definition"), "content should be preserved");
+    assert.ok(!fs.existsSync(oldAgentsDir), ".dev-team/agents/ should be removed");
+    assert.ok(
+      log.some((l) => l.includes("Migrated") && l.includes("agents")),
+      "should log agent migration",
+    );
+  });
+
+  it("is idempotent -- running twice produces same result", async () => {
+    await run(tmpDir, ["--all"]);
+    const oldAgentsDir = path.join(tmpDir, ".dev-team", "agents");
+    fs.mkdirSync(oldAgentsDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(oldAgentsDir, "dev-team-voss.md"),
+      "---\nname: dev-team-voss\n---\n# Voss",
+    );
+    const newAgentPath = path.join(tmpDir, ".claude", "agents", "dev-team-voss.agent.md");
+    fs.unlinkSync(newAgentPath);
+    migrateToV3Layout(tmpDir);
+    const firstContent = fs.readFileSync(newAgentPath, "utf-8");
+    const log2 = migrateToV3Layout(tmpDir);
+    const secondContent = fs.readFileSync(newAgentPath, "utf-8");
+    assert.equal(firstContent, secondContent, "content should be identical after second run");
+    assert.ok(
+      !log2.some((l) => l.includes("Migrated") && l.includes("agents")),
+      "second run should not re-migrate agents",
+    );
+  });
+
+  it("handles partial state -- some agents already in .claude/agents/", async () => {
+    await run(tmpDir, ["--all"]);
+    const oldAgentsDir = path.join(tmpDir, ".dev-team", "agents");
+    fs.mkdirSync(oldAgentsDir, { recursive: true });
+    const newMoriPath = path.join(tmpDir, ".claude", "agents", "dev-team-mori.agent.md");
+    fs.unlinkSync(newMoriPath);
+    fs.writeFileSync(
+      path.join(oldAgentsDir, "dev-team-mori.md"),
+      "---\nname: dev-team-mori\n---\n# Mori old",
+    );
+    fs.writeFileSync(
+      path.join(oldAgentsDir, "dev-team-voss.md"),
+      "---\nname: dev-team-voss\n---\n# Voss OLD -- should not overwrite",
+    );
+    migrateToV3Layout(tmpDir);
+    const vossContent = fs.readFileSync(
+      path.join(tmpDir, ".claude", "agents", "dev-team-voss.agent.md"),
+      "utf-8",
+    );
+    assert.ok(
+      !vossContent.includes("should not overwrite"),
+      "existing agent should not be overwritten",
+    );
+    assert.ok(fs.existsSync(newMoriPath), "mori should be migrated");
+    const moriContent = fs.readFileSync(newMoriPath, "utf-8");
+    assert.ok(moriContent.includes("Mori old"), "migrated mori should have old content");
+  });
+
+  it("migrates agent-memory from .dev-team/agent-memory/ to .claude/agent-memory/", async () => {
+    await run(tmpDir, ["--all"]);
+    const oldMemoryDir = path.join(tmpDir, ".dev-team", "agent-memory", "dev-team-voss");
+    fs.mkdirSync(oldMemoryDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(oldMemoryDir, "MEMORY.md"),
+      "# Voss Memory\nCustom calibration data here.",
+    );
+    const newMemoryDir = path.join(tmpDir, ".claude", "agent-memory", "dev-team-voss");
+    fs.rmSync(newMemoryDir, { recursive: true });
+    const log = migrateToV3Layout(tmpDir);
+    const memoryPath = path.join(newMemoryDir, "MEMORY.md");
+    assert.ok(fs.existsSync(memoryPath), "memory should be at .claude/agent-memory/");
+    const content = fs.readFileSync(memoryPath, "utf-8");
+    assert.ok(content.includes("Custom calibration data"), "memory content should be preserved");
+    assert.ok(
+      !fs.existsSync(path.join(tmpDir, ".dev-team", "agent-memory")),
+      ".dev-team/agent-memory/ should be removed",
+    );
+    assert.ok(
+      log.some((l) => l.includes("memory")),
+      "should log memory migration",
+    );
+  });
+
+  it("removes .claude/skills/ symlinks pointing to .dev-team/skills/", async () => {
+    await run(tmpDir, ["--all"]);
+    const claudeSkillsDir = path.join(tmpDir, ".claude", "skills");
+    const fakeTarget = path.join(tmpDir, ".dev-team", "skills", "dev-team-challenge");
+    fs.mkdirSync(fakeTarget, { recursive: true });
+    fs.writeFileSync(path.join(fakeTarget, "SKILL.md"), "# skill");
+    const symlinkPath = path.join(claudeSkillsDir, "dev-team-fake-symlink");
+    fs.symlinkSync(fakeTarget, symlinkPath);
+    const log = migrateToV3Layout(tmpDir);
+    assert.ok(!fs.existsSync(symlinkPath), "symlink to .dev-team/skills/ should be removed");
+    assert.ok(
+      log.some((l) => l.includes("stale symlink")),
+      "should log symlink removal",
+    );
+  });
+
+  it("preserves non-agent .md files (SHARED.md) without rename", async () => {
+    await run(tmpDir, ["--all"]);
+    const oldAgentsDir = path.join(tmpDir, ".dev-team", "agents");
+    fs.mkdirSync(oldAgentsDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(oldAgentsDir, "SHARED.md"),
+      "# Shared Agent Protocol\nShared instructions here.",
+    );
+    const destPath = path.join(tmpDir, ".claude", "agents", "SHARED.md");
+    if (fs.existsSync(destPath)) fs.unlinkSync(destPath);
+    migrateToV3Layout(tmpDir);
+    assert.ok(fs.existsSync(destPath), "SHARED.md should be migrated without rename");
+    assert.ok(
+      !fs.existsSync(path.join(tmpDir, ".claude", "agents", "SHARED.agent.md")),
+      "SHARED.md should NOT be renamed to SHARED.agent.md",
+    );
+    const content = fs.readFileSync(destPath, "utf-8");
+    assert.ok(content.includes("Shared instructions"), "SHARED.md content should be preserved");
   });
 });
 
