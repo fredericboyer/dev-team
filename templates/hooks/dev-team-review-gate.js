@@ -210,7 +210,12 @@ function findSidecar(agent, contentHash) {
     if (stat.isSymbolicLink()) return null; // Reject symlinks
     if (!stat.isFile()) return null;
     const content = fs.readFileSync(sidecarPath, "utf-8");
-    return JSON.parse(content);
+    const parsed = JSON.parse(content);
+    // Type guards: sanitize unexpected sidecar structure
+    if (typeof parsed !== "object" || parsed === null) return null;
+    if (parsed.findings !== undefined && !Array.isArray(parsed.findings)) parsed.findings = [];
+    if (parsed.classification !== undefined && typeof parsed.classification !== "string") delete parsed.classification;
+    return parsed;
   } catch {
     return null;
   }
