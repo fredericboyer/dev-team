@@ -119,7 +119,8 @@ describe("safeRegex", () => {
   });
 
   it("rejects overlapping alternation in outer quantified group ((feat|fix|fea|fi|f)(t|x|eat|ix))*", () => {
-    const result = safeRegex("((feat|fix|fea|fi|f)(t|x|eat|ix))*\\/");
+    // Intentionally unsafe pattern — testing that safeRegex rejects it
+    const result = safeRegex("((feat|fix|fea|fi|f)(t|x|eat|ix))*\\/"); // lgtm[js/redos]
     assert.equal(result.safe, false);
     assert.ok(result.reason.includes("overlapping alternation"));
   });
