@@ -77,7 +77,7 @@ const MIGRATIONS: Migration[] = [
     skillRemovals: ["dev-team-merge", "dev-team-security-status"],
   },
   {
-    version: "3.2.0",
+    version: "3.1.1",
     agentRemovals: [{ label: "Beck", file: "dev-team-beck.md" }],
   },
 ];
@@ -269,9 +269,11 @@ function runMigrations(
             : null;
         if (pathToRemove) {
           try {
+            assertNotSymlink(pathToRemove);
+            assertNoSymlinkInPath(pathToRemove);
             fs.unlinkSync(pathToRemove);
           } catch {
-            // ignore
+            // ignore — symlink or missing file
           }
           log.push(`Removed retired agent: ${removal.label}`);
         }
@@ -280,6 +282,8 @@ function runMigrations(
         const memDir = path.join(memoryDir, removal.file.replace(".md", ""));
         if (dirExists(memDir)) {
           try {
+            assertNotSymlink(memDir);
+            assertNoSymlinkInPath(memDir);
             fs.rmSync(memDir, { recursive: true, force: true });
             log.push(`Removed memory for retired agent: ${removal.label}`);
           } catch {

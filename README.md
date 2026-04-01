@@ -113,7 +113,7 @@ npx @fredericboyer/dev-team create-agent <name>     # Scaffold a custom agent
 
 ## What you get
 
-### Agents (14)
+### Agents (13)
 
 | Agent | Role | Model | When to use |
 |-------|------|-------|-------------|
@@ -302,7 +302,7 @@ Add file-pattern-to-agent mappings in `.dev-team/config.json`:
 | Preset | Agents included |
 |--------|----------------|
 | `backend` | Voss, Hamilton, Szabo, Knuth, Deming, Brooks, Conway |
-| `fullstack` | All 14 agents |
+| `fullstack` | All 13 agents |
 | `data` | Voss, Szabo, Knuth, Deming, Tufte |
 
 Drucker (orchestrator) and Borges (librarian) are included in all presets. For non-fullstack presets, invoke Drucker with `@dev-team-drucker` for automatic delegation.
@@ -322,7 +322,7 @@ Updates agents, hooks, and skills to the latest templates. Preserves your agent 
   hooks/               # 8 quality enforcement scripts
   config.json          # Installation preferences
 .claude/
-  agents/              # 14 agent definitions (.agent.md, YAML frontmatter + prompt)
+  agents/              # 13 agent definitions (.agent.md, YAML frontmatter + prompt)
   agent-memory/        # Per-agent persistent memory (never overwritten on update)
   rules/
     dev-team-learnings.md  # Shared team knowledge (never overwritten on update)
