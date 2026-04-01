@@ -251,54 +251,87 @@ describe("adapter registry", () => {
   });
 
   it("registerAdapter throws when replacing built-in copilot adapter", () => {
-    // First registration succeeds (reserves the slot)
-    const copilotAdapter = {
+    // Adapter may already be registered from module load — verify it exists
+    const existing = getAdapter("copilot");
+    if (!existing) {
+      // Not yet loaded — register it first
+      const copilotAdapter = {
+        id: "copilot",
+        name: "Copilot",
+        generate() {},
+        update() {
+          return { updated: [], added: [] };
+        },
+      };
+      registerAdapter(copilotAdapter);
+    }
+    assert.ok(getAdapter("copilot"), "copilot adapter should be registered");
+
+    // Attempting to replace with a different object must throw
+    const fakeCopilot = {
       id: "copilot",
-      name: "Copilot",
+      name: "Fake Copilot",
       generate() {},
       update() {
         return { updated: [], added: [] };
       },
     };
-    registerAdapter(copilotAdapter);
-    assert.equal(getAdapter("copilot").name, "Copilot");
-
-    // Second registration must throw
-    assert.throws(
-      () => registerAdapter(copilotAdapter),
-      /Cannot replace built-in adapter "copilot"/,
-    );
+    assert.throws(() => registerAdapter(fakeCopilot), /Cannot replace built-in adapter "copilot"/);
   });
 
   it("registerAdapter throws when replacing built-in codex adapter", () => {
-    const codexAdapter = {
+    // Adapter may already be registered from module load — verify it exists
+    const existing = getAdapter("codex");
+    if (!existing) {
+      const codexAdapter = {
+        id: "codex",
+        name: "Codex",
+        generate() {},
+        update() {
+          return { updated: [], added: [] };
+        },
+      };
+      registerAdapter(codexAdapter);
+    }
+    assert.ok(getAdapter("codex"), "codex adapter should be registered");
+
+    const fakeCodex = {
       id: "codex",
-      name: "Codex",
+      name: "Fake Codex",
       generate() {},
       update() {
         return { updated: [], added: [] };
       },
     };
-    registerAdapter(codexAdapter);
-    assert.equal(getAdapter("codex").name, "Codex");
-
-    assert.throws(() => registerAdapter(codexAdapter), /Cannot replace built-in adapter "codex"/);
+    assert.throws(() => registerAdapter(fakeCodex), /Cannot replace built-in adapter "codex"/);
   });
 
   it("registerAdapter throws when replacing built-in agents-md adapter", () => {
-    const agentsMdAdapter = {
+    // Adapter may already be registered from module load — verify it exists
+    const existing = getAdapter("agents-md");
+    if (!existing) {
+      const agentsMdAdapter = {
+        id: "agents-md",
+        name: "AGENTS.md",
+        generate() {},
+        update() {
+          return { updated: [], added: [] };
+        },
+      };
+      registerAdapter(agentsMdAdapter);
+    }
+    assert.ok(getAdapter("agents-md"), "agents-md adapter should be registered");
+
+    const fakeAgentsMd = {
       id: "agents-md",
-      name: "AGENTS.md",
+      name: "Fake AGENTS.md",
       generate() {},
       update() {
         return { updated: [], added: [] };
       },
     };
-    registerAdapter(agentsMdAdapter);
-    assert.equal(getAdapter("agents-md").name, "AGENTS.md");
-
     assert.throws(
-      () => registerAdapter(agentsMdAdapter),
+      () => registerAdapter(fakeAgentsMd),
       /Cannot replace built-in adapter "agents-md"/,
     );
   });
