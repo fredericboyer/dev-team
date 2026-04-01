@@ -20,7 +20,8 @@ Start a task loop for: $ARGUMENTS
    - Documentation -> @dev-team-tufte
    - Release/versioning -> @dev-team-conway
    - Infrastructure/CI/Docker/deployment -> @dev-team-hamilton
-   - Research/investigation -> @dev-team-turing
+
+   For tasks that require **research/investigation** before implementation, optionally spawn @dev-team-turing as a pre-implementation research agent before selecting the implementing agent above. Turing is read-only — it produces research briefs, not code changes.
 
 3. **Architect pre-assessment** (skip for bug fixes, typo fixes, config tweaks):
    Spawn @dev-team-brooks to assess:
