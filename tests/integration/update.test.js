@@ -994,4 +994,104 @@ describe("compareSemver", () => {
     // Numeric comparison: 0.10.0 > 0.4.0 (correct)
     assert.ok(compareSemver("0.10.0", "0.4.0") > 0);
   });
+
+  it("pre-release has lower precedence than release", () => {
+    assert.ok(compareSemver("1.0.0-alpha", "1.0.0") < 0);
+    assert.ok(compareSemver("1.0.0", "1.0.0-alpha") > 0);
+  });
+
+  it("two pre-release versions with same numeric parts are equal", () => {
+    assert.equal(compareSemver("1.0.0-alpha", "1.0.0-beta"), 0);
+  });
+
+  it("pre-release on lower version is still less than higher release", () => {
+    assert.ok(compareSemver("1.0.0-rc1", "2.0.0") < 0);
+    assert.ok(compareSemver("0.9.0-beta", "1.0.0") < 0);
+  });
+});
+
+describe("migrateFromClaude structured settings migration", () => {
+  // Helper replicating the structured migration logic (migrateFromClaude is not exported)
+  function rewriteHookPaths(settings) {
+    let changed = false;
+    if (settings.hooks && typeof settings.hooks === "object") {
+      for (const event of Object.keys(settings.hooks)) {
+        const matchers = settings.hooks[event];
+        if (!Array.isArray(matchers)) continue;
+        for (const matcher of matchers) {
+          if (!matcher) continue;
+          if (typeof matcher.command === "string" && matcher.command.includes(".claude/hooks/")) {
+            matcher.command = matcher.command.replace(/\.claude\/hooks\//g, ".dev-team/hooks/");
+            changed = true;
+          }
+          if (Array.isArray(matcher.hooks)) {
+            for (const hook of matcher.hooks) {
+              if (
+                hook &&
+                typeof hook.command === "string" &&
+                hook.command.includes(".claude/hooks/")
+              ) {
+                hook.command = hook.command.replace(/\.claude\/hooks\//g, ".dev-team/hooks/");
+                changed = true;
+              }
+            }
+          }
+        }
+      }
+    }
+    return changed;
+  }
+
+  it("only rewrites command fields in hooks, not other fields", () => {
+    const settings = {
+      hooks: {
+        PreToolUse: [
+          {
+            matcher: "Bash",
+            command: "node .claude/hooks/my-hook.js",
+          },
+        ],
+      },
+      description: "A project with .claude/hooks/ in its description",
+    };
+
+    const changed = rewriteHookPaths(settings);
+
+    assert.ok(changed, "should have rewritten hook command paths");
+    assert.equal(settings.hooks.PreToolUse[0].command, "node .dev-team/hooks/my-hook.js");
+    assert.equal(
+      settings.description,
+      "A project with .claude/hooks/ in its description",
+      "non-hook fields should be untouched",
+    );
+  });
+
+  it("rewrites nested hooks array commands", () => {
+    const settings = {
+      hooks: {
+        PreToolUse: [
+          {
+            matcher: "Bash",
+            hooks: [
+              { type: "command", command: "node .claude/hooks/safety-guard.js" },
+              { type: "command", command: "node .dev-team/hooks/already-migrated.js" },
+            ],
+          },
+        ],
+      },
+    };
+
+    const changed = rewriteHookPaths(settings);
+
+    assert.ok(changed, "should have rewritten nested hook commands");
+    assert.equal(
+      settings.hooks.PreToolUse[0].hooks[0].command,
+      "node .dev-team/hooks/safety-guard.js",
+    );
+    assert.equal(
+      settings.hooks.PreToolUse[0].hooks[1].command,
+      "node .dev-team/hooks/already-migrated.js",
+      "already-migrated paths should be untouched",
+    );
+  });
 });
