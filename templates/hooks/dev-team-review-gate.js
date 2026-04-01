@@ -212,11 +212,25 @@ function findSidecar(agent, contentHash) {
     const content = fs.readFileSync(sidecarPath, "utf-8");
     const parsed = JSON.parse(content);
     // Type guards: sanitize unexpected sidecar structure
-    if (typeof parsed !== "object" || parsed === null) return null;
-    if (Array.isArray(parsed)) return null;
-    if (parsed.findings !== undefined && !Array.isArray(parsed.findings)) parsed.findings = [];
-    if (parsed.classification !== undefined && typeof parsed.classification !== "string")
-      delete parsed.classification;
+    if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) return null;
+    if (parsed.findings !== undefined && !Array.isArray(parsed.findings)) {
+      parsed.findings = [];
+    }
+    if (Array.isArray(parsed.findings)) {
+      parsed.findings = parsed.findings
+        .filter((f) => f !== null && typeof f === "object" && !Array.isArray(f))
+        .map((f) => {
+          if (
+            Object.prototype.hasOwnProperty.call(f, "classification") &&
+            typeof f.classification !== "string"
+          ) {
+            const copy = { ...f };
+            delete copy.classification;
+            return copy;
+          }
+          return f;
+        });
+    }
     return parsed;
   } catch {
     return null;
