@@ -401,7 +401,7 @@ function migrateFromClaude(targetDir: string): string[] {
  * Removes .dev-team/learnings.md if .claude/rules/dev-team-learnings.md exists
  * Idempotent — safe to run multiple times.
  */
-function migrateToV3Layout(targetDir: string): string[] {
+export function migrateToV3Layout(targetDir: string): string[] {
   const log: string[] = [];
   const claudeDir = path.join(targetDir, ".claude");
   const devTeamDir = path.join(targetDir, ".dev-team");
@@ -434,6 +434,7 @@ function migrateToV3Layout(targetDir: string): string[] {
     }
     // Clean up old directory
     try {
+      assertNotSymlink(oldAgentsDir);
       fs.rmSync(oldAgentsDir, { recursive: true });
     } catch {
       // best effort
@@ -462,6 +463,7 @@ function migrateToV3Layout(targetDir: string): string[] {
     }
     // Clean up old directory
     try {
+      assertNotSymlink(oldMemoryDir);
       fs.rmSync(oldMemoryDir, { recursive: true });
     } catch {
       // best effort
@@ -472,6 +474,7 @@ function migrateToV3Layout(targetDir: string): string[] {
   const oldSkillsDir = path.join(devTeamDir, "skills");
   if (dirExists(oldSkillsDir)) {
     try {
+      assertNotSymlink(oldSkillsDir);
       fs.rmSync(oldSkillsDir, { recursive: true });
       log.push("Removed .dev-team/skills/ (skills now in .claude/skills/)");
     } catch {

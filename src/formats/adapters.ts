@@ -106,7 +106,7 @@ export class ClaudeCodeAdapter implements RuntimeAdapter {
 
 const registry = new Map<string, RuntimeAdapter>();
 
-const BUILTIN_IDS = new Set(["claude"]);
+const BUILTIN_IDS = new Set(["claude", "copilot", "codex", "agents-md"]);
 
 /**
  * Register a runtime adapter. Replaces any existing adapter with the same id,

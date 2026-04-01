@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.0] - 2026-03-30
+
+### BREAKING
+- v3 layout migration -- agents move from `.dev-team/agents/` to `.claude/agents/` with `.agent.md` extension; agent-memory moves from `.dev-team/agent-memory/` to `.claude/agent-memory/`; `.dev-team/skills/` removed (skills install directly to `.claude/skills/`).
+
+### Added
+- `migrateToV3Layout` migration -- automatically migrates pre-v3 directory layouts on `dev-team update`.
+- `assertNotSymlink` guards on all `rmSync` calls in v3 layout migration (Szabo F-01).
+- `BUILTIN_IDS` in adapter registry now includes all shipped adapters: claude, copilot, codex, agents-md (Szabo F-03).
+- Tests for `migrateToV3Layout`: happy path, idempotent, partial state, memory migration, symlink cleanup, SHARED.md preserved.
+
+## [2.0.2] - 2026-03-30
+
+### Fixed
+- `BUILTIN_IDS` adapter registry guard now covers all four shipped adapters -- prevents accidental replacement of copilot, codex, and agents-md adapters.
+- `assertNotSymlink` guards added before `rmSync` calls in `migrateToV3Layout` -- prevents symlink-following directory removal.
+
+### Tests
+- 6 new integration tests for `migrateToV3Layout` migration function.
+
 ## [2.0.1] - 2026-03-30
 
 ### Removed
