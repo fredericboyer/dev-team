@@ -39,7 +39,18 @@ let basePath = input.base_path || projectRoot;
 
 // Validate base_path: resolve to absolute, reject path traversal (fixes #617)
 basePath = path.resolve(basePath);
-if (!basePath.startsWith(projectRoot + path.sep) && basePath !== projectRoot) {
+// Resolve symlinks before checking containment
+try {
+  basePath = fs.realpathSync(basePath);
+} catch {
+  // Path doesn't exist yet — use resolved path
+}
+const realRoot = fs.realpathSync(projectRoot);
+const rel = path.relative(realRoot, basePath);
+if (
+  basePath !== realRoot &&
+  (rel === ".." || rel.startsWith(".." + path.sep) || path.isAbsolute(rel))
+) {
   process.stderr.write(
     `[dev-team worktree-create] base_path "${input.base_path}" resolves outside project root, falling back to cwd\n`,
   );

@@ -210,7 +210,28 @@ function findSidecar(agent, contentHash) {
     if (stat.isSymbolicLink()) return null; // Reject symlinks
     if (!stat.isFile()) return null;
     const content = fs.readFileSync(sidecarPath, "utf-8");
-    return JSON.parse(content);
+    const parsed = JSON.parse(content);
+    // Type guards: sanitize unexpected sidecar structure
+    if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) return null;
+    if (parsed.findings !== undefined && !Array.isArray(parsed.findings)) {
+      parsed.findings = [];
+    }
+    if (Array.isArray(parsed.findings)) {
+      parsed.findings = parsed.findings
+        .filter((f) => f !== null && typeof f === "object" && !Array.isArray(f))
+        .map((f) => {
+          if (
+            Object.prototype.hasOwnProperty.call(f, "classification") &&
+            typeof f.classification !== "string"
+          ) {
+            const copy = { ...f };
+            delete copy.classification;
+            return copy;
+          }
+          return f;
+        });
+    }
+    return parsed;
   } catch {
     return null;
   }
