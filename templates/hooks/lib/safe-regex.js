@@ -11,22 +11,106 @@
 
 "use strict";
 
-function hasOverlappingAlternation(pattern) {
+/**
+ * Build a map of group open positions to their close positions, and vice versa.
+ */
+function buildGroupMap(pattern) {
+  const openToClose = new Map();
+  const stack = [];
   for (let i = 0; i < pattern.length; i++) {
     if (pattern[i] === "\\") {
       i++;
       continue;
     }
+    if (pattern[i] === "[") {
+      while (i < pattern.length && pattern[i] !== "]") {
+        if (pattern[i] === "\\") i++;
+        i++;
+      }
+      continue;
+    }
+    if (pattern[i] === "(") {
+      stack.push(i);
+    } else if (pattern[i] === ")") {
+      if (stack.length > 0) {
+        const open = stack.pop();
+        openToClose.set(open, i);
+      }
+    }
+  }
+  return openToClose;
+}
+
+/**
+ * Check whether a group at openPos (or any ancestor group) is quantified.
+ */
+function isGroupQuantified(pattern, openPos, groupMap) {
+  // Check this group directly
+  const closePos = groupMap.get(openPos);
+  if (
+    closePos !== undefined &&
+    closePos + 1 < pattern.length &&
+    /[+*{]/.test(pattern[closePos + 1])
+  ) {
+    return true;
+  }
+  // Check ancestor groups: any group that contains openPos and is quantified
+  for (const [open, close] of groupMap) {
+    if (open < openPos && close > closePos) {
+      // This is an ancestor group — check if it's quantified
+      if (close + 1 < pattern.length && /[+*{]/.test(pattern[close + 1])) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+function hasOverlappingAlternation(pattern) {
+  const groupMap = buildGroupMap(pattern);
+  for (let i = 0; i < pattern.length; i++) {
+    if (pattern[i] === "\\") {
+      i++;
+      continue;
+    }
+    // Skip character classes
+    if (pattern[i] === "[") {
+      while (i < pattern.length && pattern[i] !== "]") {
+        if (pattern[i] === "\\") i++;
+        i++;
+      }
+      continue;
+    }
     if (pattern[i] === "(") {
       let depth = 1;
       let j = i + 1;
+      // Parse group prefix: (?:, (?=, (?!, (?<=, (?<!, (?<name>
       if (j < pattern.length && pattern[j] === "?") {
-        j += 2;
+        j++; // skip '?'
+        if (j < pattern.length) {
+          if (pattern[j] === "<") {
+            j++; // skip '<'
+            if (j < pattern.length && pattern[j] !== "=" && pattern[j] !== "!") {
+              // Named group (?<name> — skip to '>'
+              while (j < pattern.length && pattern[j] !== ">") j++;
+              if (j < pattern.length) j++; // skip '>'
+            } else {
+              j++; // skip '=' or '!'
+            }
+          } else {
+            j++; // skip ':', '=', '!'
+          }
+        }
       }
       const bodyStart = j;
       while (j < pattern.length && depth > 0) {
         if (pattern[j] === "\\") {
           j++;
+        } else if (pattern[j] === "[") {
+          while (j < pattern.length && pattern[j] !== "]") {
+            if (pattern[j] === "\\") j++;
+            j++;
+          }
         } else if (pattern[j] === "(") {
           depth++;
         } else if (pattern[j] === ")") {
@@ -35,7 +119,7 @@ function hasOverlappingAlternation(pattern) {
         j++;
       }
       const closePos = j - 1;
-      if (j < pattern.length && /[+*{]/.test(pattern[j])) {
+      if (isGroupQuantified(pattern, i, groupMap)) {
         const body = pattern.slice(bodyStart, closePos);
         const alternatives = splitOnTopLevelPipes(body);
         if (alternatives.length > 1 && hasPrefixOverlap(alternatives)) {
@@ -54,6 +138,12 @@ function splitOnTopLevelPipes(body) {
   for (let i = 0; i < body.length; i++) {
     if (body[i] === "\\") {
       i++;
+    } else if (body[i] === "[") {
+      // Skip character class — '|' inside [...] is literal
+      while (i < body.length && body[i] !== "]") {
+        if (body[i] === "\\") i++;
+        i++;
+      }
     } else if (body[i] === "(") {
       depth++;
     } else if (body[i] === ")") {

@@ -138,17 +138,46 @@ export function cleanupLegacyMemoryDirs(claudeDir: string): string[] {
 }
 
 export function compareSemver(a: string, b: string): number {
-  const pa = a.split(".").map((n) => parseInt(n.split("-")[0], 10));
-  const pb = b.split(".").map((n) => parseInt(n.split("-")[0], 10));
+  // Strip build metadata (+...) before comparison per semver spec
+  const cleanA = a.replace(/\+.*$/, "");
+  const cleanB = b.replace(/\+.*$/, "");
+  const pa = cleanA.split(".").map((n) => parseInt(n.split("-")[0], 10));
+  const pb = cleanB.split(".").map((n) => parseInt(n.split("-")[0], 10));
   for (let i = 0; i < 3; i++) {
     const diff = (pa[i] || 0) - (pb[i] || 0);
     if (diff !== 0) return diff;
   }
   // Per semver spec: pre-release versions have lower precedence than release
-  const aHasPre = a.includes("-");
-  const bHasPre = b.includes("-");
+  const aPreMatch = cleanA.match(/-(.+)$/);
+  const bPreMatch = cleanB.match(/-(.+)$/);
+  const aHasPre = !!aPreMatch;
+  const bHasPre = !!bPreMatch;
   if (aHasPre && !bHasPre) return -1;
   if (!aHasPre && bHasPre) return 1;
+  if (aHasPre && bHasPre) {
+    // Compare pre-release identifiers per semver spec
+    const aParts = aPreMatch![1].split(".");
+    const bParts = bPreMatch![1].split(".");
+    const len = Math.max(aParts.length, bParts.length);
+    for (let i = 0; i < len; i++) {
+      if (i >= aParts.length) return -1; // fewer fields = lower precedence
+      if (i >= bParts.length) return 1;
+      const aNum = parseInt(aParts[i], 10);
+      const bNum = parseInt(bParts[i], 10);
+      const aIsNum = !isNaN(aNum) && String(aNum) === aParts[i];
+      const bIsNum = !isNaN(bNum) && String(bNum) === bParts[i];
+      if (aIsNum && bIsNum) {
+        if (aNum !== bNum) return aNum - bNum;
+      } else if (aIsNum) {
+        return -1; // numeric < string
+      } else if (bIsNum) {
+        return 1;
+      } else {
+        const cmp = aParts[i].localeCompare(bParts[i]);
+        if (cmp !== 0) return cmp;
+      }
+    }
+  }
   return 0;
 }
 
@@ -410,7 +439,7 @@ function migrateFromClaude(targetDir: string): string[] {
         log.push("Rewrote settings.json hook paths to .dev-team/hooks/");
       }
     } catch {
-      // Fallback: if JSON parsing fails, skip rewrite to avoid corruption
+      log.push("WARNING: Failed to parse settings.json — skipping hook path rewrite");
     }
   }
 
