@@ -407,11 +407,11 @@ function migrateFromClaude(targetDir: string): string[] {
       }
       if (changed) {
         writeFile(settingsPath, JSON.stringify(settings, null, 2) + "\n");
+        log.push("Rewrote settings.json hook paths to .dev-team/hooks/");
       }
     } catch {
       // Fallback: if JSON parsing fails, skip rewrite to avoid corruption
     }
-    log.push("Rewrote settings.json hook paths to .dev-team/hooks/");
   }
 
   // Clean up other dev-team files in .claude/
