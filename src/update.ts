@@ -144,6 +144,11 @@ export function compareSemver(a: string, b: string): number {
     const diff = (pa[i] || 0) - (pb[i] || 0);
     if (diff !== 0) return diff;
   }
+  // Per semver spec: pre-release versions have lower precedence than release
+  const aHasPre = a.includes("-");
+  const bHasPre = b.includes("-");
+  if (aHasPre && !bHasPre) return -1;
+  if (!aHasPre && bHasPre) return 1;
   return 0;
 }
 
@@ -370,9 +375,43 @@ function migrateFromClaude(targetDir: string): string[] {
   const settingsPath = path.join(claudeDir, "settings.json");
   const settingsContent = readFile(settingsPath);
   if (settingsContent) {
-    const updated = settingsContent.replace(/\.claude\/hooks\//g, ".dev-team/hooks/");
-    writeFile(settingsPath, updated);
-    log.push("Rewrote settings.json hook paths to .dev-team/hooks/");
+    try {
+      const settings = JSON.parse(settingsContent);
+      let changed = false;
+      if (settings.hooks && typeof settings.hooks === "object") {
+        for (const event of Object.keys(settings.hooks)) {
+          const matchers = settings.hooks[event];
+          if (!Array.isArray(matchers)) continue;
+          for (const matcher of matchers) {
+            if (!matcher) continue;
+            // Top-level command field (flat format)
+            if (typeof matcher.command === "string" && matcher.command.includes(".claude/hooks/")) {
+              matcher.command = matcher.command.replace(/\.claude\/hooks\//g, ".dev-team/hooks/");
+              changed = true;
+            }
+            // Nested hooks array (standard format)
+            if (Array.isArray(matcher.hooks)) {
+              for (const hook of matcher.hooks) {
+                if (
+                  hook &&
+                  typeof hook.command === "string" &&
+                  hook.command.includes(".claude/hooks/")
+                ) {
+                  hook.command = hook.command.replace(/\.claude\/hooks\//g, ".dev-team/hooks/");
+                  changed = true;
+                }
+              }
+            }
+          }
+        }
+      }
+      if (changed) {
+        writeFile(settingsPath, JSON.stringify(settings, null, 2) + "\n");
+        log.push("Rewrote settings.json hook paths to .dev-team/hooks/");
+      }
+    } catch {
+      // Fallback: if JSON parsing fails, skip rewrite to avoid corruption
+    }
   }
 
   // Clean up other dev-team files in .claude/
