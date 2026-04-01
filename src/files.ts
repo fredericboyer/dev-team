@@ -45,6 +45,10 @@ export function assertNotSymlink(absPath: string): void {
  * that do not exist (ENOENT). Prevents parent-directory symlink
  * traversal attacks where an attacker replaces an ancestor with a
  * symlink to redirect file operations to arbitrary locations.
+ * 
+ * IMPORTANT: This function only checks ancestor directories, not the
+ * target path itself. Callers must also use assertNotSymlink() on the
+ * target to get complete symlink protection.
  */
 export function assertNoSymlinkInPath(absPath: string): void {
   // Find the deepest existing ancestor and resolve through system symlinks
@@ -380,7 +384,7 @@ export function listFilesRecursive(dir: string, maxDepth: number = 10): string[]
     const fullPath = path.join(dir, entry.name);
     if (entry.isDirectory() && !entry.isSymbolicLink()) {
       results.push(...listFilesRecursive(fullPath, maxDepth - 1));
-    } else if (!entry.isDirectory()) {
+    } else if (!entry.isDirectory() && !entry.isSymbolicLink()) {
       results.push(fullPath);
     }
   }

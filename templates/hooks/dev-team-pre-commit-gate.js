@@ -67,7 +67,9 @@ function hasSubstantiveContent(filePath) {
     if (stat.isSymbolicLink()) return false;
     // Verify realpath stays within project root (guards against symlink ancestors)
     const realAbsPath = fs.realpathSync(absPath);
-    if (!realAbsPath.startsWith(projectRoot) && realAbsPath !== process.cwd()) return false;
+    const realProjectRoot = fs.realpathSync(process.cwd()) + path.sep;
+    if (!realAbsPath.startsWith(realProjectRoot) && realAbsPath !== fs.realpathSync(process.cwd()))
+      return false;
 
     const content = fs.readFileSync(absPath, "utf-8");
     const lines = content.split("\n");

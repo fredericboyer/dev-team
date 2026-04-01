@@ -608,6 +608,18 @@ describe("listFilesRecursive", () => {
     const linkedNestedFiles = result.filter((f) => f.includes(path.join("linked", "file.txt")));
     assert.equal(linkedNestedFiles.length, 0, "should not recurse into symlink directory");
   });
+
+  it("excludes symlinked files", () => {
+    const d = path.join(tmpDir, "symfile");
+    fs.mkdirSync(d, { recursive: true });
+    const realFile = path.join(d, "real.txt");
+    fs.writeFileSync(realFile, "content");
+    fs.symlinkSync(realFile, path.join(d, "linked.txt"));
+
+    const result = listFilesRecursive(d);
+    assert.ok(result.some((f) => f.endsWith("real.txt")), "should include real file");
+    assert.ok(!result.some((f) => f.endsWith("linked.txt")), "should exclude symlinked file");
+  });
 });
 
 describe("getPackageVersion", () => {
