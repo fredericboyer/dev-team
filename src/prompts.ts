@@ -42,6 +42,9 @@ export async function confirm(question: string, defaultYes: boolean = true): Pro
  * Asks a checkbox-style question. Returns array of selected labels.
  */
 export async function checkbox(question: string, items: CheckboxItem[]): Promise<string[]> {
+  if (items.length === 0) {
+    throw new Error("checkbox requires at least one option");
+  }
   const rl = createInterface();
 
   console.log(`\n${question}`);
@@ -87,6 +90,9 @@ export async function checkbox(question: string, items: CheckboxItem[]): Promise
  * Asks a single-choice question. Returns the selected label.
  */
 export async function select(question: string, options: SelectOption[]): Promise<string> {
+  if (options.length === 0) {
+    throw new Error("select requires at least one option");
+  }
   const rl = createInterface();
 
   console.log(`\n${question}`);

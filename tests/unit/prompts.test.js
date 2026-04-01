@@ -195,6 +195,12 @@ describe("checkbox", () => {
       restoreLog();
     }
   });
+
+  it("throws when items array is empty", async () => {
+    await assert.rejects(() => checkbox("Pick:", []), {
+      message: "checkbox requires at least one option",
+    });
+  });
 });
 
 // ─── select ──────────────────────────────────────────────────────────────────
@@ -273,6 +279,12 @@ describe("select", () => {
     } finally {
       restoreLog();
     }
+  });
+
+  it("throws when options array is empty", async () => {
+    await assert.rejects(() => select("Choose:", []), {
+      message: "select requires at least one option",
+    });
   });
 });
 
