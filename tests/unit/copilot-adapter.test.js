@@ -6,7 +6,13 @@ const fs = require("fs");
 const path = require("path");
 const os = require("os");
 
-const { CopilotAdapter, buildHooksConfig } = require("../../dist/adapters/copilot");
+const {
+  CopilotAdapter,
+  buildHooksConfig,
+  mapTools,
+  adaptAgentBody,
+  adaptSkillContent,
+} = require("../../dist/adapters/copilot");
 
 function makeTmpDir() {
   return fs.mkdtempSync(path.join(os.tmpdir(), "copilot-test-"));
@@ -18,11 +24,13 @@ function makeDefs() {
       name: "dev-team-voss",
       description: "Backend engineer.",
       body: "You are Voss, a backend engineer.\n\n## Focus areas\n\n- APIs\n",
+      tools: "Read, Edit, Write, Bash, Grep, Glob, Agent",
     },
     {
       name: "dev-team-szabo",
       description: "Security reviewer.",
       body: "You are Szabo, a security reviewer.\n",
+      tools: "Read, Grep, Glob, Bash, Agent",
     },
   ];
 }
@@ -154,6 +162,141 @@ describe("CopilotAdapter", () => {
     const hooksPath = path.join(tmpDir, ".github", "hooks", "hooks.json");
     assert.ok(fs.existsSync(hooksPath), "hooks.json should exist after update");
   });
+  // --- Agent file tests ---
+
+  it("generate() creates Copilot-native agent files", () => {
+    const defs = makeDefs();
+    adapter.generate(defs, tmpDir);
+
+    const agentPath = path.join(tmpDir, ".github", "agents", "dev-team-voss.agent.md");
+    assert.ok(fs.existsSync(agentPath), "voss agent file should exist");
+
+    const content = fs.readFileSync(agentPath, "utf-8");
+    assert.ok(content.startsWith("---"), "agent file should start with frontmatter");
+    assert.ok(content.includes("name: dev-team-voss"), "should have name field");
+    assert.ok(content.includes("description: Backend engineer."), "should have description field");
+    assert.ok(content.includes("tools:"), "should have tools field");
+    assert.ok(content.includes("You are Voss"), "should have agent body");
+  });
+
+  it("generate() maps Claude Code tools to Copilot equivalents", () => {
+    const defs = makeDefs();
+    adapter.generate(defs, tmpDir);
+
+    const content = fs.readFileSync(
+      path.join(tmpDir, ".github", "agents", "dev-team-voss.agent.md"),
+      "utf-8",
+    );
+    assert.ok(
+      content.includes("tools: read, edit, terminal, search, agent"),
+      "should have mapped tools",
+    );
+  });
+
+  it("update() writes agent files", () => {
+    const defs = makeDefs();
+    adapter.update(defs, tmpDir);
+
+    const agentPath = path.join(tmpDir, ".github", "agents", "dev-team-voss.agent.md");
+    assert.ok(fs.existsSync(agentPath), "agent file should exist after update");
+  });
+
+  // --- Skills tests ---
+
+  it("generate() creates skill files", () => {
+    const defs = makeDefs();
+    adapter.generate(defs, tmpDir);
+
+    const skillsDir = path.join(tmpDir, ".github", "skills");
+    assert.ok(fs.existsSync(skillsDir), "skills directory should exist");
+
+    const skillDirs = fs.readdirSync(skillsDir);
+    assert.ok(skillDirs.length > 0, "should have at least one skill");
+
+    const taskSkillPath = path.join(skillsDir, "dev-team-task", "SKILL.md");
+    assert.ok(fs.existsSync(taskSkillPath), "task skill SKILL.md should exist");
+    const content = fs.readFileSync(taskSkillPath, "utf-8");
+    assert.ok(content.includes("---"), "skill should have frontmatter");
+    assert.ok(
+      !content.includes("disable-model-invocation"),
+      "should strip disable-model-invocation from skill frontmatter",
+    );
+  });
+
+  it("update() creates skill files", () => {
+    const defs = makeDefs();
+    adapter.update(defs, tmpDir);
+
+    const skillsDir = path.join(tmpDir, ".github", "skills");
+    assert.ok(fs.existsSync(skillsDir), "skills directory should exist after update");
+  });
+
+  // --- Agent memory tests ---
+
+  it("generate() creates agent memory directories", () => {
+    const defs = makeDefs();
+    adapter.generate(defs, tmpDir);
+
+    const vossMemory = path.join(tmpDir, ".github", "agent-memory", "dev-team-voss", "MEMORY.md");
+    assert.ok(fs.existsSync(vossMemory), "voss memory file should exist");
+
+    const content = fs.readFileSync(vossMemory, "utf-8");
+    assert.ok(content.includes("# dev-team-voss Memory"), "should have agent name header");
+    assert.ok(content.includes("calibration memory"), "should have calibration description");
+
+    const szaboMemory = path.join(tmpDir, ".github", "agent-memory", "dev-team-szabo", "MEMORY.md");
+    assert.ok(fs.existsSync(szaboMemory), "szabo memory file should exist");
+  });
+
+  it("preserves existing memory on update", () => {
+    const defs = makeDefs();
+    adapter.generate(defs, tmpDir);
+
+    const memoryPath = path.join(tmpDir, ".github", "agent-memory", "dev-team-voss", "MEMORY.md");
+    fs.writeFileSync(memoryPath, "# Custom memory content\n\nImportant findings here.\n");
+
+    adapter.update(defs, tmpDir);
+
+    const content = fs.readFileSync(memoryPath, "utf-8");
+    assert.ok(content.includes("Custom memory content"), "should preserve existing memory");
+    assert.ok(!content.includes("calibration memory"), "should not have template content");
+  });
+
+  // --- Shared learnings tests ---
+
+  it("generate() creates shared learnings instruction file", () => {
+    const defs = makeDefs();
+    adapter.generate(defs, tmpDir);
+
+    const learningsPath = path.join(
+      tmpDir,
+      ".github",
+      "instructions",
+      "dev-team-learnings.instructions.md",
+    );
+    assert.ok(fs.existsSync(learningsPath), "learnings instruction file should exist");
+
+    const content = fs.readFileSync(learningsPath, "utf-8");
+    assert.ok(content.startsWith("---"), "should start with frontmatter");
+    assert.ok(content.includes('applyTo: "**"'), "should have applyTo field");
+    assert.ok(
+      content.includes("# Shared Team Learnings"),
+      "should contain learnings template content",
+    );
+  });
+
+  it("update() creates shared learnings instruction file", () => {
+    const defs = makeDefs();
+    adapter.update(defs, tmpDir);
+
+    const learningsPath = path.join(
+      tmpDir,
+      ".github",
+      "instructions",
+      "dev-team-learnings.instructions.md",
+    );
+    assert.ok(fs.existsSync(learningsPath), "learnings instruction file should exist after update");
+  });
 });
 
 describe("buildHooksConfig", () => {
@@ -222,5 +365,88 @@ describe("buildHooksConfig", () => {
     assert.equal(config.hooks.sessionStart, undefined, "no sessionStart hooks");
     assert.equal(config.hooks.sessionEnd, undefined, "no sessionEnd hooks");
     assert.equal(config.hooks.errorOccurred, undefined, "no errorOccurred hooks");
+  });
+});
+
+describe("mapTools", () => {
+  it("maps Claude Code tools to Copilot equivalents", () => {
+    const result = mapTools("Read, Edit, Write, Bash, Grep, Glob, Agent");
+    assert.equal(result, "read, edit, terminal, search, agent");
+  });
+
+  it("deduplicates mapped tools", () => {
+    const result = mapTools("Read, Edit, Write");
+    assert.equal(result, "read, edit");
+  });
+
+  it("returns defaults when no tools provided", () => {
+    const result = mapTools(undefined);
+    assert.equal(result, "read, edit, search");
+  });
+
+  it("returns defaults for empty string", () => {
+    const result = mapTools("");
+    assert.equal(result, "read, edit, search");
+  });
+
+  it("maps WebSearch and WebFetch", () => {
+    const result = mapTools("Read, Grep, Glob, Bash, Agent, WebSearch, WebFetch");
+    assert.equal(result, "read, search, terminal, agent, fetch");
+  });
+});
+
+describe("adaptAgentBody", () => {
+  it("replaces .claude/rules/ with .github/instructions/", () => {
+    const body = "Shared context is loaded via `.claude/rules/`.";
+    const result = adaptAgentBody(body);
+    assert.ok(result.includes(".github/instructions/"), "should replace .claude/rules/");
+    assert.ok(!result.includes(".claude/rules/"), "should not contain .claude/rules/");
+  });
+
+  it("replaces .claude/agents/ with .github/agents/", () => {
+    const body = "Read agent definition from `.claude/agents/dev-team-voss.agent.md`.";
+    const result = adaptAgentBody(body);
+    assert.ok(result.includes(".github/agents/"), "should replace .claude/agents/");
+  });
+
+  it("replaces .claude/agent-memory/ with .github/agent-memory/", () => {
+    const body = "Memory lives at `.claude/agent-memory/dev-team-voss/MEMORY.md`.";
+    const result = adaptAgentBody(body);
+    assert.ok(result.includes(".github/agent-memory/"), "should replace .claude/agent-memory/");
+  });
+
+  it("preserves non-Claude-specific content", () => {
+    const body = "You are Voss, a backend engineer.\n\n## Focus areas\n\n- APIs\n";
+    const result = adaptAgentBody(body);
+    assert.equal(result, body, "should preserve content without Claude references");
+  });
+});
+
+describe("adaptSkillContent", () => {
+  it("strips disable-model-invocation from frontmatter", () => {
+    const content =
+      "---\nname: dev-team:task\ndescription: Task loop.\ndisable-model-invocation: true\n---\n\nBody here.\n";
+    const result = adaptSkillContent(content);
+    assert.ok(
+      !result.includes("disable-model-invocation"),
+      "should strip disable-model-invocation",
+    );
+    assert.ok(result.includes("name: dev-team:task"), "should preserve name");
+    assert.ok(result.includes("description: Task loop."), "should preserve description");
+    assert.ok(result.includes("Body here."), "should preserve body");
+  });
+
+  it("preserves content without frontmatter", () => {
+    const content = "No frontmatter here.";
+    const result = adaptSkillContent(content);
+    assert.equal(result, content, "should return content unchanged");
+  });
+
+  it("preserves frontmatter without disable-model-invocation", () => {
+    const content = "---\nname: dev-team:challenge\ndescription: Challenge.\n---\n\nBody.\n";
+    const result = adaptSkillContent(content);
+    assert.ok(result.includes("name: dev-team:challenge"), "should preserve name");
+    assert.ok(result.includes("description: Challenge."), "should preserve description");
+    assert.ok(!result.includes("disable-model-invocation"), "should not add the field");
   });
 });

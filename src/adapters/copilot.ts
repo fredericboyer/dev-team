@@ -13,7 +13,45 @@
 import path from "path";
 import type { CanonicalAgentDefinition } from "../formats/canonical.js";
 import { registerAdapter, type RuntimeAdapter } from "../formats/adapters.js";
-import { fileExists, readFile, writeFile } from "../files.js";
+import { fileExists, readFile, writeFile, templateDir, listSubdirectories } from "../files.js";
+
+const TOOL_MAP: Record<string, string> = {
+  Read: "read",
+  Edit: "edit",
+  Write: "edit",
+  Bash: "terminal",
+  Grep: "search",
+  Glob: "search",
+  Agent: "agent",
+  WebSearch: "search",
+  WebFetch: "fetch",
+};
+
+export function mapTools(claudeTools?: string): string {
+  if (!claudeTools) return "read, edit, search";
+  const mapped = new Set<string>();
+  for (const raw of claudeTools.split(",")) {
+    const tool = raw.trim();
+    const copilotTool = TOOL_MAP[tool];
+    if (copilotTool) {
+      mapped.add(copilotTool);
+    }
+  }
+  return mapped.size > 0 ? Array.from(mapped).join(", ") : "read, edit, search";
+}
+
+export function adaptAgentBody(body: string): string {
+  let adapted = body;
+  adapted = adapted.replace(/\.claude\/rules\//g, ".github/instructions/");
+  adapted = adapted.replace(/\.claude\/agents\//g, ".github/agents/");
+  adapted = adapted.replace(/\.claude\/agent-memory\//g, ".github/agent-memory/");
+  adapted = adapted.replace(
+    /Write status to `\.dev-team\/agent-status\/[^`]+`[^.]*\./g,
+    "Report progress via status messages.",
+  );
+  adapted = adapted.replace(/your MEMORY\.md/g, "your `.github/agent-memory/<agent>/MEMORY.md`");
+  return adapted;
+}
 
 /**
  * Renders the general copilot-instructions.md content from all definitions.
@@ -39,6 +77,45 @@ function renderAgentInstruction(def: CanonicalAgentDefinition): string {
   lines.push(`# ${def.name}`, "", def.description, "", def.body.trimEnd(), "");
 
   return lines.join("\n");
+}
+
+function renderCopilotAgent(def: CanonicalAgentDefinition): string {
+  const tools = mapTools(def.tools);
+  const adaptedBody = adaptAgentBody(def.body);
+  const lines: string[] = [
+    "---",
+    `name: ${def.name}`,
+    `description: ${def.description}`,
+    `tools: ${tools}`,
+    "---",
+    "",
+    adaptedBody.trimEnd(),
+    "",
+  ];
+  return lines.join("\n");
+}
+
+function renderLearningsInstruction(learningsContent: string): string {
+  const lines: string[] = ["---", 'applyTo: "**"', "---", "", learningsContent.trimEnd(), ""];
+  return lines.join("\n");
+}
+
+function renderMemoryFile(agentName: string): string {
+  return (
+    `# ${agentName} Memory\n\n` +
+    "<!-- Agent calibration memory. Domain-specific findings, known patterns, active watch lists. -->\n" +
+    "<!-- Entries include Last-verified dates for temporal decay. -->\n"
+  );
+}
+
+export function adaptSkillContent(content: string): string {
+  const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
+  if (!match) return content;
+  const [, yaml, body] = match;
+  const filteredLines = yaml
+    .split("\n")
+    .filter((line) => !line.trimStart().startsWith("disable-model-invocation:"));
+  return `---\n${filteredLines.join("\n")}\n---\n${body}`;
 }
 
 /**
@@ -137,6 +214,18 @@ export class CopilotAdapter implements RuntimeAdapter {
 
     // Native Copilot hooks
     this.generateHooks(targetDir);
+
+    // Copilot-native agent files
+    this.generateAgents(definitions, targetDir);
+
+    // Skills
+    this.generateSkills(targetDir);
+
+    // Agent memory directories
+    this.generateAgentMemory(definitions, targetDir);
+
+    // Shared learnings instruction file
+    this.generateLearnings(targetDir);
   }
 
   update(
@@ -176,6 +265,18 @@ export class CopilotAdapter implements RuntimeAdapter {
     // Update native Copilot hooks
     this.generateHooks(targetDir);
 
+    // Update Copilot-native agent files
+    this.updateAgents(definitions, targetDir);
+
+    // Update skills
+    this.generateSkills(targetDir);
+
+    // Update agent memory directories (preserve existing content)
+    this.generateAgentMemory(definitions, targetDir);
+
+    // Update shared learnings
+    this.generateLearnings(targetDir);
+
     return { updated, added };
   }
 
@@ -187,6 +288,81 @@ export class CopilotAdapter implements RuntimeAdapter {
     const hooksPath = path.join(targetDir, ".github", "hooks", "hooks.json");
     const config = buildHooksConfig();
     writeFile(hooksPath, JSON.stringify(config, null, 2) + "\n");
+  }
+
+  /**
+   * Generates .github/agents/*.agent.md — Copilot-native agent files
+   * with YAML frontmatter (name, description, tools).
+   */
+  generateAgents(definitions: CanonicalAgentDefinition[], targetDir: string): void {
+    const agentsDir = path.join(targetDir, ".github", "agents");
+    for (const def of definitions) {
+      const agentPath = path.join(agentsDir, `${def.name}.agent.md`);
+      writeFile(agentPath, renderCopilotAgent(def));
+    }
+  }
+
+  /**
+   * Updates .github/agents/*.agent.md during update().
+   * Delegates to generateAgents() — change tracking is handled by
+   * instruction file comparison in the caller.
+   */
+  private updateAgents(definitions: CanonicalAgentDefinition[], targetDir: string): void {
+    this.generateAgents(definitions, targetDir);
+  }
+
+  /**
+   * Generates .github/skills/SKILL.md files from templates.
+   * Strips disable-model-invocation from frontmatter (Copilot uses
+   * this at the agent level, not in skill definitions).
+   */
+  generateSkills(targetDir: string): void {
+    const skillsSrcDir = path.join(templateDir(), "skills");
+    const skillsDestDir = path.join(targetDir, ".github", "skills");
+
+    const skillDirs = listSubdirectories(skillsSrcDir);
+
+    for (const skillDir of skillDirs) {
+      const srcPath = path.join(skillsSrcDir, skillDir, "SKILL.md");
+      const content = readFile(srcPath);
+      if (!content) continue;
+
+      const adapted = adaptSkillContent(content);
+      const destPath = path.join(skillsDestDir, skillDir, "SKILL.md");
+      writeFile(destPath, adapted);
+    }
+  }
+
+  /**
+   * Generates .github/agent-memory/MEMORY.md files for each agent.
+   * Preserves existing content — only creates files that do not exist.
+   */
+  generateAgentMemory(definitions: CanonicalAgentDefinition[], targetDir: string): void {
+    const memoryDir = path.join(targetDir, ".github", "agent-memory");
+    for (const def of definitions) {
+      const memoryPath = path.join(memoryDir, def.name, "MEMORY.md");
+      if (!fileExists(memoryPath)) {
+        writeFile(memoryPath, renderMemoryFile(def.name));
+      }
+    }
+  }
+
+  /**
+   * Generates .github/instructions/dev-team-learnings.instructions.md
+   * with applyTo: "**" frontmatter so it loads for all files.
+   */
+  generateLearnings(targetDir: string): void {
+    const learningsTemplatePath = path.join(templateDir(), "dev-team-learnings.md");
+    const content = readFile(learningsTemplatePath);
+    if (!content) return;
+
+    const destPath = path.join(
+      targetDir,
+      ".github",
+      "instructions",
+      "dev-team-learnings.instructions.md",
+    );
+    writeFile(destPath, renderLearningsInstruction(content));
   }
 }
 
