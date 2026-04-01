@@ -10,7 +10,8 @@ pull_request_rules:
   - name: auto-queue when CI passes
     conditions:
       - base = main
-      - "check-success = build-and-test (ubuntu-latest, 22)"
+      - "#check-pending = 0"
+      - -check-failure
     actions:
       queue:
         name: default
