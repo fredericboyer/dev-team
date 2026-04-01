@@ -19,6 +19,8 @@ Start a task loop for: $ARGUMENTS
    - Tooling/config -> @dev-team-deming
    - Documentation -> @dev-team-tufte
    - Release/versioning -> @dev-team-conway
+   - Infrastructure/CI/Docker/deployment -> @dev-team-hamilton
+   - Research/investigation -> @dev-team-turing
 
 3. **Architect pre-assessment** (skip for bug fixes, typo fixes, config tweaks):
    Spawn @dev-team-brooks to assess:
