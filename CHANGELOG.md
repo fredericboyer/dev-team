@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Stale path references in agent memory and learnings cleaned up (#594).
 - `validate-docs` now scans `.claude/agents/` and `.claude/agent-memory/` directories (#594).
-- `BUILTIN_IDS` protects all 4 shipped adapters (claude, copilot, codex, agents-md) (#594).
+- `BUILTIN_IDS` protects all 4 shipped adapters (claude, copilot, codex, agents-md) (#596, #600).
 - `rmSync` symlink ancestor guards hardened (#596).
 - CHANGELOG entries for v2.0.2 and v3.0.0 corrected (#600).
 - 6 Copilot review findings from PRs #594 and #596 addressed (#600).
