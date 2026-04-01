@@ -112,7 +112,7 @@ jobs:
           python-version: '3.12'
 
       - name: Install Semgrep
-        run: pip install semgrep==1.112.0
+        run: pip install semgrep==1.157.0
 
       - name: Run Semgrep SAST scan
         run: semgrep scan --config=auto
