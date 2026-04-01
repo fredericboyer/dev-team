@@ -201,7 +201,7 @@ export { PRESETS, ALL_AGENTS, QUALITY_HOOKS, INFRA_HOOKS };
  */
 export async function run(targetDir: string, flags: string[] = []): Promise<void> {
   const isAll = flags.includes("--all");
-  const presetFlag = flags.find((f) => f.startsWith("--preset"));
+  const presetFlag = flags.find((f) => f === "--preset" || f.startsWith("--preset="));
   let presetName: string | undefined;
   if (presetFlag) {
     const idx = flags.indexOf(presetFlag);
