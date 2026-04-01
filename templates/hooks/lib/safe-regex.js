@@ -11,6 +11,73 @@
 
 "use strict";
 
+function hasOverlappingAlternation(pattern) {
+  for (let i = 0; i < pattern.length; i++) {
+    if (pattern[i] === "\\") {
+      i++;
+      continue;
+    }
+    if (pattern[i] === "(") {
+      let depth = 1;
+      let j = i + 1;
+      if (j < pattern.length && pattern[j] === "?") {
+        j += 2;
+      }
+      const bodyStart = j;
+      while (j < pattern.length && depth > 0) {
+        if (pattern[j] === "\\") {
+          j++;
+        } else if (pattern[j] === "(") {
+          depth++;
+        } else if (pattern[j] === ")") {
+          depth--;
+        }
+        j++;
+      }
+      const closePos = j - 1;
+      if (j < pattern.length && /[+*{]/.test(pattern[j])) {
+        const body = pattern.slice(bodyStart, closePos);
+        const alternatives = splitOnTopLevelPipes(body);
+        if (alternatives.length > 1 && hasPrefixOverlap(alternatives)) {
+          return true;
+        }
+      }
+    }
+  }
+  return false;
+}
+
+function splitOnTopLevelPipes(body) {
+  const parts = [];
+  let depth = 0;
+  let start = 0;
+  for (let i = 0; i < body.length; i++) {
+    if (body[i] === "\\") {
+      i++;
+    } else if (body[i] === "(") {
+      depth++;
+    } else if (body[i] === ")") {
+      depth--;
+    } else if (body[i] === "|" && depth === 0) {
+      parts.push(body.slice(start, i));
+      start = i + 1;
+    }
+  }
+  parts.push(body.slice(start));
+  return parts;
+}
+
+function hasPrefixOverlap(alternatives) {
+  for (let i = 0; i < alternatives.length; i++) {
+    for (let j = 0; j < alternatives.length; j++) {
+      if (i !== j && alternatives[j].startsWith(alternatives[i])) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
 /**
  * Check whether a regex pattern is likely safe from ReDoS.
  *
@@ -38,6 +105,14 @@ function safeRegex(pattern) {
   // Detect quantified backreferences — another ReDoS vector
   if (/\\[1-9]\d*[+*{]/.test(pattern)) {
     return { safe: false, reason: "quantified backreference detected (potential ReDoS)" };
+  }
+
+  // Detect quantified alternation groups with overlapping prefixes
+  if (hasOverlappingAlternation(pattern)) {
+    return {
+      safe: false,
+      reason: "overlapping alternation with quantifier detected (potential ReDoS)",
+    };
   }
 
   // Try to compile — catches syntax errors
