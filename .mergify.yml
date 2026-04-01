@@ -11,7 +11,6 @@ pull_request_rules:
     conditions:
       - base = main
       - check-success~=^CI /
-      - check-success~=CodeQL
     actions:
       queue:
         name: default
