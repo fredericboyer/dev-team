@@ -142,6 +142,10 @@ interface CopilotHooksConfig {
  * Maps dev-team hooks to Copilot's 6 native hook events:
  * - preToolUse: safety guard (bash/shell), pre-commit lint, review gate (git commit)
  * - postToolUse: TDD enforcement, post-change review (file edit tools)
+ *
+ * Hook context is provided by the Copilot hook runner via its own mechanism.
+ * Do NOT embed $TOOL_INPUT or $TOOL_NAME in command strings - they would be
+ * shell-expanded, risking injection if input contains metacharacters.
  */
 export function buildHooksConfig(): CopilotHooksConfig {
   return {
@@ -151,7 +155,7 @@ export function buildHooksConfig(): CopilotHooksConfig {
           matchers: ["bash", "shell", "terminal"],
           hooks: [
             {
-              command: 'node .dev-team/hooks/dev-team-safety-guard.js "$TOOL_NAME" "$TOOL_INPUT"',
+              command: "node .dev-team/hooks/dev-team-safety-guard.js",
               description: "Safety guard — blocks dangerous shell commands",
             },
           ],
@@ -175,12 +179,11 @@ export function buildHooksConfig(): CopilotHooksConfig {
           matchers: ["edit_file", "write_file", "insert_code"],
           hooks: [
             {
-              command: 'node .dev-team/hooks/dev-team-tdd-enforce.js "$TOOL_NAME" "$TOOL_INPUT"',
+              command: "node .dev-team/hooks/dev-team-tdd-enforce.js",
               description: "TDD enforcement — checks test exists for changed code",
             },
             {
-              command:
-                'node .dev-team/hooks/dev-team-post-change-review.js "$TOOL_NAME" "$TOOL_INPUT"',
+              command: "node .dev-team/hooks/dev-team-post-change-review.js",
               description: "Post-change review — triggers review for significant changes",
             },
           ],
