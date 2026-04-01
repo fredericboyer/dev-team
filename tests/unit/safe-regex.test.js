@@ -68,4 +68,43 @@ describe("safeRegex", () => {
     assert.equal(result.safe, false);
     assert.ok(result.reason.includes("invalid regex"));
   });
+
+  it("rejects identical alternatives with quantifier (a|a)+", () => {
+    const result = safeRegex("(a|a)+");
+    assert.equal(result.safe, false);
+    assert.ok(result.reason.includes("overlapping alternation"));
+  });
+
+  it("rejects prefix-overlapping alternatives (ab|ac|a)+", () => {
+    const result = safeRegex("(ab|ac|a)+");
+    assert.equal(result.safe, false);
+    assert.ok(result.reason.includes("overlapping alternation"));
+  });
+
+  it("rejects prefix-overlapping alternatives with * quantifier", () => {
+    const result = safeRegex("(feat|fea|f)*");
+    assert.equal(result.safe, false);
+    assert.ok(result.reason.includes("overlapping alternation"));
+  });
+
+  it("rejects prefix-overlapping alternatives with {n,} quantifier", () => {
+    const result = safeRegex("(abc|ab){2,}");
+    assert.equal(result.safe, false);
+    assert.ok(result.reason.includes("overlapping alternation"));
+  });
+
+  it("accepts non-overlapping alternation with quantifier (a|b)+", () => {
+    const result = safeRegex("(a|b)+");
+    assert.equal(result.safe, true);
+  });
+
+  it("accepts non-overlapping alternation (feat|fix)+", () => {
+    const result = safeRegex("(feat|fix)+");
+    assert.equal(result.safe, true);
+  });
+
+  it("accepts alternation without quantifier (a|a)", () => {
+    const result = safeRegex("(a|a)");
+    assert.equal(result.safe, true);
+  });
 });
