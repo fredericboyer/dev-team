@@ -46,10 +46,6 @@ export function adaptAgentBody(body: string): string {
   adapted = adapted.replace(/\.claude\/agents\//g, ".github/agents/");
   adapted = adapted.replace(/\.claude\/agent-memory\//g, ".github/agent-memory/");
   adapted = adapted.replace(
-    /`\.claude\/agents\/([^`]+)\.agent\.md`/g,
-    "`.github/agents/$1.agent.md`",
-  );
-  adapted = adapted.replace(
     /Write status to `\.dev-team\/agent-status\/[^`]+`[^.]*\./g,
     "Report progress via status messages.",
   );
@@ -118,7 +114,7 @@ export function adaptSkillContent(content: string): string {
   const [, yaml, body] = match;
   const filteredLines = yaml
     .split("\n")
-    .filter((line) => !line.trim().startsWith("disable-model-invocation"));
+    .filter((line) => !line.trimStart().startsWith("disable-model-invocation:"));
   return `---\n${filteredLines.join("\n")}\n---\n${body}`;
 }
 
@@ -308,15 +304,11 @@ export class CopilotAdapter implements RuntimeAdapter {
 
   /**
    * Updates .github/agents/*.agent.md during update().
-   * Always writes latest content — change tracking is handled by
+   * Delegates to generateAgents() — change tracking is handled by
    * instruction file comparison in the caller.
    */
   private updateAgents(definitions: CanonicalAgentDefinition[], targetDir: string): void {
-    const agentsDir = path.join(targetDir, ".github", "agents");
-    for (const def of definitions) {
-      const agentPath = path.join(agentsDir, `${def.name}.agent.md`);
-      writeFile(agentPath, renderCopilotAgent(def));
-    }
+    this.generateAgents(definitions, targetDir);
   }
 
   /**
@@ -328,12 +320,7 @@ export class CopilotAdapter implements RuntimeAdapter {
     const skillsSrcDir = path.join(templateDir(), "skills");
     const skillsDestDir = path.join(targetDir, ".github", "skills");
 
-    let skillDirs: string[];
-    try {
-      skillDirs = listSubdirectories(skillsSrcDir);
-    } catch {
-      return;
-    }
+    const skillDirs = listSubdirectories(skillsSrcDir);
 
     for (const skillDir of skillDirs) {
       const srcPath = path.join(skillsSrcDir, skillDir, "SKILL.md");

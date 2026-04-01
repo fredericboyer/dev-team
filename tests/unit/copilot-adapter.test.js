@@ -214,14 +214,13 @@ describe("CopilotAdapter", () => {
     assert.ok(skillDirs.length > 0, "should have at least one skill");
 
     const taskSkillPath = path.join(skillsDir, "dev-team-task", "SKILL.md");
-    if (fs.existsSync(taskSkillPath)) {
-      const content = fs.readFileSync(taskSkillPath, "utf-8");
-      assert.ok(content.includes("---"), "skill should have frontmatter");
-      assert.ok(
-        !content.includes("disable-model-invocation"),
-        "should strip disable-model-invocation from skill frontmatter",
-      );
-    }
+    assert.ok(fs.existsSync(taskSkillPath), "task skill SKILL.md should exist");
+    const content = fs.readFileSync(taskSkillPath, "utf-8");
+    assert.ok(content.includes("---"), "skill should have frontmatter");
+    assert.ok(
+      !content.includes("disable-model-invocation"),
+      "should strip disable-model-invocation from skill frontmatter",
+    );
   });
 
   it("update() creates skill files", () => {
