@@ -34,7 +34,18 @@ try {
   process.exit(1);
 }
 
-const basePath = input.base_path || process.cwd();
+const projectRoot = process.cwd();
+let basePath = input.base_path || projectRoot;
+
+// Validate base_path: resolve to absolute, reject path traversal (fixes #617)
+basePath = path.resolve(basePath);
+if (!basePath.startsWith(projectRoot + path.sep) && basePath !== projectRoot) {
+  process.stderr.write(
+    `[dev-team worktree-create] base_path "${input.base_path}" resolves outside project root, falling back to cwd\n`,
+  );
+  basePath = projectRoot;
+}
+
 const worktreeName = input.worktree_name;
 const branchName = input.branch_name;
 
