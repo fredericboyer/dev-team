@@ -165,17 +165,17 @@
 - **Context**: Agent definitions formalized via CanonicalAgentDefinition interface (portable + runtime-specific fields). Adapter registry pattern extracts agent copy logic from init.ts/update.ts. ClaudeCodeAdapter is identity transform — backward compatible. init.ts and update.ts now iterate registered adapters via getAdaptersForRuntimes(). `runtimes` config field + `--runtime` CLI flag control which adapters run. Duplicate `import "./adapters/index.js"` in init.ts noted but not blocking.
 
 ### [2026-03-30] v2.0: 5 runtime adapters — agents-md, copilot, codex, cursor, windsurf
-- **Type**: DECISION [new]
+- **Type**: DECISION [removed in v2.0.1]
 - **Source**: #502, #504, #505, #506, PRs #570, #571
 - **Tags**: adapters, multi-runtime, copilot, codex, cursor, windsurf, agents-md, dx
 - **Outcome**: fixed
 - **Last-verified**: 2026-03-30
-- **Context**: Five adapters registered via barrel file (src/adapters/index.ts). AgentsMd generates single AGENTS.md at root. Copilot generates .github/copilot-instructions.md + per-agent .github/instructions/. Codex generates .agents/AGENTS.md + skills + .codex/config.toml. Cursor generates .cursor/rules/. Windsurf generates .windsurf/rules/. Cursor and Windsurf share identical format (YAML frontmatter with description field). All adapters implement generate() + update() interface.
+- **Context**: Five adapters registered via barrel file (src/adapters/index.ts). AgentsMd generates single AGENTS.md at root. Copilot generates .github/copilot-instructions.md + per-agent .github/instructions/. Codex generates .agents/AGENTS.md + skills + .codex/config.toml. Cursor and Windsurf adapters removed in v2.0.1. Current adapters: claude, agents-md, copilot, codex. All adapters implement generate() + update() interface.
 
 ### [2026-03-30] v2.0: MCP enforcement server (ADR-037)
-- **Type**: DECISION [new]
+- **Type**: DECISION [removed in v2.0.1]
 - **Source**: #503, PR #572
 - **Tags**: mcp, enforcement, review-gate, multi-runtime, dx
 - **Outcome**: fixed
 - **Last-verified**: 2026-03-30
-- **Context**: JSON-RPC 2.0 over stdio, zero dependencies. Tool registry pattern with review_gate as first tool. Uses agent-patterns.json for file routing (same source as hook). Launched via `npx dev-team mcp`. Read-only: checks state but never mutates. Path traversal guard on filePath input (R-02 fix). Two code paths now exist for review gate: hook (Claude Code) and MCP tool (all runtimes) — sync risk noted in ADR-037.
+- **Context**: MCP enforcement server removed in v2.0.1. Original design: JSON-RPC 2.0 over stdio, zero dependencies. Tool registry pattern with review_gate as first tool. Removed due to scope reduction — hooks remain the primary enforcement mechanism.

@@ -11,7 +11,7 @@ Adversarial AI agent team for any project. Installs Claude Code agents, hooks, a
 - `tests/` — Unit, integration, and scenario tests
 - `.claude/agents/` — Our own agent definitions (`.agent.md` files, not shipped to users)
 - `.claude/agent-memory/` — Agent calibration memory (not shipped to users)
-- `.dev-team/` — Hooks, skills, config, and metrics (not shipped to users)
+- `.dev-team/` — Hooks, config, metrics, and research (not shipped to users)
 
 ## Workflow
 

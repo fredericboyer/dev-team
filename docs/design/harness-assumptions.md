@@ -15,7 +15,7 @@ Components in dev-team that compensate for model limitations. Each retro evaluat
 
 - **Assumption:** Models will not write tests without explicit prompting, leading to untested code.
 - **Current status:** Models are significantly better at TDD now and often generate tests unprompted. However, enforcement prevents regression in sessions where the model optimizes for speed over coverage.
-- **Component:** `templates/hooks/dev-team-pre-commit-lint.js` (test coverage check)
+- **Component:** `templates/hooks/dev-team-tdd-enforce.js` (test coverage check)
 - **Last-validated:** 2026-03-29
 
 ### Review gate

@@ -174,12 +174,12 @@
 - **Context**: Hooks are Claude Code-proprietary. MCP is the only cross-runtime enforcement mechanism. Server exposes read-only tools (review_gate first). Zero dependencies per ADR-002. Stdio transport (one server per session). Architectural risk: two code paths for same logic (hook + MCP tool) — must keep in sync. Tool registry pattern allows adding more enforcement tools without modifying server core.
 
 ### [2026-03-30] v2.0: Dual code path sync risk — hook vs MCP enforcement
-- **Type**: RISK [accepted]
+- **Type**: RISK [removed in v2.0.1]
 - **Source**: PRs #569, #572, ADR-037
 - **Tags**: architecture, code-sync, hooks, mcp, risk
 - **Outcome**: accepted
 - **Last-verified**: 2026-03-30
-- **Context**: review_gate logic now exists in two places: dev-team-review-gate.js (hook) and src/mcp/tools/review-gate.ts (MCP tool). K10 finding showed they had already diverged during initial implementation. Extraction to shared module is the long-term fix but adds complexity. For now, accepted as architectural debt — the two implementations must be tested and reviewed together.
+- **Context**: MCP enforcement server removed in v2.0.1, eliminating the dual code path sync risk. review_gate logic now exists only in dev-team-review-gate.js (hook). The K10 divergence finding validated the risk — removal was the simplest resolution.
 
 ## Calibration Log
 <!-- Challenges accepted/overruled — tunes adversarial intensity over time -->

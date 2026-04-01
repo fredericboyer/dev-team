@@ -24,7 +24,7 @@
 
 - **Skill composability: orchestration skills can invoke other skills.** /dev-team:extract and /dev-team:review are invoked by /dev-team:task as sub-skills. Use `disable-model-invocation: true` on sub-skills to prevent autonomous firing. The `--embedded` flag signals compact output mode for skill-to-skill invocation. See ADR-035 for the formal pattern.
 - **Don't encode what agents already know.** AI agents have built-in knowledge of languages, frameworks, conventions, and standards. Hardcoding language-specific patterns (test file regex, linter commands, complexity keywords) into hooks or config creates static encyclopedias that are always incomplete. Instead, hooks should detect the ecosystem (read manifest files) and delegate language-specific reasoning to the agent. Include only what agents can't discover: tool preferences, legacy traps, test quirks, custom middleware warnings. (See: "AGENTS.md Verdict" — if the agent can discover it from code, delete it.)
-- **Adapter registry for multi-runtime portability (ADR-036).** Canonical format = current dev-team format. Adapters translate to runtime-native formats. Adding a runtime = implementing RuntimeAdapter + registering it. No changes to init.ts or update.ts. Native runtime hooks (Copilot, Codex) handle enforcement per-runtime.
+- **Adapter registry for multi-runtime portability (ADR-036).** Canonical format = current dev-team format. Adapters translate to runtime-native formats (current adapters: claude, agents-md, copilot, codex). Adding a runtime = implementing RuntimeAdapter + registering it. No changes to init.ts or update.ts.
 
 ## Known Tech Debt
 
@@ -37,7 +37,7 @@
 - Pre-commit gate: blocks commits without memory updates (override via `.dev-team/.memory-reviewed`).
 - **Migration completeness**: Any change that moves/renames files must audit all modules that reference those paths. doctor.ts, status.ts, and skill definitions are recurring victims of path drift (3 instances across v1.5.0–v1.6.0).
 - **process.exit stubs must throw a sentinel error.** When testing functions that call `process.exit()`, a no-op stub lets execution continue past the exit point, causing false passes. Use a throw-sentinel pattern (e.g., `throw new Error('__EXIT__')`). Independently confirmed by Szabo, Knuth, and Brooks in v1.7.0 review.
-- **Input boundary validation for string-to-path conversions.** v2.0 had two path traversal findings (F-01 adapter name, R-02 Copilot hook filePath). All user-facing strings that become file paths must be validated at the parsing/input boundary — not deeper in the call stack.
+- **Input boundary validation for string-to-path conversions.** v2.0 had a path traversal finding (F-01 adapter name). All user-facing strings that become file paths must be validated at the parsing/input boundary — not deeper in the call stack.
 
 ## Overruled Challenges
 <\!-- When the human overrules an agent, record why — prevents re-flagging -->
