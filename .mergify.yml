@@ -10,7 +10,7 @@ pull_request_rules:
   - name: auto-queue when CI passes
     conditions:
       - base = main
-      - check-success = CI
+      - check-success~=^CI /
     actions:
       queue:
         name: default
