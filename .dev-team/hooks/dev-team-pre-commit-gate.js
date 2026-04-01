@@ -62,7 +62,7 @@ function hasSubstantiveContent(filePath) {
     const absPath = path.resolve(cwd, filePath);
     // Guard against path traversal using relative path check
     const rel = path.relative(cwd, absPath);
-    if (rel.startsWith("..") || path.isAbsolute(rel)) return false;
+    if (rel === ".." || rel.startsWith(".." + path.sep) || path.isAbsolute(rel)) return false;
     // Reject symlinks to avoid reading unintended files
     const stat = fs.lstatSync(absPath);
     if (stat.isSymbolicLink()) return false;
@@ -70,7 +70,8 @@ function hasSubstantiveContent(filePath) {
     const realCwd = fs.realpathSync(cwd);
     const realAbsPath = fs.realpathSync(absPath);
     const realRel = path.relative(realCwd, realAbsPath);
-    if (realRel.startsWith("..") || path.isAbsolute(realRel)) return false;
+    if (realRel === ".." || realRel.startsWith(".." + path.sep) || path.isAbsolute(realRel))
+      return false;
 
     const content = fs.readFileSync(absPath, "utf-8");
     const lines = content.split("\n");

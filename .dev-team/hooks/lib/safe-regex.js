@@ -12,7 +12,7 @@
 "use strict";
 
 /**
- * Build a map of group open positions to their close positions, and vice versa.
+ * Build a map of group open positions to their close positions.
  */
 function buildGroupMap(pattern) {
   const openToClose = new Map();
