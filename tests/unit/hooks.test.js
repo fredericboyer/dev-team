@@ -1864,11 +1864,15 @@ describe("dev-team-worktree-create", () => {
   it("creates worktree on first try (no lock contention)", () => {
     initGitRepo(tmpDir);
     const worktreeName = "test-wt-" + Date.now();
-    const result = runWorktreeHook(hook, {
-      base_path: tmpDir,
-      worktree_name: worktreeName,
-      branch_name: "test-branch-" + Date.now(),
-    });
+    const result = runWorktreeHook(
+      hook,
+      {
+        base_path: tmpDir,
+        worktree_name: worktreeName,
+        branch_name: "test-branch-" + Date.now(),
+      },
+      { cwd: tmpDir },
+    );
     assert.equal(result.code, 0, `Expected exit 0, stderr: ${result.stderr}`);
     const expectedPath = path.join(tmpDir, ".claude", "worktrees", worktreeName);
     assert.equal(result.stdout.trim(), expectedPath);
@@ -1884,11 +1888,15 @@ describe("dev-team-worktree-create", () => {
     fs.utimesSync(lockDir, staleTime, staleTime);
 
     const worktreeName = "test-wt-retry-" + Date.now();
-    const result = runWorktreeHook(hook, {
-      base_path: tmpDir,
-      worktree_name: worktreeName,
-      branch_name: "test-branch-retry-" + Date.now(),
-    });
+    const result = runWorktreeHook(
+      hook,
+      {
+        base_path: tmpDir,
+        worktree_name: worktreeName,
+        branch_name: "test-branch-retry-" + Date.now(),
+      },
+      { cwd: tmpDir },
+    );
     assert.equal(
       result.code,
       0,
@@ -1906,11 +1914,15 @@ describe("dev-team-worktree-create", () => {
     fs.utimesSync(lockDir, staleTime, staleTime);
 
     const worktreeName = "test-wt-stale-" + Date.now();
-    const result = runWorktreeHook(hook, {
-      base_path: tmpDir,
-      worktree_name: worktreeName,
-      branch_name: "test-branch-stale-" + Date.now(),
-    });
+    const result = runWorktreeHook(
+      hook,
+      {
+        base_path: tmpDir,
+        worktree_name: worktreeName,
+        branch_name: "test-branch-stale-" + Date.now(),
+      },
+      { cwd: tmpDir },
+    );
     assert.equal(result.code, 0, `Stale lock should be cleaned up, stderr: ${result.stderr}`);
     // Lock should be released after hook completes
     assert.ok(!fs.existsSync(lockDir), "Lock should be released after hook completes");
@@ -1933,7 +1945,7 @@ describe("dev-team-worktree-create", () => {
         worktree_name: "test-wt-timeout",
         branch_name: "test-branch-timeout",
       },
-      { timeout: 5000 },
+      { timeout: 5000, cwd: tmpDir },
     );
     assert.notEqual(result.code, 0, "Should not succeed when lock is held");
     // Clean up the lock
@@ -1945,18 +1957,37 @@ describe("dev-team-worktree-create", () => {
   });
 
   it("exits 1 when worktree_name is missing", () => {
-    const result = runWorktreeHook(hook, { base_path: tmpDir });
+    const result = runWorktreeHook(hook, { base_path: tmpDir }, { cwd: tmpDir });
     assert.equal(result.code, 1);
     assert.ok(result.stderr.includes("Missing worktree_name"));
   });
 
   it("exits 1 when basePath has no .git directory (#537)", () => {
-    const result = runWorktreeHook(hook, {
-      base_path: tmpDir,
-      worktree_name: "test-wt",
-    });
+    const result = runWorktreeHook(
+      hook,
+      {
+        base_path: tmpDir,
+        worktree_name: "test-wt",
+      },
+      { cwd: tmpDir },
+    );
     assert.equal(result.code, 1);
     assert.ok(result.stderr.includes(".git directory"));
+  });
+
+  it("falls back to cwd when base_path traverses outside project root (#617)", () => {
+    const result = runWorktreeHook(
+      hook,
+      {
+        base_path: "/tmp/../etc",
+        worktree_name: "test-wt",
+      },
+      { cwd: tmpDir },
+    );
+    assert.ok(
+      result.stderr.includes("resolves outside project root"),
+      "Should warn about path traversal",
+    );
   });
 
   it("exits 1 on malformed JSON input", () => {
