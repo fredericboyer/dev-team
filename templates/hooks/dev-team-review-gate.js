@@ -213,8 +213,10 @@ function findSidecar(agent, contentHash) {
     const parsed = JSON.parse(content);
     // Type guards: sanitize unexpected sidecar structure
     if (typeof parsed !== "object" || parsed === null) return null;
+    if (Array.isArray(parsed)) return null;
     if (parsed.findings !== undefined && !Array.isArray(parsed.findings)) parsed.findings = [];
-    if (parsed.classification !== undefined && typeof parsed.classification !== "string") delete parsed.classification;
+    if (parsed.classification !== undefined && typeof parsed.classification !== "string")
+      delete parsed.classification;
     return parsed;
   } catch {
     return null;
