@@ -58,18 +58,19 @@ const hasMemoryUpdates = memoryFiles.length > 0;
  */
 function hasSubstantiveContent(filePath) {
   try {
-    const absPath = path.resolve(process.cwd(), filePath);
-    const projectRoot = process.cwd() + path.sep;
-    // Guard against path traversal
-    if (!absPath.startsWith(projectRoot) && absPath !== process.cwd()) return false;
+    const cwd = process.cwd();
+    const absPath = path.resolve(cwd, filePath);
+    // Guard against path traversal using relative path check
+    const rel = path.relative(cwd, absPath);
+    if (rel.startsWith("..") || path.isAbsolute(rel)) return false;
     // Reject symlinks to avoid reading unintended files
     const stat = fs.lstatSync(absPath);
     if (stat.isSymbolicLink()) return false;
     // Verify realpath stays within project root (guards against symlink ancestors)
+    const realCwd = fs.realpathSync(cwd);
     const realAbsPath = fs.realpathSync(absPath);
-    const realProjectRoot = fs.realpathSync(process.cwd()) + path.sep;
-    if (!realAbsPath.startsWith(realProjectRoot) && realAbsPath !== fs.realpathSync(process.cwd()))
-      return false;
+    const realRel = path.relative(realCwd, realAbsPath);
+    if (realRel.startsWith("..") || path.isAbsolute(realRel)) return false;
 
     const content = fs.readFileSync(absPath, "utf-8");
     const lines = content.split("\n");
