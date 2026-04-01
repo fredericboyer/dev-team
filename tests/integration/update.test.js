@@ -1000,13 +1000,26 @@ describe("compareSemver", () => {
     assert.ok(compareSemver("1.0.0", "1.0.0-alpha") > 0);
   });
 
-  it("two pre-release versions with same numeric parts are equal", () => {
-    assert.equal(compareSemver("1.0.0-alpha", "1.0.0-beta"), 0);
+  it("compares pre-release identifiers alphabetically (alpha < beta < rc)", () => {
+    assert.ok(compareSemver("1.0.0-alpha", "1.0.0-beta") < 0);
+    assert.ok(compareSemver("1.0.0-beta", "1.0.0-rc") < 0);
+    assert.ok(compareSemver("1.0.0-alpha", "1.0.0-rc") < 0);
   });
 
   it("pre-release on lower version is still less than higher release", () => {
     assert.ok(compareSemver("1.0.0-rc1", "2.0.0") < 0);
     assert.ok(compareSemver("0.9.0-beta", "1.0.0") < 0);
+  });
+
+  it("strips build metadata before comparing", () => {
+    assert.equal(compareSemver("1.0.0+build1", "1.0.0+build2"), 0);
+    assert.ok(compareSemver("1.0.0+build", "1.0.1") < 0);
+    assert.equal(compareSemver("1.0.0-alpha+build", "1.0.0-alpha+other"), 0);
+  });
+
+  it("numeric pre-release identifiers are compared numerically", () => {
+    assert.ok(compareSemver("1.0.0-1", "1.0.0-2") < 0);
+    assert.ok(compareSemver("1.0.0-2", "1.0.0-10") < 0);
   });
 });
 
