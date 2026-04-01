@@ -249,6 +249,59 @@ describe("adapter registry", () => {
 
     assert.throws(() => registerAdapter(fakeAdapter), /Cannot replace built-in adapter "claude"/);
   });
+
+  it("registerAdapter throws when replacing built-in copilot adapter", () => {
+    // First registration succeeds (reserves the slot)
+    const copilotAdapter = {
+      id: "copilot",
+      name: "Copilot",
+      generate() {},
+      update() {
+        return { updated: [], added: [] };
+      },
+    };
+    registerAdapter(copilotAdapter);
+    assert.equal(getAdapter("copilot").name, "Copilot");
+
+    // Second registration must throw
+    assert.throws(
+      () => registerAdapter(copilotAdapter),
+      /Cannot replace built-in adapter "copilot"/,
+    );
+  });
+
+  it("registerAdapter throws when replacing built-in codex adapter", () => {
+    const codexAdapter = {
+      id: "codex",
+      name: "Codex",
+      generate() {},
+      update() {
+        return { updated: [], added: [] };
+      },
+    };
+    registerAdapter(codexAdapter);
+    assert.equal(getAdapter("codex").name, "Codex");
+
+    assert.throws(() => registerAdapter(codexAdapter), /Cannot replace built-in adapter "codex"/);
+  });
+
+  it("registerAdapter throws when replacing built-in agents-md adapter", () => {
+    const agentsMdAdapter = {
+      id: "agents-md",
+      name: "AGENTS.md",
+      generate() {},
+      update() {
+        return { updated: [], added: [] };
+      },
+    };
+    registerAdapter(agentsMdAdapter);
+    assert.equal(getAdapter("agents-md").name, "AGENTS.md");
+
+    assert.throws(
+      () => registerAdapter(agentsMdAdapter),
+      /Cannot replace built-in adapter "agents-md"/,
+    );
+  });
 });
 
 // ---------------------------------------------------------------------------
