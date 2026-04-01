@@ -13,16 +13,20 @@
 
 const fs = require("fs");
 const path = require("path");
+const { safeRegex } = require("./safe-regex");
 
 /**
  * Compile a pattern entry from the JSON into a RegExp.
  * Entries are either a string (no flags) or [source, flags].
  */
 function compilePattern(entry) {
-  if (Array.isArray(entry)) {
-    return new RegExp(entry[0], entry[1] || "");
+  const source = Array.isArray(entry) ? entry[0] : entry;
+  const flags = Array.isArray(entry) ? entry[1] || "" : undefined;
+  const check = safeRegex(source);
+  if (check.safe === false) {
+    return null;
   }
-  return new RegExp(entry);
+  return flags !== undefined ? new RegExp(source, flags) : check.regex;
 }
 
 /**
@@ -39,14 +43,32 @@ function loadPatterns() {
   const result = {};
   for (const [key, value] of Object.entries(data)) {
     if (value.patterns) {
+      const compiled = [];
+      for (const p of value.patterns) {
+        const re = compilePattern(p);
+        if (re === null) {
+          const src = Array.isArray(p) ? p[0] : p;
+          const check = safeRegex(src);
+          console.error('[dev-team] skipping unsafe pattern in "' + key + '": ' + src + ' (' + check.reason + ')');
+          continue;
+        }
+        compiled.push(re);
+      }
       result[key] = {
         agent: value.agent,
         label: value.label,
         matchOn: value.matchOn || ["fullPath"],
-        compiled: value.patterns.map(compilePattern),
+        compiled,
       };
     } else if (value.pattern) {
-      result[key] = { compiled: compilePattern(value.pattern) };
+      const re = compilePattern(value.pattern);
+      if (re === null) {
+        const src = Array.isArray(value.pattern) ? value.pattern[0] : value.pattern;
+        const check = safeRegex(src);
+        console.error('[dev-team] skipping unsafe pattern in "' + key + '": ' + src + ' (' + check.reason + ')');
+        continue;
+      }
+      result[key] = { compiled: re };
     }
   }
   return result;
