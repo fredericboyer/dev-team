@@ -1,0 +1,25 @@
+queue_rules:
+  - name: default
+    merge_method: squash
+    merge_conditions:
+      - base = main
+      - "#check-success >= 1"
+      - "#check-pending = 0"
+      - "#check-failure = 0"
+      - "#review-threads-unresolved = 0"
+    commit_message_template: |
+      {{ title }} (#{{ number }})
+
+      {{ body | get_section("## Summary", "") }}
+
+pull_request_rules:
+  - name: auto-queue when CI passes
+    conditions:
+      - base = main
+      - "#check-success >= 1"
+      - "#check-pending = 0"
+      - "#check-failure = 0"
+      - "#review-threads-unresolved = 0"
+    actions:
+      queue:
+        name: default
