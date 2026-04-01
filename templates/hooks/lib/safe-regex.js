@@ -109,7 +109,10 @@ function safeRegex(pattern) {
 
   // Detect quantified alternation groups with overlapping prefixes
   if (hasOverlappingAlternation(pattern)) {
-    return { safe: false, reason: "overlapping alternation with quantifier detected (potential ReDoS)" };
+    return {
+      safe: false,
+      reason: "overlapping alternation with quantifier detected (potential ReDoS)",
+    };
   }
 
   // Try to compile — catches syntax errors
