@@ -98,6 +98,12 @@ jobs:
       - name: Validate hooks
         run: node scripts/validate-hooks.js
 
+      - name: Validate README
+        run: node scripts/validate-readme.js
+
+      - name: Validate docs
+        run: node scripts/validate-docs.js
+
   publish:
     needs: [validate-version, test, lint, format, validate]
     runs-on: ubuntu-latest
