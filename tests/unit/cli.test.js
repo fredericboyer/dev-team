@@ -128,11 +128,9 @@ describe("--runtime flag parsing", () => {
         { encoding: "utf-8", cwd: tmpDir, timeout: 10000 },
       );
       assert.ok(output.includes("Done!"), "init should complete successfully");
-    } catch (err) {
-      const stderr = err.stderr || "";
-      assert.ok(!stderr.includes("Cannot read"), "--runtime=claude,copilot should parse correctly");
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
     }
-    fs.rmSync(tmpDir, { recursive: true, force: true });
   });
 
   it("parses --runtime claude,copilot with space syntax", () => {
@@ -144,11 +142,9 @@ describe("--runtime flag parsing", () => {
         { encoding: "utf-8", cwd: tmpDir, timeout: 10000 },
       );
       assert.ok(output.includes("Done!"), "init should complete successfully");
-    } catch (err) {
-      const stderr = err.stderr || "";
-      assert.ok(!stderr.includes("Cannot read"), "--runtime claude,copilot should parse correctly");
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
     }
-    fs.rmSync(tmpDir, { recursive: true, force: true });
   });
 
   it("defaults to claude runtime when --runtime is omitted", () => {
@@ -160,10 +156,9 @@ describe("--runtime flag parsing", () => {
         timeout: 10000,
       });
       assert.ok(output.includes("Done!"), "init should complete with default runtime");
-    } catch {
-      // May fail for other reasons
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
     }
-    fs.rmSync(tmpDir, { recursive: true, force: true });
   });
 });
 
@@ -207,10 +202,9 @@ describe("--force flag behavior", () => {
         timeout: 10000,
       });
       assert.ok(output.includes("Done!"), "--force should allow re-init");
-    } catch {
-      // May fail for other reasons
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
     }
-    fs.rmSync(tmpDir, { recursive: true, force: true });
   });
 });
 
@@ -225,10 +219,9 @@ describe("--all flag combinations", () => {
       });
       assert.ok(output.includes("Using preset: backend"), "should use backend preset");
       assert.ok(output.includes("Done!"), "should complete successfully");
-    } catch {
-      // May fail for other reasons
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
     }
-    fs.rmSync(tmpDir, { recursive: true, force: true });
   });
 
   it("--all with --preset=data uses data preset", () => {
@@ -240,10 +233,9 @@ describe("--all flag combinations", () => {
         timeout: 10000,
       });
       assert.ok(output.includes("Using preset: data"), "should use data preset");
-    } catch {
-      // May fail for other reasons
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
     }
-    fs.rmSync(tmpDir, { recursive: true, force: true });
   });
 
   it("rejects unknown preset name", () => {
@@ -280,10 +272,9 @@ describe("--all flag combinations", () => {
       assert.ok(output.includes("Voss"), "should include Voss");
       assert.ok(output.includes("Drucker"), "should include Drucker");
       assert.ok(output.includes("Rams"), "should include Rams");
-    } catch {
-      // May fail for other reasons
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
     }
-    fs.rmSync(tmpDir, { recursive: true, force: true });
   });
 });
 
