@@ -45,7 +45,7 @@ export function assertNotSymlink(absPath: string): void {
  * that do not exist (ENOENT). Prevents parent-directory symlink
  * traversal attacks where an attacker replaces an ancestor with a
  * symlink to redirect file operations to arbitrary locations.
- * 
+ *
  * IMPORTANT: This function only checks ancestor directories, not the
  * target path itself. Callers must also use assertNotSymlink() on the
  * target to get complete symlink protection.

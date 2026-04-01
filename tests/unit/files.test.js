@@ -617,7 +617,10 @@ describe("listFilesRecursive", () => {
     fs.symlinkSync(realFile, path.join(d, "linked.txt"));
 
     const result = listFilesRecursive(d);
-    assert.ok(result.some((f) => f.endsWith("real.txt")), "should include real file");
+    assert.ok(
+      result.some((f) => f.endsWith("real.txt")),
+      "should include real file",
+    );
     assert.ok(!result.some((f) => f.endsWith("linked.txt")), "should exclude symlinked file");
   });
 });
