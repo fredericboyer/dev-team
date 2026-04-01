@@ -170,11 +170,6 @@ describe("dev-team-post-change-review", () => {
     assert.ok(!result.stdout.includes("@dev-team-knuth"), "should not flag Knuth for _test.go");
   });
 
-  it("flags Beck for Go test files (_test.go)", () => {
-    const result = runHook(hook, { file_path: "/app/handler_test.go" });
-    assert.equal(result.code, 0);
-    assert.ok(result.stdout.includes("@dev-team-beck"), "should flag Beck for _test.go");
-  });
 
   it("flags Brooks only once for arch boundary files (no duplicate)", () => {
     const result = runHook(hook, { file_path: "/app/src/core/engine.ts" });

@@ -177,15 +177,6 @@ describe("Orchestration scenario: happy path agent selection", () => {
     );
   });
 
-  it("flags Beck for test file changes", () => {
-    const result = runReviewHook("tests/unit/parser.test.js", {
-      content: 'const assert = require("assert"); assert.ok(true);',
-    });
-    assert.ok(
-      result.flags.some((f) => f.includes("@dev-team-beck")),
-      "Should flag Beck for test file changes",
-    );
-  });
 
   it("produces no output for non-code, non-config files", () => {
     const result = runReviewHook("assets/logo.png");

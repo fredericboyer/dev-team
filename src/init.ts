@@ -54,7 +54,6 @@ const ALL_AGENTS: AgentDefinition[] = [
     file: "dev-team-knuth.md",
     description: "Quality Auditor",
   },
-  { label: "Beck", file: "dev-team-beck.md", description: "Test Implementer" },
   {
     label: "Deming",
     file: "dev-team-deming.md",
@@ -171,7 +170,6 @@ const PRESETS: Record<string, PresetDefinition> = {
       "Hamilton",
       "Szabo",
       "Knuth",
-      "Beck",
       "Deming",
       "Brooks",
       "Conway",
@@ -189,7 +187,7 @@ const PRESETS: Record<string, PresetDefinition> = {
   data: {
     label: "data",
     description: "Data pipeline — backend, quality, security, tooling",
-    agents: ["Voss", "Szabo", "Knuth", "Beck", "Deming", "Tufte", "Drucker", "Borges"],
+    agents: ["Voss", "Szabo", "Knuth", "Deming", "Tufte", "Drucker", "Borges"],
     hooks: QUALITY_HOOKS.map((h) => h.label),
   },
 };

@@ -24,7 +24,6 @@ graph TB
         Voss["@dev-team-voss\nBackend"]
         Mori["@dev-team-mori\nFrontend"]
         Hamilton["@dev-team-hamilton\nInfrastructure"]
-        Beck["@dev-team-beck\nTests"]
         Deming["@dev-team-deming\nTooling"]
         Tufte["@dev-team-tufte\nDocumentation"]
         Conway["@dev-team-conway\nRelease Manager"]
@@ -124,7 +123,6 @@ npx @fredericboyer/dev-team create-agent <name>     # Scaffold a custom agent
 | `@dev-team-hamilton` | Infrastructure Engineer | sonnet | Dockerfiles, IaC, CI/CD, k8s, deployment, monitoring |
 | `@dev-team-szabo` | Security Auditor | opus | Vulnerability review, auth flows, attack surfaces |
 | `@dev-team-knuth` | Quality Auditor | opus | Coverage gaps, boundary conditions, correctness |
-| `@dev-team-beck` | Test Implementer | sonnet | Writing tests, TDD cycles |
 | `@dev-team-deming` | Tooling Optimizer | sonnet | Linters, formatters, CI/CD, hooks, automation |
 | `@dev-team-tufte` | Documentation Engineer | sonnet | Doc accuracy, stale docs, doc-code sync |
 | `@dev-team-brooks` | Architect & Quality Reviewer | opus | Coupling, ADR compliance, quality attributes |
@@ -303,9 +301,9 @@ Add file-pattern-to-agent mappings in `.dev-team/config.json`:
 
 | Preset | Agents included |
 |--------|----------------|
-| `backend` | Voss, Hamilton, Szabo, Knuth, Beck, Deming, Brooks, Conway |
+| `backend` | Voss, Hamilton, Szabo, Knuth, Deming, Brooks, Conway |
 | `fullstack` | All 14 agents |
-| `data` | Voss, Szabo, Knuth, Beck, Deming, Tufte |
+| `data` | Voss, Szabo, Knuth, Deming, Tufte |
 
 Drucker (orchestrator) and Borges (librarian) are included in all presets. For non-fullstack presets, invoke Drucker with `@dev-team-drucker` for automatic delegation.
 
