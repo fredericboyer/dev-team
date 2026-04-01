@@ -92,8 +92,18 @@ export function createAgent(targetDir: string, name: string): void {
   }
 
   const safeName = name.toLowerCase().replace(/[^a-z0-9-]/g, "-");
+  if (!safeName.replace(/-/g, "")) {
+    console.error("Error: agent name must contain at least one alphanumeric character.");
+    process.exit(1);
+  }
   const fullName = safeName.startsWith("dev-team-") ? safeName : `dev-team-${safeName}`;
   const displayName = safeName.replace(/^dev-team-/, "");
+  if (!displayName.replace(/-/g, "")) {
+    console.error(
+      "Error: agent name must contain at least one alphanumeric character after the dev-team- prefix.",
+    );
+    process.exit(1);
+  }
   const titleName = displayName.charAt(0).toUpperCase() + displayName.slice(1);
 
   const agentPath = path.join(targetDir, ".claude", "agents", `${fullName}.agent.md`);
