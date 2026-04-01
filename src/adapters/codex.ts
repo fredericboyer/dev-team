@@ -77,7 +77,7 @@ export function buildHooksConfig(): CodexHooksConfig {
           matchers: ["bash", "shell", "terminal"],
           hooks: [
             {
-              command: 'node .dev-team/hooks/dev-team-safety-guard.js "$TOOL_NAME" "$TOOL_INPUT"',
+              command: "node .dev-team/hooks/dev-team-safety-guard.js",
               description: "Safety guard",
             },
           ],
@@ -98,12 +98,11 @@ export function buildHooksConfig(): CodexHooksConfig {
           matchers: ["edit_file", "write_file", "insert_code"],
           hooks: [
             {
-              command: 'node .dev-team/hooks/dev-team-tdd-enforce.js "$TOOL_NAME" "$TOOL_INPUT"',
+              command: "node .dev-team/hooks/dev-team-tdd-enforce.js",
               description: "TDD enforcement",
             },
             {
-              command:
-                'node .dev-team/hooks/dev-team-post-change-review.js "$TOOL_NAME" "$TOOL_INPUT"',
+              command: "node .dev-team/hooks/dev-team-post-change-review.js",
               description: "Post-change review",
             },
           ],
@@ -208,10 +207,12 @@ export class CodexAdapter implements RuntimeAdapter {
   }
 
   private genRules(codexDir: string): void {
+    const rulesPath = path.join(codexDir, "rules", "dev-team-learnings.md");
+    if (fileExists(rulesPath)) return;
     const src = path.join(templateDir(), "rules", "dev-team-learnings.md");
     const content = readFile(src);
     writeFile(
-      path.join(codexDir, "rules", "dev-team-learnings.md"),
+      rulesPath,
       content || "# Shared Team Learnings\n\nAdd project-specific learnings here.\n",
     );
   }

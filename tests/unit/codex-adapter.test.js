@@ -146,6 +146,15 @@ describe("CodexAdapter", () => {
     assert.ok(fs.existsSync(path.join(tmpDir, ".codex", "hooks.json")));
     assert.ok(fs.existsSync(path.join(tmpDir, ".codex", "rules", "dev-team-learnings.md")));
   });
+
+  it("generate() does not overwrite existing learnings rules", () => {
+    const rp = path.join(tmpDir, ".codex", "rules", "dev-team-learnings.md");
+    fs.mkdirSync(path.dirname(rp), { recursive: true });
+    fs.writeFileSync(rp, "# Custom learnings\nUser-specific content.\n");
+    new CodexAdapter().generate(SAMPLE_DEFS, tmpDir);
+    const content = fs.readFileSync(rp, "utf-8");
+    assert.ok(content.includes("User-specific content"), "existing learnings should be preserved");
+  });
 });
 
 describe("renderAgentToml", () => {
