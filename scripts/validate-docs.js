@@ -123,9 +123,8 @@ function shouldSkip(filePath) {
 
 function scanFileForStalePaths(filePath) {
   const content = fs.readFileSync(filePath, "utf-8");
-  const isMemoryFile = /agent-memory\//.test(filePath);
+  const isMemoryFile = /agent-memory[\\/]/.test(filePath.replace(/\\/g, "/"));
   for (const dep of DEPRECATED_PATHS) {
-    dep.pattern.lastIndex = 0;
     const lines = content.split("\n");
     let matchCount = 0;
     for (const line of lines) {
