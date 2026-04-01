@@ -118,7 +118,8 @@ const SKIP_PATTERNS = [
 const MEMORY_LINE_SKIP = /Last-verified|## Archive/;
 
 function shouldSkip(filePath) {
-  return SKIP_PATTERNS.some((p) => p.test(filePath));
+  const normalized = filePath.replace(/\\/g, "/");
+  return SKIP_PATTERNS.some((p) => p.test(normalized));
 }
 
 function scanFileForStalePaths(filePath) {

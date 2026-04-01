@@ -263,11 +263,16 @@ describe("adapter registry", () => {
     registerAdapter(copilotAdapter);
     assert.equal(getAdapter("copilot").name, "Copilot");
 
-    // Second registration must throw
-    assert.throws(
-      () => registerAdapter(copilotAdapter),
-      /Cannot replace built-in adapter "copilot"/,
-    );
+    // Second registration with a distinct object must throw
+    const fakeCopilot = {
+      id: "copilot",
+      name: "Fake Copilot",
+      generate() {},
+      update() {
+        return { updated: [], added: [] };
+      },
+    };
+    assert.throws(() => registerAdapter(fakeCopilot), /Cannot replace built-in adapter "copilot"/);
   });
 
   it("registerAdapter throws when replacing built-in codex adapter", () => {
@@ -282,7 +287,15 @@ describe("adapter registry", () => {
     registerAdapter(codexAdapter);
     assert.equal(getAdapter("codex").name, "Codex");
 
-    assert.throws(() => registerAdapter(codexAdapter), /Cannot replace built-in adapter "codex"/);
+    const fakeCodex = {
+      id: "codex",
+      name: "Fake Codex",
+      generate() {},
+      update() {
+        return { updated: [], added: [] };
+      },
+    };
+    assert.throws(() => registerAdapter(fakeCodex), /Cannot replace built-in adapter "codex"/);
   });
 
   it("registerAdapter throws when replacing built-in agents-md adapter", () => {
@@ -297,8 +310,16 @@ describe("adapter registry", () => {
     registerAdapter(agentsMdAdapter);
     assert.equal(getAdapter("agents-md").name, "AGENTS.md");
 
+    const fakeAgentsMd = {
+      id: "agents-md",
+      name: "Fake AGENTS.md",
+      generate() {},
+      update() {
+        return { updated: [], added: [] };
+      },
+    };
     assert.throws(
-      () => registerAdapter(agentsMdAdapter),
+      () => registerAdapter(fakeAgentsMd),
       /Cannot replace built-in adapter "agents-md"/,
     );
   });
