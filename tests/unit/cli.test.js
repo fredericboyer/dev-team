@@ -4,6 +4,7 @@ const { describe, it } = require("node:test");
 const assert = require("node:assert/strict");
 const { execFileSync } = require("child_process");
 const path = require("path");
+const os = require("os");
 
 const bin = path.join(__dirname, "..", "..", "bin", "dev-team.js");
 const pkg = require("../../package.json");
@@ -42,6 +43,72 @@ describe("CLI --help flag", () => {
       },
       "unknown command should exit with code 1",
     );
+  });
+});
+
+describe("--preset flag parsing", () => {
+  it("rejects --presets as not a preset match", () => {
+    try {
+      execFileSync(process.execPath, [bin, "init", "--presets"], {
+        encoding: "utf-8",
+        cwd: os.tmpdir(),
+      });
+    } catch (err) {
+      const stderr = err.stderr || "";
+      assert.ok(
+        !stderr.includes("Unknown preset: s"),
+        "--presets should not be parsed as --preset with leftover 's'",
+      );
+    }
+  });
+
+  it("rejects --presetfoo as not a preset match", () => {
+    try {
+      execFileSync(process.execPath, [bin, "init", "--presetfoo"], {
+        encoding: "utf-8",
+        cwd: os.tmpdir(),
+      });
+    } catch (err) {
+      const stderr = err.stderr || "";
+      assert.ok(
+        !stderr.includes("Unknown preset"),
+        "--presetfoo should not be parsed as a preset flag",
+      );
+    }
+  });
+
+  it("parses --preset=backend with equals syntax", () => {
+    try {
+      execFileSync(process.execPath, [bin, "init", "--preset=backend"], {
+        encoding: "utf-8",
+        cwd: os.tmpdir(),
+      });
+    } catch (err) {
+      const stderr = err.stderr || "";
+      if (stderr.includes("Unknown preset")) {
+        assert.ok(
+          stderr.includes("Unknown preset: backend"),
+          "--preset=backend should extract 'backend' as the preset name",
+        );
+      }
+    }
+  });
+
+  it("parses --preset backend with space syntax", () => {
+    try {
+      execFileSync(process.execPath, [bin, "init", "--preset", "backend"], {
+        encoding: "utf-8",
+        cwd: os.tmpdir(),
+      });
+    } catch (err) {
+      const stderr = err.stderr || "";
+      if (stderr.includes("Unknown preset")) {
+        assert.ok(
+          stderr.includes("Unknown preset: backend"),
+          "--preset backend should extract 'backend' as the preset name",
+        );
+      }
+    }
   });
 });
 
