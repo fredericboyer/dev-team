@@ -138,11 +138,45 @@ export function cleanupLegacyMemoryDirs(claudeDir: string): string[] {
 }
 
 export function compareSemver(a: string, b: string): number {
-  const pa = a.split(".").map((n) => parseInt(n.split("-")[0], 10));
-  const pb = b.split(".").map((n) => parseInt(n.split("-")[0], 10));
+  // Strip build metadata (+...) before comparison per semver spec
+  const cleanA = a.replace(/\+.*$/, "");
+  const cleanB = b.replace(/\+.*$/, "");
+  const pa = cleanA.split(".").map((n) => parseInt(n.split("-")[0], 10));
+  const pb = cleanB.split(".").map((n) => parseInt(n.split("-")[0], 10));
   for (let i = 0; i < 3; i++) {
     const diff = (pa[i] || 0) - (pb[i] || 0);
     if (diff !== 0) return diff;
+  }
+  // Per semver spec: pre-release versions have lower precedence than release
+  const aPreMatch = cleanA.match(/-(.+)$/);
+  const bPreMatch = cleanB.match(/-(.+)$/);
+  const aHasPre = !!aPreMatch;
+  const bHasPre = !!bPreMatch;
+  if (aHasPre && !bHasPre) return -1;
+  if (!aHasPre && bHasPre) return 1;
+  if (aHasPre && bHasPre) {
+    // Compare pre-release identifiers per semver spec
+    const aParts = aPreMatch![1].split(".");
+    const bParts = bPreMatch![1].split(".");
+    const len = Math.max(aParts.length, bParts.length);
+    for (let i = 0; i < len; i++) {
+      if (i >= aParts.length) return -1; // fewer fields = lower precedence
+      if (i >= bParts.length) return 1;
+      const aNum = parseInt(aParts[i], 10);
+      const bNum = parseInt(bParts[i], 10);
+      const aIsNum = !isNaN(aNum) && String(aNum) === aParts[i];
+      const bIsNum = !isNaN(bNum) && String(bNum) === bParts[i];
+      if (aIsNum && bIsNum) {
+        if (aNum !== bNum) return aNum - bNum;
+      } else if (aIsNum) {
+        return -1; // numeric < string
+      } else if (bIsNum) {
+        return 1;
+      } else {
+        const cmp = aParts[i].localeCompare(bParts[i]);
+        if (cmp !== 0) return cmp;
+      }
+    }
   }
   return 0;
 }
@@ -370,9 +404,43 @@ function migrateFromClaude(targetDir: string): string[] {
   const settingsPath = path.join(claudeDir, "settings.json");
   const settingsContent = readFile(settingsPath);
   if (settingsContent) {
-    const updated = settingsContent.replace(/\.claude\/hooks\//g, ".dev-team/hooks/");
-    writeFile(settingsPath, updated);
-    log.push("Rewrote settings.json hook paths to .dev-team/hooks/");
+    try {
+      const settings = JSON.parse(settingsContent);
+      let changed = false;
+      if (settings.hooks && typeof settings.hooks === "object") {
+        for (const event of Object.keys(settings.hooks)) {
+          const matchers = settings.hooks[event];
+          if (!Array.isArray(matchers)) continue;
+          for (const matcher of matchers) {
+            if (!matcher) continue;
+            // Top-level command field (flat format)
+            if (typeof matcher.command === "string" && matcher.command.includes(".claude/hooks/")) {
+              matcher.command = matcher.command.replace(/\.claude\/hooks\//g, ".dev-team/hooks/");
+              changed = true;
+            }
+            // Nested hooks array (standard format)
+            if (Array.isArray(matcher.hooks)) {
+              for (const hook of matcher.hooks) {
+                if (
+                  hook &&
+                  typeof hook.command === "string" &&
+                  hook.command.includes(".claude/hooks/")
+                ) {
+                  hook.command = hook.command.replace(/\.claude\/hooks\//g, ".dev-team/hooks/");
+                  changed = true;
+                }
+              }
+            }
+          }
+        }
+      }
+      if (changed) {
+        writeFile(settingsPath, JSON.stringify(settings, null, 2) + "\n");
+        log.push("Rewrote settings.json hook paths to .dev-team/hooks/");
+      }
+    } catch {
+      log.push("WARNING: Failed to parse settings.json — skipping hook path rewrite");
+    }
   }
 
   // Clean up other dev-team files in .claude/

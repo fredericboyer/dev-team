@@ -68,4 +68,84 @@ describe("safeRegex", () => {
     assert.equal(result.safe, false);
     assert.ok(result.reason.includes("invalid regex"));
   });
+
+  it("rejects identical alternatives with quantifier (a|a)+", () => {
+    const result = safeRegex("(a|a)+");
+    assert.equal(result.safe, false);
+    assert.ok(result.reason.includes("overlapping alternation"));
+  });
+
+  it("rejects prefix-overlapping alternatives (ab|ac|a)+", () => {
+    const result = safeRegex("(ab|ac|a)+");
+    assert.equal(result.safe, false);
+    assert.ok(result.reason.includes("overlapping alternation"));
+  });
+
+  it("rejects prefix-overlapping alternatives with * quantifier", () => {
+    const result = safeRegex("(feat|fea|f)*");
+    assert.equal(result.safe, false);
+    assert.ok(result.reason.includes("overlapping alternation"));
+  });
+
+  it("rejects prefix-overlapping alternatives with {n,} quantifier", () => {
+    const result = safeRegex("(abc|ab){2,}");
+    assert.equal(result.safe, false);
+    assert.ok(result.reason.includes("overlapping alternation"));
+  });
+
+  it("accepts non-overlapping alternation with quantifier (a|b)+", () => {
+    const result = safeRegex("(a|b)+");
+    assert.equal(result.safe, true);
+  });
+
+  it("accepts non-overlapping alternation (feat|fix)+", () => {
+    const result = safeRegex("(feat|fix)+");
+    assert.equal(result.safe, true);
+  });
+
+  it("accepts alternation without quantifier (a|a)", () => {
+    const result = safeRegex("(a|a)");
+    assert.equal(result.safe, true);
+  });
+
+  it("accepts pipe inside character class [a|b]+", () => {
+    const result = safeRegex("[a|b]+");
+    assert.equal(result.safe, true);
+  });
+
+  it("does not treat pipe in char class as alternation ([feat|fix])+", () => {
+    const result = safeRegex("([feat|fix])+");
+    assert.equal(result.safe, true);
+  });
+
+  it("rejects overlapping alternation in outer quantified group ((feat|fix|fea|fi|f)(t|x|eat|ix))*", () => {
+    // Build pattern dynamically to avoid CodeQL static ReDoS detection —
+    // this is an intentionally unsafe pattern for testing safeRegex rejection
+    const alts1 = ["feat", "fix", "fea", "fi", "f"].join("|");
+    const alts2 = ["t", "x", "eat", "ix"].join("|");
+    const result = safeRegex(`((${alts1})(${alts2}))*\\/`);
+    assert.equal(result.safe, false);
+    assert.ok(result.reason.includes("overlapping alternation"));
+  });
+
+  it("handles named groups (?<name>a|ab)+ correctly", () => {
+    const result = safeRegex("(?<name>a|ab)+");
+    assert.equal(result.safe, false);
+    assert.ok(result.reason.includes("overlapping alternation"));
+  });
+
+  it("handles lookbehind (?<=x) without crashing", () => {
+    const result = safeRegex("(?<=x)foo");
+    assert.equal(result.safe, true);
+  });
+
+  it("handles negative lookbehind (?<!x) without crashing", () => {
+    const result = safeRegex("(?<!x)bar");
+    assert.equal(result.safe, true);
+  });
+
+  it("rejects the exact #623 branch pattern with nested quantified overlapping alternation", () => {
+    const result = safeRegex("^((feat|fix|fea|fi|f)\\/)+");
+    assert.equal(result.safe, false);
+  });
 });

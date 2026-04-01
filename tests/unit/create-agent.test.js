@@ -19,6 +19,36 @@ afterEach(() => {
   fs.rmSync(tmpDir, { recursive: true, force: true });
 });
 
+/**
+ * Run createAgent expecting it to call process.exit(1).
+ * Captures the exit code and any stderr output.
+ * Returns { exitCode, stderr }.
+ */
+function expectExitError(dir, name) {
+  const originalExit = process.exit;
+  const originalStderr = process.stderr.write;
+  let exitCode = null;
+  const stderrChunks = [];
+  process.exit = (code) => {
+    exitCode = code;
+    throw new Error("__EXIT__");
+  };
+  process.stderr.write = (chunk) => {
+    stderrChunks.push(String(chunk));
+    return true;
+  };
+  try {
+    createAgent(dir, name);
+    assert.fail("should have called process.exit");
+  } catch (err) {
+    assert.equal(err.message, "__EXIT__");
+  } finally {
+    process.exit = originalExit;
+    process.stderr.write = originalStderr;
+  }
+  return { exitCode, stderr: stderrChunks.join("") };
+}
+
 describe("createAgent", () => {
   it("creates agent file and memory template for valid name", () => {
     createAgent(tmpDir, "codd");
@@ -63,26 +93,11 @@ describe("createAgent", () => {
   });
 
   it("exits with error if agent already exists", () => {
-    // Create agent first time
     createAgent(tmpDir, "codd");
 
-    // Override process.exit to capture the call
-    const originalExit = process.exit;
-    let exitCode = null;
-    process.exit = (code) => {
-      exitCode = code;
-      throw new Error("EXIT");
-    };
-
-    try {
-      createAgent(tmpDir, "codd");
-      assert.fail("should have called process.exit");
-    } catch (err) {
-      assert.equal(err.message, "EXIT");
-      assert.equal(exitCode, 1, "should exit with code 1");
-    } finally {
-      process.exit = originalExit;
-    }
+    const { exitCode, stderr } = expectExitError(tmpDir, "codd");
+    assert.equal(exitCode, 1, "should exit with code 1");
+    assert.ok(stderr.includes("already exists"), "should mention agent already exists");
   });
 
   it("creates correct frontmatter structure", () => {
@@ -114,20 +129,27 @@ describe("createAgent", () => {
     assert.ok(content.includes("Myagent"), "body should have title-cased display name");
   });
 
-  it('handles name that is just "dev-team-" prefix with nothing after', () => {
-    createAgent(tmpDir, "dev-team-");
+  it('exits with error for name that is just "dev-team-" prefix with nothing after', () => {
+    const { exitCode, stderr } = expectExitError(tmpDir, "dev-team-");
+    assert.equal(exitCode, 1, "should exit with code 1");
+    assert.ok(stderr.includes("alphanumeric"), "should mention alphanumeric requirement");
+  });
 
-    const agentPath = path.join(tmpDir, ".claude", "agents", "dev-team-.agent.md");
-    assert.ok(fs.existsSync(agentPath), "agent file should exist even with empty suffix");
+  it("exits with error for whitespace-only name", () => {
+    const { exitCode, stderr } = expectExitError(tmpDir, "   ");
+    assert.equal(exitCode, 1, "should exit with code 1");
+    assert.ok(stderr.length > 0, "should output an error message");
+  });
 
-    const content = fs.readFileSync(agentPath, "utf-8");
-    assert.ok(content.includes("name: dev-team-"), "should have name with trailing dash");
+  it("exits with error for single dash name", () => {
+    const { exitCode, stderr } = expectExitError(tmpDir, "-");
+    assert.equal(exitCode, 1, "should exit with code 1");
+    assert.ok(stderr.includes("alphanumeric"), "should mention alphanumeric requirement");
+  });
 
-    // Verify the template placeholders (AGENTNAME) are replaced, not left empty
-    assert.ok(!content.includes("AGENTNAME"), "should not have unresolved AGENTNAME placeholder");
-    assert.ok(!content.includes("FULLNAME"), "should not have unresolved FULLNAME placeholder");
-    assert.ok(content.startsWith("---"), "should have valid frontmatter");
-    assert.ok(content.includes("model: sonnet"), "should have model field");
-    assert.ok(content.includes("memory: project"), "should have memory field");
+  it("exits with error for all-special-character name", () => {
+    const { exitCode, stderr } = expectExitError(tmpDir, "!@#$%^&*");
+    assert.equal(exitCode, 1, "should exit with code 1");
+    assert.ok(stderr.includes("alphanumeric"), "should mention alphanumeric requirement");
   });
 });

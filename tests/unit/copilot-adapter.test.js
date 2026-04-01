@@ -366,6 +366,24 @@ describe("buildHooksConfig", () => {
     assert.equal(config.hooks.sessionEnd, undefined, "no sessionEnd hooks");
     assert.equal(config.hooks.errorOccurred, undefined, "no errorOccurred hooks");
   });
+
+  it("does not embed $TOOL_INPUT or $TOOL_NAME in hook commands", () => {
+    const config = buildHooksConfig();
+    const allEvents = [...config.hooks.preToolUse, ...config.hooks.postToolUse];
+
+    for (const event of allEvents) {
+      for (const hook of event.hooks) {
+        assert.ok(
+          hook.command.indexOf("$TOOL_INPUT") === -1,
+          "hook command must not contain $TOOL_INPUT (shell expansion risk)",
+        );
+        assert.ok(
+          hook.command.indexOf("$TOOL_NAME") === -1,
+          "hook command must not contain $TOOL_NAME (shell expansion risk)",
+        );
+      }
+    }
+  });
 });
 
 describe("mapTools", () => {
