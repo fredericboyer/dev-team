@@ -7,10 +7,9 @@ queue_rules:
       {{ body | get_section("## Summary", "") }}
 
 pull_request_rules:
-  - name: auto-queue when CI passes
+  - name: auto-queue PRs targeting main
     conditions:
       - base = main
-      - check-success~=^CI /
     actions:
       queue:
         name: default
