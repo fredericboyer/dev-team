@@ -6,7 +6,12 @@ const fs = require("fs");
 const path = require("path");
 const os = require("os");
 
-const { CodexAdapter, parseSkillFrontmatter } = require("../../dist/adapters/codex");
+const {
+  CodexAdapter,
+  parseSkillFrontmatter,
+  renderAgentToml,
+  buildHooksConfig,
+} = require("../../dist/adapters/codex");
 const { getAdapter } = require("../../dist/formats/adapters");
 
 function makeTmpDir() {
@@ -18,11 +23,7 @@ function cleanup(dir) {
 }
 
 const SAMPLE_DEFS = [
-  {
-    name: "dev-team-voss",
-    description: "Backend engineer.",
-    body: "You are Voss.\n",
-  },
+  { name: "dev-team-voss", description: "Backend engineer.", body: "You are Voss.\n" },
   {
     name: "dev-team-szabo",
     description: "Security auditor.",
@@ -34,191 +35,238 @@ const SAMPLE_DEFS = [
 
 describe("CodexAdapter", () => {
   let tmpDir;
-
   beforeEach(() => {
     tmpDir = makeTmpDir();
   });
-
   afterEach(() => {
     cleanup(tmpDir);
   });
 
   it("has correct id and name", () => {
-    const adapter = new CodexAdapter();
-    assert.equal(adapter.id, "codex");
-    assert.equal(adapter.name, "Codex CLI");
+    const a = new CodexAdapter();
+    assert.equal(a.id, "codex");
+    assert.equal(a.name, "Codex CLI");
   });
 
   it("is registered in the adapter registry", () => {
-    const adapter = getAdapter("codex");
-    assert.ok(adapter, "codex adapter should be registered");
-    assert.equal(adapter.id, "codex");
+    const a = getAdapter("codex");
+    assert.ok(a);
+    assert.equal(a.id, "codex");
   });
 
-  it("generate() creates .agents/AGENTS.md with all agent instructions", () => {
-    const adapter = new CodexAdapter();
-    adapter.generate(SAMPLE_DEFS, tmpDir);
-
-    const agentsMdPath = path.join(tmpDir, ".agents", "AGENTS.md");
-    assert.ok(fs.existsSync(agentsMdPath), ".agents/AGENTS.md should exist");
-
-    const content = fs.readFileSync(agentsMdPath, "utf-8");
-    assert.ok(content.includes("## dev-team-voss"), "should contain Voss heading");
-    assert.ok(content.includes("## dev-team-szabo"), "should contain Szabo heading");
-    assert.ok(content.includes("Backend engineer."), "should contain Voss description");
-    assert.ok(content.includes("You are Voss."), "should contain Voss body");
+  it("generate() creates .codex/agents/*.toml files", () => {
+    new CodexAdapter().generate(SAMPLE_DEFS, tmpDir);
+    const vt = path.join(tmpDir, ".codex", "agents", "dev-team-voss.toml");
+    const st = path.join(tmpDir, ".codex", "agents", "dev-team-szabo.toml");
+    assert.ok(fs.existsSync(vt), "voss.toml should exist");
+    assert.ok(fs.existsSync(st), "szabo.toml should exist");
+    const vc = fs.readFileSync(vt, "utf-8");
+    assert.ok(vc.includes('name = "dev-team-voss"'));
+    assert.ok(vc.includes('description = "Backend engineer."'));
+    assert.ok(vc.includes("developer_instructions"));
+    assert.ok(vc.includes("You are Voss."));
+    assert.ok(fs.readFileSync(st, "utf-8").includes('model = "sonnet"'));
   });
 
-  it("generate() creates .codex/config.toml with hooks flag", () => {
-    const adapter = new CodexAdapter();
-    adapter.generate(SAMPLE_DEFS, tmpDir);
-
-    const configPath = path.join(tmpDir, ".codex", "config.toml");
-    assert.ok(fs.existsSync(configPath), ".codex/config.toml should exist");
-
-    const content = fs.readFileSync(configPath, "utf-8");
-    assert.ok(content.includes("codex_hooks = true"), "should enable hooks feature flag");
+  it("generate() creates .codex/hooks.json", () => {
+    new CodexAdapter().generate(SAMPLE_DEFS, tmpDir);
+    const hp = path.join(tmpDir, ".codex", "hooks.json");
+    assert.ok(fs.existsSync(hp));
+    const c = JSON.parse(fs.readFileSync(hp, "utf-8"));
+    assert.ok(c.hooks.PreToolUse);
+    assert.ok(c.hooks.PostToolUse);
   });
 
-  it("generate() does not overwrite existing .codex/config.toml", () => {
-    const adapter = new CodexAdapter();
-    const configPath = path.join(tmpDir, ".codex", "config.toml");
-    fs.mkdirSync(path.dirname(configPath), { recursive: true });
-    fs.writeFileSync(configPath, "custom_setting = true\n");
-
-    adapter.generate(SAMPLE_DEFS, tmpDir);
-
-    const content = fs.readFileSync(configPath, "utf-8");
-    assert.ok(content.includes("custom_setting"), "should preserve existing config");
-    assert.ok(!content.includes("codex_hooks"), "should not add hooks flag to existing config");
+  it("generate() creates .codex/rules/dev-team-learnings.md", () => {
+    new CodexAdapter().generate(SAMPLE_DEFS, tmpDir);
+    const rp = path.join(tmpDir, ".codex", "rules", "dev-team-learnings.md");
+    assert.ok(fs.existsSync(rp));
+    assert.ok(fs.readFileSync(rp, "utf-8").includes("Learnings"));
   });
 
-  it("update() returns added names on first run", () => {
-    const adapter = new CodexAdapter();
-    const result = adapter.update(SAMPLE_DEFS, tmpDir);
-
-    assert.equal(result.added.length, 2, "should report 2 added agents");
-    assert.ok(result.added.includes("dev-team-voss"));
-    assert.ok(result.added.includes("dev-team-szabo"));
-    assert.equal(result.updated.length, 0);
+  it("generate() creates .codex/agent-memory MEMORY.md", () => {
+    new CodexAdapter().generate(SAMPLE_DEFS, tmpDir);
+    for (const def of SAMPLE_DEFS) {
+      const mp = path.join(tmpDir, ".codex", "agent-memory", def.name, "MEMORY.md");
+      assert.ok(fs.existsSync(mp), def.name + "/MEMORY.md should exist");
+      assert.ok(fs.readFileSync(mp, "utf-8").includes(def.name));
+    }
   });
 
-  it("update() returns updated names when content changes", () => {
-    const adapter = new CodexAdapter();
-    adapter.generate(SAMPLE_DEFS, tmpDir);
-
-    const modifiedDefs = [
-      { ...SAMPLE_DEFS[0], description: "Updated backend engineer." },
-      SAMPLE_DEFS[1],
-    ];
-    const result = adapter.update(modifiedDefs, tmpDir);
-
-    assert.ok(result.updated.length > 0, "should report updated agents");
-    assert.equal(result.added.length, 0);
+  it("generate() does not overwrite existing agent memory", () => {
+    const mp = path.join(tmpDir, ".codex", "agent-memory", "dev-team-voss", "MEMORY.md");
+    fs.mkdirSync(path.dirname(mp), { recursive: true });
+    fs.writeFileSync(mp, "# Custom\nUser content.\n");
+    new CodexAdapter().generate(SAMPLE_DEFS, tmpDir);
+    assert.ok(fs.readFileSync(mp, "utf-8").includes("User content"));
   });
 
-  it("update() returns empty arrays when nothing changed", () => {
-    const adapter = new CodexAdapter();
-    adapter.generate(SAMPLE_DEFS, tmpDir);
-    const result = adapter.update(SAMPLE_DEFS, tmpDir);
+  it("generate() creates .codex/config.toml", () => {
+    new CodexAdapter().generate(SAMPLE_DEFS, tmpDir);
+    const cp = path.join(tmpDir, ".codex", "config.toml");
+    assert.ok(fs.existsSync(cp));
+    assert.ok(fs.readFileSync(cp, "utf-8").includes("codex_hooks = true"));
+  });
 
-    assert.equal(result.updated.length, 0);
-    assert.equal(result.added.length, 0);
+  it("generate() does not overwrite existing config.toml", () => {
+    const cp = path.join(tmpDir, ".codex", "config.toml");
+    fs.mkdirSync(path.dirname(cp), { recursive: true });
+    fs.writeFileSync(cp, "custom = true\n");
+    new CodexAdapter().generate(SAMPLE_DEFS, tmpDir);
+    const c = fs.readFileSync(cp, "utf-8");
+    assert.ok(c.includes("custom"));
+    assert.ok(!c.includes("codex_hooks"));
+  });
+
+  it("update() returns added on first run", () => {
+    const r = new CodexAdapter().update(SAMPLE_DEFS, tmpDir);
+    assert.equal(r.added.length, 2);
+    assert.equal(r.updated.length, 0);
+  });
+
+  it("update() returns updated on change", () => {
+    new CodexAdapter().generate(SAMPLE_DEFS, tmpDir);
+    const r = new CodexAdapter().update(
+      [{ ...SAMPLE_DEFS[0], description: "Changed." }, SAMPLE_DEFS[1]],
+      tmpDir,
+    );
+    assert.ok(r.updated.includes("dev-team-voss"));
+    assert.equal(r.added.length, 0);
+  });
+
+  it("update() returns empty when unchanged", () => {
+    new CodexAdapter().generate(SAMPLE_DEFS, tmpDir);
+    const r = new CodexAdapter().update(SAMPLE_DEFS, tmpDir);
+    assert.equal(r.updated.length, 0);
+    assert.equal(r.added.length, 0);
+  });
+
+  it("update() creates hooks and rules", () => {
+    new CodexAdapter().update(SAMPLE_DEFS, tmpDir);
+    assert.ok(fs.existsSync(path.join(tmpDir, ".codex", "hooks.json")));
+    assert.ok(fs.existsSync(path.join(tmpDir, ".codex", "rules", "dev-team-learnings.md")));
+  });
+});
+
+describe("renderAgentToml", () => {
+  it("renders basic definition", () => {
+    const t = renderAgentToml({ name: "dev-team-voss", description: "Backend.", body: "Voss.\n" });
+    assert.ok(t.includes('name = "dev-team-voss"'));
+    assert.ok(t.includes("developer_instructions"));
+    assert.ok(!t.includes("model ="));
+  });
+
+  it("includes model", () => {
+    const t = renderAgentToml({ name: "x", description: "y", body: "z\n", model: "sonnet" });
+    assert.ok(t.includes('model = "sonnet"'));
+  });
+
+  it("strips Claude Code refs", () => {
+    const t = renderAgentToml({ name: "x", description: "y", body: "Agent tool. Claude Code.\n" });
+    assert.ok(!t.includes("Agent tool"));
+    assert.ok(!t.includes("Claude Code"));
+    assert.ok(t.includes("agent delegation"));
+    assert.ok(t.includes("Codex"));
+  });
+
+  it("escapes TOML chars", () => {
+    const t = renderAgentToml({ name: "x", description: 'A "q" d', body: "b\n" });
+    assert.ok(t.includes('\\"q\\"'));
+  });
+});
+
+describe("buildHooksConfig", () => {
+  it("has PreToolUse and PostToolUse", () => {
+    const c = buildHooksConfig();
+    assert.ok(c.hooks.PreToolUse);
+    assert.ok(c.hooks.PostToolUse);
+  });
+
+  it("safety guard in PreToolUse bash", () => {
+    const e = buildHooksConfig().hooks.PreToolUse.find(
+      (e) => e.matchers && e.matchers.includes("shell"),
+    );
+    assert.ok(e);
+    assert.ok(e.hooks.some((h) => h.command.includes("safety-guard")));
+  });
+
+  it("TDD in PostToolUse edit_file", () => {
+    const e = buildHooksConfig().hooks.PostToolUse.find(
+      (e) => e.matchers && e.matchers.includes("edit_file"),
+    );
+    assert.ok(e);
+    assert.ok(e.hooks.some((h) => h.command.includes("tdd-enforce")));
+  });
+
+  it("post-change review in PostToolUse", () => {
+    const e = buildHooksConfig().hooks.PostToolUse.find(
+      (e) => e.matchers && e.matchers.includes("write_file"),
+    );
+    assert.ok(e);
+    assert.ok(e.hooks.some((h) => h.command.includes("post-change-review")));
+  });
+
+  it("pre-commit lint in PreToolUse", () => {
+    const e = buildHooksConfig().hooks.PreToolUse.find(
+      (e) => e.hooks && e.hooks.some((h) => h.command.includes("pre-commit-lint")),
+    );
+    assert.ok(e);
+    assert.ok(e.matchers.includes("bash"));
   });
 });
 
 describe("parseSkillFrontmatter", () => {
-  it("parses valid SKILL.md content", () => {
-    const content = [
-      "---",
-      "name: dev-team-task",
-      "description: Start an iterative task loop",
-      "disable-model-invocation: true",
-      "---",
-      "",
-      "# Task skill body",
-    ].join("\n");
-
-    const result = parseSkillFrontmatter(content);
-    assert.ok(result, "should parse successfully");
-    assert.equal(result.name, "dev-team-task");
-    assert.equal(result.description, "Start an iterative task loop");
-    assert.equal(result.disableModelInvocation, true);
-    assert.ok(result.body.includes("# Task skill body"));
+  it("parses valid content", () => {
+    const r = parseSkillFrontmatter(
+      "---\nname: t\ndescription: d\ndisable-model-invocation: true\n---\n\nBody",
+    );
+    assert.ok(r);
+    assert.equal(r.name, "t");
+    assert.equal(r.disableModelInvocation, true);
   });
 
-  it("returns null for content without frontmatter", () => {
-    const result = parseSkillFrontmatter("# Just a heading\n\nNo frontmatter here.");
-    assert.equal(result, null);
+  it("null without frontmatter", () => {
+    assert.equal(parseSkillFrontmatter("# No fm"), null);
   });
 
-  it("returns null when required fields are missing", () => {
-    const content = ["---", "name: dev-team-task", "---", "", "Body"].join("\n");
-    const result = parseSkillFrontmatter(content);
-    assert.equal(result, null, "should return null without description");
+  it("null missing fields", () => {
+    assert.equal(parseSkillFrontmatter("---\nname: t\n---\nBody"), null);
   });
 
-  it("defaults disableModelInvocation to false when not present", () => {
-    const content = [
-      "---",
-      "name: dev-team-challenge",
-      "description: Challenge a proposal",
-      "---",
-      "",
-      "Body",
-    ].join("\n");
-
-    const result = parseSkillFrontmatter(content);
-    assert.ok(result);
-    assert.equal(result.disableModelInvocation, false);
+  it("defaults disableModelInvocation false", () => {
+    const r = parseSkillFrontmatter("---\nname: t\ndescription: d\n---\nBody");
+    assert.equal(r.disableModelInvocation, false);
   });
 });
 
 describe("CodexAdapter copySkills", () => {
   let tmpDir;
-
   beforeEach(() => {
     tmpDir = makeTmpDir();
   });
-
   afterEach(() => {
     cleanup(tmpDir);
   });
 
-  it("generate() creates .agents/skills/ with skill files", () => {
-    const adapter = new CodexAdapter();
-    adapter.generate(SAMPLE_DEFS, tmpDir);
-
-    const skillsDir = path.join(tmpDir, ".agents", "skills");
-    assert.ok(fs.existsSync(skillsDir), ".agents/skills/ should exist");
-
-    // At least one skill directory should be created
-    const entries = fs.readdirSync(skillsDir);
-    assert.ok(entries.length > 0, "should have at least one skill directory");
+  it("creates .codex/skills/", () => {
+    new CodexAdapter().generate(SAMPLE_DEFS, tmpDir);
+    const sd = path.join(tmpDir, ".codex", "skills");
+    assert.ok(fs.existsSync(sd));
+    assert.ok(fs.readdirSync(sd).length > 0);
   });
 
-  it("generate() creates openai.yaml for orchestration skills", () => {
-    const adapter = new CodexAdapter();
-    adapter.generate(SAMPLE_DEFS, tmpDir);
-
-    const skillsDir = path.join(tmpDir, ".agents", "skills");
-    if (!fs.existsSync(skillsDir)) return;
-
-    // Look for any openai.yaml in skill subdirectories
-    const entries = fs.readdirSync(skillsDir);
-    let foundYaml = false;
-    for (const entry of entries) {
-      const yamlPath = path.join(skillsDir, entry, "agents", "openai.yaml");
-      if (fs.existsSync(yamlPath)) {
-        foundYaml = true;
-        const content = fs.readFileSync(yamlPath, "utf-8");
-        assert.ok(
-          content.includes("allow_implicit_invocation: false"),
-          "openai.yaml should disable implicit invocation",
-        );
+  it("creates openai.yaml for orchestration skills", () => {
+    new CodexAdapter().generate(SAMPLE_DEFS, tmpDir);
+    const sd = path.join(tmpDir, ".codex", "skills");
+    if (!fs.existsSync(sd)) return;
+    let found = false;
+    for (const e of fs.readdirSync(sd)) {
+      const yp = path.join(sd, e, "agents", "openai.yaml");
+      if (fs.existsSync(yp)) {
+        found = true;
+        assert.ok(fs.readFileSync(yp, "utf-8").includes("allow_implicit_invocation: false"));
       }
     }
-    // Orchestration skills (task, review, etc.) should have openai.yaml
-    assert.ok(foundYaml, "should generate openai.yaml for at least one orchestration skill");
+    assert.ok(found);
   });
 });

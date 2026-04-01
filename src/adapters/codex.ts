@@ -1,13 +1,8 @@
 /**
  * Codex CLI adapter.
  *
- * Generates `.agents/skills/` directory with per-skill SKILL.md files
- * and per-agent instruction files. Skills transfer ~95% (near-identical
- * format). Hooks are NOT mapped — only ~30% are Bash-scoped and the
- * hook system is experimental.
- *
- * Per research brief #508: focus on skills + instructions, skip hooks.
- * See docs/research/508-codex-cli-evaluation-2026-03-30.md.
+ * Generates native Codex configuration from canonical agent definitions.
+ * See ADR-036 for the multi-runtime adapter architecture.
  */
 
 import path from "path";
@@ -15,23 +10,35 @@ import type { CanonicalAgentDefinition } from "../formats/canonical.js";
 import { registerAdapter, type RuntimeAdapter } from "../formats/adapters.js";
 import { fileExists, readFile, writeFile, templateDir, listSubdirectories } from "../files.js";
 
-/**
- * Renders an agent definition into Codex-compatible instruction Markdown.
- * No frontmatter — Codex uses AGENTS.md for instructions, which is plain Markdown.
- */
-function renderAgentInstruction(def: CanonicalAgentDefinition): string {
-  return `## ${def.name}\n\n${def.description}\n\n${def.body}`.trimEnd() + "\n";
+function escapeTomlMultiline(s: string): string {
+  return s.replace(/\\/g, "\\\\").replace(/"""/g, '""\\"');
 }
 
-/**
- * Reads a SKILL.md file and extracts frontmatter fields.
- */
+function escapeTomlString(s: string): string {
+  return s.replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\n/g, "\\n");
+}
+
+export function renderAgentToml(def: CanonicalAgentDefinition): string {
+  const lines: string[] = [];
+  lines.push(`name = "${escapeTomlString(def.name)}"`);
+  lines.push(`description = "${escapeTomlString(def.description)}"`);
+  const cleanBody = def.body
+    .replace(/\bAgent tool\b/g, "agent delegation")
+    .replace(/\bsubagent_type:\s*"[^"]*"/g, "")
+    .replace(/\brun_in_background:\s*true\b/g, "")
+    .replace(/\bClaude Code\b/gi, "Codex");
+  const tq = '"""';
+  lines.push(`developer_instructions = ${tq}\n${escapeTomlMultiline(cleanBody.trimEnd())}\n${tq}`);
+  if (def.model) lines.push(`model = "${escapeTomlString(def.model)}"`);
+  lines.push("");
+  return lines.join("\n");
+}
+
 export function parseSkillFrontmatter(
   content: string,
 ): { name: string; description: string; disableModelInvocation: boolean; body: string } | null {
   const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
   if (!match) return null;
-
   const [, yaml, body] = match;
   const fields: Record<string, string> = {};
   for (const line of yaml.split("\n")) {
@@ -41,9 +48,7 @@ export function parseSkillFrontmatter(
     const value = line.slice(idx + 1).trim();
     if (key && value) fields[key] = value;
   }
-
   if (!fields.name || !fields.description) return null;
-
   return {
     name: fields.name,
     description: fields.description,
@@ -52,23 +57,73 @@ export function parseSkillFrontmatter(
   };
 }
 
+interface CodexHookEntry {
+  command: string;
+  description?: string;
+}
+interface CodexHookEvent {
+  matchers?: string[];
+  hooks: CodexHookEntry[];
+}
+interface CodexHooksConfig {
+  hooks: Record<string, CodexHookEvent[]>;
+}
+
+export function buildHooksConfig(): CodexHooksConfig {
+  return {
+    hooks: {
+      PreToolUse: [
+        {
+          matchers: ["bash", "shell", "terminal"],
+          hooks: [
+            {
+              command: 'node .dev-team/hooks/dev-team-safety-guard.js "$TOOL_NAME" "$TOOL_INPUT"',
+              description: "Safety guard",
+            },
+          ],
+        },
+        {
+          matchers: ["bash"],
+          hooks: [
+            {
+              command: "node .dev-team/hooks/dev-team-pre-commit-lint.js",
+              description: "Pre-commit lint",
+            },
+            { command: "node .dev-team/hooks/dev-team-review-gate.js", description: "Review gate" },
+          ],
+        },
+      ],
+      PostToolUse: [
+        {
+          matchers: ["edit_file", "write_file", "insert_code"],
+          hooks: [
+            {
+              command: 'node .dev-team/hooks/dev-team-tdd-enforce.js "$TOOL_NAME" "$TOOL_INPUT"',
+              description: "TDD enforcement",
+            },
+            {
+              command:
+                'node .dev-team/hooks/dev-team-post-change-review.js "$TOOL_NAME" "$TOOL_INPUT"',
+              description: "Post-change review",
+            },
+          ],
+        },
+      ],
+    },
+  };
+}
+
 export class CodexAdapter implements RuntimeAdapter {
   readonly id = "codex";
   readonly name = "Codex CLI";
 
   generate(definitions: CanonicalAgentDefinition[], targetDir: string): void {
-    const agentsDir = path.join(targetDir, ".agents");
-    const skillsDestDir = path.join(agentsDir, "skills");
-
-    // Write combined agent instructions to .agents/AGENTS.md
-    const instructions = definitions.map(renderAgentInstruction).join("\n");
-    writeFile(path.join(agentsDir, "AGENTS.md"), instructions);
-
-    // Copy skills from templates to .agents/skills/
-    this.copySkills(skillsDestDir);
-
-    // Create .codex/ config directory with hooks feature flag
     const codexDir = path.join(targetDir, ".codex");
+    this.genToml(definitions, codexDir);
+    this.copySkills(path.join(codexDir, "skills"));
+    this.genHooks(codexDir);
+    this.genRules(codexDir);
+    this.genMemory(definitions, codexDir);
     if (!fileExists(path.join(codexDir, "config.toml"))) {
       writeFile(
         path.join(codexDir, "config.toml"),
@@ -81,41 +136,41 @@ export class CodexAdapter implements RuntimeAdapter {
     definitions: CanonicalAgentDefinition[],
     targetDir: string,
   ): { updated: string[]; added: string[] } {
-    const agentsDir = path.join(targetDir, ".agents");
-    const skillsDestDir = path.join(agentsDir, "skills");
-    const agentsMdPath = path.join(agentsDir, "AGENTS.md");
-
-    const newInstructions = definitions.map(renderAgentInstruction).join("\n");
-    const existed = fileExists(agentsMdPath);
-    const oldContent = existed ? readFile(agentsMdPath) : null;
-
-    writeFile(agentsMdPath, newInstructions);
-
-    // Update skills
-    this.copySkills(skillsDestDir);
-
-    // Ensure .codex/ config exists
     const codexDir = path.join(targetDir, ".codex");
+    const agentsDir = path.join(codexDir, "agents");
+    const updated: string[] = [];
+    const added: string[] = [];
+    for (const def of definitions) {
+      const tomlPath = path.join(agentsDir, `${def.name}.toml`);
+      const nc = renderAgentToml(def);
+      if (fileExists(tomlPath)) {
+        if (readFile(tomlPath) !== nc) {
+          writeFile(tomlPath, nc);
+          updated.push(def.name);
+        }
+      } else {
+        writeFile(tomlPath, nc);
+        added.push(def.name);
+      }
+    }
+    this.copySkills(path.join(codexDir, "skills"));
+    this.genHooks(codexDir);
+    this.genRules(codexDir);
+    this.genMemory(definitions, codexDir);
     if (!fileExists(path.join(codexDir, "config.toml"))) {
       writeFile(
         path.join(codexDir, "config.toml"),
         "# Codex CLI configuration\ncodex_hooks = true\n",
       );
     }
-
-    if (oldContent === newInstructions) {
-      return { updated: [], added: [] };
-    }
-
-    const names = definitions.map((d) => d.name);
-    return existed ? { updated: names, added: [] } : { updated: [], added: names };
+    return { updated, added };
   }
 
-  /**
-   * Copies skill SKILL.md files from templates to .agents/skills/.
-   * For orchestration skills (disable-model-invocation: true), generates
-   * an openai.yaml policy file to prevent implicit invocation.
-   */
+  private genToml(defs: CanonicalAgentDefinition[], codexDir: string): void {
+    const d = path.join(codexDir, "agents");
+    for (const def of defs) writeFile(path.join(d, `${def.name}.toml`), renderAgentToml(def));
+  }
+
   private copySkills(skillsDestDir: string): void {
     const skillsSrcDir = path.join(templateDir(), "skills");
     let skillDirs: string[];
@@ -124,31 +179,50 @@ export class CodexAdapter implements RuntimeAdapter {
     } catch {
       return;
     }
-
     for (const skillDir of skillDirs) {
       const srcPath = path.join(skillsSrcDir, skillDir, "SKILL.md");
       const content = readFile(srcPath);
       if (!content) continue;
-
-      const destPath = path.join(skillsDestDir, skillDir, "SKILL.md");
-      writeFile(destPath, content);
-
-      // Generate openai.yaml for orchestration skills
+      writeFile(path.join(skillsDestDir, skillDir, "SKILL.md"), content);
       const parsed = parseSkillFrontmatter(content);
       if (parsed && parsed.disableModelInvocation) {
-        const yamlPath = path.join(skillsDestDir, skillDir, "agents", "openai.yaml");
-        const yamlContent = [
-          `name: ${parsed.name}`,
-          `description: ${parsed.description}`,
-          "policy:",
-          "  allow_implicit_invocation: false",
-          "",
-        ].join("\n");
-        writeFile(yamlPath, yamlContent);
+        writeFile(
+          path.join(skillsDestDir, skillDir, "agents", "openai.yaml"),
+          [
+            `name: ${parsed.name}`,
+            `description: ${parsed.description}`,
+            "policy:",
+            "  allow_implicit_invocation: false",
+            "",
+          ].join("\n"),
+        );
       }
+    }
+  }
+
+  private genHooks(codexDir: string): void {
+    writeFile(
+      path.join(codexDir, "hooks.json"),
+      JSON.stringify(buildHooksConfig(), null, 2) + "\n",
+    );
+  }
+
+  private genRules(codexDir: string): void {
+    const src = path.join(templateDir(), "rules", "dev-team-learnings.md");
+    const content = readFile(src);
+    writeFile(
+      path.join(codexDir, "rules", "dev-team-learnings.md"),
+      content || "# Shared Team Learnings\n\nAdd project-specific learnings here.\n",
+    );
+  }
+
+  private genMemory(definitions: CanonicalAgentDefinition[], codexDir: string): void {
+    for (const def of definitions) {
+      const p = path.join(codexDir, "agent-memory", def.name, "MEMORY.md");
+      if (!fileExists(p))
+        writeFile(p, `# ${def.name} Memory\n\nAgent-specific calibration memory.\n`);
     }
   }
 }
 
-// Module-level registration
 registerAdapter(new CodexAdapter());
