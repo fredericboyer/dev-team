@@ -7,9 +7,10 @@ queue_rules:
       {{ body | get_section("## Summary", "") }}
 
 pull_request_rules:
-  - name: auto-queue PRs targeting main
+  - name: auto-queue when CI passes
     conditions:
       - base = main
+      - "check-success = build-and-test (ubuntu-latest, 22)"
     actions:
       queue:
         name: default
