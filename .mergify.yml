@@ -11,7 +11,7 @@ pull_request_rules:
     conditions:
       - base = main
       - "#check-pending = 0"
-      - -check-failure
+      - "#check-failure = 0"
     actions:
       queue:
         name: default
