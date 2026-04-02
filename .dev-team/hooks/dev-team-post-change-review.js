@@ -130,10 +130,6 @@ if (isCodeFile && !isTestFile) {
   }
 }
 
-// Flag Beck for test file changes (test quality review)
-if (isTestFile && isCodeFile) {
-  flags.push("@dev-team-beck (test file changed — review test quality)");
-}
 
 if (flags.length === 0) {
   process.exit(0);

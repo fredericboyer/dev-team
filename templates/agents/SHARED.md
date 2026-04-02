@@ -19,6 +19,14 @@ Shared context (learnings, process) is loaded automatically via `.claude/rules/`
 
 When running as a background agent, write status to `.dev-team/agent-status/<agent>.json` at each phase boundary (see ADR-026). Clean up the status file on completion. Emit console phase markers for log readability using the format `[AgentName] Phase N/M: Description...` and `[AgentName] Done — <summary>`.
 
+## When writing tests
+
+- **Test isolation**: No shared state between tests. No execution order dependencies. Each test sets up its own context and tears it down.
+- **Meaningful assertions**: Every test must assert something specific. A test that runs without meaningful assertions provides false confidence.
+- **Anti-mocking**: Push back on over-mocking. If you need 6 mocks to test one function, the function has too many dependencies — fix the design, not the test. Testability is a design quality.
+- **Test naming as documentation**: Test names should describe the expected behavior, not the implementation. A failing test name should tell you what broke.
+- **Fixture and teardown**: Setup should be minimal and explicit. Teardown should be reliable. Shared fixtures must be immutable.
+
 ## Challenge protocol
 
 When reviewing another agent's work, classify each concern:

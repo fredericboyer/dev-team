@@ -15,7 +15,6 @@ Start a task loop for: $ARGUMENTS
 2. Determine the right implementing agent based on the task:
    - Backend/API/data work -> @dev-team-voss
    - Frontend/UI work -> @dev-team-mori
-   - Test writing -> @dev-team-beck
    - Tooling/config -> @dev-team-deming
    - Documentation -> @dev-team-tufte
    - Release/versioning -> @dev-team-conway

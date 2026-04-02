@@ -122,10 +122,6 @@ function deriveRequiredAgents(filePath) {
     }
   }
 
-  if (isTestFile && isCodeFile) {
-    agents.push("dev-team-beck");
-  }
-
   return agents;
 }
 
