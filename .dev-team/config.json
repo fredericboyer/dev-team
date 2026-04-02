@@ -30,6 +30,5 @@
   "issueTracker": "GitHub Issues",
   "branchConvention": "feat/123-description",
   "taskBranchPattern": "(feat|fix)\\/",
-  "platform": "github",
   "agentTeams": true
 }

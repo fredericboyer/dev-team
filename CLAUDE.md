@@ -36,7 +36,7 @@ Adversarial AI agent team for any project. Installs Claude Code agents, hooks, a
 
 Templates, agent definitions, skills, and hooks ship to all projects. They must remain:
 - **Workflow-agnostic** — don't assume PRs, specific branch naming, or any particular development workflow
-- **Platform-neutral** — don't hardcode `gh`, GitHub Actions, Copilot, or any specific tool. Use the `platform` config field for detection
+- **GitHub-first** — `gh` CLI, GitHub Actions, and GitHub GraphQL API are first-class (ADR-040). Review handling is reviewer-agnostic (works for Copilot, human reviewers, bots) via GraphQL `reviewThreads`
 - **Language-neutral** — don't encode language conventions (test patterns, linter commands, file extensions) that the agent already knows. Hooks detect the ecosystem; agents apply their built-in knowledge
 - **Discoverable-only** — if the agent can learn it by reading the codebase, don't put it in a template. Include only what agents can't discover: tool preferences, legacy traps, process decisions
 - **Process-driven** — agent definitions describe *capabilities* (what the agent can do), not *steps* (how a specific project uses them). Workflow steps (release process, review requirements, integration rules) belong in `.claude/rules/dev-team-process.md`, which each project customizes. Agents receive it automatically via rules — no explicit "read this file" needed.
