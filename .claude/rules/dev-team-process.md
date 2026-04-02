@@ -34,9 +34,10 @@ Semantic versioning (semver). Version source: `package.json`.
 ## Parallelization
 
 - **Aggressively parallelize independent work.** When multiple issues touch independent files, work them simultaneously. Only sequence issues that have file conflicts.
+- **Cap parallel agents at 4-6 per wave.** Higher concurrency causes worktree exhaustion and cross-branch contamination. v3.2.0 spawned 12 agents and multiple contaminated the main working directory.
 - **Agent teams** (preferred for multi-issue batches): The main conversation loop acts as Drucker (team lead). Spawn implementation teammates via agent teams, each on its own branch. Never delegate to a Drucker subagent — the main loop IS Drucker.
 - **Worktree subagents** (fallback when agent teams are unavailable): Use the Agent tool with `isolation: "worktree"` to spawn parallel workstreams in separate worktrees.
-- **Worktree isolation for multi-branch work.** When agent teams work on multiple branches simultaneously, shared working directories cause cross-branch contamination (stray commits, reverted edits, lost work). Prefer worktree isolation when available. v1.7.0 experienced 3 stray commits and 1 agent re-spawn from this issue.
+- **Worktree isolation for multi-branch work.** When agent teams work on multiple branches simultaneously, shared working directories cause cross-branch contamination (stray commits, reverted edits, lost work). Prefer worktree isolation when available.
 - The main loop must stay interactive at all times. All implementation happens via background teammates or subagents.
 
 **Agent teammate naming convention:** Use `{agent}-{role}[-{qualifier}]`:
@@ -56,14 +57,35 @@ Semantic versioning (semver). Version source: `package.json`.
 
 When issues are sequenced due to file conflicts, ensure each completed change is integrated into the shared codebase before starting the next. Working from a stale baseline causes integration conflicts.
 
-## Handling unresponsive agents
+## Orchestration validation loop
 
-Background agents can get stuck without producing output. Apply this escalation pattern:
-1. If an agent has not reported progress (status file, message, or commit) within **2 minutes**, send a status ping via `SendMessage`.
-2. If no response within **1 additional minute**, terminate the agent.
-3. Assess what was completed: check for partial output (status files, commits, branch changes).
-4. Either re-spawn a fresh agent with the remaining work, or complete the work yourself.
-5. Do not wait indefinitely — an unresponsive agent will not recover on its own.
+The orchestrator has a **continuous obligation** to monitor all active work. This is not opt-in — it runs at every orchestrator turn during any active workflow. v3.2.0 demonstrated the failure mode: spawn agents → respond to user → forget about agents until prompted.
+
+**At every turn, the orchestrator must check:**
+
+1. **PR pipeline** — for each open PR:
+   - CI status (pass/fail/pending)
+   - Unresolved review threads (via GraphQL `reviewThreads`)
+   - If CI passes + threads exist: read, reply, resolve via `resolveReviewThread`
+   - If all clear + BEHIND: update branch
+   - If all clear + CLEAN: report ready for merge
+   - Start reviews/merges immediately as each PR lands — don't batch
+
+2. **Agent liveness** — for each in-progress task:
+   - Verify a branch or PR exists within 4 minutes of spawn
+   - If no progress after 2 minutes: send status ping
+   - If no response after 3 minutes: terminate and re-spawn or do directly
+   - Stuck agents will not recover on their own
+
+3. **Task completion verification** — for each "completed" task:
+   - Verify a PR was actually created (not just task marked done)
+   - If no PR exists: reopen task, flag as failed delivery
+
+4. **Work continuity** — check blocked tasks:
+   - If all blockers completed: unblock and spawn next agent
+   - If pending tasks have no owner: assign or do directly
+
+**Safety net:** When agents are active, schedule a cron loop (every 2 minutes) as backup. The primary enforcement is the orchestrator's own turn discipline — the cron is a fallback for when it gets distracted.
 
 ## Dogfooding
 
