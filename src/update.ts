@@ -78,6 +78,7 @@ const MIGRATIONS: Migration[] = [
   },
   {
     version: "3.1.1",
+    skillRemovals: ["merge"],
     agentRemovals: [{ label: "Beck", file: "dev-team-beck.md" }],
   },
 ];

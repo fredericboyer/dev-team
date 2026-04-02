@@ -72,7 +72,7 @@ The task skill orchestrates four steps per branch. Each step has a clear entry c
 |------|---------------|-----------------|----------------|
 | **1. Implement** | Agent works on branch, validates output | Task assigned | Non-empty diff, tests pass, PR created |
 | **2. Review** | Adversarial review, finding routing, defect fixing | PR exists | Zero `[DEFECT]`s, all findings acknowledged |
-| **3. Merge** | Merge via `/merge` skill, CI verification | Review passed | PR merged |
+| **3. Merge** | Merge via `/dev-team:merge` skill, CI verification | Review passed | PR merged |
 | **4. Extract** | Borges memory extraction, metrics | All branches merged | Metrics recorded, memory updated |
 
 ## Phase checkpoints
@@ -83,7 +83,7 @@ At each phase boundary, emit a structured status line before proceeding. This gi
 ```
 [dev-team:task] Step 1/4: Implement — <agent> on <branch>...
 [dev-team:task] Step 2/4: Review — /dev-team:review --embedded (round <N>)...
-[dev-team:task] Step 3/4: Merge — /merge PR #NNN...
+[dev-team:task] Step 3/4: Merge — /dev-team:merge PR #NNN...
 [dev-team:task] Step 4/4: Extract — spawning Borges...
 [dev-team:task] Done — PR #NNN merged, <N> DEFECTs fixed
 ```
@@ -180,7 +180,7 @@ After creating a PR, check for automated review findings from the platform's rev
 
 ## Step 3: Merge
 
-**Use the project's merge skill (e.g., `/merge`) for every PR.** Do not use raw `gh pr merge` or other git commands — the merge skill handles automated review monitoring, CI verification, and post-merge actions. If no merge skill exists, ensure the PR is mergeable and report readiness. If merge fails (CI failures, merge conflicts, branch protection), report the blocker to the human rather than leaving work unattended.
+**Use the project's merge skill (e.g., `/dev-team:merge`) for every PR.** Do not use raw `gh pr merge` or other git commands — the merge skill handles automated review monitoring, CI verification, and post-merge actions. If no merge skill exists, ensure the PR is mergeable and report readiness. If merge fails (CI failures, merge conflicts, branch protection), report the blocker to the human rather than leaving work unattended.
 
 ## Step 4: Extract
 
