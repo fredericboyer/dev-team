@@ -150,10 +150,11 @@ npx @fredericboyer/dev-team create-agent <name>     # Scaffold a custom agent
 
 All hooks are Node.js scripts — work on macOS, Linux, and Windows.
 
-### Skills (8)
+### Skills (9)
 
 | Skill | What it does |
 |-------|-------------|
+| `/dev-team:implement` | Implement a task on a feature branch — agent selection, pre-assessment, validation, PR creation |
 | `/dev-team:task` | Iterative task loop — implement, review, fix defects, repeat until clean |
 | `/dev-team:review` | Parallel multi-agent review — spawns agents based on changed file patterns |
 | `/dev-team:audit` | Full codebase scan — Szabo (security) + Knuth (quality) + Deming (tooling) |
@@ -161,7 +162,7 @@ All hooks are Node.js scripts — work on macOS, Linux, and Windows.
 | `/dev-team:retro` | Audit knowledge base health — learnings, agent memory, CLAUDE.md accuracy |
 | `/dev-team:extract` | Borges memory extraction — spawns Borges, verifies metrics and memory formation |
 | `/dev-team:scorecard` | Audit process conformance — verify Borges, findings, metrics, memory, issue closure |
-| `/merge` | Merge a PR with monitoring — Copilot check, auto-merge, CI verification, deferred finding enforcement |
+| `/dev-team:merge` | Merge a PR with monitoring — review check, auto-merge, CI verification |
 
 ## Step-by-step usage guide
 
