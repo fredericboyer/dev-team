@@ -55,6 +55,7 @@ Do NOT skip this. Do NOT treat hook output as optional. If you believe a review 
 
 **Framework skills** (installed automatically, updated with `dev-team update`):
 - `/dev-team:challenge` — critically examine a proposal or implementation
+- `/dev-team:implement` — implement a task on a feature branch with pre-assessment and validation
 - `/dev-team:task` — start an iterative task loop with adversarial review gates
 - `/dev-team:review` — orchestrated multi-agent parallel review of changes
 - `/dev-team:audit` — full codebase security + quality + tooling audit

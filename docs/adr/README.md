@@ -63,3 +63,4 @@ What becomes easier or more difficult?
 | [036](036-canonical-format-adapter-registry.md) | Canonical agent definition format and multi-runtime adapter registry | accepted |
 | [037](037-mcp-enforcement-server.md) | MCP enforcement server | superseded |
 | [038](038-runtime-native-directory-layout.md) | Runtime-native directory layout | accepted |
+| [039](039-decompose-task-into-composable-skills.md) | Decompose task skill into composable sub-skills | accepted |
