@@ -15,7 +15,7 @@ const path = require("path");
 
 let input = {};
 try {
-  input = JSON.parse(require("fs").readFileSync(0, "utf-8"));
+  input = JSON.parse(process.argv[2] || "{}");
 } catch {
   process.exit(0);
 }
