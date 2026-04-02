@@ -7,6 +7,55 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.2.0] - 2026-04-01
+
+### Added
+- `/dev-team:implement` skill — standalone implementation step extracted from task skill (ADR-039, #608).
+- Mergify merge queue configuration (`.mergify.yml`) — handles branch update cascades automatically (#645).
+- Orchestration validation loop — continuous monitoring obligation for PR pipeline, agent liveness, task completion verification (#653).
+- ADR-039: Decompose task skill into composable sub-skills.
+- ADR-040: GitHub-first platform, reviewer-agnostic merge skill.
+- GraphQL `resolveReviewThread` for programmatic thread resolution in merge skill (#647).
+- `safeRegex` validation for `agent-patterns.json` at load time (#616).
+- Validate-readme and validate-docs added to release pipeline (#618).
+- Unit tests for init.ts flag parsing edge cases (#628).
+- Hook validation extended to `.claude/hooks/` (#629).
+- "When writing tests" section added to SHARED.md (from retired Beck agent).
+
+### Changed
+- `/merge` renamed to `/dev-team:merge` for namespace consistency (#609).
+- Merge skill rewritten: reviewer-agnostic thread handling via GraphQL instead of Copilot-specific login regex (#647).
+- Task skill simplified to orchestrate composable sub-skills: implement → review → merge → extract.
+- Template design principle changed from "Platform-neutral" to "GitHub-first" (ADR-040).
+- Agent routing table updated: added Hamilton, Turing as pre-implementation research note (#597).
+- CI: removed Semgrep (zero findings, CodeQL sufficient), added concurrency controls, setup-node for validate jobs (#595, #619, #620).
+- Test scripts use glob patterns instead of explicit file listing (#622).
+- Parallel agent cap: 4-6 per wave to prevent worktree exhaustion.
+
+### Removed
+- Beck agent retired — testing guidelines folded into SHARED.md (#644).
+- Semgrep from CI pipeline — CodeQL covers all security scanning (#595, #621).
+- `platform` config field from `.dev-team/config.json` (ADR-040).
+- "Non-GitHub platforms" note from template CLAUDE.md.
+
+### Fixed
+- lint-format.js hook reading stdin instead of argv[2] (#611).
+- `createAgent` guard against empty/whitespace-only names (#612).
+- `--preset` flag prefix-matching bug (`--presets` no longer matches) (#614).
+- `$TOOL_INPUT` shell expansion risk removed from Copilot adapter (#615).
+- Path traversal validation added to worktree hook `base_path` (#617).
+- `select()`/`checkbox()` guard against empty options array (#624).
+- `compareSemver` handles pre-release suffixes and build metadata (#625).
+- Settings.json migration uses structured JSON replacement (#627).
+- Symlink handling hardened in `listFilesRecursive` and pre-commit gate (#626, #631).
+- Review gate type guards for sidecar JSON validation (#626).
+- `safeRegex` extended to detect overlapping alternation patterns (#623).
+- Pretest double build removed (#613).
+
+### Security
+- Full codebase security audit by Szabo — 0 defects, 4 risks addressed.
+- Path traversal checks use `path.relative()` pattern instead of `startsWith()`.
+
 ## [3.1.0] - 2026-03-30
 
 ### Added
