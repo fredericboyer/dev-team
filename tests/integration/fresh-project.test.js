@@ -31,7 +31,6 @@ describe("fresh project installation", () => {
     assert.ok(fs.existsSync(path.join(tmpDir, ".claude", "agents", "dev-team-mori.agent.md")));
     assert.ok(fs.existsSync(path.join(tmpDir, ".claude", "agents", "dev-team-szabo.agent.md")));
     assert.ok(fs.existsSync(path.join(tmpDir, ".claude", "agents", "dev-team-knuth.agent.md")));
-    assert.ok(fs.existsSync(path.join(tmpDir, ".claude", "agents", "dev-team-beck.agent.md")));
     assert.ok(fs.existsSync(path.join(tmpDir, ".claude", "agents", "dev-team-deming.agent.md")));
 
     // Hooks
@@ -53,9 +52,6 @@ describe("fresh project installation", () => {
     // Memory (runtime-native: .claude/agent-memory/)
     assert.ok(
       fs.existsSync(path.join(tmpDir, ".claude", "agent-memory", "dev-team-voss", "MEMORY.md")),
-    );
-    assert.ok(
-      fs.existsSync(path.join(tmpDir, ".claude", "agent-memory", "dev-team-beck", "MEMORY.md")),
     );
     assert.ok(fs.existsSync(path.join(tmpDir, ".claude", "rules", "dev-team-learnings.md")));
     assert.ok(fs.existsSync(path.join(tmpDir, ".dev-team", "metrics.md")));
@@ -132,7 +128,6 @@ describe("fresh project installation", () => {
     assert.ok(prefs.version, "should have a version");
     assert.ok(/^\d+\.\d+\.\d+/.test(prefs.version), "version should be semver");
     assert.ok(prefs.agents.includes("Voss"));
-    assert.ok(prefs.agents.includes("Beck"));
     assert.ok(prefs.hooks.includes("TDD enforcement"));
     assert.equal(prefs.issueTracker, "GitHub Issues");
     assert.equal(prefs.branchConvention, "feat/123-description");
@@ -197,7 +192,7 @@ describe("fresh project installation", () => {
       fs.readFileSync(path.join(tmpDir, ".dev-team", "config.json"), "utf-8"),
     );
     assert.equal(prefs.preset, "fullstack");
-    assert.equal(prefs.agents.length, 14);
+    assert.equal(prefs.agents.length, 13);
   });
 
   it("--preset data installs data pipeline agents", async () => {

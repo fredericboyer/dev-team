@@ -107,7 +107,6 @@ When agent memory files are empty (only contain the template boilerplate), gener
 - **Hamilton**: Dockerfile presence, CI/CD config, deploy targets, infra deps
 - **Deming**: linter/formatter config, CI steps, tooling dependencies
 - **Tufte**: doc directories, README structure, API doc tools
-- **Beck**: test framework, test directory structure, coverage tools
 - **Conway**: version scheme, release workflow, changelog format
 - **Mori**: UI framework, component directories, accessibility tools
 
@@ -194,7 +193,7 @@ After each task cycle, append a metrics entry to `.dev-team/metrics.md`:
 
 Check for contradictions between agent memories:
 - Does Szabo's memory contradict Voss's architectural decisions?
-- Does Knuth's coverage assessment conflict with Beck's test patterns?
+- Does Knuth's coverage assessment conflict with established test patterns?
 - Do any agents reference patterns or conventions that have since changed?
 
 ## Focus areas

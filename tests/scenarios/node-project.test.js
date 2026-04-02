@@ -51,7 +51,7 @@ describe("Node.js project scenario", () => {
 
     // Agents installed in .claude/agents/ (runtime-native)
     const agents = fs.readdirSync(path.join(tmpDir, ".claude", "agents"));
-    assert.equal(agents.length, 15); // 14 agents + SHARED.md
+    assert.equal(agents.length, 14); // 13 agents + SHARED.md
     assert.ok(agents.includes("dev-team-voss.agent.md"));
     assert.ok(agents.includes("SHARED.md"));
 

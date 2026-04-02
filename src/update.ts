@@ -29,9 +29,15 @@ interface AgentRename {
   newFile: string;
 }
 
+interface AgentRemoval {
+  label: string;
+  file: string;
+}
+
 interface Migration {
   version: string;
   agentRenames?: AgentRename[];
+  agentRemovals?: AgentRemoval[];
   skillRemovals?: string[];
   hookRemovals?: string[];
 }
@@ -69,6 +75,10 @@ const MIGRATIONS: Migration[] = [
   {
     version: "1.0.0",
     skillRemovals: ["dev-team-merge", "dev-team-security-status"],
+  },
+  {
+    version: "3.1.1",
+    agentRemovals: [{ label: "Beck", file: "dev-team-beck.md" }],
   },
 ];
 
@@ -240,6 +250,51 @@ function runMigrations(
         const idx = prefs.agents.indexOf(rename.oldLabel);
         if (idx !== -1) {
           prefs.agents[idx] = rename.newLabel;
+        }
+      }
+    }
+
+    if (migration.agentRemovals) {
+      for (const removal of migration.agentRemovals) {
+        const agentsDir = path.join(claudeDir, "agents");
+        const memoryDir = path.join(claudeDir, "agent-memory");
+
+        // Remove agent file (check both .agent.md and legacy .md extensions)
+        const agentPath = path.join(agentsDir, removal.file.replace(/\.md$/, ".agent.md"));
+        const agentPathLegacy = path.join(agentsDir, removal.file);
+        const pathToRemove = fileExists(agentPath)
+          ? agentPath
+          : fileExists(agentPathLegacy)
+            ? agentPathLegacy
+            : null;
+        if (pathToRemove) {
+          try {
+            assertNotSymlink(pathToRemove);
+            assertNoSymlinkInPath(pathToRemove);
+            fs.unlinkSync(pathToRemove);
+          } catch {
+            // ignore — symlink or missing file
+          }
+          log.push(`Removed retired agent: ${removal.label}`);
+        }
+
+        // Remove memory directory
+        const memDir = path.join(memoryDir, removal.file.replace(".md", ""));
+        if (dirExists(memDir)) {
+          try {
+            assertNotSymlink(memDir);
+            assertNoSymlinkInPath(memDir);
+            fs.rmSync(memDir, { recursive: true, force: true });
+            log.push(`Removed memory for retired agent: ${removal.label}`);
+          } catch {
+            // Best effort
+          }
+        }
+
+        // Remove from prefs
+        const idx = prefs.agents.indexOf(removal.label);
+        if (idx !== -1) {
+          prefs.agents.splice(idx, 1);
         }
       }
     }

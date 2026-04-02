@@ -57,7 +57,7 @@ This project uses [dev-team](https://github.com/dev-team) — adversarial AI age
 
 ### Agents
 
-Available agents: `@dev-team-voss`, `@dev-team-hamilton`, `@dev-team-mori`, `@dev-team-szabo`, `@dev-team-knuth`, `@dev-team-beck`, `@dev-team-deming`, `@dev-team-tufte`, `@dev-team-brooks`, `@dev-team-conway`, `@dev-team-drucker`, `@dev-team-turing`, `@dev-team-rams`, `@dev-team-borges`. See `.claude/agents/` for full definitions, roles, and when to use each agent.
+Available agents: `@dev-team-voss`, `@dev-team-hamilton`, `@dev-team-mori`, `@dev-team-szabo`, `@dev-team-knuth`, `@dev-team-deming`, `@dev-team-tufte`, `@dev-team-brooks`, `@dev-team-conway`, `@dev-team-drucker`, `@dev-team-turing`, `@dev-team-rams`, `@dev-team-borges`. See `.claude/agents/` for full definitions, roles, and when to use each agent.
 
 ### Capabilities
 
