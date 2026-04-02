@@ -64,3 +64,4 @@ What becomes easier or more difficult?
 | [037](037-mcp-enforcement-server.md) | MCP enforcement server | superseded |
 | [038](038-runtime-native-directory-layout.md) | Runtime-native directory layout | accepted |
 | [039](039-decompose-task-into-composable-skills.md) | Decompose task skill into composable sub-skills | accepted |
+| [040](040-github-first-reviewer-agnostic-merge.md) | GitHub-first platform, reviewer-agnostic merge skill | accepted |
