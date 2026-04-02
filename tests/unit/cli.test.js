@@ -118,6 +118,166 @@ describe("--preset flag parsing", () => {
   });
 });
 
+describe("--runtime flag parsing", () => {
+  it("parses --runtime=claude,copilot with equals syntax", () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "dt-test-"));
+    try {
+      const output = execFileSync(
+        process.execPath,
+        [bin, "init", "--all", "--runtime=claude,copilot"],
+        { encoding: "utf-8", cwd: tmpDir, timeout: 10000 },
+      );
+      assert.ok(output.includes("Done!"), "init should complete successfully");
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  it("parses --runtime claude,copilot with space syntax", () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "dt-test-"));
+    try {
+      const output = execFileSync(
+        process.execPath,
+        [bin, "init", "--all", "--runtime", "claude,copilot"],
+        { encoding: "utf-8", cwd: tmpDir, timeout: 10000 },
+      );
+      assert.ok(output.includes("Done!"), "init should complete successfully");
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  it("defaults to claude runtime when --runtime is omitted", () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "dt-test-"));
+    try {
+      const output = execFileSync(process.execPath, [bin, "init", "--all"], {
+        encoding: "utf-8",
+        cwd: tmpDir,
+        timeout: 10000,
+      });
+      assert.ok(output.includes("Done!"), "init should complete with default runtime");
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe("--force flag behavior", () => {
+  it("refuses to re-init without --force when config exists", () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "dt-test-"));
+    fs.mkdirSync(path.join(tmpDir, ".dev-team"), { recursive: true });
+    fs.writeFileSync(path.join(tmpDir, ".dev-team", "config.json"), "{}");
+    try {
+      assert.throws(
+        () => {
+          execFileSync(process.execPath, [bin, "init", "--all"], {
+            encoding: "utf-8",
+            cwd: tmpDir,
+            timeout: 10000,
+          });
+        },
+        (err) => {
+          const stderr = err.stderr || "";
+          assert.ok(
+            stderr.includes("config.json already exists"),
+            "should warn about existing config",
+          );
+          assert.equal(err.status, 1, "should exit with code 1");
+          return true;
+        },
+      );
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  it("allows re-init with --force when config exists", () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "dt-test-"));
+    fs.mkdirSync(path.join(tmpDir, ".dev-team"), { recursive: true });
+    fs.writeFileSync(path.join(tmpDir, ".dev-team", "config.json"), "{}");
+    try {
+      const output = execFileSync(process.execPath, [bin, "init", "--all", "--force"], {
+        encoding: "utf-8",
+        cwd: tmpDir,
+        timeout: 10000,
+      });
+      assert.ok(output.includes("Done!"), "--force should allow re-init");
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe("--all flag combinations", () => {
+  it("--all with --preset uses preset agent selection", () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "dt-test-"));
+    try {
+      const output = execFileSync(process.execPath, [bin, "init", "--all", "--preset=backend"], {
+        encoding: "utf-8",
+        cwd: tmpDir,
+        timeout: 10000,
+      });
+      assert.ok(output.includes("Using preset: backend"), "should use backend preset");
+      assert.ok(output.includes("Done!"), "should complete successfully");
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  it("--all with --preset=data uses data preset", () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "dt-test-"));
+    try {
+      const output = execFileSync(process.execPath, [bin, "init", "--all", "--preset=data"], {
+        encoding: "utf-8",
+        cwd: tmpDir,
+        timeout: 10000,
+      });
+      assert.ok(output.includes("Using preset: data"), "should use data preset");
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  it("rejects unknown preset name", () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "dt-test-"));
+    try {
+      assert.throws(
+        () => {
+          execFileSync(process.execPath, [bin, "init", "--all", "--preset=nonexistent"], {
+            encoding: "utf-8",
+            cwd: tmpDir,
+            timeout: 10000,
+          });
+        },
+        (err) => {
+          const stderr = err.stderr || "";
+          assert.ok(stderr.includes("Unknown preset: nonexistent"), "should report unknown preset");
+          assert.equal(err.status, 1, "should exit with code 1");
+          return true;
+        },
+      );
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  it("--all without --preset installs all agents", () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "dt-test-"));
+    try {
+      const output = execFileSync(process.execPath, [bin, "init", "--all"], {
+        encoding: "utf-8",
+        cwd: tmpDir,
+        timeout: 10000,
+      });
+      assert.ok(output.includes("Voss"), "should include Voss");
+      assert.ok(output.includes("Drucker"), "should include Drucker");
+      assert.ok(output.includes("Rams"), "should include Rams");
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+});
+
 describe("CLI --version flag", () => {
   it("prints the version from package.json with --version", () => {
     const output = execFileSync(process.execPath, [bin, "--version"], {

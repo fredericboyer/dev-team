@@ -30,7 +30,6 @@ In embedded mode, the review skill produces its report and returns control to th
    - **@dev-team-szabo** — always included (security review)
    - **@dev-team-knuth** — included for any non-test code changes (quality/coverage)
    - **@dev-team-brooks** — included for any non-test code changes (architecture)
-   - **@dev-team-beck** — included for test-only changes (test quality)
 
    **LIGHT review mode** (`--light` flag): Spawn only **one reviewer** — the most relevant agent based on file patterns. If no pattern-based agent is determined, default to @dev-team-knuth. In LIGHT mode, all findings are **advisory only** — `[DEFECT]` findings are downgraded to `[RISK]` in the report. LIGHT reviews do not block progress. The verdict is always "Approve (advisory)" with any findings noted.
 

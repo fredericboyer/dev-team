@@ -37,7 +37,6 @@ Based on the classification, select:
 | Backend, API, data | @dev-team-voss | API design, data modeling, system architecture |
 | Infrastructure, IaC, containers, deployment | @dev-team-hamilton | Dockerfiles, CI/CD, Terraform, Helm, k8s, health checks, monitoring |
 | Frontend, UI, components | @dev-team-mori | Components, accessibility, UX patterns |
-| Tests, TDD | @dev-team-beck | Writing tests, translating audit findings into test cases |
 | Tooling, CI/CD, hooks, config | @dev-team-deming | Linters, formatters, CI/CD, automation |
 | Documentation | @dev-team-tufte | README, API docs, inline comments, doc-code sync |
 | Release, versioning | @dev-team-conway | Changelog, semver, release readiness |
@@ -254,7 +253,6 @@ When Claude Code agent teams are enabled (`CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=
 | Infrastructure | Hamilton | `Dockerfile`, `.github/workflows/`, IaC |
 | Tooling/config | Deming | `package.json`, linter configs, build scripts |
 | Documentation | Tufte | `docs/`, `*.md`, `README` |
-| Tests | Beck | `tests/`, `__tests__/`, `*.test.*` |
 | Frontend | Mori | `components/`, `pages/`, UI code |
 | Release | Conway | `CHANGELOG.md`, version files |
 
