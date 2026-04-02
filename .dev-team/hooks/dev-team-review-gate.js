@@ -122,7 +122,6 @@ function deriveRequiredAgents(filePath) {
     }
   }
 
-
   return agents;
 }
 
