@@ -41,6 +41,7 @@ This brief analyzes every applicable pattern from the article and its linked res
 **Article**: "Communication was handled via files: one agent would write a file, another agent would read it and respond either within that file or with a new file."
 
 **dev-team alignment**: dev-team uses file-based communication extensively:
+
 - `.dev-team/agent-status/<agent>.json` for progress reporting (ADR-026)
 - `.dev-team/.reviews/` for review evidence (ADR-029)
 - `.dev-team/metrics.md` for cross-session calibration data
@@ -62,6 +63,7 @@ This brief analyzes every applicable pattern from the article and its linked res
 **Article (Long-Running Agents)**: "Finding a way for agents to quickly understand the state of work when starting with a fresh context window, which is accomplished with the `claude-progress.txt` file alongside the git history."
 
 **dev-team alignment**: dev-team has multiple handoff mechanisms:
+
 - Phase checkpoints in `/dev-team:task` (status lines at each step boundary)
 - Agent status files written at phase boundaries
 - Compact context summaries between review rounds ("produce a structured summary: all findings, files changed, outstanding items")
@@ -110,6 +112,7 @@ This brief analyzes every applicable pattern from the article and its linked res
 **Impact**: As tasks grow longer (multiple review rounds, complex implementations), implementing agents may experience the context anxiety the article describes — rushing to finish or dropping quality as context fills. The current approach works because most tasks resolve in 1-2 review rounds, but complex tasks could hit this ceiling.
 
 **Recommendation**: Document a context management strategy in the task skill:
+
 - **Reviewers**: Already use implicit reset (fresh spawn each round) — document this as intentional.
 - **Implementing agents**: After 3+ review rounds, consider spawning a fresh implementing agent with a compact handoff (current findings, remaining defects, relevant code context) rather than continuing with a growing context.
 - **Orchestrator**: The orchestrator (Drucker or main loop) accumulates context across the entire task. For parallel mode with 5+ branches, consider explicit context compaction between branch completions.
@@ -123,10 +126,11 @@ This brief analyzes every applicable pattern from the article and its linked res
 **Impact**: For projects where dev-team is installed (web apps, APIs, CLI tools), static review misses entire categories of bugs: integration failures, UI rendering issues, race conditions, and state management problems. The article demonstrates that runtime verification via Playwright catches "feature gaps: missing audio recording, clip manipulation, effect visualizations" that code review alone would miss.
 
 **Recommendation**: This is a larger architectural shift and should be evaluated as a potential v2.x feature. The pattern would be:
+
 - Reviewer agents that can optionally invoke runtime verification tools (Playwright MCP, API testing)
 - A new hook or skill step that spins up the application before review
 - Criteria for when runtime review is warranted (UI changes, API changes) vs. overkill (documentation, config)
-This aligns with the existing template design principle of "platform-neutral" — the capability would be optional and project-configurable.
+  This aligns with the existing template design principle of "platform-neutral" — the capability would be optional and project-configurable.
 
 ### G5. Penalty Language for Known Anti-Patterns
 
@@ -143,6 +147,7 @@ This aligns with the existing template design principle of "platform-neutral" �
 **Article**: "Every component in a harness encodes an assumption about what the model can't do on its own, and those assumptions are worth stress testing." The article shows that Opus 4.6 made sprint decomposition unnecessary — a capability the harness previously compensated for.
 
 **dev-team gap**: dev-team's architecture (14 agents, 10 hooks, 8 skills) encodes many assumptions about model limitations:
+
 - That models can't self-review reliably (V1 above — still valid per article)
 - That models need structured classification systems (DEFECT/RISK/etc.) to produce consistent output
 - That models need separate orchestrators to manage multi-step workflows
@@ -162,6 +167,7 @@ Some of these assumptions may become stale as models improve. The article explic
 **Article (Building Effective Agents)**: The "Evaluator-Optimizer" pattern: "Generator LLM produces responses; evaluator LLM provides iterative feedback. Works best with clear evaluation criteria and demonstrable improvement through refinement."
 
 dev-team's task skill is a direct implementation of this pattern:
+
 - Step 1 (Implement) = Generator
 - Step 2 (Review) = Evaluator
 - Iteration within Step 2 = the optimization loop
@@ -174,11 +180,11 @@ The article's key finding — that this pattern "works best with clear evaluatio
 
 The article's three-agent architecture maps cleanly to dev-team's task skill:
 
-| Article Role | dev-team Role | Function |
-|---|---|---|
-| Planner | Brooks (pre-assessment) | Analyzes requirements, identifies architectural needs, produces high-level plan |
-| Generator | Implementing agent (Voss/Mori/Deming/Beck) | Produces code implementation |
-| Evaluator | Review agents (Szabo/Knuth/Brooks) | Tests output against criteria, files findings |
+| Article Role | dev-team Role                              | Function                                                                        |
+| ------------ | ------------------------------------------ | ------------------------------------------------------------------------------- |
+| Planner      | Brooks (pre-assessment)                    | Analyzes requirements, identifies architectural needs, produces high-level plan |
+| Generator    | Implementing agent (Voss/Mori/Deming/Beck) | Produces code implementation                                                    |
+| Evaluator    | Review agents (Szabo/Knuth/Brooks)         | Tests output against criteria, files findings                                   |
 
 The main structural difference: the article uses a single Evaluator; dev-team uses multiple parallel evaluators with different specializations (security, quality, architecture). dev-team's approach is richer — it provides multi-perspective evaluation that a single evaluator cannot match.
 
@@ -191,6 +197,7 @@ while :; do cat PROMPT.md | claude-code ; done
 ```
 
 Key characteristics:
+
 - Single-task-per-loop: each iteration does one thing
 - Self-improvement: the agent updates its own docs during execution
 - Back pressure via testing: validation occurs through tests, not reviewers
@@ -200,11 +207,13 @@ Key characteristics:
 **Comparison with dev-team**: Ralph is a fundamentally different philosophy. Where dev-team uses specialized agents with defined roles, Ralph uses a single general-purpose agent in a tight loop. Where dev-team uses adversarial review (external evaluation), Ralph uses back pressure from tests (self-evaluation via tooling).
 
 Ralph's strengths that dev-team lacks:
+
 - **Faster iteration cycle**: Ralph's loop takes minutes per iteration; dev-team's task loop can take 30+ minutes per review round due to multi-agent spawning overhead
 - **Self-updating documentation**: Ralph updates its own learning files during execution; dev-team defers this to Borges at the end
 - **Simplicity**: One agent, one loop, one prompt file
 
 dev-team's strengths that Ralph lacks:
+
 - **Multi-perspective evaluation**: Ralph has no adversarial review; dev-team has specialized reviewers
 - **Persistent structured memory**: Ralph's learning files are unstructured; dev-team has typed memory with temporal decay
 - **Orchestration intelligence**: dev-team routes tasks to domain specialists; Ralph uses one generalist
@@ -214,12 +223,14 @@ dev-team's strengths that Ralph lacks:
 ### A4. Context Engineering Principles Confirm dev-team's Rules Architecture
 
 **Article (Context Engineering)**: "Context must be treated as a finite resource." Recommendations include:
+
 - Just-in-time context retrieval (load data on demand, not upfront)
 - Progressive disclosure (agents discover context through exploration)
 - Structured note-taking for persistent memory outside the context window
 - Sub-agent architectures for clean context separation
 
 dev-team's architecture aligns well:
+
 - `.claude/rules/` files are loaded automatically (pre-loaded shared context)
 - Agent definitions are read on demand when spawning (just-in-time)
 - Agent memory files persist knowledge outside any single context window (structured notes)
@@ -294,19 +305,23 @@ One tension: dev-team loads a significant amount of context upfront via rules (l
 ## Evidence
 
 ### Primary Source
+
 - [Harness Design for Long-Running Application Development](https://www.anthropic.com/engineering/harness-design-long-running-apps) — Prithvi Rajasekaran, Anthropic Engineering, 2026
 
 ### Linked Resources (Anthropic)
+
 - [Effective Harnesses for Long-Running Agents](https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents) — Anthropic Engineering
 - [Effective Context Engineering for AI Agents](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents) — Anthropic Engineering
 - [Building Effective Agents](https://www.anthropic.com/research/building-effective-agents) — Anthropic Research
 
 ### Linked Resources (External)
+
 - [The Ralph Wiggum Method](https://ghuntley.com/ralph/) — Geoffrey Huntley
 - [Frontend Design Skill](https://github.com/anthropics/claude-code/blob/main/plugins/frontend-design/skills/frontend-design/SKILL.md) — Anthropic, Claude Code plugins
 - [Claude Agent SDK](https://platform.claude.com/docs/en/agent-sdk/overview) — Anthropic Platform
 
 ### dev-team Internal References
+
 - ADR-005: Adversarial Agents
 - ADR-019: Parallel Review Waves
 - ADR-026: Agent Progress Reporting

@@ -9,6 +9,7 @@ Merge a pull request with full monitoring: $ARGUMENTS
 ## Release PRs
 
 **Release PRs MUST use this merge skill.** Release PRs (version bumps, changelog updates, release branches) require the same Copilot review handling and CI verification as any other PR — do not bypass this process for releases. When merging a release PR, pay extra attention to:
+
 - Changelog completeness (all PRs since last release are documented)
 - Version bump correctness (semver compliance)
 - No draft or WIP markers left in release notes
@@ -56,10 +57,12 @@ gh api --paginate repos/{owner}/{repo}/pulls/{number}/reviews \
    - Once status is `completed` within the polling limit: proceed to 1a-read below.
 
 2. **If Copilot is in requested_reviewers (Signal 2 count > 0):** Copilot has been requested but hasn't submitted a review yet. Poll the reviews API every 15 seconds until a review from Copilot appears with state `APPROVED`, `CHANGES_REQUESTED`, or `COMMENTED` (max 12 polls, ~3 minutes):
+
    ```bash
    gh api --paginate repos/{owner}/{repo}/pulls/{number}/reviews \
      --jq '[.[] | select((.user.login | test("^(Copilot|copilot-pull-request-reviewer)(\\[bot\\])?$")) and (.state == "APPROVED" or .state == "CHANGES_REQUESTED" or .state == "COMMENTED"))] | length'
    ```
+
    - If a completed review appears within the polling limit: proceed to 1a-read below.
    - If after the final (12th) poll no completed review exists, **treat this as a timeout**: surface a clear error, do **not** proceed to comment reading or merge, and stop the workflow without setting auto-merge.
 
@@ -96,6 +99,7 @@ gh api --paginate repos/{owner}/{repo}/pulls/{number}/reviews --jq '.[] | select
 ```
 
 For each Copilot comment:
+
 1. Read the finding and assess: is it actionable?
 2. **Actionable** (bug, ambiguity, missing logic): fix in code, commit, push
 3. **Style/minor**: acknowledge but skip if not substantive
@@ -107,6 +111,7 @@ For each Copilot comment:
    To get the `node_id` for a comment, include it in the initial fetch (already updated above).
 5. **Deferred findings must be tracked.** For findings acknowledged but NOT fixed (style/minor skips, intentional deferrals, or "won't fix" decisions):
    - Create a GitHub issue to track the deferred finding:
+
      ```bash
      gh issue create \
        --title "Deferred Copilot finding: <short description>" \
@@ -128,11 +133,13 @@ For each Copilot comment:
      EOF
      )"
      ```
+
    - Reply to the Copilot thread with the tracking issue number:
      ```bash
      gh api repos/{owner}/{repo}/pulls/comments/{comment_id}/replies \
        -f body="Tracked in #NNN — deferred: <brief reason>"
      ```
+
 6. **Validation gate before merge.** Before proceeding to Step 2 (auto-merge), verify that every Copilot inline comment has been addressed with one of:
    - A code fix (reply mentioning "Fixed:")
    - A tracking issue (reply mentioning "Tracked in #NNN")
@@ -140,6 +147,7 @@ For each Copilot comment:
    Empty acknowledgments, bare "acknowledged" replies, or comments without either a fix or an issue number are **not valid**. If any comment lacks proper resolution, go back and either fix it or create a tracking issue.
 
    To verify, re-fetch all Copilot inline comments and check that each has at least one reply from the PR author or bot containing "Fixed:" or "Tracked in #":
+
    ```bash
    # Get all Copilot comment IDs
    COPILOT_COMMENTS=$(gh api --paginate repos/{owner}/{repo}/pulls/{number}/comments \
@@ -156,7 +164,9 @@ For each Copilot comment:
      fi
    done
    ```
+
    If any comments are unresolved, **do not proceed** — address them before continuing.
+
 7. After addressing all actionable findings, re-push and wait for CI to restart
 
 ### 1c. Verify no new Copilot comments after push
@@ -184,11 +194,13 @@ gh pr checks {number}
 ```
 
 **If all checks are passing:**
+
 - The PR will merge immediately (or within seconds)
 - Verify by checking: `gh pr view {number} --json state --jq .state`
 - If state is `MERGED`, proceed to Step 4
 
 **If checks are pending:**
+
 - Inform the user that auto-merge is set and CI is running
 - Spawn a background monitoring agent to poll until completion:
   - Poll every 30 seconds: `gh pr view {number} --json state --jq .state`
@@ -197,6 +209,7 @@ gh pr checks {number}
   - Timeout after 15 minutes of polling
 
 **If checks are failing:**
+
 - Report which checks failed: `gh pr checks {number}`
 - Do NOT proceed with merge
 - Suggest investigating the failures
@@ -206,12 +219,14 @@ gh pr checks {number}
 After merge is confirmed:
 
 1. **Switch to main and pull latest:**
+
    ```bash
    git checkout main
    git pull origin main
    ```
 
 2. **Report the merge commit:**
+
    ```bash
    git log -1 --format="%H %s"
    ```

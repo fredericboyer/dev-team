@@ -1,4 +1,5 @@
 # ADR-036: Canonical agent definition format and multi-runtime adapter registry
+
 Date: 2026-03-30
 Status: accepted
 
@@ -32,11 +33,13 @@ The `runtimes` field in config.json (default: `["claude"]`) controls which adapt
 ## Consequences
 
 ### Easier
+
 - Adding a new runtime adapter (Codex CLI, Copilot, Cursor) requires only implementing `RuntimeAdapter` and registering it — no changes to init.ts or update.ts
 - Templates remain untouched — the current format is canonical
 - Backward compatible — existing installations see no behavior change (default runtime is "claude", adapter is identity transform)
 
 ### Harder
+
 - Agent file parsing adds a layer of indirection (frontmatter parsing) that wasn't previously needed for the Claude Code path
 - Adapters must handle edge cases per-runtime (file naming, directory structure, metadata stripping)
 - Testing matrix grows per-adapter

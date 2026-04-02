@@ -1,8 +1,10 @@
 # ADR-018: Shared git context via temp file cache
+
 Date: 2026-03-22
 Status: accepted
 
 ## Context
+
 Multiple hooks shell out to git independently on every Edit/Write and TaskCompleted event:
 
 - `dev-team-tdd-enforce.js` calls `git diff --name-only`
@@ -11,6 +13,7 @@ Multiple hooks shell out to git independently on every Edit/Write and TaskComple
 These hooks fire on the same event cycle, so they redundantly execute the same git commands within milliseconds of each other. On large repositories or slow filesystems, this adds measurable latency to every tool use.
 
 ## Decision
+
 Use a temp file cache with a 5-second TTL. Each hook that needs git output:
 
 1. Derives a cache key from the git arguments (e.g. `diff--name-only`)
@@ -23,6 +26,7 @@ The `cachedGitDiff` helper is defined inline in each hook (no shared module) to 
 Hook timeouts are reduced from 5000ms to 2000ms, since cached reads are near-instant and git calls on a local repo should complete well within 2 seconds.
 
 ## Consequences
+
 - Hooks that fire in the same cycle share git output without redundant process spawns
 - Cache staleness risk is mitigated by the 5-second TTL — hook cycles complete in under a second, so stale reads are not a practical concern
 - The cache file is written to `os.tmpdir()`, which is cleaned by the OS and does not pollute the working directory
@@ -30,11 +34,14 @@ Hook timeouts are reduced from 5000ms to 2000ms, since cached reads are near-ins
 - If a hook cannot write the cache file (permissions, disk full), it falls back to a direct git call with no user-visible impact
 
 ### Security hardening
+
 - Cache files are written with mode `0o600` (owner read/write only) to prevent other users on shared systems from reading or tampering with cached git output
 - `lstatSync` is used instead of `statSync` to detect symlinks — if the cache file is a symlink, it is removed and the cache is treated as a miss. This prevents symlink attacks where an attacker creates a symlink at the cache path pointing to a sensitive file, causing the hook to overwrite it on the next git call
 
 ### Timeout trade-off
+
 Hook timeouts are set to 2000ms (reduced from an initial 5000ms). The rationale:
+
 - **Cached reads** are near-instant filesystem operations, well within any timeout
 - **Cold git calls** on local repos typically complete in under 500ms, even on large repositories
 - The 2000ms timeout provides a 4x margin over typical cold-call latency while keeping hooks responsive

@@ -83,13 +83,13 @@ Shares the same pattern definitions. Same language biases in code file detection
 
 The scanner is the most language-aware component, with explicit multi-language support:
 
-| Category | JS/TS tools | Non-JS/TS tools | Status |
-|----------|------------|----------------|--------|
-| Linters | ESLint, Biome, `npm lint` | pylint, ruff, RuboCop, golangci-lint | Good coverage |
-| Formatters | Prettier, Biome, EditorConfig | rustfmt, clang-format | Good coverage |
-| SAST | Semgrep, Snyk, Trivy, SonarQube | Bandit, Safety | Python covered; missing `cargo audit`, `govulncheck`, SpotBugs |
-| CI/CD | GitHub Actions, GitLab CI, CircleCI | Jenkins, Travis, Azure, Bitbucket | Language-agnostic |
-| Dependency | npm audit, yarn audit, pnpm audit | bundle audit, pip-audit, cargo audit, govulncheck | Good coverage |
+| Category   | JS/TS tools                         | Non-JS/TS tools                                   | Status                                                         |
+| ---------- | ----------------------------------- | ------------------------------------------------- | -------------------------------------------------------------- |
+| Linters    | ESLint, Biome, `npm lint`           | pylint, ruff, RuboCop, golangci-lint              | Good coverage                                                  |
+| Formatters | Prettier, Biome, EditorConfig       | rustfmt, clang-format                             | Good coverage                                                  |
+| SAST       | Semgrep, Snyk, Trivy, SonarQube     | Bandit, Safety                                    | Python covered; missing `cargo audit`, `govulncheck`, SpotBugs |
+| CI/CD      | GitHub Actions, GitLab CI, CircleCI | Jenkins, Travis, Azure, Bitbucket                 | Language-agnostic                                              |
+| Dependency | npm audit, yarn audit, pnpm audit   | bundle audit, pip-audit, cargo audit, govulncheck | Good coverage                                                  |
 
 **Enforcement gap detection** (`parseCiScripts`): reads `package.json` scripts only. Projects using `Makefile`, `pyproject.toml` scripts, `Cargo.toml`, or `build.gradle` for CI script definitions get zero enforcement gap analysis.
 
@@ -98,16 +98,21 @@ The scanner is the most language-aware component, with explicit multi-language s
 ### 3. Agent patterns (`agent-patterns.json`)
 
 #### Code file pattern
+
 ```json
 "codeFile": { "pattern": "\\.(js|ts|jsx|tsx|py|rb|go|java|rs|c|cpp|cs)$" }
 ```
+
 Already multi-language. Covers Python, Ruby, Go, Java, Rust, C, C++, C#.
 
 #### Test file pattern
+
 ```json
 "testFile": { "pattern": "\\.(test|spec)\\.|__tests__|\\/tests?\\/" }
 ```
+
 **JS/TS-biased.** Misses:
+
 - Python: `test_*.py` (pytest convention)
 - Go: `*_test.go` (the pattern `\.(test|spec)\.` requires a dot before `test`, so `_test.go` does NOT match)
 - Rust: no separate test files (inline `#[cfg(test)]` modules)
@@ -145,31 +150,31 @@ All 5 skills (`task`, `review`, `audit`, `challenge`, `retro`) are language-agno
 
 ## Per-language compatibility matrix
 
-| Component | Python | Rust | Go | Java | Notes |
-|-----------|--------|------|----|------|-------|
-| **safety-guard** | Full | Full | Full | Full | Universal patterns |
-| **pre-commit-lint** | Partial (ruff only) | None | None | None | Needs clippy, golangci-lint, checkstyle |
-| **tdd-enforce** | Partial | None | Partial | Partial | Misses `test_*.py`, inline Rust tests, `*Test.java` |
-| **watch-list** | Full | Full | Full | Full | User-configurable |
-| **agent-teams-guide** | Full | Full | Full | Full | No language logic |
-| **pre-commit-gate** | Full | Full | Full | Full | Multi-language file extensions |
-| **post-change-review** | Partial | Partial | Partial | Partial | Complexity scoring JS-biased |
-| **review-gate** | Partial | Partial | Partial | Partial | Test pattern gaps |
-| **scanner** | Good | Partial | Good | Partial | Enforcement gaps JS-only |
-| **agent-patterns (code)** | Full | Full | Full | Full | All extensions covered |
-| **agent-patterns (test)** | Partial | None | None | Partial | Missing conventions |
-| **agent-patterns (tooling)** | None | None | None | None | All JS/TS tooling names |
-| **agent definitions** | Full | Full | Full | Full | Language-agnostic |
-| **skills** | Full | Full | Full | Full | Bias inherited from patterns |
+| Component                    | Python              | Rust    | Go      | Java    | Notes                                               |
+| ---------------------------- | ------------------- | ------- | ------- | ------- | --------------------------------------------------- |
+| **safety-guard**             | Full                | Full    | Full    | Full    | Universal patterns                                  |
+| **pre-commit-lint**          | Partial (ruff only) | None    | None    | None    | Needs clippy, golangci-lint, checkstyle             |
+| **tdd-enforce**              | Partial             | None    | Partial | Partial | Misses `test_*.py`, inline Rust tests, `*Test.java` |
+| **watch-list**               | Full                | Full    | Full    | Full    | User-configurable                                   |
+| **agent-teams-guide**        | Full                | Full    | Full    | Full    | No language logic                                   |
+| **pre-commit-gate**          | Full                | Full    | Full    | Full    | Multi-language file extensions                      |
+| **post-change-review**       | Partial             | Partial | Partial | Partial | Complexity scoring JS-biased                        |
+| **review-gate**              | Partial             | Partial | Partial | Partial | Test pattern gaps                                   |
+| **scanner**                  | Good                | Partial | Good    | Partial | Enforcement gaps JS-only                            |
+| **agent-patterns (code)**    | Full                | Full    | Full    | Full    | All extensions covered                              |
+| **agent-patterns (test)**    | Partial             | None    | None    | Partial | Missing conventions                                 |
+| **agent-patterns (tooling)** | None                | None    | None    | None    | All JS/TS tooling names                             |
+| **agent definitions**        | Full                | Full    | Full    | Full    | Language-agnostic                                   |
+| **skills**                   | Full                | Full    | Full    | Full    | Bias inherited from patterns                        |
 
 ### Compatibility summary
 
-| Language | Fully working | Partially working | Not working | Compatibility score |
-|----------|--------------|-------------------|-------------|-------------------|
-| **Python** | 10/13 | 3/13 | 0/13 | 77% |
-| **Go** | 9/13 | 3/13 | 1/13 | 69% |
-| **Java** | 9/13 | 3/13 | 1/13 | 69% |
-| **Rust** | 9/13 | 2/13 | 2/13 | 62% |
+| Language   | Fully working | Partially working | Not working | Compatibility score |
+| ---------- | ------------- | ----------------- | ----------- | ------------------- |
+| **Python** | 10/13         | 3/13              | 0/13        | 77%                 |
+| **Go**     | 9/13          | 3/13              | 1/13        | 69%                 |
+| **Java**   | 9/13          | 3/13              | 1/13        | 69%                 |
+| **Rust**   | 9/13          | 2/13              | 2/13        | 62%                 |
 
 ## Recommendations (prioritized)
 
@@ -186,6 +191,7 @@ This single regex change fixes Go (`_test.go`), Python (`test_*.py` partially vi
 **2. Add tooling patterns for non-JS/TS ecosystems**
 
 Add to `agent-patterns.json` tooling patterns:
+
 - `pyproject\\.toml$` (Python)
 - `setup\\.cfg$` (Python)
 - `cargo\\.toml$` (Rust)
@@ -199,6 +205,7 @@ Add to `agent-patterns.json` tooling patterns:
 **3. Add non-JS/TS linter detection to `pre-commit-lint.js`**
 
 After the `pyproject.toml` / ruff check, add detection for:
+
 - Go: check for `.golangci.yml` and run `golangci-lint run`
 - Rust: check for `Cargo.toml` and run `cargo clippy`
 - Java: check for `build.gradle` or `pom.xml` and run `./gradlew check` or `mvn verify`
@@ -208,6 +215,7 @@ After the `pyproject.toml` / ruff check, add detection for:
 **4. Expand complexity scoring keywords in `post-change-review.js`**
 
 Add language-specific complexity indicators:
+
 - Python: `def`, `class`, `raise`, `except`, `async def`, `yield`
 - Rust: `fn`, `impl`, `match`, `unsafe`, `async`, `pub`
 - Go: `func`, `go `, `select`, `defer`, `panic`
@@ -216,6 +224,7 @@ Add language-specific complexity indicators:
 **5. Add TDD candidate patterns for non-JS/TS conventions**
 
 In `tdd-enforce.js`, expand `CANDIDATE_PATTERNS` to include:
+
 - Python: `test_${name}${ext}` in same directory
 - Java: `${dir}/../test/**/` traversal, `${name}Test${ext}`
 - Go: already covered if test pattern is fixed (Go tests live in same directory as `_test.go`)
@@ -224,6 +233,7 @@ In `tdd-enforce.js`, expand `CANDIDATE_PATTERNS` to include:
 **6. Extend scanner enforcement gap detection beyond package.json**
 
 `parseCiScripts()` currently reads only `package.json`. Add support for:
+
 - `Makefile` targets (lint, test, format, build)
 - `pyproject.toml` `[tool.pytest]` and `[tool.ruff]` sections
 - `Cargo.toml` presence (implies `cargo test`, `cargo clippy`)
@@ -234,6 +244,7 @@ In `tdd-enforce.js`, expand `CANDIDATE_PATTERNS` to include:
 **7. Add release patterns for non-JS/TS ecosystems**
 
 `agent-patterns.json` release section already includes `pyproject.toml` and `cargo.toml`. Add:
+
 - `go.mod$` (Go module version)
 - `build\\.gradle(\\.kts)?$` (Java/Kotlin version)
 - `pom\\.xml$` (Maven version)

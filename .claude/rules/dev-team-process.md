@@ -1,9 +1,11 @@
 # Dev Team — Project Process
+
 <!-- Project-specific. Not overwritten by dev-team update. -->
 
 ## Versioning
 
 Semantic versioning (semver). Version source: `package.json`.
+
 - **Patch** (1.5.x) — bug fixes, guard fixes, hotfixes
 - **Minor** (1.x.0) — new features, skills, agents, ADRs, non-breaking changes
 - **Major** (x.0.0) — breaking changes to template format, config schema, or CLI interface
@@ -40,17 +42,18 @@ Semantic versioning (semver). Version source: `package.json`.
 - The main loop must stay interactive at all times. All implementation happens via background teammates or subagents.
 
 **Agent teammate naming convention:** Use `{agent}-{role}[-{qualifier}]`:
+
 - `{agent}` — dev-team agent name (lowercase): `voss`, `deming`, `szabo`, etc.
 - `{role}` — action: `implement`, `review`, `research`, `audit`, `extract`
 - `{qualifier}` — optional, for disambiguation (e.g., issue number, feature name)
 
-| Role suffix | When used | Examples |
-|-------------|-----------|---------|
-| `-implement` | Implementing agent on a task branch | `voss-implement`, `deming-implement-auth` |
-| `-review` | Reviewer in a review wave | `szabo-review`, `knuth-review` |
-| `-research` | Turing research brief | `turing-research`, `turing-research-caching` |
-| `-audit` | Full codebase audit pass | `szabo-audit`, `knuth-audit` |
-| `-extract` | Borges memory extraction | `borges-extract` |
+| Role suffix  | When used                           | Examples                                     |
+| ------------ | ----------------------------------- | -------------------------------------------- |
+| `-implement` | Implementing agent on a task branch | `voss-implement`, `deming-implement-auth`    |
+| `-review`    | Reviewer in a review wave           | `szabo-review`, `knuth-review`               |
+| `-research`  | Turing research brief               | `turing-research`, `turing-research-caching` |
+| `-audit`     | Full codebase audit pass            | `szabo-audit`, `knuth-audit`                 |
+| `-extract`   | Borges memory extraction            | `borges-extract`                             |
 
 ## Sequential execution
 
@@ -59,6 +62,7 @@ When issues are sequenced due to file conflicts, ensure each completed change is
 ## Handling unresponsive agents
 
 Background agents can get stuck without producing output. Apply this escalation pattern:
+
 1. If an agent has not reported progress (status file, message, or commit) within **2 minutes**, send a status ping via `SendMessage`.
 2. If no response within **1 additional minute**, terminate the agent.
 3. Assess what was completed: check for partial output (status files, commits, branch changes).

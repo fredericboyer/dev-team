@@ -1,4 +1,5 @@
 # Shared Team Learnings
+
 <\!-- Read by all agents at session start. Keep under 200 lines. -->
 <\!-- For formal decisions, use ADRs instead. This file captures organic learnings. -->
 
@@ -40,4 +41,5 @@
 - **Input boundary validation for string-to-path conversions.** v2.0 had a path traversal finding (F-01 adapter name). All user-facing strings that become file paths must be validated at the parsing/input boundary — not deeper in the call stack.
 
 ## Overruled Challenges
+
 <\!-- When the human overrules an agent, record why — prevents re-flagging -->

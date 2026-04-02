@@ -2,8 +2,24 @@
   "name": "@fredericboyer/dev-team",
   "version": "3.1.0",
   "description": "Adversarial AI agent team for any project — installs Claude Code agents, hooks, and skills that enforce quality through productive friction",
-  "main": "dist/init.js",
-  "types": "dist/init.d.ts",
+  "keywords": [
+    "ai-agents",
+    "claude-code",
+    "code-review",
+    "developer-tools",
+    "security",
+    "tdd"
+  ],
+  "homepage": "https://github.com/fredericboyer/dev-team#readme",
+  "bugs": {
+    "url": "https://github.com/fredericboyer/dev-team/issues"
+  },
+  "license": "MIT",
+  "author": "Frederic Boyer",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fredericboyer/dev-team.git"
+  },
   "bin": {
     "dev-team": "bin/dev-team.js"
   },
@@ -12,6 +28,8 @@
     "dist/",
     "templates/"
   ],
+  "main": "dist/init.js",
+  "types": "dist/init.d.ts",
   "scripts": {
     "build": "tsc",
     "pretest": "npm run build",
@@ -27,31 +45,13 @@
     "validate:readme": "node scripts/validate-readme.js",
     "prepublishOnly": "npm run build"
   },
-  "keywords": [
-    "claude-code",
-    "ai-agents",
-    "developer-tools",
-    "code-review",
-    "tdd",
-    "security"
-  ],
-  "author": "Frederic Boyer",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/fredericboyer/dev-team.git"
-  },
-  "bugs": {
-    "url": "https://github.com/fredericboyer/dev-team/issues"
-  },
-  "homepage": "https://github.com/fredericboyer/dev-team#readme",
-  "engines": {
-    "node": ">=22.0.0"
-  },
   "devDependencies": {
     "@types/node": "^25.5.0",
     "oxfmt": "^0.42.0",
     "oxlint": "^1.56.0",
     "typescript": "^6.0.2"
+  },
+  "engines": {
+    "node": ">=22.0.0"
   }
 }

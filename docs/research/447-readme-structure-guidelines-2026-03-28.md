@@ -10,20 +10,20 @@ What sections are essential in a README? What level of detail per section? Where
 
 Surveyed: React, Next.js, Tailwind CSS, Prisma, Express. These represent a spectrum from minimal (Tailwind) to comprehensive (Prisma, Express).
 
-| Section | React | Next.js | Tailwind | Prisma | Express |
-|---------|-------|---------|----------|--------|---------|
-| One-liner description | Yes | Yes | Yes | Yes | Yes |
-| Badges | Yes | Yes | Yes | Yes | Yes |
-| What it is / Features | Implicit | Implicit | No | Yes (detailed) | Yes |
-| Installation | Minimal | No | No | Yes (detailed) | Yes |
-| Quick start / Usage | Yes (code) | No | No | Yes (5-step) | Yes |
-| Documentation link | Yes | Yes | Yes | Implicit | Yes |
-| Contributing | Yes | Yes | Yes | No | Yes |
-| License | Yes | Yes | Implicit | Yes | Yes |
-| Community | No | Yes | Yes | Yes | Yes (Docs & Community) |
-| Security | No | Yes | No | Yes | Via Contributing |
-| Philosophy | No | No | No | No | Yes |
-| Visuals / Architecture | No | Logo | Logo | Logo | No |
+| Section                | React      | Next.js  | Tailwind | Prisma         | Express                |
+| ---------------------- | ---------- | -------- | -------- | -------------- | ---------------------- |
+| One-liner description  | Yes        | Yes      | Yes      | Yes            | Yes                    |
+| Badges                 | Yes        | Yes      | Yes      | Yes            | Yes                    |
+| What it is / Features  | Implicit   | Implicit | No       | Yes (detailed) | Yes                    |
+| Installation           | Minimal    | No       | No       | Yes (detailed) | Yes                    |
+| Quick start / Usage    | Yes (code) | No       | No       | Yes (5-step)   | Yes                    |
+| Documentation link     | Yes        | Yes      | Yes      | Implicit       | Yes                    |
+| Contributing           | Yes        | Yes      | Yes      | No             | Yes                    |
+| License                | Yes        | Yes      | Implicit | Yes            | Yes                    |
+| Community              | No         | Yes      | Yes      | Yes            | Yes (Docs & Community) |
+| Security               | No         | Yes      | No       | Yes            | Via Contributing       |
+| Philosophy             | No         | No       | No       | No             | Yes                    |
+| Visuals / Architecture | No         | Logo     | Logo     | Logo           | No                     |
 
 ### Key observations
 
@@ -80,13 +80,13 @@ README answers "what, why, how-to-start, where-to-learn-more" and delegates ever
 
 These five sections are the minimum for a README that is not half-assed:
 
-| # | Section | What it answers | Detail level |
-|---|---------|----------------|--------------|
-| 1 | **Title + one-liner** | What is this? | 1 sentence. Should work as an npm/PyPI description. |
-| 2 | **Install / Getting started** | How do I start using it? | Copy-pasteable commands. Prerequisites stated. 5-15 lines. |
-| 3 | **Usage** | What does it look like in practice? | Minimal working example. Show expected output if applicable. Link to more examples in docs/. |
-| 4 | **Contributing** | Can I contribute? How? | 2-5 lines or link to CONTRIBUTING.md. Must include how to run tests. |
-| 5 | **License** | Can I use this? | 1 line: license name + link to LICENSE file. |
+| #   | Section                       | What it answers                     | Detail level                                                                                 |
+| --- | ----------------------------- | ----------------------------------- | -------------------------------------------------------------------------------------------- |
+| 1   | **Title + one-liner**         | What is this?                       | 1 sentence. Should work as an npm/PyPI description.                                          |
+| 2   | **Install / Getting started** | How do I start using it?            | Copy-pasteable commands. Prerequisites stated. 5-15 lines.                                   |
+| 3   | **Usage**                     | What does it look like in practice? | Minimal working example. Show expected output if applicable. Link to more examples in docs/. |
+| 4   | **Contributing**              | Can I contribute? How?              | 2-5 lines or link to CONTRIBUTING.md. Must include how to run tests.                         |
+| 5   | **License**                   | Can I use this?                     | 1 line: license name + link to LICENSE file.                                                 |
 
 **Why these five?** They answer the three questions every visitor has (what/how/can-I-use-it) and the one question every potential contributor has (how-do-I-help).
 
@@ -94,14 +94,14 @@ These five sections are the minimum for a README that is not half-assed:
 
 Add these when the project warrants:
 
-| Section | When to add | Detail level |
-|---------|------------|--------------|
-| **Badges** | When CI, npm, or coverage exist | Status, version, license. Keep to 3-5 badges max. |
-| **Features** | When the project has multiple capabilities | Bullet list, not paragraphs. 5-10 items max. |
+| Section                         | When to add                                 | Detail level                                                  |
+| ------------------------------- | ------------------------------------------- | ------------------------------------------------------------- |
+| **Badges**                      | When CI, npm, or coverage exist             | Status, version, license. Keep to 3-5 badges max.             |
+| **Features**                    | When the project has multiple capabilities  | Bullet list, not paragraphs. 5-10 items max.                  |
 | **Architecture / How it works** | When the system isn't obvious from a glance | Diagram or brief explanation. Link to docs/design/ for depth. |
-| **Documentation link** | When external docs exist | 1 line with link. Don't duplicate docs content in README. |
-| **Security** | When the project accepts external input | Responsible disclosure process. 2-3 lines. |
-| **Community** | When there's a forum, Discord, etc. | Links only. |
+| **Documentation link**          | When external docs exist                    | 1 line with link. Don't duplicate docs content in README.     |
+| **Security**                    | When the project accepts external input     | Responsible disclosure process. 2-3 lines.                    |
+| **Community**                   | When there's a forum, Discord, etc.         | Links only.                                                   |
 
 ### What does NOT belong in README
 
@@ -144,13 +144,13 @@ CHANGELOG.md       →  "What changed?" (release history)
 
 These files serve different audiences and should not overlap:
 
-| Aspect | README | CLAUDE.md |
-|--------|--------|-----------|
-| **Audience** | Humans browsing the repo | AI agents working in the repo |
-| **Purpose** | Attract, orient, onboard | Instruct, constrain, contextualize |
-| **Tone** | Marketing + onboarding | Directive + technical |
-| **Content** | What the project does, how to use it | How to work in this codebase, workflow rules, agent setup |
-| **Overlap** | Project description, dev commands | Dev commands (acceptable duplication) |
+| Aspect       | README                               | CLAUDE.md                                                 |
+| ------------ | ------------------------------------ | --------------------------------------------------------- |
+| **Audience** | Humans browsing the repo             | AI agents working in the repo                             |
+| **Purpose**  | Attract, orient, onboard             | Instruct, constrain, contextualize                        |
+| **Tone**     | Marketing + onboarding               | Directive + technical                                     |
+| **Content**  | What the project does, how to use it | How to work in this codebase, workflow rules, agent setup |
+| **Overlap**  | Project description, dev commands    | Dev commands (acceptable duplication)                     |
 
 **Acceptable overlap**: development commands (`npm test`, `npm run build`) appear in both because README serves contributors and CLAUDE.md serves agents. This is fine — it's the same source of truth (package.json scripts), just surfaced in two contexts.
 
@@ -161,6 +161,7 @@ These files serve different audiences and should not overlap:
 **No — but dev-team should validate README presence and quality.**
 
 Reasoning:
+
 1. **README is project-specific.** A scaffolded README would be generic boilerplate that projects immediately overwrite. Unlike CLAUDE.md (which has a dev-team-specific section), README has no dev-team-specific content.
 2. **Scaffolding creates false completeness.** A generated README with placeholder text ("TODO: describe your project") is worse than no README — it signals the project is unfinished or lazy.
 3. **Validation is more valuable.** Conway (release manager) or Tufte (documentation) can validate that a README exists, has the essential sections, and hasn't gone stale. This is a review concern, not an init concern.

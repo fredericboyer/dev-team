@@ -18,13 +18,13 @@ memory: project
 ---
 ```
 
-| Field | Required | Values | Notes |
-|-------|----------|--------|-------|
-| `name` | Yes | `dev-team-<name>` | Lowercase, hyphenated. Used as `@dev-team-<name>` mention. |
-| `description` | Yes | String | Shown in agent selection UI. Include role and trigger conditions. |
-| `tools` | Yes | Comma-separated | `Read, Grep, Glob, Bash, Agent` for read-only auditors. Add `Edit, Write` for agents that modify code. |
-| `model` | Yes | `sonnet` or `opus` | Use `opus` for read-only analysis agents (deeper reasoning). Use `sonnet` for implementation agents (faster, can write code). |
-| `memory` | Yes | `project` | Always `project` — enables per-project memory in `.claude/agent-memory/`. |
+| Field         | Required | Values             | Notes                                                                                                                         |
+| ------------- | -------- | ------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
+| `name`        | Yes      | `dev-team-<name>`  | Lowercase, hyphenated. Used as `@dev-team-<name>` mention.                                                                    |
+| `description` | Yes      | String             | Shown in agent selection UI. Include role and trigger conditions.                                                             |
+| `tools`       | Yes      | Comma-separated    | `Read, Grep, Glob, Bash, Agent` for read-only auditors. Add `Edit, Write` for agents that modify code.                        |
+| `model`       | Yes      | `sonnet` or `opus` | Use `opus` for read-only analysis agents (deeper reasoning). Use `sonnet` for implementation agents (faster, can write code). |
+| `memory`      | Yes      | `project`          | Always `project` — enables per-project memory in `.claude/agent-memory/`.                                                     |
 
 ### Body sections
 
@@ -38,17 +38,20 @@ Your philosophy: "<Guiding principle in quotes.>"
 ## How you work
 
 Before <doing work>:
+
 1. Spawn Explore subagents to understand the area.
 2. Read the actual code — do not rely on descriptions.
 3. Return concise findings to the main thread.
 
 After completing work:
+
 1. Report cross-domain impacts for other agents.
 2. Spawn review agents as background tasks.
 
 ## Focus areas
 
 You always check for:
+
 - **Area 1**: Description of what to look for.
 - **Area 2**: Description of what to look for.
 
@@ -59,12 +62,14 @@ You always check for:
 ## Challenge protocol
 
 When reviewing another agent's work, classify each concern:
+
 - `[DEFECT]`: Concretely wrong. Will produce incorrect behavior. **Blocks progress.**
 - `[RISK]`: Not wrong today, but creates a likely failure mode. Advisory.
 - `[QUESTION]`: Decision needs justification. Advisory.
 - `[SUGGESTION]`: Works, but here is a specific improvement. Advisory.
 
 Rules:
+
 1. Every challenge must include a concrete scenario, input, or code reference.
 2. Only `[DEFECT]` blocks progress.
 3. When challenged: address directly, concede when wrong, justify with a counter-scenario when you disagree.
@@ -74,6 +79,7 @@ Rules:
 ## Learning
 
 After completing work, write key learnings to your MEMORY.md:
+
 - <What to remember specific to this agent's domain>
 - Challenges you raised that were accepted (reinforce) or overruled (calibrate)
 ```
@@ -146,17 +152,16 @@ Each agent gets a memory file at `.claude/agent-memory/dev-team-<name>/MEMORY.md
 
 ```markdown
 # Agent Memory: <Name> (<Role>)
+
 <!-- First 200 lines are loaded into agent context. Keep concise. -->
 
 ## Project Conventions
 
-
 ## Patterns to Watch For
 
-
 ## Calibration Log
-<!-- Challenges accepted/overruled — tunes adversarial intensity over time -->
 
+<!-- Challenges accepted/overruled — tunes adversarial intensity over time -->
 ```
 
 ### Memory best practices

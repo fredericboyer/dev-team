@@ -1,4 +1,5 @@
 # ADR-029: Stateless commit gates for adversarial review enforcement
+
 Date: 2026-03-26
 Status: accepted
 
@@ -28,6 +29,7 @@ Introduce a two-gate stateless enforcement mechanism as a PreToolUse hook on Bas
 ### Gate 1 — Review evidence
 
 At commit time, the hook:
+
 1. Reads staged files via `git diff --cached --name-only`
 2. Re-derives which agents should have reviewed each file (same pattern matching as `dev-team-post-change-review.js`)
 3. Checks that matching review sidecar files exist in `.dev-team/.reviews/`
@@ -36,6 +38,7 @@ At commit time, the hook:
 ### Gate 2 — Findings resolution
 
 Same hook, second check:
+
 1. Reads all sidecar files matching staged files
 2. If any `[DEFECT]` finding exists with `resolved: false`, **exit 2**
 3. Resolution markers are written when the reviewer re-runs and clears the defect, or when the human explicitly dismisses a finding

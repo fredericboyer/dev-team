@@ -1,4 +1,5 @@
 # ADR-032: Memory write semantics — append-only format vs mutable content
+
 Date: 2026-03-26
 Status: accepted
 
@@ -31,13 +32,13 @@ This preserves the audit trail: every learning that entered the system is tracea
 
 Borges is the sole authorized mutation agent for memory maintenance operations:
 
-| Operation | When | Authorization |
-|-----------|------|---------------|
-| **Archive** | Entry not verified in 90+ days | Borges temporal decay cycle |
-| **Supersede** | New finding contradicts existing entry | Borges memory evolution |
-| **Merge** | Duplicate entries detected (same tags + similar context) | Borges deduplication |
-| **Update** | `Last-verified` date refresh, `Seen: N times` counter increment | Borges extraction |
-| **Generate** | Calibration rules from 3+ overrules on same tag | Borges calibration |
+| Operation     | When                                                            | Authorization               |
+| ------------- | --------------------------------------------------------------- | --------------------------- |
+| **Archive**   | Entry not verified in 90+ days                                  | Borges temporal decay cycle |
+| **Supersede** | New finding contradicts existing entry                          | Borges memory evolution     |
+| **Merge**     | Duplicate entries detected (same tags + similar context)        | Borges deduplication        |
+| **Update**    | `Last-verified` date refresh, `Seen: N times` counter increment | Borges extraction           |
+| **Generate**  | Calibration rules from 3+ overrules on same tag                 | Borges calibration          |
 
 Individual agents may archive or supersede clearly stale entries in their own MEMORY.md at session start (per their agent definitions), but only entries they own and only using the archive/supersede mechanisms described above. Cross-agent mutations are Borges-only. Actual removal (compressing archived entries into summaries near the 200-line cap) is a Borges-only operation.
 

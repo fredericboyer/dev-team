@@ -1,4 +1,5 @@
 # ADR-028: Rams design system reviewer agent
+
 Date: 2026-03-25
 Status: accepted
 

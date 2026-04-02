@@ -7,6 +7,7 @@
 The `/dev-team:merge` skill is GitHub-specific (Copilot review, `gh` CLI). But the underlying principle — "before completing work, check all automated feedback and address it" — is universal. Every platform has automated review bots, CI feedback, and code analysis tools.
 
 Currently, Copilot feedback is missed because:
+
 - The merge skill lives in `.claude/skills/` (project-specific), so agents don't always use it
 - Release PRs bypass it entirely (Conway uses `gh pr merge` directly)
 - The skill checks for feedback but doesn't enforce responding to/resolving threads
@@ -18,7 +19,7 @@ Currently, Copilot feedback is missed because:
 Template skill or Drucker step: "Before marking work complete, check for automated review feedback from the platform. Read it, evaluate it, address actionable items, respond to threads."
 
 - Platform-specific details (Copilot API endpoints, `gh` commands) stay in project CLAUDE.md or `.claude/skills/`
-- The framework enforces the *behavior* (check feedback), the project provides the *how*
+- The framework enforces the _behavior_ (check feedback), the project provides the _how_
 - Pros: every project gets the reminder, platform-agnostic
 - Cons: without the specific API calls, the gate is just a guideline
 
@@ -42,7 +43,7 @@ Drucker already coordinates the implement -> review -> merge flow. Add a step be
 
 2. **Project-level (`.claude/skills/` or project CLAUDE.md):** Provides the specific implementation — which APIs to call, which bot usernames to check, how to respond. For GitHub: Copilot review comments, CodeQL alerts, Dependabot. For GitLab: MR bots, SAST. For Bitbucket: code insights.
 
-3. **Enforcement:** The framework defines *that* feedback must be checked. The project defines *how*. If no project-level implementation exists, the gate is a best-effort reminder. If one exists, it's a hard gate.
+3. **Enforcement:** The framework defines _that_ feedback must be checked. The project defines _how_. If no project-level implementation exists, the gate is a best-effort reminder. If one exists, it's a hard gate.
 
 ## How This Affects Existing Architecture
 

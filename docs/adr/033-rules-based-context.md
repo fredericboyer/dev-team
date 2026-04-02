@@ -23,6 +23,7 @@ Agent definitions replace explicit read instructions with: "Shared context (lear
 The `update` command includes a migration that moves files from old paths to new paths automatically.
 
 Files that stay in `.dev-team/`:
+
 - `agent-memory/` — per-agent calibration (not shared context)
 - `metrics.md` — appendable log (not behavioral context)
 - `config.json` — machine-readable config
@@ -31,12 +32,14 @@ Files that stay in `.dev-team/`:
 ## Consequences
 
 **Easier:**
+
 - Agents get shared context automatically without explicit read instructions
 - Agent definitions are simpler — less boilerplate
 - New agent invocation patterns (agent teams, subagents) get context without code changes
 - Consistent behavior regardless of how an agent is spawned
 
 **Harder:**
+
 - Existing installs need migration (handled by `update` command)
 - `.claude/rules/` now contains dev-team managed files alongside user rules
 - Files prefixed with `dev-team-` to avoid naming conflicts with user rules

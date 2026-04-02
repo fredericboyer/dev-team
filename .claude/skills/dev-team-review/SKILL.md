@@ -37,6 +37,7 @@ In embedded mode, the review skill produces its report and returns control to th
 ## Pre-review validation
 
 Before spawning reviewers, verify the changes are reviewable:
+
 1. **Non-empty diff**: The diff contains actual changes to review. If empty, report "nothing to review" and stop.
 2. **Tests pass**: If the project has a test command, confirm tests pass. Flag test failures in the review report header.
 
@@ -60,6 +61,7 @@ Before starting the review, check for open security alerts using the project's s
 ## Filter findings (judge pass)
 
 Before producing the report, filter raw findings to maximize signal quality:
+
 1. **Remove contradictions**: Drop findings that contradict existing ADRs (`docs/adr/`), learnings (`.claude/rules/dev-team-learnings.md`), or agent memory (`.claude/agent-memory/*/MEMORY.md`)
 2. **Deduplicate**: When multiple agents flag the same issue, keep the most specific finding
 3. **Consolidate suggestions**: Group `[SUGGESTION]`-level items into a single summary block
@@ -81,6 +83,7 @@ List all `[DEFECT]` findings from all agents. These must be resolved before merg
 In **LIGHT review mode**, this section is omitted — all findings appear under Advisory findings.
 
 Format each as:
+
 ```
 **[DEFECT]** @agent-name — file:line
 Description of the defect and why it blocks.
@@ -89,6 +92,7 @@ Description of the defect and why it blocks.
 ### Advisory findings
 
 Group by severity:
+
 - **[RISK]** — likely failure modes
 - **[QUESTION]** — decisions needing justification
 - **[SUGGESTION]** — specific improvements
@@ -96,6 +100,7 @@ Group by severity:
 ### Filtered
 
 List findings removed during the judge pass, with the reason for filtering:
+
 ```
 **Filtered** @agent-name — reason (contradicts ADR-NNN / duplicate of above / no concrete scenario / generated file)
 Original finding summary.
@@ -118,6 +123,7 @@ Before issuing any `gh issue`, `gh pr`, or other platform-specific CLI commands,
 **Standalone mode only** (skip this section entirely when `--embedded` flag is present):
 
 After the review report is delivered:
+
 1. Format the **finding outcome log** with every finding's classification, source agent, and outcome (accepted/overruled/ignored), including reasoning for overrules. Then call `/dev-team:extract` with the formatted log.
 2. If `/dev-team:extract` was not called, the review is INCOMPLETE.
 3. `/dev-team:extract` handles Borges spawning, metrics verification, and memory formation gates. Do not report the review as complete until `/dev-team:extract` reports success.

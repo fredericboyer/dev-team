@@ -1,9 +1,11 @@
 # Agent Memory: Deming (Tooling & DX Optimizer)
+
 <!-- First 200 lines are loaded into agent context. Keep concise. -->
 
 ## Tooling Decisions
 
 ### [2026-03-25] oxlint for linting, oxfmt for formatting — not ESLint/Prettier (ADR-007)
+
 - **Type**: PATTERN [verified]
 - **Source**: package.json + ADR-007 analysis
 - **Tags**: linting, formatting, tooling, oxc
@@ -12,6 +14,7 @@
 - **Context**: OXC toolchain chosen for speed. npm run lint uses oxlint on src/, scripts/, templates/hooks/. npm run format uses oxfmt. CI enforces both via lint-and-format job. Format check runs oxfmt --check.
 
 ### [2026-03-25] Hooks enforce quality gates — TDD, safety, review, lint, gate, watch list
+
 - **Type**: PATTERN [verified]
 - **Source**: templates/hooks/ analysis
 - **Tags**: hooks, enforcement, dx
@@ -20,6 +23,7 @@
 - **Context**: dev-team-tdd-enforce.js (TDD), dev-team-safety-guard.js (safety), dev-team-post-change-review.js (review spawning), dev-team-pre-commit-lint.js (lint), dev-team-pre-commit-gate.js (blocking gate), dev-team-watch-list.js (file watch triggers). ADR-001: hooks over CLAUDE.md for enforcement.
 
 ### [2026-03-25] Agent and hook validation scripts run in CI
+
 - **Type**: PATTERN [verified]
 - **Source**: .github/workflows/ci.yml analysis
 - **Tags**: ci, validation, agents, hooks
@@ -28,6 +32,7 @@
 - **Context**: scripts/validate-agents.js checks agent frontmatter. scripts/validate-hooks.js verifies hook scripts load without errors. Both are separate CI jobs. Hook validation runs cross-platform.
 
 ### [2026-03-25] TypeScript with NodeNext resolution — pretest builds before test
+
 - **Type**: PATTERN [verified]
 - **Source**: tsconfig.json + package.json analysis
 - **Tags**: typescript, build, tooling
@@ -36,6 +41,7 @@
 - **Context**: TypeScript with ES2022 target, NodeNext modules (ADR-021). pretest script runs npm run build automatically. Source in src/, output in dist/. Tests run against compiled JS.
 
 ### [2026-03-26] Review gate — stateless commit-time enforcement (ADR-029)
+
 - **Type**: PATTERN [verified]
 - **Source**: #263 implementation
 - **Tags**: hooks, enforcement, review-loop, dx
@@ -46,12 +52,14 @@
 ## Hook Effectiveness
 
 ### [2026-03-26] v1.5.0 era — pattern extraction and template organization (consolidated)
+
 - **Type**: PATTERN [verified]
 - **Tags**: hooks, templates, shared-protocol, guarded-files, dx
 - **Last-verified**: 2026-03-26
 - **Context**: Several foundational DX decisions consolidated: (1) Review gate pattern duplication resolved via agent-patterns.json extraction (PR #344). (2) SHARED.md protocol reduces agent definition duplication ~16% (ADR-030). (3) Process rules extracted from CLAUDE.md to dev-team-process.md (ADR-031). (4) process.md, learnings.md, metrics.md are guarded files — never overwritten on update (PR #398).
 
 ### [2026-03-26] Skill invocation control: orchestration vs advisory skills
+
 - **Type**: DECISION [verified]
 - **Source**: Issue #409, PR #414
 - **Tags**: skills, invocation, dx, enforcement
@@ -60,6 +68,7 @@
 - **Context**: Orchestration skills (task, review, audit, retro) get `disable-model-invocation: true` to prevent accidental autonomous firing. Advisory/read-only skills (scorecard, challenge) can be autonomous. This is a design principle in CLAUDE.md.
 
 ### [2026-03-26] Language delegation: hooks detect ecosystem, agents interpret
+
 - **Type**: DECISION [verified]
 - **Source**: Issue #385, PR #419, ADR-034
 - **Tags**: hooks, language-neutral, delegation
@@ -68,6 +77,7 @@
 - **Context**: Hooks replaced JS/TS-specific patterns with language-agnostic structural proxies (nesting depth, control flow density). Test file detection expanded to Go/Python/Java conventions. Complexity scoring no longer keyword-based. Key principle: hooks handle detection and gating, agents handle language-specific interpretation.
 
 ### [2026-03-27] cachedGitDiff extracted to shared hook module
+
 - **Type**: DECISION [verified]
 - **Source**: Issue #436, branch fix/436-extract-cached-git-diff
 - **Tags**: hooks, duplication, shared-module, dx
@@ -76,15 +86,18 @@
 - **Context**: cachedGitDiff was copy-pasted across 3 hooks (tdd-enforce, pre-commit-gate, review-gate). Extracted to `templates/hooks/lib/git-cache.js`. All 3 hooks now `require("./lib/git-cache")`. init.ts and update.ts updated to copy lib/ directory. Remaining duplication: fallback pattern arrays (#437, still open).
 
 ### [2026-03-27] v1.7.0 era — audit-derived fixes (consolidated)
+
 - **Type**: PATTERN [verified]
 - **Tags**: ci, testing, duplication, dx
 - **Last-verified**: 2026-03-27
 - **Context**: Three audit-derived improvements consolidated: (1) npm audit CI step added (#440). (2) review-gate.test.js added to test script, runGate helper switched from execFileSync to spawnSync (#435). (3) ensureSymlink() extracted from init.ts/update.ts to files.ts (#441).
 
 ## Calibration Log
+
 <!-- Challenges accepted/overruled — tunes adversarial intensity over time -->
 
 ### [2026-03-27] ReDoS guard: safe-regex.js shared module for user-controlled patterns
+
 - **Type**: DECISION [verified]
 - **Source**: Issue #434, branch fix/434-redos-guard
 - **Tags**: hooks, security, shared-module, regex
@@ -93,6 +106,7 @@
 - **Context**: User-controlled regex from config.json (watchLists[].pattern, taskBranchPattern) was compiled without validation. Created `templates/hooks/lib/safe-regex.js` — checks for nested quantifiers and quantified backreferences, rejects patterns >1024 chars. Applied to dev-team-watch-list.js and dev-team-pre-commit-gate.js. agent-patterns.js left unchanged — it reads developer-authored agent-patterns.json (different trust boundary). Pattern: hooks should validate at system boundaries (user config) but can trust shipped data files.
 
 ### [2026-03-29] v1.8.0: Worktree serialization hooks — temporary infrastructure workaround
+
 - **Type**: DECISION [new]
 - **Source**: #482, PR #482
 - **Tags**: hooks, worktrees, infrastructure, temporary
@@ -101,6 +115,7 @@
 - **Context**: WorktreeCreate/WorktreeRemove hooks use mkdir-based locking to serialize worktree creation (workaround for anthropics/claude-code#34645 and #39680). Classified as INFRA_HOOKS — always installed, not user-selectable. TEMPORARY: remove when upstream fixes land. Hooks are JS, no dependencies, cross-platform. Lock dir: `.dev-team/.worktree-lock`.
 
 ### [2026-03-29] v1.8.0: Retro skill verifies tech debt against issue tracker (#473)
+
 - **Type**: DECISION [new]
 - **Source**: #456, PR #473
 - **Tags**: retro, tech-debt, staleness, dx
@@ -109,6 +124,7 @@
 - **Context**: Retro skill Phase 1 (Learnings audit) now cross-checks Known Tech Debt entries against closed issues before reporting. Addresses the v1.7.0 finding where 5 of 7 tech debt entries were already resolved. Uses generic "check the issue tracker" language (not hardcoded gh CLI).
 
 ### [2026-03-29] v1.9.0: Extract skill — Borges extraction decomposed into standalone skill
+
 - **Type**: DECISION [new]
 - **Source**: #485, PR #492
 - **Tags**: skills, extract, borges, dx, composability
@@ -117,6 +133,7 @@
 - **Context**: Borges extraction logic extracted from task and retro skills into /dev-team:extract. Orchestration skill with disable-model-invocation:true. Reduces duplication between task and retro (both previously embedded Borges instructions). Retro now delegates to extract instead of inlining. Task Step 4 invokes extract as sub-skill. This is the first instance of the skill-calls-skill composability pattern.
 
 ### [2026-03-29] v1.9.0: Review delegation — task skill delegates to /dev-team:review
+
 - **Type**: DECISION [new]
 - **Source**: #486, PR #496
 - **Tags**: skills, review, task, delegation, dx
@@ -125,6 +142,7 @@
 - **Context**: Task skill Step 2 (Review) now delegates to /dev-team:review with --embedded flag instead of inlining review instructions. Review skill gains --embedded mode for compact output consumed by task orchestration. Compact summary passthrough documented for subsequent review rounds. --reviewers flag removed from review skill (breaking change — task controls reviewer selection).
 
 ### [2026-03-29] v1.10.0: Merge skill auto-merge timing guard (#489)
+
 - **Type**: DECISION [new]
 - **Source**: #489, PR #512
 - **Tags**: skills, merge, auto-merge, timing, dx
@@ -133,6 +151,7 @@
 - **Context**: Merge skill now enforces: wait for Copilot review → address all findings → then set auto-merge. Previously auto-merge could be set preemptively, causing PRs to merge with unresolved Copilot findings (v1.8.0 PR #484). Guard applies to both .dev-team/ and .claude/ copies.
 
 ### [2026-03-29] v1.10.0: Scorecard skill updated for /dev-team:extract awareness (#494)
+
 - **Type**: DECISION [new]
 - **Source**: #494, PR #510
 - **Tags**: skills, scorecard, extract, borges, dx
@@ -141,6 +160,7 @@
 - **Context**: Scorecard now checks for /dev-team:extract invocation (the new Borges entry point) in addition to direct Borges agent spawning. Without this, scorecard would always report "Borges not spawned" for v1.9.0+ workflows that use the extract skill.
 
 ### [2026-03-29] v1.10.1: init/update bug trio — config completeness, init guard, settings merge
+
 - **Type**: DECISION [new]
 - **Source**: #515, PR #516
 - **Tags**: init, update, settings, hooks, dx
@@ -149,6 +169,7 @@
 - **Context**: Three bugs fixed: (1) init now appends INFRA_HOOKS labels to config.json hooks array, (2) init refuses when config.json exists (use --force), (3) mergeSettings updates attributes (timeout, type) on existing hooks via Object.assign. Also added removeHooksFromSettings for hook removal cleanup and hookRemovals migration in update.ts. HookEntry interface extended with timeout/blocking fields per Brooks review.
 
 ### [2026-03-29] v1.11.0: CI hardening — npm ci, Semgrep, release parallelization, validate-docs
+
 - **Type**: DECISION [new]
 - **Source**: #528, #530, #533, #546, #547, PR #552
 - **Tags**: ci, security, dx, semgrep, validation
@@ -157,6 +178,7 @@
 - **Context**: CI improvements: npm ci replaces npm install for reproducible builds, Semgrep SAST added (silent on failure per Brooks — deferred to full enforcement), release workflow parallelized, validate-docs job added. Lint scope extended to tests/ directory (#555). Duplicate hook removed (dev-team-watch-list.js had redundant copy).
 
 ### [2026-03-30] v2.0: Canonical format + adapter registry (ADR-036)
+
 - **Type**: DECISION [new]
 - **Source**: #501, PR #569
 - **Tags**: architecture, adapters, multi-runtime, canonical-format, dx
@@ -165,6 +187,7 @@
 - **Context**: Agent definitions formalized via CanonicalAgentDefinition interface (portable + runtime-specific fields). Adapter registry pattern extracts agent copy logic from init.ts/update.ts. ClaudeCodeAdapter is identity transform — backward compatible. init.ts and update.ts now iterate registered adapters via getAdaptersForRuntimes(). `runtimes` config field + `--runtime` CLI flag control which adapters run. Duplicate `import "./adapters/index.js"` in init.ts noted but not blocking.
 
 ### [2026-03-30] v2.0: 5 runtime adapters — agents-md, copilot, codex, cursor, windsurf
+
 - **Type**: DECISION [removed in v2.0.1]
 - **Source**: #502, #504, #505, #506, PRs #570, #571
 - **Tags**: adapters, multi-runtime, copilot, codex, cursor, windsurf, agents-md, dx
@@ -173,6 +196,7 @@
 - **Context**: Five adapters registered via barrel file (src/adapters/index.ts). AgentsMd generates single AGENTS.md at root. Copilot generates .github/copilot-instructions.md + per-agent .github/instructions/. Codex generates .agents/AGENTS.md + skills + .codex/config.toml. Cursor and Windsurf adapters removed in v2.0.1. Current adapters: claude, agents-md, copilot, codex. All adapters implement generate() + update() interface.
 
 ### [2026-03-30] v2.0: MCP enforcement server (ADR-037)
+
 - **Type**: DECISION [removed in v2.0.1]
 - **Source**: #503, PR #572
 - **Tags**: mcp, enforcement, review-gate, multi-runtime, dx

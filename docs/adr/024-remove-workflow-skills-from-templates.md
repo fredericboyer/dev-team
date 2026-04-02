@@ -1,4 +1,5 @@
 # ADR-024: Remove workflow-skills from templates
+
 Date: 2026-03-25
 Status: accepted
 Supersedes: parts of ADR-009, ADR-010, ADR-014

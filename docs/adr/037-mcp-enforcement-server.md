@@ -45,11 +45,13 @@ All MCP tools are read-only. They check state (review sidecars, config files) bu
 ## Consequences
 
 ### Easier
+
 - Enforcement checks become portable across any MCP-capable runtime
 - Adding new enforcement tools (lint-gate, test-gate, architecture-check) follows the same registry pattern
 - No new dependencies — consistent with the zero-dependency constraint
 
 ### Harder
+
 - Two code paths for the same logic: hooks (for Claude Code) and MCP tools (for all runtimes). Must keep them in sync.
 - Stdio transport means one server instance per client session — no shared state between sessions
 - MCP protocol implementation must be maintained as the spec evolves

@@ -1,4 +1,5 @@
 # ADR-021: TypeScript 6.0 with nodenext module resolution
+
 Date: 2026-03-24
 Status: accepted
 

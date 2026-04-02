@@ -1,4 +1,5 @@
 # ADR-035: Skill composability via sub-skill invocation
+
 Date: 2026-03-29
 Status: accepted
 
@@ -16,11 +17,11 @@ Skills can invoke other skills via slash commands within the agent's skill conte
 
 ### Skill classification
 
-| Tier | Skills | Characteristics |
-|------|--------|----------------|
-| **Orchestration** | `task`, `audit`, `retro` | User-facing entry points. Manage lifecycle, coordinate steps, handle iteration. Call utility skills as sub-steps. |
-| **Utility** | `extract`, `review` | Called by orchestration skills or directly by users. Produce a defined output (report, metrics). Encapsulate reusable logic. |
-| **Advisory** | `challenge`, `scorecard` | Standalone. Not part of the composability graph. |
+| Tier              | Skills                   | Characteristics                                                                                                              |
+| ----------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
+| **Orchestration** | `task`, `audit`, `retro` | User-facing entry points. Manage lifecycle, coordinate steps, handle iteration. Call utility skills as sub-steps.            |
+| **Utility**       | `extract`, `review`      | Called by orchestration skills or directly by users. Produce a defined output (report, metrics). Encapsulate reusable logic. |
+| **Advisory**      | `challenge`, `scorecard` | Standalone. Not part of the composability graph.                                                                             |
 
 ### The `--embedded` flag
 

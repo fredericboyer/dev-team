@@ -15,18 +15,21 @@ Today, teams either use raw Claude Code with no agent structure (missing quality
 ## User Personas
 
 ### Alex — Engineering Manager
+
 - Leading a team of 15 engineers adopting Claude Code
 - Wants guardrails: code quality shouldn't drop because "the AI said it was fine"
 - Needs something the whole team can install in 5 minutes
 - Values: consistency, enforcement, approachability
 
 ### Sam — Senior Engineer
+
 - Comfortable with AI tools, wants them to do more
 - Frustrated that Claude agrees with everything instead of pushing back
 - Wants agents that think like their best colleagues: opinionated, precise, adversarial
 - Values: depth, specificity, signal over noise
 
 ### Jordan — Security-conscious Tech Lead
+
 - Responsible for security posture across 3 services
 - Wants AI reviews that think like attackers, not just pattern-match OWASP checklists
 - Needs security enforcement that can't be ignored (hooks > guidelines)
@@ -38,16 +41,17 @@ Today, teams either use raw Claude Code with no agent structure (missing quality
 
 **Model assignment principle**: Opus for deep analysis (read-only), Sonnet for implementation (full access), Haiku for future lightweight agents.
 
-| Agent | Role | Model | What they do |
-|-------|------|-------|-------------|
-| **Voss** | Backend Engineer | sonnet | Constructs failure scenarios. Stress-tests data flow, error handling, API contracts. |
-| **Mori** | Frontend/UI Engineer | sonnet | Becomes the user. Challenges UI state fidelity, accessibility, error communication. |
-| **Szabo** | Security Auditor | opus | Constructs attack paths against actual code. Read-only — audits, does not implement. |
-| **Knuth** | Quality Auditor | opus | Identifies coverage gaps and constructs counter-examples. Read-only — analyzes, does not write code. |
-| **Beck** | Test Implementer | sonnet | Translates Knuth's findings into concrete, well-isolated tests. Enforces TDD discipline. |
-| **Deming** | Tooling & DX Optimizer | sonnet | Identifies manual processes and replaces them with automation. Scans for missing tooling. |
+| Agent      | Role                   | Model  | What they do                                                                                         |
+| ---------- | ---------------------- | ------ | ---------------------------------------------------------------------------------------------------- |
+| **Voss**   | Backend Engineer       | sonnet | Constructs failure scenarios. Stress-tests data flow, error handling, API contracts.                 |
+| **Mori**   | Frontend/UI Engineer   | sonnet | Becomes the user. Challenges UI state fidelity, accessibility, error communication.                  |
+| **Szabo**  | Security Auditor       | opus   | Constructs attack paths against actual code. Read-only — audits, does not implement.                 |
+| **Knuth**  | Quality Auditor        | opus   | Identifies coverage gaps and constructs counter-examples. Read-only — analyzes, does not write code. |
+| **Beck**   | Test Implementer       | sonnet | Translates Knuth's findings into concrete, well-isolated tests. Enforces TDD discipline.             |
+| **Deming** | Tooling & DX Optimizer | sonnet | Identifies manual processes and replaces them with automation. Scans for missing tooling.            |
 
 Each agent has:
+
 - Domain-specific focus areas (what they always check)
 - A challenge style grounded in concrete scenarios, not abstract concerns
 - Persistent memory that calibrates over time
@@ -57,6 +61,7 @@ Each agent has:
 ### 2. Challenge protocol
 
 Structured adversarial review with classification:
+
 - `[DEFECT]` — blocks progress (concretely wrong)
 - `[RISK]` — advisory (likely failure mode)
 - `[QUESTION]` — needs justification
@@ -66,20 +71,21 @@ Rules: concrete evidence required, one exchange before escalation, human decides
 
 ### 3. Enforced hooks (cross-platform, Node.js)
 
-| Hook | Trigger | Behavior |
-|------|---------|----------|
-| `dev-team-safety-guard.js` | PreToolUse (Bash) | Blocks rm -rf, force push, DROP TABLE, etc. |
-| `dev-team-tdd-enforce.js` | PostToolUse (Edit/Write) | Blocks impl changes without corresponding tests |
+| Hook                             | Trigger                  | Behavior                                                |
+| -------------------------------- | ------------------------ | ------------------------------------------------------- |
+| `dev-team-safety-guard.js`       | PreToolUse (Bash)        | Blocks rm -rf, force push, DROP TABLE, etc.             |
+| `dev-team-tdd-enforce.js`        | PostToolUse (Edit/Write) | Blocks impl changes without corresponding tests         |
 | `dev-team-post-change-review.js` | PostToolUse (Edit/Write) | Flags which agents should review based on changed files |
-| `dev-team-pre-commit-gate.js` | TaskCompleted | Memory freshness check before committing |
-| `dev-team-pre-commit-lint.js` | PreToolUse (Bash) | Lint + format checks before git commit |
-| `dev-team-watch-list.js` | PostToolUse (Edit/Write) | Custom pattern-to-agent matching |
+| `dev-team-pre-commit-gate.js`    | TaskCompleted            | Memory freshness check before committing                |
+| `dev-team-pre-commit-lint.js`    | PreToolUse (Bash)        | Lint + format checks before git commit                  |
+| `dev-team-watch-list.js`         | PostToolUse (Edit/Write) | Custom pattern-to-agent matching                        |
 
 All hooks are Node.js scripts — work on macOS, Linux, and Windows.
 
 ### 4. Task loop (iterative quality convergence)
 
 `/dev-team:task` — inspired by the Ralph Loop pattern. When tasked with non-trivial work:
+
 1. Implementing agent works
 2. Review agents challenge in parallel
 3. If `[DEFECT]` found → loop continues with fixes
@@ -91,6 +97,7 @@ The adversarial review IS the quality gate — the implementing agent can't decl
 ### 5. Continuous learning
 
 Each agent maintains persistent memory (`.claude/agent-memory/<agent>/MEMORY.md`) that is automatically injected into their context every session:
+
 - Project-specific patterns and conventions
 - Adversarial calibration (what was accepted/overruled)
 - Quality benchmarks
@@ -105,6 +112,7 @@ npx dev-team init --all # Everything, no prompts
 ```
 
 Asks:
+
 - Which agents to install
 - Which quality hooks to enable (TDD, safety, review flagging, or None)
 - Issue/PR workflow preferences (GitHub Issues, Jira, Linear, Other, None)
@@ -114,10 +122,10 @@ Creates `.claude/agents/`, `.claude/skills/`, `.claude/agent-memory/`, `.dev-tea
 
 ### 7. Skills
 
-| Skill | Purpose |
-|-------|---------|
+| Skill                 | Purpose                                                                       |
+| --------------------- | ----------------------------------------------------------------------------- |
 | `/dev-team:challenge` | Devil's advocate — critically examine a proposal, approach, or implementation |
-| `/dev-team:task` | Start an iterative task loop with adversarial review gates |
+| `/dev-team:task`      | Start an iterative task loop with adversarial review gates                    |
 
 ## Success Criteria
 
@@ -140,6 +148,7 @@ Creates `.claude/agents/`, `.claude/skills/`, `.claude/agent-memory/`, `.dev-tea
 ## Phased Roadmap
 
 ### v0.1 — Foundation (current)
+
 - 6 agents (Voss, Mori, Szabo, Knuth, Beck, Deming)
 - 5 hooks (safety, TDD, post-change review, pre-commit gate, task loop)
 - 2 skills (challenge, task)
@@ -148,6 +157,7 @@ Creates `.claude/agents/`, `.claude/skills/`, `.claude/agent-memory/`, `.dev-tea
 - Challenge protocol with classification system
 
 ### v0.2 — Expansion
+
 - Additional agents: Docs, Architect, Release Manager
 - `/dev-team:review` skill (orchestrated multi-agent parallel review)
 - `/dev-team:audit` skill (security + quality + coverage scan)
@@ -155,12 +165,14 @@ Creates `.claude/agents/`, `.claude/skills/`, `.claude/agent-memory/`, `.dev-tea
 - Enhanced onboarding (Deming auto-scans for linters, SAST, CI gaps)
 
 ### v0.3 — Distribution
+
 - Plugin format for Claude Code marketplace
 - `/dev-team:eject` command (plugin → local files)
 - Custom agent authoring guide
 - Preset bundles (backend-heavy, full-stack, data-pipeline)
 
 ### v0.4 — Orchestration
+
 - Orchestrator / team lead agent (auto-delegates to specialists)
 - Agent teams integration (direct inter-agent messaging)
 - Agent watch lists (file pattern → auto-spawn domain agent)
@@ -169,11 +181,13 @@ Creates `.claude/agents/`, `.claude/skills/`, `.claude/agent-memory/`, `.dev-tea
 ## Testing Strategy
 
 ### Unit tests
+
 - CLI init logic (detection, prompting, file operations)
 - File helpers (copy, merge, append-with-markers, settings merge)
 - Hook logic (pattern matching, exit codes)
 
 ### Integration tests
+
 - Fresh project installation
 - Existing project installation (additive merge)
 - Idempotency (run init twice)
@@ -181,11 +195,13 @@ Creates `.claude/agents/`, `.claude/skills/`, `.claude/agent-memory/`, `.dev-tea
 - Agent frontmatter validation
 
 ### Scenario tests
+
 - Small Node.js project: install dev-team, verify agents work
 - Small Python project: verify language-agnostic claims
 - Upgrade path: install v0.1, then v0.2, verify clean upgrade
 
 ### TDD enforcement
+
 Implementation files cannot be modified without corresponding test changes. This prevents overengineering — you can only write code that a test demands.
 
 ## Release Process
@@ -193,6 +209,7 @@ Implementation files cannot be modified without corresponding test changes. This
 ### Versioning
 
 Strict semantic versioning:
+
 - **Major** (1.0.0 → 2.0.0): Breaking changes to agent behavior, hook behavior, CLI flags, or installed file structure that would break existing users.
 - **Minor** (0.1.0 → 0.2.0): New agents, hooks, skills, or CLI features that are additive and backward-compatible.
 - **Patch** (0.1.0 → 0.1.1): Bug fixes to existing agents, hooks, CLI, or documentation corrections.
@@ -200,11 +217,13 @@ Strict semantic versioning:
 ### CI/CD
 
 **Continuous Integration** (every push to `main` and every PR):
+
 1. Test suite (unit + integration) across Node 18/20/22 × ubuntu/macos/windows
 2. Agent frontmatter validation (required fields: name, description, model, memory)
 3. Hook script syntax validation (Node `--check`)
 
 **Release pipeline** (triggered by version tags `v*`):
+
 1. Validate tag matches `package.json` version
 2. Run full CI suite
 3. Publish to npm
@@ -213,6 +232,7 @@ Strict semantic versioning:
 ### Prerequisites
 
 Before the first release, these must be configured:
+
 - [ ] `NPM_TOKEN` secret in GitHub repo settings (for npm publish)
 - [ ] Branch protection on `main` (require PR, require CI pass, no force push)
 - [ ] Verify `dev-team` package name is available on npm (or choose alternative)
@@ -278,6 +298,7 @@ Releases are deliberate, not automated on every merge. The team decides when to 
 ### Branch protection rules
 
 The `main` branch should be protected with:
+
 - Require PR before merging (no direct pushes)
 - Require CI status checks to pass
 - Require at least 1 review approval

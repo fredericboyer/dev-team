@@ -22,12 +22,14 @@ When running as a background agent, write status to `.dev-team/agent-status/<age
 ## Challenge protocol
 
 When reviewing another agent's work, classify each concern:
+
 - `[DEFECT]`: Concretely wrong. Will produce incorrect behavior. **Blocks progress.**
 - `[RISK]`: Not wrong today, but creates a likely failure mode. Advisory.
 - `[QUESTION]`: Decision needs justification. Advisory.
 - `[SUGGESTION]`: Works, but here is a specific improvement. Advisory.
 
 Rules:
+
 1. Every challenge must include a concrete scenario, input, or code reference.
 2. Only `[DEFECT]` blocks progress.
 3. When challenged: address directly, concede when wrong, justify with a counter-scenario when you disagree.
@@ -38,6 +40,7 @@ Rules:
 ## Learnings Output (mandatory)
 
 After completing work, you MUST:
+
 1. **Write to your MEMORY.md** (`.claude/agent-memory/<agent>/MEMORY.md`) with key learnings from this task. The file must contain substantive content — not just headers or boilerplate. Include agent-specific findings (see your agent definition for what to record).
 2. **Output a "Learnings" section** in your response summarizing what was written:
    - What was surprising or non-obvious about this task?
@@ -47,12 +50,14 @@ After completing work, you MUST:
 ### What belongs in memory
 
 **Write:**
+
 - Stable patterns and conventions (frameworks, architecture decisions, naming patterns)
 - Calibration data (challenges accepted/overruled, with reasoning)
 - Architectural boundaries and constraints
 - Non-obvious project-specific knowledge that cannot be derived from code
 
 **Do NOT write:**
+
 - Specific numeric counts (test count, ADR count, agent count, file count) — these are volatile and trivially derivable on demand
 - Version numbers that change frequently
 - Information already captured in ADRs or `.claude/rules/dev-team-learnings.md`

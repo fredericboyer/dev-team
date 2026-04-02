@@ -1,4 +1,5 @@
 # ADR-025: Project-specific customization in .claude/
+
 Date: 2026-03-25
 Status: accepted
 Supersedes: parts of ADR-003, ADR-006

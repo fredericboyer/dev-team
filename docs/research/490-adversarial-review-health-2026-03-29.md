@@ -40,28 +40,29 @@ AI review tools have been extensively benchmarked in 2025–2026, providing dire
 
 **Propel Benchmark (2026)** — 50 real-world bugs across 5 repos:
 
-| Tool | Precision | Recall | F-score |
-|------|-----------|--------|---------|
-| Propel | 68% | 61% | 64% |
-| Codex Code Review | 68% | 29% | 41% |
-| Cursor Bugbot | 60% | 41% | 49% |
-| Greptile | 45% | 45% | 45% |
-| CodeRabbit | 36% | 43% | 39% |
-| Claude Code | 23% | 51% | 31% |
-| GitHub Copilot | 20% | 34% | 25% |
+| Tool              | Precision | Recall | F-score |
+| ----------------- | --------- | ------ | ------- |
+| Propel            | 68%       | 61%    | 64%     |
+| Codex Code Review | 68%       | 29%    | 41%     |
+| Cursor Bugbot     | 60%       | 41%    | 49%     |
+| Greptile          | 45%       | 45%    | 45%     |
+| CodeRabbit        | 36%       | 43%    | 39%     |
+| Claude Code       | 23%       | 51%    | 31%     |
+| GitHub Copilot    | 20%       | 34%    | 25%     |
 
 **CodeAnt Benchmark (2026)** — 200,000 real PRs, developer-behavior-based (comment → code change = true positive):
 
-| Tool | Precision | Recall | F1 |
-|------|-----------|--------|-----|
-| Qodo Extended | 62.3% | 66.4% | 64.3% |
-| Augment | 47.0% | 62.8% | 53.8% |
-| CodeAnt AI | 52.2% | 51.1% | 51.7% |
-| Cursor Bugbot | 46.2% | 43.8% | 44.9% |
-| GitHub Copilot | 26.6% | 53.3% | 35.5% |
-| Claude Code Reviewer | 37.3% | 40.9% | 39.0% |
+| Tool                 | Precision | Recall | F1    |
+| -------------------- | --------- | ------ | ----- |
+| Qodo Extended        | 62.3%     | 66.4%  | 64.3% |
+| Augment              | 47.0%     | 62.8%  | 53.8% |
+| CodeAnt AI           | 52.2%     | 51.1%  | 51.7% |
+| Cursor Bugbot        | 46.2%     | 43.8%  | 44.9% |
+| GitHub Copilot       | 26.6%     | 53.3%  | 35.5% |
+| Claude Code Reviewer | 37.3%     | 40.9%  | 39.0% |
 
 **Augment Benchmark (2026)** — 50 PRs across 5 large open-source projects (Sentry, Grafana, Cal.com, Discourse, Keycloak):
+
 - Best tool (Augment): 65% precision
 - Claude Code: ~51% recall but much lower precision
 - Context retrieval quality was the dominant factor differentiating tools
@@ -72,16 +73,16 @@ AI review tools have been extensively benchmarked in 2025–2026, providing dire
 
 Static analysis provides the closest analogy to automated review — both produce findings that require human triage.
 
-| Source | Raw FP Rate | After Filtering |
-|--------|-------------|-----------------|
-| NIST (Java SAST) | 78% | — |
-| OWASP Benchmark (DAST) | 82% | — |
-| Ghost Security (2025, open-source) | 91% (180 real / 2,116 flagged) | — |
-| OX Security (2026, 250 orgs) | 99.9% noise (795 critical / 216M alerts) | 0.092% critical |
-| Veracode (enterprise, tuned) | — | <1.1% |
-| SonarQube (OWASP benchmark) | — | ~1% |
-| Checkmarx (2024 Tolly) | 36.3% | — |
-| LLM-filtered SAST (2025 research) | — | single-digit % |
+| Source                             | Raw FP Rate                              | After Filtering |
+| ---------------------------------- | ---------------------------------------- | --------------- |
+| NIST (Java SAST)                   | 78%                                      | —               |
+| OWASP Benchmark (DAST)             | 82%                                      | —               |
+| Ghost Security (2025, open-source) | 91% (180 real / 2,116 flagged)           | —               |
+| OX Security (2026, 250 orgs)       | 99.9% noise (795 critical / 216M alerts) | 0.092% critical |
+| Veracode (enterprise, tuned)       | —                                        | <1.1%           |
+| SonarQube (OWASP benchmark)        | —                                        | ~1%             |
+| Checkmarx (2024 Tolly)             | 36.3%                                    | —               |
+| LLM-filtered SAST (2025 research)  | —                                        | single-digit %  |
 
 **Semgrep Assistant (2025):** Achieves 95% agreement rate with human triage decisions across 250,000+ findings. Maintains a minimum 90% accuracy threshold. Key feature: "triage memories" — the system learns from developer decisions, achieving 2.8x improvement with just 5 memories at one Fortune 500 customer.
 
@@ -92,6 +93,7 @@ Static analysis provides the closest analogy to automated review — both produc
 ### 4. AI-Generated Code Rejection Rates
 
 **LinearB (2026)** — 8.1M PRs across 4,800 engineering teams:
+
 - AI-generated PR acceptance: 32.7% (vs 84.4% for manual PRs)
 - **67.3% rejection rate** for AI-generated PRs
 - 77% of merge approvals remain human-controlled despite 67% AI usage in coding
@@ -109,12 +111,12 @@ Jet Xu's signal-to-noise framework for AI code review proposes a three-tier clas
 
 **Signal Ratio** = (Tier 1 + Tier 2) / Total comments
 
-| Rating | Signal Ratio |
-|--------|-------------|
-| Excellent | >80% |
-| Good | >60% |
-| Needs improvement | 40–60% |
-| Poor | <40% |
+| Rating            | Signal Ratio |
+| ----------------- | ------------ |
+| Excellent         | >80%         |
+| Good              | >60%         |
+| Needs improvement | 40–60%       |
+| Poor              | <40%         |
 
 Real-world comparison: CodeRabbit 21% signal ratio vs LlamaPReview 61%.
 
@@ -144,24 +146,24 @@ Based on the evidence gathered, these thresholds should be monitored per release
 
 #### A. Acceptance Rate (findings acted upon / total findings)
 
-| Band | Interpretation | Action |
-|------|---------------|--------|
-| >85% | Excellent calibration or possible compliance culture | If sustained >3 releases AND overrule rate = 0%, flag for human review of agent finding quality |
-| 60–85% | Healthy — agents finding real issues, some advisory noise filtered | Optimal operating range |
-| 40–60% | Borderline — review agents may be generating noise | Investigate: are ignored findings Tier 3 noise? If so, calibrate agents to reduce SUGGESTION volume |
-| <40% | Over-flagging — agents producing more noise than signal | Trigger recalibration: review recent SUGGESTION/QUESTION findings, add suppression rules for recurring false positive patterns |
+| Band   | Interpretation                                                     | Action                                                                                                                         |
+| ------ | ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------ |
+| >85%   | Excellent calibration or possible compliance culture               | If sustained >3 releases AND overrule rate = 0%, flag for human review of agent finding quality                                |
+| 60–85% | Healthy — agents finding real issues, some advisory noise filtered | Optimal operating range                                                                                                        |
+| 40–60% | Borderline — review agents may be generating noise                 | Investigate: are ignored findings Tier 3 noise? If so, calibrate agents to reduce SUGGESTION volume                            |
+| <40%   | Over-flagging — agents producing more noise than signal            | Trigger recalibration: review recent SUGGESTION/QUESTION findings, add suppression rules for recurring false positive patterns |
 
 **Evidence basis:** Microsoft usefulness studies (59–79% useful), Propel/CodeAnt precision benchmarks (best-in-class 62–68%), signal-to-noise framework (>60% = good).
 
 #### B. Overrule Rate (findings explicitly rejected by human / total findings)
 
-| Band | Interpretation | Action |
-|------|---------------|--------|
-| 0% (n<30) | Insufficient data | No action — continue collecting |
-| 0% (n>=30) | Either excellent calibration or rubber-stamping | Apply compliance culture detection (see Section C below) |
-| 1–10% | Healthy disagreement | Optimal range — agents flag edge cases, human catches false positives |
-| 10–25% | Moderate recalibration needed | Review overruled findings for patterns; add calibration rules for recurring categories |
-| >25% | Agent noise is blocking productivity | Urgent recalibration: agents are wasting human review time |
+| Band       | Interpretation                                  | Action                                                                                 |
+| ---------- | ----------------------------------------------- | -------------------------------------------------------------------------------------- |
+| 0% (n<30)  | Insufficient data                               | No action — continue collecting                                                        |
+| 0% (n>=30) | Either excellent calibration or rubber-stamping | Apply compliance culture detection (see Section C below)                               |
+| 1–10%      | Healthy disagreement                            | Optimal range — agents flag edge cases, human catches false positives                  |
+| 10–25%     | Moderate recalibration needed                   | Review overruled findings for patterns; add calibration rules for recurring categories |
+| >25%       | Agent noise is blocking productivity            | Urgent recalibration: agents are wasting human review time                             |
 
 **Evidence basis:** SAST tuned FP rates (10–20% after tuning), AI code review precision gaps (32–77% false positive rates unfiltered). The 1–10% healthy range accounts for dev-team's filtering advantages (memory, learnings, project context) that unfiltered tools lack.
 
@@ -182,14 +184,15 @@ Rubber-stamping cannot be detected by a single metric. Borges should flag when *
 
 #### D. DEFECT-to-Advisory Ratio
 
-| Band | Interpretation |
-|------|---------------|
-| 1:1 to 1:3 | High signal — agents finding real defects alongside reasonable advisory context |
-| 1:3 to 1:8 | Normal — most findings are advisory, defects are rare (which is good for a codebase) |
-| 1:8+ | Possible noise — agents may be generating advisory findings to fill the review |
+| Band                      | Interpretation                                                                                                                        |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| 1:1 to 1:3                | High signal — agents finding real defects alongside reasonable advisory context                                                       |
+| 1:3 to 1:8                | Normal — most findings are advisory, defects are rare (which is good for a codebase)                                                  |
+| 1:8+                      | Possible noise — agents may be generating advisory findings to fill the review                                                        |
 | 0 DEFECTs, 10+ advisories | "Silence is golden" violation — if there are no defects, a short review with 2–3 targeted observations is better than 10+ suggestions |
 
 **Dev-team current data:**
+
 - v1.2.0: 3 DEFECT, 14 advisory (1:4.7) — healthy
 - v1.7.0: 3 DEFECT (unique), 4 advisory (unique) (1:1.3) — excellent signal
 - Full audit: 2 DEFECT, 35 advisory (1:17.5) — expected for a full audit (broader sweep)
@@ -198,18 +201,19 @@ Rubber-stamping cannot be detected by a single metric. Borges should flag when *
 
 Monitor each agent's metrics independently. Drift signals:
 
-| Signal | Detection | Action |
-|--------|-----------|--------|
-| Rising SUGGESTION volume, stable DEFECT count | Agent generating noise to fill reviews | Review agent's recent SUGGESTION findings; add "silence is golden" reinforcement |
-| Falling DEFECT count, rising acceptance rate | Agent becoming too agreeable | Compare to codebase complexity — if complexity is growing but DEFECTs are falling, agent may be under-flagging |
-| Single agent's acceptance rate diverges >20% from others | Asymmetric calibration | Investigate: is the divergent agent's domain genuinely different, or is it miscalibrated? |
-| Same finding type overruled 3+ times | Systematic false positive pattern | Promote to calibration rule in agent memory: "Do not flag [pattern] in this codebase" |
+| Signal                                                   | Detection                              | Action                                                                                                         |
+| -------------------------------------------------------- | -------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Rising SUGGESTION volume, stable DEFECT count            | Agent generating noise to fill reviews | Review agent's recent SUGGESTION findings; add "silence is golden" reinforcement                               |
+| Falling DEFECT count, rising acceptance rate             | Agent becoming too agreeable           | Compare to codebase complexity — if complexity is growing but DEFECTs are falling, agent may be under-flagging |
+| Single agent's acceptance rate diverges >20% from others | Asymmetric calibration                 | Investigate: is the divergent agent's domain genuinely different, or is it miscalibrated?                      |
+| Same finding type overruled 3+ times                     | Systematic false positive pattern      | Promote to calibration rule in agent memory: "Do not flag [pattern] in this codebase"                          |
 
 ---
 
 ## Evidence
 
 ### Academic / Industry Studies
+
 - [Modern Code Review: A Case Study at Google](https://research.google/pubs/modern-code-review-a-case-study-at-google/) — Sadowski et al., ICSE 2018
 - [Characteristics of Useful Code Reviews: An Empirical Study at Microsoft](https://www.microsoft.com/en-us/research/publication/characteristics-of-useful-code-reviews-an-empirical-study-at-microsoft/) — Bosu et al., MSR 2015
 - [Exploring the Advances in Identifying Useful Code Review Comments](https://arxiv.org/html/2307.00692) — Ahmed et al., 2023 survey of usefulness datasets
@@ -217,22 +221,26 @@ Monitor each agent's metrics independently. Drift signals:
 - [Multi-Agent Debate Underperforms](https://d2jud02ci9yv69.cloudfront.net/2025-04-28-mad-159/blog/mad/) — ICLR 2025: devil's advocate pattern performs worst
 
 ### AI Code Review Benchmarks
+
 - [Propel AI Code Review Benchmarks 2026](https://www.propelcode.ai/benchmarks) — Claude Code: 23% precision, 51% recall
 - [CodeAnt AI Benchmark 2026](https://www.codeant.ai/blogs/ai-code-review-benchmark-results-from-200-000-real-pull-requests) — 200K PRs, 17 tools, precision 26–62%
 - [Augment Code Review Benchmark 2026](https://www.augmentcode.com/blog/we-benchmarked-7-ai-code-review-tools-on-real-world-prs-here-are-the-results) — 50 PRs, 5 large OSS projects
 - [Greptile AI Code Review Benchmarks 2025](https://www.greptile.com/benchmarks) — 50 bugs, 5 tools, catch rate 6–82%
 
 ### SAST / Static Analysis
+
 - [SAST False Positives: 91% Are Noise](https://www.pixee.ai/blog/sast-false-positives-reduction) — Pixee, Ghost Security 91% FP rate, OX Security 0.092% critical rate
 - [SAST Tools False Positive Comparison](https://www.mobb.ai/blog/sast-tools-false-positive-comparison) — Veracode <1.1%, Checkmarx 36.3%, SonarQube ~1%
 - [Semgrep AI Noise Filtering](https://semgrep.dev/blog/2025/announcing-ai-noise-filtering-and-triage-memories/) — 95% agreement rate, triage memories
 - [OWASP Benchmark Project](https://owasp.org/www-project-benchmark/) — NIST: 78% FP rate for Java SAST
 
 ### AI Code Generation Quality
+
 - [LinearB 2026 Software Engineering Benchmarks](https://linearb.io/resources/software-engineering-benchmarks-report) — 67.3% AI PR rejection rate, 8.1M PRs, 4,800 teams
 - [HubSpot Sidekick](https://www.infoq.com/news/2026/03/hubspot-ai-code-review-agent/) — 80% thumbs-up rate with judge filtering
 
 ### Signal-to-Noise Frameworks
+
 - [Drowning in AI Code Review Noise?](https://jetxu-llm.github.io/posts/low-noise-code-review/) — Signal ratio framework, >60% good, >80% excellent
 - [Google eng-practices: Handling Pushback](https://google.github.io/eng-practices/review/reviewer/pushback.html) — pushback is normal and expected
 
@@ -257,6 +265,7 @@ Monitor each agent's metrics independently. Drift signals:
 **Medium.** The individual data points (AI review precision, SAST FP rates, human review usefulness) are well-established across multiple independent studies. However, the specific combination — adversarial AI agents with project memory reviewing AI-generated code with human triage — has no direct empirical precedent. The thresholds proposed are synthesized from adjacent domains and should be validated against dev-team's own data over the next 3–5 releases.
 
 What would increase confidence to High:
+
 - 50+ findings from in-team adversarial review cycles (requires ~3 more full releases with #486 enforcing review delegation)
 - At least 1 human overrule to establish that the overrule pathway works and the human is willing to use it
 - Per-agent acceptance rate divergence data (requires consistent multi-agent review waves)

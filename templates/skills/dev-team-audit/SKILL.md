@@ -65,6 +65,7 @@ One paragraph summarizing the overall health of the codebase across all three do
 ### Security findings (@dev-team-szabo)
 
 List all findings, grouped by classification:
+
 - `[DEFECT]` — must fix
 - `[RISK]` — should address
 - `[QUESTION]` / `[SUGGESTION]` — consider
@@ -79,11 +80,11 @@ Same grouping. Include actionable recommendations.
 
 ### Priority matrix
 
-| Priority | Finding | Agent | Action |
-|----------|---------|-------|--------|
-| P0 (fix now) | `[DEFECT]` items | ... | ... |
-| P1 (fix soon) | `[RISK]` items | ... | ... |
-| P2 (improve) | `[SUGGESTION]` items | ... | ... |
+| Priority      | Finding              | Agent | Action |
+| ------------- | -------------------- | ----- | ------ |
+| P0 (fix now)  | `[DEFECT]` items     | ...   | ...    |
+| P1 (fix soon) | `[RISK]` items       | ...   | ...    |
+| P2 (improve)  | `[SUGGESTION]` items | ...   | ...    |
 
 ### Recommended next steps
 
@@ -96,6 +97,7 @@ Before issuing any `gh issue`, `gh pr`, or other platform-specific CLI commands,
 ### Completion
 
 After the audit report is delivered:
+
 1. Format the **finding outcome log** with every finding's classification, source agent, and outcome. Then call `/dev-team:extract` with the formatted log.
 2. If `/dev-team:extract` was not called, the audit is INCOMPLETE.
 3. `/dev-team:extract` handles Borges spawning, metrics verification, and memory formation gates. Do not report the audit as complete until `/dev-team:extract` reports success.

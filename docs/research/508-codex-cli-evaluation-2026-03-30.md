@@ -15,13 +15,13 @@ Can dev-team's hooks and skills be mapped to Codex CLI's native hook system and 
 
 ### Codex CLI Hook Events (5 events, experimental)
 
-| Event | When it fires | Matcher support | Tool scope |
-|-------|--------------|-----------------|------------|
-| `SessionStart` | Session begins (startup or resume) | Yes (`source`: startup, resume) | N/A |
-| `PreToolUse` | Before tool invocation | Yes (`tool_name`) | Bash only |
-| `PostToolUse` | After tool completion | Yes (`tool_name`) | Bash only |
-| `UserPromptSubmit` | User sends a prompt | No | N/A |
-| `Stop` | Conversation turn concludes | No | N/A |
+| Event              | When it fires                      | Matcher support                 | Tool scope |
+| ------------------ | ---------------------------------- | ------------------------------- | ---------- |
+| `SessionStart`     | Session begins (startup or resume) | Yes (`source`: startup, resume) | N/A        |
+| `PreToolUse`       | Before tool invocation             | Yes (`tool_name`)               | Bash only  |
+| `PostToolUse`      | After tool completion              | Yes (`tool_name`)               | Bash only  |
+| `UserPromptSubmit` | User sends a prompt                | No                              | N/A        |
+| `Stop`             | Conversation turn concludes        | No                              | N/A        |
 
 **Status**: Experimental. Requires `codex_hooks = true` in `config.toml`. Windows support disabled.
 
@@ -29,33 +29,33 @@ Can dev-team's hooks and skills be mapped to Codex CLI's native hook system and 
 
 Claude Code has significantly more events than the 12 documented in the #264 brief (the count has grown since that research). The full list:
 
-| Event | Codex equivalent |
-|-------|-----------------|
-| `SessionStart` | **SessionStart** (direct map) |
-| `UserPromptSubmit` | **UserPromptSubmit** (direct map) |
-| `PreToolUse` | **PreToolUse** (partial — Codex is Bash-only) |
-| `PostToolUse` | **PostToolUse** (partial — Codex is Bash-only) |
-| `Stop` | **Stop** (direct map) |
-| `PermissionRequest` | None |
-| `PostToolUseFailure` | None |
-| `Notification` | None |
-| `SubagentStart` | None |
-| `SubagentStop` | None |
-| `TaskCreated` | None |
-| `TaskCompleted` | None |
-| `StopFailure` | None |
-| `TeammateIdle` | None |
-| `InstructionsLoaded` | None |
-| `ConfigChange` | None |
-| `CwdChanged` | None |
-| `FileChanged` | None |
-| `WorktreeCreate` | None |
-| `WorktreeRemove` | None |
-| `PreCompact` | None |
-| `PostCompact` | None |
-| `Elicitation` | None |
-| `ElicitationResult` | None |
-| `SessionEnd` | None |
+| Event                | Codex equivalent                               |
+| -------------------- | ---------------------------------------------- |
+| `SessionStart`       | **SessionStart** (direct map)                  |
+| `UserPromptSubmit`   | **UserPromptSubmit** (direct map)              |
+| `PreToolUse`         | **PreToolUse** (partial — Codex is Bash-only)  |
+| `PostToolUse`        | **PostToolUse** (partial — Codex is Bash-only) |
+| `Stop`               | **Stop** (direct map)                          |
+| `PermissionRequest`  | None                                           |
+| `PostToolUseFailure` | None                                           |
+| `Notification`       | None                                           |
+| `SubagentStart`      | None                                           |
+| `SubagentStop`       | None                                           |
+| `TaskCreated`        | None                                           |
+| `TaskCompleted`      | None                                           |
+| `StopFailure`        | None                                           |
+| `TeammateIdle`       | None                                           |
+| `InstructionsLoaded` | None                                           |
+| `ConfigChange`       | None                                           |
+| `CwdChanged`         | None                                           |
+| `FileChanged`        | None                                           |
+| `WorktreeCreate`     | None                                           |
+| `WorktreeRemove`     | None                                           |
+| `PreCompact`         | None                                           |
+| `PostCompact`        | None                                           |
+| `Elicitation`        | None                                           |
+| `ElicitationResult`  | None                                           |
+| `SessionEnd`         | None                                           |
 
 **Summary**: 5 of 25 Claude Code events have Codex equivalents. 20 events have no mapping.
 
@@ -63,37 +63,37 @@ Claude Code has significantly more events than the 12 documented in the #264 bri
 
 dev-team ships 10 hooks across 5 event types. Here is the mapping:
 
-| dev-team hook | Claude Code event | Codex mappable? | Notes |
-|---------------|------------------|-----------------|-------|
-| `dev-team-post-change-review.js` | `PostToolUse` (Edit\|Write) | **No** | Codex PostToolUse only matches `Bash` tool, not Edit/Write |
-| `dev-team-tdd-enforce.js` | `PostToolUse` (Edit\|Write) | **No** | Same — Codex lacks Edit/Write tool matching |
-| `dev-team-watch-list.js` | `PostToolUse` (Edit\|Write) | **No** | Same |
-| `dev-team-safety-guard.js` | `PreToolUse` (Bash) | **Yes** | Direct map — both filter on Bash commands |
-| `dev-team-pre-commit-lint.js` | `PreToolUse` (Bash) | **Yes** | Direct map — can intercept `git commit` commands |
-| `dev-team-review-gate.js` | `PreToolUse` (Bash) | **Yes** | Direct map — can intercept `git commit`/`git push` |
-| `dev-team-agent-teams-guide.js` | `PreToolUse` (Agent) | **No** | Codex has no Agent tool or multi-agent support |
-| `dev-team-worktree-create.js` | `WorktreeCreate` | **No** | Codex has no worktree events |
-| `dev-team-worktree-remove.js` | `WorktreeRemove` | **No** | Codex has no worktree events |
-| `dev-team-pre-commit-gate.js` | `TaskCompleted` | **No** | Codex has no TaskCompleted event |
+| dev-team hook                    | Claude Code event           | Codex mappable? | Notes                                                      |
+| -------------------------------- | --------------------------- | --------------- | ---------------------------------------------------------- |
+| `dev-team-post-change-review.js` | `PostToolUse` (Edit\|Write) | **No**          | Codex PostToolUse only matches `Bash` tool, not Edit/Write |
+| `dev-team-tdd-enforce.js`        | `PostToolUse` (Edit\|Write) | **No**          | Same — Codex lacks Edit/Write tool matching                |
+| `dev-team-watch-list.js`         | `PostToolUse` (Edit\|Write) | **No**          | Same                                                       |
+| `dev-team-safety-guard.js`       | `PreToolUse` (Bash)         | **Yes**         | Direct map — both filter on Bash commands                  |
+| `dev-team-pre-commit-lint.js`    | `PreToolUse` (Bash)         | **Yes**         | Direct map — can intercept `git commit` commands           |
+| `dev-team-review-gate.js`        | `PreToolUse` (Bash)         | **Yes**         | Direct map — can intercept `git commit`/`git push`         |
+| `dev-team-agent-teams-guide.js`  | `PreToolUse` (Agent)        | **No**          | Codex has no Agent tool or multi-agent support             |
+| `dev-team-worktree-create.js`    | `WorktreeCreate`            | **No**          | Codex has no worktree events                               |
+| `dev-team-worktree-remove.js`    | `WorktreeRemove`            | **No**          | Codex has no worktree events                               |
+| `dev-team-pre-commit-gate.js`    | `TaskCompleted`             | **No**          | Codex has no TaskCompleted event                           |
 
 **Result**: 3 of 10 dev-team hooks (30%) can be directly mapped to Codex CLI. The remaining 7 hooks rely on Claude Code-specific events or tool matchers that Codex does not support.
 
 ### Hook Execution Model Comparison
 
-| Aspect | Claude Code | Codex CLI |
-|--------|-------------|-----------|
-| Configuration file | `.claude/settings.json` (JSON, `hooks` key) | `.codex/hooks.json` (JSON, `hooks` key) |
-| Scope levels | User, project, local, managed policy, plugin, skill/agent | User (`~/.codex/`), repo (`.codex/`) |
-| Execution | Concurrent within same file | Concurrent within same file |
-| Default timeout | 600s (10 min) | 600s (10 min) |
-| Timeout configurable | Yes (`timeout` in seconds) | Yes (`timeout` or `timeoutSec` in seconds) |
-| Input format | JSON on stdin | JSON on stdin |
-| Block mechanism | Exit code 2 or JSON `decision: "block"` | Exit code 2 or JSON `permissionDecision: "deny"` |
-| Context injection | stdout text added to context | `additionalContext` in JSON response |
-| Hook types | `command`, `http`, `prompt`, `agent` | `command` only |
-| Matcher syntax | Regex on tool name (all tools) | Regex (Bash only for Pre/PostToolUse) |
-| `if` field (argument filtering) | Yes (v2.1.85+) | No |
-| Feature flag required | No (stable) | Yes (`codex_hooks = true`, experimental) |
+| Aspect                          | Claude Code                                               | Codex CLI                                        |
+| ------------------------------- | --------------------------------------------------------- | ------------------------------------------------ |
+| Configuration file              | `.claude/settings.json` (JSON, `hooks` key)               | `.codex/hooks.json` (JSON, `hooks` key)          |
+| Scope levels                    | User, project, local, managed policy, plugin, skill/agent | User (`~/.codex/`), repo (`.codex/`)             |
+| Execution                       | Concurrent within same file                               | Concurrent within same file                      |
+| Default timeout                 | 600s (10 min)                                             | 600s (10 min)                                    |
+| Timeout configurable            | Yes (`timeout` in seconds)                                | Yes (`timeout` or `timeoutSec` in seconds)       |
+| Input format                    | JSON on stdin                                             | JSON on stdin                                    |
+| Block mechanism                 | Exit code 2 or JSON `decision: "block"`                   | Exit code 2 or JSON `permissionDecision: "deny"` |
+| Context injection               | stdout text added to context                              | `additionalContext` in JSON response             |
+| Hook types                      | `command`, `http`, `prompt`, `agent`                      | `command` only                                   |
+| Matcher syntax                  | Regex on tool name (all tools)                            | Regex (Bash only for Pre/PostToolUse)            |
+| `if` field (argument filtering) | Yes (v2.1.85+)                                            | No                                               |
+| Feature flag required           | No (stable)                                               | Yes (`codex_hooks = true`, experimental)         |
 
 ### Critical Gap: Tool Scope
 
@@ -111,21 +111,21 @@ The Bash-only scope makes Codex hooks useful only for command interception, not 
 
 ### Format Comparison
 
-| Aspect | Claude Code | Codex CLI |
-|--------|-------------|-----------|
-| File | `SKILL.md` | `SKILL.md` |
-| Format | Markdown + YAML frontmatter | Markdown + YAML frontmatter |
-| Required fields | `name`, `description` | `name`, `description` |
-| Directory | `.claude/skills/<name>/SKILL.md` | `.agents/skills/<name>/SKILL.md` |
-| Discovery hierarchy | Project `.claude/` only | Repo `.agents/` (CWD, parent, root), user `~/.agents/`, admin `/etc/codex/`, system built-in |
-| Invocation | Slash commands (`/skill-name`) | `/skills` or `$` prefix, plus implicit matching |
-| Auto-invoke | No (explicit only for orchestration skills) | Yes, via `description` matching |
-| `disable-model-invocation` | Yes (YAML frontmatter field) | Via `policy.allow_implicit_invocation: false` in `agents/openai.yaml` |
-| Tool dependencies | Not declared in skill | Declared in `agents/openai.yaml` `dependencies.tools` |
-| Arguments | `$ARGUMENTS` placeholder | Prompt inclusion |
-| Progressive loading | Full SKILL.md loaded at invocation | Metadata first, full SKILL.md only when used |
-| Distribution | Copy files | Plugin system with marketplace catalogs |
-| Additional files | Scripts alongside SKILL.md | `scripts/`, `references/`, `assets/`, `agents/openai.yaml` |
+| Aspect                     | Claude Code                                 | Codex CLI                                                                                    |
+| -------------------------- | ------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| File                       | `SKILL.md`                                  | `SKILL.md`                                                                                   |
+| Format                     | Markdown + YAML frontmatter                 | Markdown + YAML frontmatter                                                                  |
+| Required fields            | `name`, `description`                       | `name`, `description`                                                                        |
+| Directory                  | `.claude/skills/<name>/SKILL.md`            | `.agents/skills/<name>/SKILL.md`                                                             |
+| Discovery hierarchy        | Project `.claude/` only                     | Repo `.agents/` (CWD, parent, root), user `~/.agents/`, admin `/etc/codex/`, system built-in |
+| Invocation                 | Slash commands (`/skill-name`)              | `/skills` or `$` prefix, plus implicit matching                                              |
+| Auto-invoke                | No (explicit only for orchestration skills) | Yes, via `description` matching                                                              |
+| `disable-model-invocation` | Yes (YAML frontmatter field)                | Via `policy.allow_implicit_invocation: false` in `agents/openai.yaml`                        |
+| Tool dependencies          | Not declared in skill                       | Declared in `agents/openai.yaml` `dependencies.tools`                                        |
+| Arguments                  | `$ARGUMENTS` placeholder                    | Prompt inclusion                                                                             |
+| Progressive loading        | Full SKILL.md loaded at invocation          | Metadata first, full SKILL.md only when used                                                 |
+| Distribution               | Copy files                                  | Plugin system with marketplace catalogs                                                      |
+| Additional files           | Scripts alongside SKILL.md                  | `scripts/`, `references/`, `assets/`, `agents/openai.yaml`                                   |
 
 ### Key Findings
 
@@ -142,6 +142,7 @@ The Bash-only scope makes Codex hooks useful only for command interception, not 
 ### Skill Adapter Feasibility
 
 Translating dev-team skills to Codex format requires:
+
 - Copying `SKILL.md` files from `.claude/skills/` to `.agents/skills/`
 - No frontmatter changes needed (`name` and `description` are identical)
 - Generating `agents/openai.yaml` with `policy.allow_implicit_invocation: false` for orchestration skills (those with `disable-model-invocation: true`)
@@ -157,27 +158,29 @@ Translating dev-team skills to Codex format requires:
 
 Codex CLI treats AGENTS.md as **unstructured Markdown context**. There is no field parsing, no frontmatter support, and no section schema. The entire file content is injected as project instructions.
 
-| Aspect | Detail |
-|--------|--------|
-| Spec compliance | AAIF spec is intentionally minimal — "just standard Markdown" |
-| Structured fields | None. No frontmatter, no required sections, no typed data |
-| Multi-agent definitions | Not supported. No syntax for defining multiple agents |
-| Discovery | Walk from `~/.codex/` (global) then git root to CWD (project), checking each directory |
-| Override mechanism | `AGENTS.override.md` takes precedence over `AGENTS.md` in same directory |
-| Size limit | `project_doc_max_bytes` (default 32 KiB). Discovery stops at threshold |
-| Fallback filenames | Configurable via `project_doc_fallback_filenames` in `config.toml` |
-| Concatenation | Multiple files joined with blank-line separators; closest-to-CWD appears last (highest priority) |
-| Config override | `model_instructions_file` replaces AGENTS.md entirely |
+| Aspect                  | Detail                                                                                           |
+| ----------------------- | ------------------------------------------------------------------------------------------------ |
+| Spec compliance         | AAIF spec is intentionally minimal — "just standard Markdown"                                    |
+| Structured fields       | None. No frontmatter, no required sections, no typed data                                        |
+| Multi-agent definitions | Not supported. No syntax for defining multiple agents                                            |
+| Discovery               | Walk from `~/.codex/` (global) then git root to CWD (project), checking each directory           |
+| Override mechanism      | `AGENTS.override.md` takes precedence over `AGENTS.md` in same directory                         |
+| Size limit              | `project_doc_max_bytes` (default 32 KiB). Discovery stops at threshold                           |
+| Fallback filenames      | Configurable via `project_doc_fallback_filenames` in `config.toml`                               |
+| Concatenation           | Multiple files joined with blank-line separators; closest-to-CWD appears last (highest priority) |
+| Config override         | `model_instructions_file` replaces AGENTS.md entirely                                            |
 
 ### AAIF Spec Assessment
 
 The AAIF AGENTS.md spec is deliberately minimal:
+
 - **No required fields** — just a Markdown file
 - **No structured data** — "use any headings you like"
 - **No multi-agent support** — single instruction document, not agent definitions
 - **No frontmatter** — unlike Claude Code's agent definitions with YAML metadata
 
 This means AGENTS.md cannot express:
+
 - Agent roles, tools, model preferences (dev-team's agent definitions)
 - Skill invocation control
 - Hook configuration
@@ -192,29 +195,32 @@ AGENTS.md is suitable only for the **instruction layer** — project context, co
 
 ### Coverage Summary
 
-| dev-team artifact | Count | Codex mappable | Coverage |
-|-------------------|-------|---------------|----------|
-| Hooks (event types used) | 5 event types | 2 (PreToolUse/Bash, PostToolUse/Bash partially) | 30% of hooks directly mappable |
-| Skills | 8 skills | 8 (format is near-identical) | ~95% of skill content transfers |
-| Agent definitions | 14 agents | 0 (no Codex equivalent for agent definitions with metadata) | 0% native mapping |
-| Rules (`.claude/rules/`) | N/A | Partial (via nested AGENTS.md files) | ~60% (content transfers, auto-loading differs) |
-| Memory architecture | 2-tier | 0 (Codex has no memory system) | 0% |
-| Multi-agent orchestration | Full | 0 (Codex is single-agent) | 0% |
-| Settings (`.claude/settings.json`) | 1 | Partial (`.codex/config.toml` + `hooks.json`) | ~40% (hooks + basic config) |
+| dev-team artifact                  | Count         | Codex mappable                                              | Coverage                                       |
+| ---------------------------------- | ------------- | ----------------------------------------------------------- | ---------------------------------------------- |
+| Hooks (event types used)           | 5 event types | 2 (PreToolUse/Bash, PostToolUse/Bash partially)             | 30% of hooks directly mappable                 |
+| Skills                             | 8 skills      | 8 (format is near-identical)                                | ~95% of skill content transfers                |
+| Agent definitions                  | 14 agents     | 0 (no Codex equivalent for agent definitions with metadata) | 0% native mapping                              |
+| Rules (`.claude/rules/`)           | N/A           | Partial (via nested AGENTS.md files)                        | ~60% (content transfers, auto-loading differs) |
+| Memory architecture                | 2-tier        | 0 (Codex has no memory system)                              | 0%                                             |
+| Multi-agent orchestration          | Full          | 0 (Codex is single-agent)                                   | 0%                                             |
+| Settings (`.claude/settings.json`) | 1             | Partial (`.codex/config.toml` + `hooks.json`)               | ~40% (hooks + basic config)                    |
 
 ### Overall Functionality Mapping
 
 **Directly mappable to Codex CLI: ~25-30%**
+
 - Bash command interception hooks (safety guard, lint, review gate)
 - Skill content and invocation
 - Project instructions via AGENTS.md
 
 **Requires workarounds or degraded experience: ~20-25%**
+
 - File change detection (would need to poll git status in Stop hook instead of PostToolUse on Edit/Write)
 - Rules (flatten into AGENTS.md sections instead of auto-loaded rule files)
 - Invocation control (openai.yaml instead of frontmatter)
 
 **Not mappable (no Codex equivalent): ~45-50%**
+
 - Multi-agent coordination (agent teams, subagents, orchestration)
 - Agent definitions with metadata (tools, model, memory config)
 - Structured memory (two-tier memory architecture)
@@ -230,6 +236,7 @@ AGENTS.md is suitable only for the **instruction layer** — project context, co
 **No.** An instruction-only adapter (AGENTS.md export) would capture ~15% of dev-team's value — the behavioral context and coding conventions. dev-team's thesis is **enforcement through productive friction**, which requires hooks. Without hooks, all agent guidance is advisory.
 
 However, an instruction-only adapter is still **worth building** as a baseline because:
+
 1. It provides immediate value on 20+ runtimes
 2. It composes with the Codex-native adapter (instructions + hooks + skills)
 3. It's low effort (Markdown concatenation)
@@ -238,16 +245,16 @@ However, an instruction-only adapter is still **worth building** as a baseline b
 
 A Codex-specific adapter that generates `hooks.json` + `.agents/skills/` adds meaningful value beyond instruction-only:
 
-| Feature | Instruction-only | + Codex adapter |
-|---------|-----------------|-----------------|
-| Project context | Yes | Yes |
-| Skill invocation | No | Yes |
-| Bash command safety guard | No | Yes |
-| Pre-commit lint enforcement | No | Yes |
-| Review gate on git push | No | Yes |
-| File change review triggers | No | Degraded (polling workaround) |
-| Agent orchestration | No | No |
-| Memory | No | No |
+| Feature                     | Instruction-only | + Codex adapter               |
+| --------------------------- | ---------------- | ----------------------------- |
+| Project context             | Yes              | Yes                           |
+| Skill invocation            | No               | Yes                           |
+| Bash command safety guard   | No               | Yes                           |
+| Pre-commit lint enforcement | No               | Yes                           |
+| Review gate on git push     | No               | Yes                           |
+| File change review triggers | No               | Degraded (polling workaround) |
+| Agent orchestration         | No               | No                            |
+| Memory                      | No               | No                            |
 
 The adapter unlocks 3 enforceable hooks and 8 skills, which is significant. The Bash-only tool scope is the primary limitation.
 
@@ -255,15 +262,15 @@ The adapter unlocks 3 enforceable hooks and 8 skills, which is significant. The 
 
 ## Part 5: Codex CLI Maturity Assessment
 
-| Dimension | Assessment | Confidence |
-|-----------|-----------|------------|
-| Hook system stability | **Beta** — behind feature flag, Windows disabled, Bash-only tool scope | High |
-| Hook documentation quality | **Good** — complete JSON schemas, clear examples | High |
-| Skill system stability | **Stable** — no feature flag, full documentation, plugin ecosystem | High |
-| Skill documentation quality | **Excellent** — progressive disclosure, distribution model documented | High |
-| AGENTS.md support | **Stable** — native, well-documented discovery mechanism | High |
-| Release cadence | **Very active** — v0.117.0 as of 2026-03-26, 660+ releases | High |
-| Tool scope expansion (hooks) | **Unknown** — no public roadmap for supporting Edit/Write/Read tools in hooks | Low |
+| Dimension                    | Assessment                                                                    | Confidence |
+| ---------------------------- | ----------------------------------------------------------------------------- | ---------- |
+| Hook system stability        | **Beta** — behind feature flag, Windows disabled, Bash-only tool scope        | High       |
+| Hook documentation quality   | **Good** — complete JSON schemas, clear examples                              | High       |
+| Skill system stability       | **Stable** — no feature flag, full documentation, plugin ecosystem            | High       |
+| Skill documentation quality  | **Excellent** — progressive disclosure, distribution model documented         | High       |
+| AGENTS.md support            | **Stable** — native, well-documented discovery mechanism                      | High       |
+| Release cadence              | **Very active** — v0.117.0 as of 2026-03-26, 660+ releases                    | High       |
+| Tool scope expansion (hooks) | **Unknown** — no public roadmap for supporting Edit/Write/Read tools in hooks | Low        |
 
 The hook system's Bash-only limitation may be temporary (it's beta), but there is no public signal that OpenAI plans to expand tool scope. The prior brief's claim that Codex has "5 events (beta)" is confirmed. The skill system is production-quality.
 
@@ -320,6 +327,7 @@ The hook system's Bash-only limitation may be temporary (it's beta), but there i
 All findings are based on official OpenAI documentation (developers.openai.com/codex) and the official Codex CLI GitHub repository. The hook system JSON schemas are fully documented. The skill format comparison is based on direct format inspection.
 
 Confidence would increase to **Very High** with:
+
 - Hands-on installation and execution of Codex CLI hooks (validate runtime behavior matches docs)
 - Testing `$ARGUMENTS` in Codex skills
 - Confirmation from OpenAI on tool scope expansion timeline for hooks

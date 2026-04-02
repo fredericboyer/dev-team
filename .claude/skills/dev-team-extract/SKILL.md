@@ -13,6 +13,7 @@ Extract memory and metrics via @dev-team-borges for: $ARGUMENTS
 `$ARGUMENTS` is a **finding outcome log** — a structured summary of findings from a completed task, review, audit, or retro. The log follows one of two formats depending on whether the work involved a single branch or multiple branches.
 
 **Single-branch format:**
+
 ```
 ## Finding Outcome Log
 Source: <issue number, PR, audit scope, or retro reference>
@@ -37,6 +38,7 @@ Agents involved: <comma-separated list of all participating agents>
 ```
 
 **Multi-branch format** (parallel mode):
+
 ```
 ## Finding Outcome Log
 Sources: <comma-separated issue numbers, PRs, audit scopes, or retro references>
@@ -63,6 +65,7 @@ Agents involved: <comma-separated list of all participating agents>
 Spawn **@dev-team-borges** as `borges-extract` (Librarian). Pass Borges the finding outcome log from `$ARGUMENTS`.
 
 Borges will:
+
 - **Extract structured memory entries** from review findings and implementation decisions
 - **Reinforce accepted patterns** in the reviewer's memory (calibration feedback)
 - **Record overruled findings** with context so reviewers generate fewer false positives
@@ -78,6 +81,7 @@ Borges will:
 ### Borges completion gate (HARD CHECK)
 
 Before returning success, verify BOTH conditions:
+
 - (a) Borges has been spawned **and completed** (not just spawned — wait for completion)
 - (b) Read `.dev-team/metrics.md` and verify it contains a new `Task: <reference>` entry for the current task. The reference may be an issue number, PR number, or descriptive label (e.g., for audits and retros that lack an external reference). A stale metrics file (no new entry) means Borges did not complete successfully.
 

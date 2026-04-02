@@ -1,9 +1,11 @@
 # Agent Calibration Metrics
+
 <!-- Appendable log of per-task agent performance metrics. -->
 <!-- Borges records an entry after each task cycle. -->
 <!-- Used by /dev-team:retro to track acceptance rates and signal quality over time. -->
 
 ## Format
+
 <!-- Each entry follows this structure:
 ### [YYYY-MM-DD] Task: <issue or PR reference>
 - **Agents**: implementing: <agent>, reviewers: <agent1, agent2, ...>
@@ -15,4 +17,3 @@
 -->
 
 ## Entries
-

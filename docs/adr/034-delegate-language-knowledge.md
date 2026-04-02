@@ -1,4 +1,5 @@
 # ADR-034: Delegate language-specific knowledge to agents, not hooks
+
 Date: 2026-03-26
 Status: accepted
 

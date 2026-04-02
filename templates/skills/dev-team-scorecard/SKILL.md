@@ -118,6 +118,7 @@ Produce a structured scorecard:
 ## Completion
 
 After the scorecard is delivered:
+
 1. If any checks failed, recommend specific remediation steps.
 2. If all checks passed, acknowledge clean process conformance.
 3. Do NOT spawn Borges — this is a read-only audit skill that does not produce findings requiring memory extraction.

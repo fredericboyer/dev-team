@@ -116,54 +116,54 @@ npx @fredericboyer/dev-team create-agent <name>     # Scaffold a custom agent
 
 ### Agents (14)
 
-| Agent | Role | Model | When to use |
-|-------|------|-------|-------------|
-| `@dev-team-drucker` | **Orchestrator** | opus | Auto-delegates to specialists, manages review loops |
-| `@dev-team-voss` | Backend Engineer | sonnet | API design, data modeling, system architecture |
-| `@dev-team-mori` | Frontend Engineer | sonnet | Components, accessibility, UX patterns |
-| `@dev-team-hamilton` | Infrastructure Engineer | sonnet | Dockerfiles, IaC, CI/CD, k8s, deployment, monitoring |
-| `@dev-team-szabo` | Security Auditor | opus | Vulnerability review, auth flows, attack surfaces |
-| `@dev-team-knuth` | Quality Auditor | opus | Coverage gaps, boundary conditions, correctness |
-| `@dev-team-beck` | Test Implementer | sonnet | Writing tests, TDD cycles |
-| `@dev-team-deming` | Tooling Optimizer | sonnet | Linters, formatters, CI/CD, hooks, automation |
-| `@dev-team-tufte` | Documentation Engineer | sonnet | Doc accuracy, stale docs, doc-code sync |
-| `@dev-team-brooks` | Architect & Quality Reviewer | opus | Coupling, ADR compliance, quality attributes |
-| `@dev-team-conway` | Release Manager | sonnet | Versioning, changelog, semver validation |
-| `@dev-team-turing` | Pre-implementation Researcher | opus | Library evaluation, migration paths, trade-off analysis |
-| `@dev-team-rams` | Design System Reviewer | sonnet | Token compliance, spacing consistency, design-code alignment |
-| `@dev-team-borges` | Librarian | sonnet | Memory extraction, cross-agent coherence, system improvement |
+| Agent                | Role                          | Model  | When to use                                                  |
+| -------------------- | ----------------------------- | ------ | ------------------------------------------------------------ |
+| `@dev-team-drucker`  | **Orchestrator**              | opus   | Auto-delegates to specialists, manages review loops          |
+| `@dev-team-voss`     | Backend Engineer              | sonnet | API design, data modeling, system architecture               |
+| `@dev-team-mori`     | Frontend Engineer             | sonnet | Components, accessibility, UX patterns                       |
+| `@dev-team-hamilton` | Infrastructure Engineer       | sonnet | Dockerfiles, IaC, CI/CD, k8s, deployment, monitoring         |
+| `@dev-team-szabo`    | Security Auditor              | opus   | Vulnerability review, auth flows, attack surfaces            |
+| `@dev-team-knuth`    | Quality Auditor               | opus   | Coverage gaps, boundary conditions, correctness              |
+| `@dev-team-beck`     | Test Implementer              | sonnet | Writing tests, TDD cycles                                    |
+| `@dev-team-deming`   | Tooling Optimizer             | sonnet | Linters, formatters, CI/CD, hooks, automation                |
+| `@dev-team-tufte`    | Documentation Engineer        | sonnet | Doc accuracy, stale docs, doc-code sync                      |
+| `@dev-team-brooks`   | Architect & Quality Reviewer  | opus   | Coupling, ADR compliance, quality attributes                 |
+| `@dev-team-conway`   | Release Manager               | sonnet | Versioning, changelog, semver validation                     |
+| `@dev-team-turing`   | Pre-implementation Researcher | opus   | Library evaluation, migration paths, trade-off analysis      |
+| `@dev-team-rams`     | Design System Reviewer        | sonnet | Token compliance, spacing consistency, design-code alignment |
+| `@dev-team-borges`   | Librarian                     | sonnet | Memory extraction, cross-agent coherence, system improvement |
 
 **Opus** agents do deep analysis — Szabo, Knuth, Brooks, and Turing are read-only; Drucker uses opus for orchestration with full access. **Sonnet** agents implement (faster, full write access). Borges runs at end-of-workflow for memory consolidation. Rams reviews design system compliance.
 
 ### Hooks (10)
 
-| Hook | Trigger | Behavior |
-|------|---------|----------|
-| Safety guard | Before Bash | **Blocks** dangerous commands (`rm -rf /`, force push, `DROP TABLE`, `curl\|sh`). Fails closed on malformed input. |
-| TDD enforcement | After Edit/Write | **Blocks** implementation changes without corresponding test files. |
-| Post-change review | After Edit/Write | **Flags + tracks** domain agents for review. Writes tracking file. Outputs `ACTION REQUIRED` directive. |
-| Pre-commit gate | On task completion | **Blocks** commit if flagged agents were not spawned. Advisory for memory freshness. |
-| Watch list | After Edit/Write | **Flags** custom agents based on configurable file-pattern-to-agent mappings in `dev-team.json`. |
-| Pre-commit lint | Before commit | **Blocks** commit if lint or format checks fail. |
-| Agent teams guide | Before Agent spawn | **Advisory** guidance for worktree isolation and team coordination patterns. |
-| Review gate | Before commit | **Blocks** commit without review evidence. Stateless commit gates for adversarial review enforcement. |
-| Worktree create | Before worktree creation | **Serializes** parallel worktree creation to prevent git lock races. |
-| Worktree remove | After worktree removal | **Cleans up** worktree artifacts and stale branch references. |
+| Hook               | Trigger                  | Behavior                                                                                                           |
+| ------------------ | ------------------------ | ------------------------------------------------------------------------------------------------------------------ |
+| Safety guard       | Before Bash              | **Blocks** dangerous commands (`rm -rf /`, force push, `DROP TABLE`, `curl\|sh`). Fails closed on malformed input. |
+| TDD enforcement    | After Edit/Write         | **Blocks** implementation changes without corresponding test files.                                                |
+| Post-change review | After Edit/Write         | **Flags + tracks** domain agents for review. Writes tracking file. Outputs `ACTION REQUIRED` directive.            |
+| Pre-commit gate    | On task completion       | **Blocks** commit if flagged agents were not spawned. Advisory for memory freshness.                               |
+| Watch list         | After Edit/Write         | **Flags** custom agents based on configurable file-pattern-to-agent mappings in `dev-team.json`.                   |
+| Pre-commit lint    | Before commit            | **Blocks** commit if lint or format checks fail.                                                                   |
+| Agent teams guide  | Before Agent spawn       | **Advisory** guidance for worktree isolation and team coordination patterns.                                       |
+| Review gate        | Before commit            | **Blocks** commit without review evidence. Stateless commit gates for adversarial review enforcement.              |
+| Worktree create    | Before worktree creation | **Serializes** parallel worktree creation to prevent git lock races.                                               |
+| Worktree remove    | After worktree removal   | **Cleans up** worktree artifacts and stale branch references.                                                      |
 
 All hooks are Node.js scripts — work on macOS, Linux, and Windows.
 
 ### Skills (8)
 
-| Skill | What it does |
-|-------|-------------|
-| `/dev-team:task` | Iterative task loop — implement, review, fix defects, repeat until clean |
-| `/dev-team:review` | Parallel multi-agent review — spawns agents based on changed file patterns |
-| `/dev-team:audit` | Full codebase scan — Szabo (security) + Knuth (quality) + Deming (tooling) |
-| `/dev-team:challenge` | Critical examination of a proposal or design decision |
-| `/dev-team:retro` | Audit knowledge base health — learnings, agent memory, CLAUDE.md accuracy |
-| `/dev-team:extract` | Borges memory extraction — spawns Borges, verifies metrics and memory formation |
-| `/dev-team:scorecard` | Audit process conformance — verify Borges, findings, metrics, memory, issue closure |
-| `/merge` | Merge a PR with monitoring — Copilot check, auto-merge, CI verification, deferred finding enforcement |
+| Skill                 | What it does                                                                                          |
+| --------------------- | ----------------------------------------------------------------------------------------------------- |
+| `/dev-team:task`      | Iterative task loop — implement, review, fix defects, repeat until clean                              |
+| `/dev-team:review`    | Parallel multi-agent review — spawns agents based on changed file patterns                            |
+| `/dev-team:audit`     | Full codebase scan — Szabo (security) + Knuth (quality) + Deming (tooling)                            |
+| `/dev-team:challenge` | Critical examination of a proposal or design decision                                                 |
+| `/dev-team:retro`     | Audit knowledge base health — learnings, agent memory, CLAUDE.md accuracy                             |
+| `/dev-team:extract`   | Borges memory extraction — spawns Borges, verifies metrics and memory formation                       |
+| `/dev-team:scorecard` | Audit process conformance — verify Borges, findings, metrics, memory, issue closure                   |
+| `/merge`              | Merge a PR with monitoring — Copilot check, auto-merge, CI verification, deferred finding enforcement |
 
 ## Step-by-step usage guide
 
@@ -211,6 +211,7 @@ Reviewers produce classified findings:
 ### 4. Commit
 
 Once all defects are resolved:
+
 - Tracking file is deleted
 - Pre-commit gate allows the commit
 - Memory files are updated with learnings
@@ -226,16 +227,19 @@ If you try to commit with pending reviews, the pre-commit gate **blocks**:
 ### 5. Other workflows
 
 **Review a PR or branch:**
+
 ```
 /dev-team:review
 ```
 
 **Audit the whole codebase:**
+
 ```
 /dev-team:audit src/
 ```
 
 **Challenge a design before building it:**
+
 ```
 /dev-team:challenge Should we use JWT or session tokens for auth?
 ```
@@ -250,6 +254,7 @@ Every agent uses the same classification:
 - **`[SUGGESTION]`** — Works, but here is a specific improvement. Advisory.
 
 Rules:
+
 1. Every finding must include concrete evidence (file, line, input, scenario)
 2. Only `[DEFECT]` blocks — everything else is advisory
 3. When agents disagree: one exchange each, then escalate to the human
@@ -301,11 +306,11 @@ Add file-pattern-to-agent mappings in `.dev-team/config.json`:
 
 ### Preset bundles
 
-| Preset | Agents included |
-|--------|----------------|
-| `backend` | Voss, Hamilton, Szabo, Knuth, Beck, Deming, Brooks, Conway |
-| `fullstack` | All 14 agents |
-| `data` | Voss, Szabo, Knuth, Beck, Deming, Tufte |
+| Preset      | Agents included                                            |
+| ----------- | ---------------------------------------------------------- |
+| `backend`   | Voss, Hamilton, Szabo, Knuth, Beck, Deming, Brooks, Conway |
+| `fullstack` | All 14 agents                                              |
+| `data`      | Voss, Szabo, Knuth, Beck, Deming, Tufte                    |
 
 Drucker (orchestrator) and Borges (librarian) are included in all presets. For non-fullstack presets, invoke Drucker with `@dev-team-drucker` for automatic delegation.
 

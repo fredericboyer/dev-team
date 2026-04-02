@@ -1,4 +1,5 @@
 # ADR-038: Runtime-native directory layout
+
 Date: 2026-03-30
 Status: accepted
 Supersedes: ADR-036 (agent path decisions), ADR-025 (customization-only policy for .claude/)
@@ -31,6 +32,7 @@ Skills install directly to `.claude/skills/` with no intermediate `.dev-team/ski
 ### 4. `.dev-team/` retains operational files
 
 `.dev-team/` keeps files that are dev-team operational artifacts, not runtime-native:
+
 - `config.json` — dev-team preferences and version tracking
 - `hooks/*.js` — hook script files (referenced by `.claude/settings.json`)
 - `metrics.md` — calibration metrics log
@@ -40,6 +42,7 @@ Skills install directly to `.claude/skills/` with no intermediate `.dev-team/ski
 ### 5. Migration strategy
 
 `dev-team update` auto-migrates v2.x installations:
+
 - Detects `.dev-team/agents/` and moves files to `.claude/agents/` (renaming `.md` to `.agent.md`)
 - Detects `.dev-team/agent-memory/` and moves to `.claude/agent-memory/`
 - Removes `.dev-team/skills/` symlinks (skills already in `.claude/skills/`)
@@ -49,12 +52,14 @@ Skills install directly to `.claude/skills/` with no intermediate `.dev-team/ski
 ## Consequences
 
 ### Easier
+
 - Agent discovery works natively in Claude Code without explicit references
 - No symlink maintenance or repair logic needed
 - Skills work reliably across platforms and worktrees
 - Memory is colocated with agents in the runtime's expected location
 
 ### Harder
+
 - Breaking change requires major version bump (v3.0.0)
 - Existing v2.x users need to run `dev-team update` to migrate
 - Documentation and templates need path updates across the codebase

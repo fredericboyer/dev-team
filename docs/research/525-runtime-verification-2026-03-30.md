@@ -19,6 +19,7 @@ Should dev-team's review step include optional runtime verification (browser tes
 **Interaction model**: Structured CLI commands (`open`, `snapshot`, `click`, `fill`, `screenshot`). Snapshots produce YAML files with element references (`@e1`, `@e2`) that subsequent commands use. Deterministic and scriptable.
 
 **Setup requirements**:
+
 - Node.js 18+
 - `npm install -g @playwright/cli@latest`
 - `playwright-cli install` (downloads Chromium)
@@ -27,6 +28,7 @@ Should dev-team's review step include optional runtime verification (browser tes
 **Token efficiency**: ~27,000 tokens per typical session vs ~114,000 for Playwright MCP — roughly 4x reduction. Snapshots save to disk; screenshots never enter context unless explicitly read.
 
 **Strengths**:
+
 - Official Microsoft backing, active maintenance
 - Deterministic scripts — reproducible results
 - Excellent token efficiency via file-based snapshots
@@ -36,6 +38,7 @@ Should dev-team's review step include optional runtime verification (browser tes
 - Already a skill available in the Claude Code skill registry (`playwright-cli`)
 
 **Weaknesses**:
+
 - Requires Node.js and Chromium binary installation (~400MB)
 - File-based output means the agent manages cleanup
 - No natural-language interaction — requires structured commands
@@ -49,6 +52,7 @@ Should dev-team's review step include optional runtime verification (browser tes
 **Interaction model**: Structured CLI commands, similar to Playwright CLI. Uses snapshot-ref pattern (`agent-browser snapshot -i` produces refs like `@e2`). Despite marketing suggesting "natural language", the actual interaction is command-based through bash.
 
 **Setup requirements**:
+
 - `npm install -g agent-browser` (or Homebrew/Cargo)
 - `agent-browser install` (downloads Chrome for Testing)
 - Maintains a background daemon for session state between commands
@@ -56,6 +60,7 @@ Should dev-team's review step include optional runtime verification (browser tes
 **Token efficiency**: ~3,000-5,000 tokens per page (per independent testing). Better than MCP-based tools but worse than Playwright CLI.
 
 **Strengths**:
+
 - Fast native Rust implementation
 - Auth Vault for credential storage
 - Network mocking built-in
@@ -64,6 +69,7 @@ Should dev-team's review step include optional runtime verification (browser tes
 - Vercel is a trusted source in `skill-recommendations.json`
 
 **Weaknesses**:
+
 - Vercel Labs project (experimental, not mainline Vercel)
 - Windows path normalization issues reported
 - 2-6x more tokens per page than Playwright CLI
@@ -75,11 +81,13 @@ Should dev-team's review step include optional runtime verification (browser tes
 **What it would look like**: Define a `RuntimeVerifier` interface in dev-team that accepts a configuration object (URL, scenarios, expected outcomes). The reviewer agent invokes whatever browser tool the project has installed.
 
 **Strengths**:
+
 - No forced dependency on any specific tool
 - Projects already using Playwright, Cypress, or Puppeteer can plug in
 - Aligns with dev-team's platform-neutral design principles
 
 **Weaknesses**:
+
 - Claude Code already has skill discovery — if a project has `playwright-cli` or `agent-browser` installed, the agent can use it
 - A generic interface adds abstraction without adding capability
 - The agent already adapts to available tools; a rigid interface constrains this
@@ -101,6 +109,7 @@ Add a conditional step to the review skill: if the project has a `runtimeVerific
 A post-change hook detects UI file changes and triggers browser verification. Results feed into the review.
 
 **Recommendation**: Option A (reviewer invokes directly) combined with skill recommendations. The reviewer agent already has Bash access and can detect browser tools. No new orchestration is needed. Dev-team's role is to:
+
 1. Recommend installation of `playwright-cli` skill for web projects (via `skill-recommendations.json`)
 2. Add guidance to reviewer agent definitions about when to invoke runtime verification
 3. Allow users to configure verification URLs and scenarios in `.dev-team/config.json`
@@ -126,13 +135,13 @@ This is lightweight, optional, and tool-agnostic. The reviewer reads the config 
 
 ## Which projects benefit?
 
-| Project type | Benefit | Notes |
-|-------------|---------|-------|
-| Web apps with UI | High | Primary use case. Catches visual regressions, broken interactions |
-| APIs with Swagger/docs UI | Low | Swagger UI is generated; little value in browser-testing it |
-| CLI tools | None | No browser surface |
-| Libraries | None | No browser surface |
-| Desktop apps (Electron) | Medium | agent-browser has Electron support; Playwright can connect to CDP |
+| Project type              | Benefit | Notes                                                             |
+| ------------------------- | ------- | ----------------------------------------------------------------- |
+| Web apps with UI          | High    | Primary use case. Catches visual regressions, broken interactions |
+| APIs with Swagger/docs UI | Low     | Swagger UI is generated; little value in browser-testing it       |
+| CLI tools                 | None    | No browser surface                                                |
+| Libraries                 | None    | No browser surface                                                |
+| Desktop apps (Electron)   | Medium  | agent-browser has Electron support; Playwright can connect to CDP |
 
 Detection heuristic: presence of `react`, `vue`, `next`, `angular`, `svelte` in dependencies + existence of HTML/JSX/TSX files in changed set.
 
@@ -141,12 +150,14 @@ Detection heuristic: presence of `react`, `vue`, `next`, `angular`, `svelte` in 
 **Recommendation: Do not bind. Use skill recommendations + agent guidance.**
 
 Rationale:
+
 1. **Claude Code already has skill discovery.** If `playwright-cli` is installed, Claude will use it. Dev-team does not need to duplicate this.
 2. **The skill registry already works.** `skill-recommendations.json` already recommends Playwright for projects with `@playwright/test` or `playwright` in dependencies. Expanding this to recommend `playwright-cli` for web projects is a one-line change.
 3. **A generic interface adds abstraction without capability.** The agent adapts to available tools. A rigid interface constrains this natural adaptation.
 4. **Configuration should be minimal.** URL + scenarios in config.json is enough. The agent picks the tool.
 
 If a specific tool must be recommended, **Playwright CLI is the safer choice**:
+
 - Microsoft backing vs Vercel Labs (experimental)
 - 4x better token efficiency than MCP, and better than agent-browser
 - Already in the trusted sources list
@@ -187,6 +198,7 @@ This keeps dev-team tool-agnostic while enabling runtime verification for web pr
 ## Confidence level
 
 **Medium-High.** The tool landscape is well-documented and independently benchmarked. The recommendation to avoid tool binding aligns with dev-team's design principles (platform-neutral, discoverable-only). Confidence would increase with:
+
 - Direct benchmarking of Playwright CLI in a review agent context (token cost within a full review session)
 - User feedback on whether the config model (`url` + `scenarios`) is sufficient
 

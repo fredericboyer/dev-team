@@ -1,4 +1,5 @@
 # ADR-023: Cross-model reviewer assignment for high-risk changes
+
 Date: 2026-03-24
 Status: proposed
 
@@ -28,6 +29,7 @@ cross_model: openai:o3      # Preferred alternative model for cross-validation
 ```
 
 The `cross_model` field is:
+
 - **Optional** — agents without it run on their ADR-008 assigned tier as today
 - **Ignored** by current runtimes that only support Claude models
 - **Recommended** for reviewer agents (Szabo, Knuth, Brooks) on high-risk changes
@@ -36,11 +38,13 @@ The `cross_model` field is:
 ### Integration with ADR-008 model tiers
 
 ADR-008's model assignment strategy remains the primary mechanism:
+
 - Opus for read-only analysis agents (Szabo, Knuth, Brooks)
 - Opus for the orchestrator (Drucker)
 - Sonnet for implementation agents
 
 Cross-model assignment is an **overlay**, not a replacement. The `model` field remains the default. `cross_model` is activated only when:
+
 1. The runtime supports non-Claude models
 2. The change is classified as high-risk (security-sensitive, auth, crypto, or DEEP review depth)
 3. The orchestrator (Drucker) explicitly requests cross-model validation
@@ -48,11 +52,13 @@ Cross-model assignment is an **overlay**, not a replacement. The `model` field r
 ### When to use cross-model validation
 
 Cross-model validation is recommended for:
+
 - Security-sensitive changes (Szabo's domain): auth flows, token handling, crypto, session management
 - Architectural boundary changes (Brooks's domain): module boundaries, dependency direction changes, new public APIs
 - Changes triggering DEEP review depth from complexity-based triage (R8)
 
 Cross-model validation is NOT recommended for:
+
 - LIGHT review depth changes (typo fixes, comment updates)
 - Implementation tasks (code generation should remain single-model for consistency)
 - Documentation-only changes

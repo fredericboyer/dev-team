@@ -11,7 +11,6 @@ Proactively monitor all GitHub Advanced Security signals for this repository.
 ## Steps
 
 1. **Run all checks in parallel** using the Bash tool with `gh api`. Derive {owner}/{repo} from `gh repo view --json nameWithOwner --jq .nameWithOwner`:
-
    - Code scanning alerts (CodeQL, code quality): `gh api --paginate repos/{owner}/{repo}/code-scanning/alerts?state=open`
    - Dependabot alerts (vulnerable dependencies): `gh api --paginate repos/{owner}/{repo}/dependabot/alerts?state=open`
    - Secret scanning alerts: `gh api --paginate repos/{owner}/{repo}/secret-scanning/alerts?state=open`
@@ -20,13 +19,13 @@ Proactively monitor all GitHub Advanced Security signals for this repository.
 
 2. **Report findings** in a summary table:
 
-| Signal | Status | Details |
-|--------|--------|---------|
-| Code Scanning (CodeQL) | X open alerts | severity breakdown |
-| Dependabot Security | X open alerts | affected packages |
-| Dependabot Updates | X pending PRs | age of oldest |
-| Secret Scanning | X open alerts | types |
-| Copilot Review | X comments on open PRs | blocking? |
+| Signal                 | Status                 | Details            |
+| ---------------------- | ---------------------- | ------------------ |
+| Code Scanning (CodeQL) | X open alerts          | severity breakdown |
+| Dependabot Security    | X open alerts          | affected packages  |
+| Dependabot Updates     | X pending PRs          | age of oldest      |
+| Secret Scanning        | X open alerts          | types              |
+| Copilot Review         | X comments on open PRs | blocking?          |
 
 3. **Classify findings:**
    - `[DEFECT]` — Critical/high severity security alerts, exposed secrets

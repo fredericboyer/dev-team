@@ -1,11 +1,14 @@
 # Dev Team — Project Process
+
 <!-- Project-specific. Not overwritten by dev-team update. -->
 <!-- Customize the sections below for your project's workflow. -->
 
 ## Versioning
+
 <!-- How does this project version releases? -->
 
 Follow semantic versioning (semver). Read the project's manifest file for the current version.
+
 - **Patch** — bug fixes, hotfixes
 - **Minor** — new features, non-breaking changes
 - **Major** — breaking changes
@@ -15,11 +18,13 @@ Follow semantic versioning (semver). Read the project's manifest file for the cu
 Every issue must target the right milestone or iteration based on its scope. This applies at all points — batch pre-assessment, ad-hoc issue creation mid-session, or backlog grooming. If obvious, just assign. Flag ambiguous cases to the human (e.g., a change that could be considered breaking).
 
 ## Branching
+
 <!-- What branch naming convention does this project use? -->
 
 Use descriptive branch names that reference the issue being worked on.
 
 ## Integration
+
 <!-- How are changes integrated? PRs? Direct commits? Review requirements? -->
 
 All changes via pull request. Link the deliverable to the originating issue so it auto-closes on merge. Include the issue-closing keyword appropriate for your platform (e.g., `Closes #NNN` for GitHub, `Closes <PROJ>-NNN` for Jira/Linear).
@@ -27,6 +32,7 @@ All changes via pull request. Link the deliverable to the originating issue so i
 Ensure CI is green and reviews have passed before merging. If the project provides merge automation (a `/merge` skill or similar), use it; otherwise, confirm the deliverable is in a mergeable state and report readiness.
 
 ## Release
+
 <!-- How are releases cut? Manual or automated? Who approves? -->
 
 The release engineer (Conway) handles release readiness validation, version bumps, changelogs, and release deliverables.
@@ -56,17 +62,18 @@ When working on multiple independent issues, combine agent teams with worktree i
 - **Review/read-only agents** should assess whether they need access to an implementer's worktree (to run tests or read changed files in context), or should work in their own isolation for independent analysis.
 
 **Agent teammate naming convention:** Use `{agent}-{role}[-{qualifier}]`:
+
 - `{agent}` — dev-team agent name (lowercase): `voss`, `deming`, `szabo`, etc.
 - `{role}` — action: `implement`, `review`, `research`, `audit`, `extract`
 - `{qualifier}` — optional, for disambiguation (e.g., issue number, feature name)
 
-| Role suffix | When used | Examples |
-|-------------|-----------|---------|
-| `-implement` | Implementing agent on a task branch | `voss-implement`, `deming-implement-auth` |
-| `-review` | Reviewer in a review wave | `szabo-review`, `knuth-review` |
-| `-research` | Turing research brief | `turing-research`, `turing-research-caching` |
-| `-audit` | Full codebase audit pass | `szabo-audit`, `knuth-audit` |
-| `-extract` | Borges memory extraction | `borges-extract` |
+| Role suffix  | When used                           | Examples                                     |
+| ------------ | ----------------------------------- | -------------------------------------------- |
+| `-implement` | Implementing agent on a task branch | `voss-implement`, `deming-implement-auth`    |
+| `-review`    | Reviewer in a review wave           | `szabo-review`, `knuth-review`               |
+| `-research`  | Turing research brief               | `turing-research`, `turing-research-caching` |
+| `-audit`     | Full codebase audit pass            | `szabo-audit`, `knuth-audit`                 |
+| `-extract`   | Borges memory extraction            | `borges-extract`                             |
 
 Drucker coordinates the review wave after all implementations complete.
 
@@ -77,6 +84,7 @@ When issues are sequenced due to file conflicts, ensure each completed change is
 ### Handling unresponsive agents
 
 Background agents can get stuck without producing output. Apply this escalation pattern:
+
 1. If an agent has not reported progress (status file, message, or commit) within **2 minutes**, send a status ping via `SendMessage`.
 2. If no response within **1 additional minute**, terminate the agent.
 3. Assess what was completed: check for partial output (status files, commits, branch changes).

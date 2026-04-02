@@ -27,6 +27,7 @@ This brief surveys the current landscape of agent runtime configuration, identif
 **Discovery**: Agents locate the nearest AGENTS.md in the directory tree. The closest file takes precedence. Monorepos can use nested files per subproject. Codex's implementation walks from Git root to CWD, checking for `AGENTS.override.md` then `AGENTS.md` in each directory.
 
 **What it does NOT define**:
+
 - Hooks or lifecycle events
 - Skills or callable commands
 - Memory or state persistence
@@ -38,6 +39,7 @@ This brief surveys the current landscape of agent runtime configuration, identif
 **Assessment**: AGENTS.md is the de facto standard for the instruction layer — the lowest common denominator. It covers only one of dev-team's six artifact types (rules/instructions). It cannot express hooks, skills, memory, or multi-agent coordination.
 
 Sources:
+
 - [AGENTS.md official site](https://agents.md/)
 - [AGENTS.md GitHub repo](https://github.com/agentsmd/agents.md)
 - [OpenAI Codex AGENTS.md guide](https://developers.openai.com/codex/guides/agents-md)
@@ -51,12 +53,14 @@ Sources:
 **What it is**: A JSON-RPC client-server protocol enabling LLMs to access external tools, resources, and data through standardized mechanisms. It is an integration layer for tool access, not an agent definition format.
 
 **What it covers**:
+
 - Tool definitions (name, description, input schema)
 - Resource access (data retrieval)
 - Prompt templates
 - Transport: stdio, HTTP+SSE, Streamable HTTP
 
 **What it does NOT cover (today)**:
+
 - Agent behavioral instructions (that's AGENTS.md's domain)
 - Agent-to-agent communication (on the 2026 roadmap)
 - Hook/event lifecycle
@@ -70,6 +74,7 @@ Sources:
 **Assessment**: MCP is the standard for tool integration, not for agent definitions. dev-team's hooks could potentially be exposed as MCP tools, but the protocol cannot express behavioral instructions, skill workflows, or memory. MCP is complementary to AGENTS.md, not a replacement.
 
 Sources:
+
 - [MCP Specification](https://modelcontextprotocol.io/specification/2025-11-25)
 - [2026 MCP Roadmap](http://blog.modelcontextprotocol.io/posts/2026-mcp-roadmap/)
 - [MCP GitHub](https://github.com/modelcontextprotocol/modelcontextprotocol)
@@ -78,12 +83,12 @@ Sources:
 
 Four protocols address agent interoperability at different levels. None target coding agent configuration specifically:
 
-| Protocol | Scope | Relevance to dev-team |
-|----------|-------|-----------------------|
-| **MCP** | Tool invocation for LLMs | High — tool integration layer |
-| **A2A** (Google, v0.3) | Agent-to-agent task delegation via Agent Cards + JSON-RPC | Low — enterprise orchestration, not IDE agents |
-| **ACP** (Agent Communication Protocol) | REST-native async agent messaging | Low — infrastructure-level |
-| **ANP** (Agent Network Protocol) | Decentralized P2P agent discovery via DIDs | Low — internet-scale, not project-level |
+| Protocol                               | Scope                                                     | Relevance to dev-team                          |
+| -------------------------------------- | --------------------------------------------------------- | ---------------------------------------------- |
+| **MCP**                                | Tool invocation for LLMs                                  | High — tool integration layer                  |
+| **A2A** (Google, v0.3)                 | Agent-to-agent task delegation via Agent Cards + JSON-RPC | Low — enterprise orchestration, not IDE agents |
+| **ACP** (Agent Communication Protocol) | REST-native async agent messaging                         | Low — infrastructure-level                     |
+| **ANP** (Agent Network Protocol)       | Decentralized P2P agent discovery via DIDs                | Low — internet-scale, not project-level        |
 
 **W3C**: AI Agent Protocol Community Group developing web-based agent discovery and collaboration. WebMCP allows websites to expose JS functionality as agent tools.
 
@@ -92,6 +97,7 @@ Four protocols address agent interoperability at different levels. None target c
 **Assessment**: No W3C/IETF standard addresses coding agent configuration portability. The AAIF (AGENTS.md + MCP + goose) is the closest thing to a governing body for this space.
 
 Sources:
+
 - [Agent Interoperability Protocols Survey (arXiv)](https://arxiv.org/html/2505.02279v1)
 - [Google A2A Announcement](https://developers.googleblog.com/en/a2a-a-new-era-of-agent-interoperability/)
 - [IETF Agentic AI Standards blog](https://www.ietf.org/blog/agentic-ai-standards/)
@@ -101,23 +107,24 @@ Sources:
 ## Part 2: Runtime Capability Matrix
 
 ### Legend
+
 - **Full**: Native, documented support
 - **Partial**: Limited or workaround-based
 - **None**: Not supported
 - **Via MCP**: Available through MCP server integration
 
-| Capability | Claude Code | GitHub Copilot | Cursor | Windsurf | Codex CLI | Gemini CLI | Amazon Q Dev | Aider | Cline |
-|------------|-------------|---------------|--------|----------|-----------|------------|-------------|-------|-------|
-| **Instruction file** | CLAUDE.md | copilot-instructions.md + AGENTS.md | .cursor/rules/ | .windsurf/rules/ | AGENTS.md | GEMINI.md | JSON config | CONVENTIONS.md | .clinerules/ |
-| **AGENTS.md support** | None (requested) | Full | Full | Full | Full (native) | Full | Unknown | Full | Full |
-| **Directory hierarchy** | Full (.claude/) | Full (.github/) | Full (.cursor/rules/) | Full (.windsurf/rules/) | Full (.codex/, .agents/) | Full (nested GEMINI.md) | Partial (.qdeveloper/) | Partial | Full (.clinerules/) |
-| **Path-scoped rules** | Full (rules/*.md) | Full (.instructions.md + applyTo glob) | Full (glob in rule frontmatter) | Full (activation modes) | Partial (directory nesting) | Partial (directory nesting) | Partial (glob in JSON) | None | Partial |
-| **Hooks/events** | Full (12 events) | None | None | None | Partial (5 events, beta) | None | Partial (hooks in JSON) | None | None |
-| **Skills/commands** | Full (slash commands via SKILL.md) | Partial (Copilot Extensions) | None | Partial (Workflows) | Full (.agents/skills/) | None | None | None | None |
-| **Memory persistence** | Full (rules + agent memory) | None | None | Partial (Cascade memories) | None | Partial (/memory command) | None | None | None |
-| **Multi-agent coordination** | Full (agent teams, subagents) | None | None | None | None | None | None | None | None |
-| **MCP support** | Full | Full | Full | Full | Full | Full | Full | None | Full |
-| **Frontmatter in instructions** | Yes (YAML in agents, skills) | Yes (.instructions.md) | Yes (MDC format) | Yes (activation mode) | No (AGENTS.md) / Yes (skills) | No | N/A (JSON) | No | No |
+| Capability                      | Claude Code                        | GitHub Copilot                         | Cursor                          | Windsurf                   | Codex CLI                     | Gemini CLI                  | Amazon Q Dev            | Aider          | Cline               |
+| ------------------------------- | ---------------------------------- | -------------------------------------- | ------------------------------- | -------------------------- | ----------------------------- | --------------------------- | ----------------------- | -------------- | ------------------- |
+| **Instruction file**            | CLAUDE.md                          | copilot-instructions.md + AGENTS.md    | .cursor/rules/                  | .windsurf/rules/           | AGENTS.md                     | GEMINI.md                   | JSON config             | CONVENTIONS.md | .clinerules/        |
+| **AGENTS.md support**           | None (requested)                   | Full                                   | Full                            | Full                       | Full (native)                 | Full                        | Unknown                 | Full           | Full                |
+| **Directory hierarchy**         | Full (.claude/)                    | Full (.github/)                        | Full (.cursor/rules/)           | Full (.windsurf/rules/)    | Full (.codex/, .agents/)      | Full (nested GEMINI.md)     | Partial (.qdeveloper/)  | Partial        | Full (.clinerules/) |
+| **Path-scoped rules**           | Full (rules/\*.md)                 | Full (.instructions.md + applyTo glob) | Full (glob in rule frontmatter) | Full (activation modes)    | Partial (directory nesting)   | Partial (directory nesting) | Partial (glob in JSON)  | None           | Partial             |
+| **Hooks/events**                | Full (12 events)                   | None                                   | None                            | None                       | Partial (5 events, beta)      | None                        | Partial (hooks in JSON) | None           | None                |
+| **Skills/commands**             | Full (slash commands via SKILL.md) | Partial (Copilot Extensions)           | None                            | Partial (Workflows)        | Full (.agents/skills/)        | None                        | None                    | None           | None                |
+| **Memory persistence**          | Full (rules + agent memory)        | None                                   | None                            | Partial (Cascade memories) | None                          | Partial (/memory command)   | None                    | None           | None                |
+| **Multi-agent coordination**    | Full (agent teams, subagents)      | None                                   | None                            | None                       | None                          | None                        | None                    | None           | None                |
+| **MCP support**                 | Full                               | Full                                   | Full                            | Full                       | Full                          | Full                        | Full                    | None           | Full                |
+| **Frontmatter in instructions** | Yes (YAML in agents, skills)       | Yes (.instructions.md)                 | Yes (MDC format)                | Yes (activation mode)      | No (AGENTS.md) / Yes (skills) | No                          | N/A (JSON)              | No             | No                  |
 
 ### Key Observations
 
@@ -138,15 +145,18 @@ Sources:
 ## Part 3: Common Denominator Analysis
 
 ### Universally Portable (works on all runtimes)
+
 - **Markdown instructions**: Project context, coding conventions, behavioral guidelines
 - **MCP tools**: External tool integration (8/9 runtimes)
 
 ### Partially Portable (works on 2-3 runtimes)
+
 - **Skills/commands**: Claude Code + Codex CLI (different formats, same concept)
 - **Hooks/events**: Claude Code + Codex CLI (similar event model, different config)
 - **Path-scoped rules**: Claude Code, Copilot, Cursor, Windsurf (different frontmatter)
 
 ### Not Portable (single runtime only)
+
 - **Multi-agent coordination**: Claude Code only
 - **Agent definitions with YAML frontmatter**: Claude Code format
 - **Structured memory**: Claude Code format
@@ -155,14 +165,14 @@ Sources:
 
 dev-team's value proposition rests on capabilities that are **not** in the portable intersection:
 
-| dev-team Artifact | Portability |
-|-------------------|-------------|
+| dev-team Artifact | Portability                                                                                                    |
+| ----------------- | -------------------------------------------------------------------------------------------------------------- |
 | Agent definitions | NOT portable — behavioral Markdown is portable, but frontmatter (tools, model, memory) is Claude Code-specific |
-| Skills | Partially portable — Codex CLI has a similar concept (.agents/skills/) |
-| Hooks | Partially portable — Codex CLI has a beta hook system |
-| Rules | Highly portable — Markdown instructions work everywhere |
-| Settings | NOT portable — .claude/settings.json is Claude Code-specific |
-| Memory | NOT portable — structured agent memory is Claude Code-only |
+| Skills            | Partially portable — Codex CLI has a similar concept (.agents/skills/)                                         |
+| Hooks             | Partially portable — Codex CLI has a beta hook system                                                          |
+| Rules             | Highly portable — Markdown instructions work everywhere                                                        |
+| Settings          | NOT portable — .claude/settings.json is Claude Code-specific                                                   |
+| Memory            | NOT portable — structured agent memory is Claude Code-only                                                     |
 
 ---
 
@@ -173,11 +183,13 @@ dev-team's value proposition rests on capabilities that are **not** in the porta
 **Approach**: Express all agent instructions as plain AGENTS.md files. Drop hooks, skills, memory, and multi-agent features.
 
 **Pros**:
+
 - Works on 20+ runtimes today
 - Zero maintenance burden — the format is trivial
 - AAIF governance provides stability
 
 **Cons**:
+
 - Loses 80% of dev-team's value (adversarial review loops, hooks, skills, memory calibration)
 - AGENTS.md has a 150-line best practice / 32KB hard limit — dev-team's agent definitions alone exceed this
 - No enforcement — all instructions are advisory with no hook-based gates
@@ -200,12 +212,14 @@ dev-team canonical format
 ```
 
 **Pros**:
+
 - Preserves full capability on capable runtimes (Claude Code, Codex CLI)
 - Graceful degradation — less capable runtimes get what they can support
 - Single source of truth — agent definitions authored once
 - Adapter pattern is proven (Babel, PostCSS, Terraform providers)
 
 **Cons**:
+
 - Significant engineering investment (one adapter per runtime)
 - Must track runtime format changes (cursor just migrated .cursorrules to .cursor/rules/)
 - Feature gap creates confusing "works on Claude Code but not on Cursor" situations
@@ -218,12 +232,14 @@ dev-team canonical format
 **Approach**: Express dev-team's agents, skills, and hooks as MCP servers. Runtimes that support MCP get full capability.
 
 **Pros**:
+
 - MCP is supported by 8/9 runtimes evaluated
 - Tool definitions map naturally to MCP tool schemas
 - MCP servers can run arbitrary logic (equivalent to hooks)
 - Future MCP agent-to-agent features could enable multi-agent portability
 
 **Cons**:
+
 - MCP defines tool interfaces, not behavioral instructions — agent definitions still need a separate format
 - MCP servers require a runtime process (Node.js, Python) — heavier than static Markdown files
 - MCP cannot express "read this context before every request" — that's AGENTS.md's job
@@ -258,6 +274,7 @@ Canonical agent definition (dev-team format)
 ```
 
 **Pros**:
+
 - Maximum reach: AGENTS.md works everywhere, MCP works on 8/9 runtimes
 - Maximum depth: native features used where available
 - Graceful degradation: instruction-only runtimes still get behavioral context
@@ -265,6 +282,7 @@ Canonical agent definition (dev-team format)
 - Future-proof: as MCP gains agent communication, the enforcement layer strengthens
 
 **Cons**:
+
 - Most complex to implement
 - Three layers to maintain instead of one
 - MCP enforcement server is a new component to build and ship
@@ -299,15 +317,15 @@ Canonical agent definition (dev-team format)
 
 ### Half-Life Estimates
 
-| Format | Estimated Half-Life | Reasoning |
-|--------|-------------------|-----------|
-| AGENTS.md | 3+ years | AAIF governance, near-universal adoption |
-| MCP | 3+ years | AAIF governance, enterprise investment |
-| CLAUDE.md | 2+ years | Anthropic's primary format, large user base |
-| .cursor/rules/ | 1-2 years | Already migrated once, Cursor supports AGENTS.md |
-| .windsurf/rules/ | 1-2 years | Already migrated once, Windsurf supports AGENTS.md |
-| .github/copilot-instructions.md | 2+ years | GitHub platform, but AGENTS.md also supported |
-| Runtime-specific hooks formats | Unknown | No standard emerging, high fragmentation risk |
+| Format                          | Estimated Half-Life | Reasoning                                          |
+| ------------------------------- | ------------------- | -------------------------------------------------- |
+| AGENTS.md                       | 3+ years            | AAIF governance, near-universal adoption           |
+| MCP                             | 3+ years            | AAIF governance, enterprise investment             |
+| CLAUDE.md                       | 2+ years            | Anthropic's primary format, large user base        |
+| .cursor/rules/                  | 1-2 years           | Already migrated once, Cursor supports AGENTS.md   |
+| .windsurf/rules/                | 1-2 years           | Already migrated once, Windsurf supports AGENTS.md |
+| .github/copilot-instructions.md | 2+ years            | GitHub platform, but AGENTS.md also supported      |
+| Runtime-specific hooks formats  | Unknown             | No standard emerging, high fragmentation risk      |
 
 ---
 
@@ -316,29 +334,34 @@ Canonical agent definition (dev-team format)
 **Adopt Option D (Hybrid)** with a phased implementation:
 
 ### Phase 1: Canonical Format + AGENTS.md Export (Low effort, high reach)
+
 - Define a canonical agent definition format (superset of AGENTS.md)
 - Add an AGENTS.md export adapter to `dev-team init` — generates AGENTS.md from agent definitions
 - This immediately gives dev-team users instruction-layer portability across 20+ runtimes
 - No changes to Claude Code-native artifacts
 
 ### Phase 2: MCP Enforcement Server (Medium effort, high value)
+
 - Build a dev-team MCP server that exposes review gates, hook logic, and skill execution as MCP tools
 - Runtimes that support MCP (8/9) get enforcement without native hooks
 - This is the key unlock for Copilot, Cursor, Windsurf portability — they get enforcement through MCP
 
 ### Phase 3: Runtime Adapters for Capable Runtimes (Medium effort, targeted)
+
 - Codex CLI adapter: generate hooks.json + .agents/skills/ from canonical format
 - Copilot adapter: generate .instructions.md files with applyTo globs
 - Cursor/Windsurf adapters: generate native rule files
 - These provide native-feel integration where the runtime supports it
 
 ### Phase 4: Monitor and Adapt (Ongoing)
+
 - Track AGENTS.md spec evolution under AAIF
 - Track MCP agent communication features (2026 roadmap)
 - Track Claude Code AGENTS.md adoption
 - Re-evaluate when MCP agent-to-agent communication lands
 
 ### What NOT to Do
+
 - Do not drop Claude Code-native features to chase portability
 - Do not build adapters for every runtime — focus on the top 3-4 by market share
 - Do not wait for a single standard to emerge — the hybrid approach hedges correctly
@@ -395,6 +418,7 @@ Canonical agent definition (dev-team format)
 The instruction layer (AGENTS.md) and tool integration layer (MCP) are well-documented with clear adoption data. The runtime capability matrix is based on official documentation for all nine runtimes. The architectural recommendation follows established patterns (adapter, facade).
 
 Confidence would increase to High with:
+
 - Hands-on testing of Codex CLI hooks and skills (to validate adapter feasibility)
 - Confirmation of Claude Code's stance on AGENTS.md
 - Prototype of the MCP enforcement server (to validate the hybrid approach)

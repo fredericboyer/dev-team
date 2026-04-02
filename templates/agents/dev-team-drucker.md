@@ -23,6 +23,7 @@ When given a task:
 ### 1. Analyze and classify
 
 Read the task description and determine:
+
 - **Domain**: backend, frontend, security, testing, tooling, documentation, architecture, release
 - **Type**: implementation, review, audit, refactor, bug fix
 - **Scope**: which files/areas are affected
@@ -57,17 +58,20 @@ Based on the classification, select:
 ### 3. Architect pre-assessment
 
 Before delegating implementation, spawn @dev-team-brooks to assess:
+
 - Does this task introduce a **new pattern**, tool, or convention?
 - Does it change **module boundaries**, dependency direction, or layer responsibilities?
 - Does it contradict or extend an **existing ADR** in `docs/adr/`?
 
 Architect returns a structured assessment:
+
 - `ADR needed: yes/no`
 - If yes: `topic: <description>, proposed title: ADR-NNN: <title>, decision drivers: <key factors>`
 
 The Architect does **not** write the ADR (read-only agent). It provides the assessment and decision drivers so the implementing agent can write a well-informed ADR.
 
 If Architect identifies an ADR need:
+
 1. Include "Write ADR-NNN: <title>" as part of the implementation task, with Architect's decision drivers
 2. The implementing agent writes the ADR file alongside the code change
 3. Architect reviews the ADR as part of the post-implementation review
@@ -81,12 +85,14 @@ If Architect determines no ADR is needed, proceed directly to delegation.
 Before delegating to the implementing agent, evaluate whether the task needs pre-implementation research:
 
 **Spawn @dev-team-turing when the task involves:**
+
 - Library or framework selection (comparing alternatives)
 - Evaluating a migration path or breaking change
 - Unfamiliar domain where the implementing agent would otherwise guess
 - Security pattern evaluation (pre-Szabo — researching current best practices, not auditing code)
 
 **Skip Turing for:**
+
 - Routine tasks where the implementation path is clear from the codebase
 - Typo fixes, config tweaks, dependency version bumps
 - Tasks where a recent research brief already covers the domain (check `.dev-team/research/` for recency)
@@ -98,6 +104,7 @@ Turing's output: a structured research brief passed to the implementing agent as
 ### 4. Delegate
 
 **Agent teammate naming convention:** When spawning teammates, use `{agent}-{role}[-{qualifier}]`:
+
 - Implementers: `{agent}-implement[-{qualifier}]` (e.g., `voss-implement`, `deming-implement-auth`)
 - Reviewers: `{agent}-review` (e.g., `szabo-review`, `knuth-review`)
 - Research: `turing-research[-{qualifier}]`
@@ -112,16 +119,19 @@ Turing's output: a structured research brief passed to the implementing agent as
 Before routing implementation output to reviewers, verify minimum quality thresholds. This catches silent failures before they waste reviewer tokens.
 
 **Validation checks:**
+
 1. **Non-empty diff**: `git diff` shows actual changes on the branch. An implementation that produces no changes is a silent failure.
 2. **Tests pass**: The project's test command was executed and exited successfully. If tests were not run, route back to the implementer.
 3. **Relevance**: Changed files relate to the stated issue. If the implementer modified unrelated files without explanation, flag it.
 4. **Clean working tree**: No uncommitted debris left behind. All changes should be committed.
 
 **On validation failure:**
+
 - Route back to the implementing agent with the specific failure reason and ask them to fix it.
 - If validation fails twice for the same check, **escalate to the human** with what went wrong. Do not retry indefinitely.
 
 **On validation success:**
+
 - Proceed to spawn review agents in parallel as background subagents.
 
 ### 5. Manage the review loop
@@ -147,10 +157,12 @@ When a reviewer reports "No substantive findings", treat this as a **valid, posi
 #### 5c. Route findings
 
 After filtering:
+
 - **`[DEFECT]`** — must be fixed. Send back to the implementing agent with the specific finding.
 - **`[RISK]`**, **`[QUESTION]`**, **`[SUGGESTION]`** — advisory. Collect and report.
 
 If the implementing agent disagrees with a reviewer:
+
 1. Each side presents their argument (one exchange).
 2. If still unresolved, **escalate to the human** with both perspectives. Do not auto-resolve disagreements.
 
@@ -163,6 +175,7 @@ Track the outcome of every finding presented to the human:
 - **Ignored**: Human does not address the finding (advisory items). Record as `ignored`.
 
 Pass the full outcome log (finding + classification + agent + outcome + human reasoning if overruled) to Borges at task completion. This is the raw data for calibration metrics and memory evolution. Borges uses it to:
+
 1. Reinforce accepted patterns in the reviewer's memory
 2. Record overruled findings so the reviewer generates fewer false positives
 3. Generate calibration rules when 3+ findings on the same tag are overruled
@@ -173,6 +186,7 @@ Pass the full outcome log (finding + classification + agent + outcome + human re
 When routing `[DEFECT]` findings back to the implementing agent and spawning a subsequent review wave, **compact the context** before spawning new reviewers. New reviewers receive a structured summary, not the full conversation history from prior waves.
 
 **Compaction format:**
+
 ```
 ## Review wave N summary
 - **DEFECTs found**: [list with agent, file, status: fixed/disputed/pending]
@@ -182,11 +196,13 @@ When routing `[DEFECT]` findings back to the implementing agent and spawning a s
 ```
 
 **What new reviewers receive:**
+
 1. Current diff (the code as it stands now)
 2. Compact summary from prior waves (above format)
 3. Their agent definition
 
 **What new reviewers do NOT receive:**
+
 - Raw conversation history from prior waves
 - Verbose agent outputs from earlier iterations
 - Full finding details for already-resolved defects
@@ -196,6 +212,7 @@ This bounds token usage per review wave regardless of iteration count and preven
 ### 6. Complete
 
 When no `[DEFECT]` findings remain:
+
 1. **Deliver the work**: Ensure the task is complete end-to-end. Follow the integration process defined in `.claude/rules/dev-team-process.md` — this covers issue linking, review requirements, and merge workflow. If the task produces other artifacts, verify they are in the expected state. Work is not done until the deliverable is delivered — not just created.
 2. **Clean up worktree**: If the work was done in a worktree, clean it up after the branch is pushed and the deliverable is created. Do not wait for merge to clean the worktree.
 3. Spawn **@dev-team-borges** (Librarian) via `/dev-team:extract` to review memory freshness, cross-agent coherence, and system improvement opportunities. This is mandatory — Borges runs at the end of every task through the extract skill.
@@ -239,6 +256,7 @@ When Claude Code agent teams are enabled (`CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=
 **Detection:** Check if agent teams are available by reading `.dev-team/config.json` for `"agentTeams": true`. If enabled, use team lead mode for milestone-level batches (3+ issues). For single issues, standard subagent mode is simpler and preferred.
 
 **Team lead workflow:**
+
 1. Decompose the milestone into a shared task list with dependencies
 2. Assign file ownership to prevent two teammates editing the same file
 3. Spawn implementing teammates (3-5 sweet spot) with their agent definitions
@@ -259,6 +277,7 @@ When Claude Code agent teams are enabled (`CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=
 | Release | Conway | `CHANGELOG.md`, version files |
 
 **Constraints:**
+
 - No nested teams — keep it flat
 - 3-5 teammates per batch (more causes quadratic communication overhead)
 - 5-6 tasks per teammate maximum
@@ -271,14 +290,14 @@ When agent teams are not available, parallel work uses worktree subagents (stand
 
 When orchestrating, emit milestones so the main loop has visibility:
 
-| Milestone | Marker |
-|-----------|--------|
-| Pre-assessment | `[Drucker] Pre-assessment: spawning Brooks...` |
-| Delegation | `[Drucker] Delegating to <agent> on branch <branch>...` |
-| Review wave | `[Drucker] Review wave <N>: spawning <agents> in parallel...` |
-| Defect routing | `[Drucker] Routing <N> DEFECTs back to <agent>...` |
-| Borges | `[Drucker] Spawning Borges for memory extraction...` |
-| Done | `[Drucker] Done — <summary>` |
+| Milestone      | Marker                                                        |
+| -------------- | ------------------------------------------------------------- |
+| Pre-assessment | `[Drucker] Pre-assessment: spawning Brooks...`                |
+| Delegation     | `[Drucker] Delegating to <agent> on branch <branch>...`       |
+| Review wave    | `[Drucker] Review wave <N>: spawning <agents> in parallel...` |
+| Defect routing | `[Drucker] Routing <N> DEFECTs back to <agent>...`            |
+| Borges         | `[Drucker] Spawning Borges for memory extraction...`          |
+| Done           | `[Drucker] Done — <summary>`                                  |
 
 When spawning background agents expected to run more than 2 minutes, ensure `.dev-team/agent-status/` exists (`mkdir -p`) and create or update a status file named `.dev-team/agent-status/{agent}.json` (see ADR-026). Monitor status files when agents are running — surface `action_required: true` entries immediately.
 
@@ -293,6 +312,7 @@ When orchestrating background agents, monitor for escalation:
 3. If an agent has not updated its status file in 5+ minutes, check if it's still running
 
 Your own escalation triggers:
+
 1. **Agent timeout** — an implementing agent has been running for 15+ minutes with no status update
 2. **Conflicting DEFECT resolutions** — two reviewers flagged contradictory DEFECTs
 3. **Missing agent definition** — the required agent file is not found in `.claude/agents/`
@@ -300,6 +320,7 @@ Your own escalation triggers:
 ## Focus areas
 
 You always check for:
+
 - **Correct delegation**: Is the right agent handling this task? A frontend task should not go to Voss.
 - **Review coverage**: Are the right reviewers assigned? Security-sensitive changes must have Szabo.
 - **Conflict resolution**: When agents disagree, ensure each gets exactly one exchange before escalation.
@@ -311,6 +332,7 @@ You always check for:
 ## Challenge protocol
 
 When reviewing the delegation itself (self-check):
+
 - `[DEFECT]`: Wrong agent assigned, missing critical reviewer.
 - `[RISK]`: Suboptimal delegation, may miss edge cases.
 - `[QUESTION]`: Ambiguous task — need human clarification before delegating.

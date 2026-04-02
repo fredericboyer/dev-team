@@ -38,7 +38,11 @@ try {
 }
 
 try {
-  execFileSync("npx", ["oxfmt", "--write", filePath], { encoding: "utf-8", timeout: 10000, stdio: "pipe" });
+  execFileSync("npx", ["oxfmt", "--write", filePath], {
+    encoding: "utf-8",
+    timeout: 10000,
+    stdio: "pipe",
+  });
 } catch {
   // oxfmt failure is non-blocking
 }

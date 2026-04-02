@@ -11,16 +11,18 @@
  * - Warns if branch name lacks issue number
  */
 
-'use strict';
+"use strict";
 
 let input = {};
 try {
-  input = JSON.parse(process.argv[2] || '{}');
+  input = JSON.parse(process.argv[2] || "{}");
 } catch (err) {
-  console.warn(`[dev-team issue-pr-enforce] Warning: Failed to parse hook input, allowing operation. ${err.message}`);
+  console.warn(
+    `[dev-team issue-pr-enforce] Warning: Failed to parse hook input, allowing operation. ${err.message}`,
+  );
   process.exit(0);
 }
-const command = (input.tool_input && input.tool_input.command) || '';
+const command = (input.tool_input && input.tool_input.command) || "";
 
 function isGitCommit(cmd) {
   return /\bgit\s+commit\b/.test(cmd);
@@ -51,7 +53,7 @@ function branchHasIssueNumber(cmd) {
 if (isGitCommit(command)) {
   if (!hasIssueRef(command)) {
     console.error(
-      'Commit must reference a GitHub Issue. Use "fixes #123" or "refs #123" in your commit message.'
+      'Commit must reference a GitHub Issue. Use "fixes #123" or "refs #123" in your commit message.',
     );
     process.exit(2);
   }
@@ -59,17 +61,13 @@ if (isGitCommit(command)) {
 
 // Block direct push to main/master
 if (isPushToMain(command)) {
-  console.error(
-    'Direct push to main/master is blocked. Create a PR instead.'
-  );
+  console.error("Direct push to main/master is blocked. Create a PR instead.");
   process.exit(2);
 }
 
 // Warn if new branch lacks issue number
 if (isNewBranch(command) && !branchHasIssueNumber(command)) {
-  console.log(
-    'Advisory: Branch name should include issue number (e.g., feat/123-description).'
-  );
+  console.log("Advisory: Branch name should include issue number (e.g., feat/123-description).");
 }
 
 process.exit(0);

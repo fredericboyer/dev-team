@@ -50,6 +50,7 @@ For tasks classified as **COMPLEX**, negotiate acceptance criteria before implem
 1. The implementing agent proposes **3-5 testable acceptance criteria** based on the task description and Brooks' pre-assessment. Criteria must specify **WHAT** (observable outcomes) not **HOW** (implementation details).
 
    Example criteria format:
+
    ```
    - [ ] New API endpoint returns 200 with valid payload and 422 with invalid input
    - [ ] Existing integration tests continue to pass without modification
@@ -67,20 +68,21 @@ Before the first iteration, the implementing agent should research current best 
 
 ## Four-step model
 
-The task skill orchestrates four steps per branch. Each step has a clear entry condition, responsibility, and exit condition. Both single-issue and parallel modes use these same steps — the orchestration mode only changes *when* and *how many* branches run concurrently.
+The task skill orchestrates four steps per branch. Each step has a clear entry condition, responsibility, and exit condition. Both single-issue and parallel modes use these same steps — the orchestration mode only changes _when_ and _how many_ branches run concurrently.
 
-| Step | Responsibility | Entry condition | Exit condition |
-|------|---------------|-----------------|----------------|
-| **1. Implement** | Agent works on branch, validates output | Task assigned | Non-empty diff, tests pass, PR created |
-| **2. Review** | Adversarial review, finding routing, defect fixing | PR exists | Zero `[DEFECT]`s, all findings acknowledged |
-| **3. Merge** | Merge via `/merge` skill, CI verification | Review passed | PR merged |
-| **4. Extract** | Borges memory extraction, metrics | All branches merged | Metrics recorded, memory updated |
+| Step             | Responsibility                                     | Entry condition     | Exit condition                              |
+| ---------------- | -------------------------------------------------- | ------------------- | ------------------------------------------- |
+| **1. Implement** | Agent works on branch, validates output            | Task assigned       | Non-empty diff, tests pass, PR created      |
+| **2. Review**    | Adversarial review, finding routing, defect fixing | PR exists           | Zero `[DEFECT]`s, all findings acknowledged |
+| **3. Merge**     | Merge via `/merge` skill, CI verification          | Review passed       | PR merged                                   |
+| **4. Extract**   | Borges memory extraction, metrics                  | All branches merged | Metrics recorded, memory updated            |
 
 ## Phase checkpoints
 
 At each phase boundary, emit a structured status line before proceeding. This gives the human visibility into long-running task loops.
 
 **Single-issue mode:**
+
 ```
 [dev-team:task] Step 1/4: Implement — <agent> on <branch>...
 [dev-team:task] Step 2/4: Review — /dev-team:review --embedded (round <N>)...
@@ -90,6 +92,7 @@ At each phase boundary, emit a structured status line before proceeding. This gi
 ```
 
 **Parallel mode (multiple issues):**
+
 ```
 [dev-team:task] Parallel mode — <N> branches
 [dev-team:task] <branch>: Step 1 complete — starting review
@@ -108,6 +111,7 @@ The implementing agent works on the task on a feature branch.
 **Timeout**: If the implementing agent has not reported progress (status file, message, or commit) within 2 minutes, send a status ping. If no response within 1 additional minute, terminate the agent, assess what was completed, and either resume the work yourself or re-spawn a fresh agent with the remaining tasks.
 
 **Validation** — before exiting Step 1, verify:
+
 - Non-empty diff: `git diff` shows actual changes
 - Tests pass: test command executed with exit code 0
 - Relevance: changed files relate to the stated issue
@@ -127,6 +131,7 @@ The implementing agent works on the task on a feature branch.
 - **If pre-assessment was skipped** (bug fixes, typo fixes, config tweaks): default to LIGHT review.
 
 Call `/dev-team:review --embedded [--light]` with the current branch or PR as the argument. The review skill handles:
+
 - Agent selection based on changed file patterns (full set for FULL review, single reviewer for LIGHT)
 - Spawning reviewers in parallel as background tasks
 - Timeout handling for unresponsive reviewers
@@ -142,22 +147,25 @@ Receive the review report and proceed to finding routing below.
 Route **all classified findings** to the implementing agent — not just `[DEFECT]`s. **Implementing agents must remain alive until all findings have been routed and acknowledged.** If an implementer was terminated prematurely, re-spawn it with a compact context (findings + their original diff) for acknowledgment.
 
 **For `[DEFECT]` findings** (these block progress):
+
 - **Address** (`fixed`): fix the defect in the next iteration
 - **Dispute** (`overruled`): disagree with the finding (triggers one-round escalation — reviewer responds, then human decides)
-DEFECTs cannot be deferred or ignored — they must be fixed or explicitly overruled.
+  DEFECTs cannot be deferred or ignored — they must be fixed or explicitly overruled.
 
 **For advisory findings** (`[RISK]`, `[QUESTION]`, `[SUGGESTION]`):
+
 - **Address** (`accepted`): incorporate the finding
 - **Defer** (`deferred`): accept but defer to a follow-up issue (must state reason and issue number)
 - **Dispute** (`overruled`): disagree (same escalation as above)
 - **Ignore** (`ignored`): explicitly decline to act (must state reason — e.g., out of scope, not applicable)
-Advisory findings must be acknowledged but do not prevent the loop from exiting.
+  Advisory findings must be acknowledged but do not prevent the loop from exiting.
 
 The orchestrator verifies that **all** findings have an explicit outcome before exiting Step 2. Findings without an explicit outcome block the exit — there is no automatic fallback.
 
 ### Iteration within Step 2
 
 After the implementer has acknowledged all findings, **compact the context** before the next review round:
+
 - Produce a structured summary: all findings (agent, classification, file, status/outcome), files changed, outstanding items
 - This compact summary is available in the task skill's context for continuity across rounds
 
@@ -204,7 +212,9 @@ When multiple issues are being addressed in a single session, the task loop swit
 **Mode selection:** If agent teams are enabled (check `.dev-team/config.json` for `"agentTeams": true`), use team lead mode for batches of 3+ issues. Otherwise, use standard worktree subagent mode. For single issues, always use standard mode.
 
 ### Phase 0: Brooks pre-assessment (batch)
+
 Spawn @dev-team-brooks once with all issues. Brooks identifies:
+
 - **File independence**: which issues touch overlapping files (conflict groups that must run sequentially)
 - **ADR needs** across the batch
 - **Architectural interactions** between issues
@@ -213,6 +223,7 @@ Spawn @dev-team-brooks once with all issues. Brooks identifies:
 Issues in the same conflict group execute sequentially. Independent issues proceed in parallel.
 
 ### Step 1 (parallel): Implementation
+
 Drucker spawns one implementing agent per independent issue, each on its own branch (`feat/<issue>-<description>`). Use the agent teammate naming convention: `{agent}-implement[-{qualifier}]` (e.g., `voss-implement`, `deming-implement-auth`, `tufte-implement-319`). Agents work concurrently without awareness of each other. Drucker tracks which issues are assigned to which agents and branches in conversation context.
 
 **Sequential chains:** For sequential chains, verify the previous change is integrated before starting the next dependent task. Do not start multiple sequential agents from the same stale baseline — this causes integration conflicts that negate the sequencing benefit.
@@ -220,6 +231,7 @@ Drucker spawns one implementing agent per independent issue, each on its own bra
 **Sequential chain gate:** When issues are sequenced due to file conflicts, verify the previous change is integrated into the shared codebase before starting the next dependent task. Do not spawn the next agent until integration is confirmed. This is a hard gate.
 
 ### Steps 2–3 (per-branch, as each PR lands)
+
 Review each branch **the moment its implementing agent finishes** — do not wait for all implementations to complete. As soon as an agent reports completion and passes Step 1 validation (non-empty diff, tests pass, relevance, clean tree), immediately call `/dev-team:review --embedded [--light]` for that branch (using `--light` for SIMPLE branches, omitting it for COMPLEX branches).
 
 This means reviews and implementations run concurrently: some branches are under review while others are still being implemented. For sequential chains, the first branch in a chain enters review while the next dependent branch is being implemented — though the next branch still waits for the predecessor to merge before starting.
@@ -229,10 +241,13 @@ If a branch's review finds zero `[DEFECT]` findings and all advisory findings ar
 Finding routing follows the same rules as Step 2 above. Disputes block only the affected branch, not the entire batch.
 
 ### Step 4 (once, after all branches)
+
 Borges runs **once** across all branches after all per-branch reviews have cleared and all branches are merged. Pass Borges the multi-branch finding outcome log. This ensures cross-branch coherence.
 
 ### Convergence criteria
+
 Parallel mode is complete when:
+
 1. All branches have zero `[DEFECT]` findings, OR the per-branch iteration limit (default: 10) is reached
 2. All branches are merged
 3. Borges has run across all branches

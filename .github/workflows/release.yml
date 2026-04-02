@@ -2,7 +2,7 @@ name: Release
 
 on:
   push:
-    tags: ['v[0-9]*']
+    tags: ["v[0-9]*"]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -37,7 +37,7 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: 22
-          cache: 'npm'
+          cache: "npm"
 
       - run: npm ci
 
@@ -57,7 +57,7 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: 22
-          cache: 'npm'
+          cache: "npm"
 
       - run: npm ci
 
@@ -74,7 +74,7 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: 22
-          cache: 'npm'
+          cache: "npm"
 
       - run: npm ci
 
@@ -116,8 +116,8 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: 22
-          registry-url: 'https://registry.npmjs.org'
-          cache: 'npm'
+          registry-url: "https://registry.npmjs.org"
+          cache: "npm"
 
       - run: npm ci
 

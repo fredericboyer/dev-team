@@ -1,4 +1,5 @@
 # ADR-007: TypeScript migration with oxlint/oxfmt
+
 Date: 2026-03-22
 Status: accepted
 

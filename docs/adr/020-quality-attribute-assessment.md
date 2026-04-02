@@ -1,8 +1,10 @@
 # ADR-020: Quality attribute assessment via expanded Brooks agent
+
 Date: 2026-03-23
 Status: accepted
 
 ## Context
+
 The dev-team adversarial review system had deep, specialized coverage for security (Szabo) and correctness (Knuth), but several important quality dimensions had no dedicated reviewer:
 
 - **Performance**: algorithm complexity, hot path impact, resource lifecycle, I/O patterns
@@ -12,10 +14,12 @@ The dev-team adversarial review system had deep, specialized coverage for securi
 These dimensions were only caught incidentally -- when a reviewer happened to notice an issue outside their primary lens. There was no systematic coverage.
 
 Two approaches were considered:
+
 1. Add new specialist agents (e.g., a "Perf" agent, a "Maintainability" agent)
 2. Expand an existing agent whose lens naturally encompasses these concerns
 
 ## Decision
+
 Expand Brooks (Architect) to include a "Quality Attribute Assessment" section covering performance, maintainability, and scalability. Brooks becomes always-on for all non-test implementation code changes, matching the trigger scope of Knuth.
 
 ### Design principle: "Depth justifies separation, breadth justifies consolidation"
@@ -31,11 +35,13 @@ Every quality attribute finding must cite a **measurable criterion**, **concrete
 ### Scope boundaries
 
 Brooks covers:
+
 - Performance (algorithm complexity, hot paths, resource lifecycle, I/O patterns)
 - Maintainability (cognitive complexity, naming, abstraction consistency, hidden coupling)
 - Scalability (data growth, concurrency, bottlenecks)
 
 Brooks explicitly does NOT cover:
+
 - **Security** -- owned by Szabo (threat modeling, attack surface, vulnerability patterns)
 - **Correctness/reliability** -- owned by Knuth (edge cases, boundary conditions, coverage gaps)
 - **Usability/UX** -- owned by Mori (user-facing lens)
@@ -47,6 +53,7 @@ Brooks explicitly does NOT cover:
 Brooks previously triggered only on architectural boundary files (/adr/, /core/, /domain/, /lib/, build config). Now triggers on all non-test implementation code files -- the same scope as Knuth. The architectural boundary patterns still trigger Brooks with the "architectural boundary touched" message; the new always-on trigger adds "quality attribute review" for all other code files.
 
 ## Consequences
+
 - Brooks becomes the third always-on reviewer alongside Szabo and Knuth, increasing review coverage but also review volume
 - Quality dimensions that were previously uncovered now have systematic assessment
 - The measurability requirement prevents finding inflation -- Brooks cannot flag vague concerns

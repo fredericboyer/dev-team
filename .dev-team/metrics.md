@@ -1,9 +1,11 @@
 # Agent Calibration Metrics
+
 <!-- Appendable log of per-task agent performance metrics. -->
 <!-- Borges records an entry after each task cycle. -->
 <!-- Used by /dev-team:retro to track acceptance rates and signal quality over time. -->
 
 ## Format
+
 <!-- Each entry follows this structure:
 ### [YYYY-MM-DD] Task: <issue or PR reference>
 - **Agents**: implementing: <agent>, reviewers: <agent1, agent2, ...>
@@ -17,6 +19,7 @@
 ## Entries
 
 ### [2026-03-25] Task: v1.2.0 release (#275, #274, #273, #266, #265)
+
 - **Agents**: implementing: Deming, reviewers: Knuth
 - **Rounds**: 2
 - **Findings**:
@@ -38,6 +41,7 @@
   - **Status (2026-03-26):** All 7 deferred findings resolved (issues closed). 100% conversion rate.
 
 ### [2026-03-26] Task: v1.5.0 delivery (#353, #354, #355, #356, #357, #358, #359, #364, #368, #374, #351, #348, #335, #325)
+
 - **Agents**: implementing: Voss, Deming, Tufte, Turing; pre-assessment: Brooks; reviewers: Copilot
 - **Rounds**: 1
 - **Findings**:
@@ -52,6 +56,7 @@
 - **Notes**: Largest batch to date. All findings addressed in first pass — zero deferred, zero overruled. Copilot was the primary code reviewer. Key themes: path correctness (findings #7, #12), null safety in merge logic (#1-3), documentation precision (#4-6, #9-11), and platform field backfill (#15-16). Process improvement: merge-as-you-go for sequential chains (#18).
 
 ### [2026-03-26] Task: v1.5.1 hotfix (#397)
+
 - **Agents**: implementing: Deming (main loop), reviewers: Copilot
 - **Rounds**: 1
 - **Findings**:
@@ -65,6 +70,7 @@
 - **Notes**: Small hotfix — process.md guarded from overwrite on reinstall. The 5 ignored findings were all about hook/config files referencing paths that only exist after local install (not committed to repo). One DEFECT fixed: contradiction in process.md between "never modify .dev-team/" and process.md being user-editable.
 
 ### [2026-03-26] Audit: Full codebase audit (Issues #431–#441)
+
 - **Agents**: reviewers: Szabo (security), Knuth (quality), Deming (tooling)
 - **Rounds**: 1
 - **Findings**:
@@ -79,6 +85,7 @@
 - **Notes**: First full codebase audit. 37 findings across 3 agents, zero overrules. Key themes: symlink hardening (Szabo), migration drift in doctor/status (Knuth + Deming cross-validated), hook code duplication (Deming), test coverage gaps (Knuth). 2 DEFECTs deferred to v1.6.1 patch rather than fixed in-audit.
 
 ### [2026-03-26] Task: v1.6.0 delivery (#409, #410, #411, #395, #385, #402, #388, #392, #401, #386, #393, #387, #391, #406, #405, #352)
+
 - **Agents**: implementing: Deming, Tufte, Voss (#406), Turing (research #406, #407); pre-assessment: Brooks; reviewers: Copilot
 - **Rounds**: 1
 - **Findings**:
@@ -92,6 +99,7 @@
 - **Notes**: Major architectural release — research-first approach (Turing #406, #407). Key outcomes: rules-based shared context (ADR-033), language delegation (ADR-034), skill invocation control, process-driven agents, design principles codified. No formal review wave was run; Copilot was the sole code reviewer. All Copilot findings addressed inline during merge. Merge-as-you-go enforced successfully — no stale-branch issues (unlike v1.5.0 early delivery).
 
 ### [2026-03-27] Task: v1.7.0 delivery (#433, #434, #435, #436, #437, #438, #439, #440, #441, #445, #446, #447)
+
 - **Agents**: implementing: Deming, Voss, Beck, Tufte, Turing; reviewers: Szabo, Knuth, Brooks
 - **Rounds**: 1
 - **Findings**:
@@ -107,6 +115,7 @@
 - **Notes**: First formal review wave with in-team agents since v1.2.0 (v1.5.0-v1.6.0 used Copilot-only). 12 issues addressed (10 closed via PRs, 2 moved to v1.8.0), all audit-derived tech debt from v1.6.0. Key themes: symlink hardening (Szabo), path correctness (Knuth — 4th instance), process.exit stub pattern (cross-agent convergence by Szabo+Knuth+Brooks on same finding). Operational issue: agent teams sharing working directory caused cross-branch contamination — 3 stray commits on wrong branches, 1 agent re-spawn needed. Worktree isolation recommended for future multi-branch work.
 
 ### [2026-03-29] Task: v1.9.0 delivery (#485, #486) — PRs #492, #496
+
 - **Agents**: implementing: Deming, reviewers: Szabo, Knuth, Brooks; research: Turing
 - **Rounds**: 1 per branch (2 branches)
 - **Findings**:
@@ -123,6 +132,7 @@
 - **Notes**: First v1.9.0 delivery with full adversarial review loop restored (v1.8.0 had process gap). Skill composability pattern established — /dev-team:extract and /dev-team:review --embedded are now sub-skills of /dev-team:task. Turing research brief on adversarial review health thresholds (#490) produced calibration data. Retro ran pre-implementation. 3 issues created from retro (#489, #490, #491), 2 from review (#493, #494). Clean approve from Szabo (security-neutral refactor). Higher ignore rate (50%) reflects advisory findings on minor wording — no functional issues.
 
 ### [2026-03-29] Task: v1.10.0 retro-derived fixes (#489, #490, #493, #494) — PRs #509, #510, #511, #512
+
 - **Agents**: implementing: Deming (#489/#490/#494), Tufte (#493); reviewers: Szabo, Knuth, Brooks; research: Turing; extract: Borges
 - **Rounds**: 1 per branch (4 branches)
 - **Findings**:
@@ -140,6 +150,7 @@
 - **[RISK] Zero-overrule alert**: Rolling overrule rate is 0% at n>=87 in-team findings (v1.2.0 through v1.10.0). Per research brief #490, healthy adversarial review shows 1-10% overrule rate (acceptance rate healthy band: 60-85%). Current acceptance rate (60%) is within the healthy band but overrule rate at 0% warrants investigation: are agents pushing hard enough, or is the human accepting reflexively?
 
 ### [2026-03-29] Task: v1.8.0 delivery (#447, #456, #457, #458, #459, #460, #461, #462, #465, #466, #467, #468)
+
 - **Agents**: implementing: orchestrator (direct), reviewers: Copilot
 - **Rounds**: 1 per branch
 - **Findings**:
@@ -153,6 +164,7 @@
 - **Notes**: v1.8.0 delivered without `/dev-team:task` or dev-team agent reviews. All implementation by orchestrator directly. Copilot was sole reviewer. ~30 Copilot findings across 12 PRs, all addressed. Key PRs with substantive findings: #475 (8 findings on symlink guards — 5 fixed, 3 acknowledged), #479 (mergeClaudeMd edge case), #478 (readFile docstring). Process gap: no adversarial review loop, no Borges extraction during delivery. This post-hoc extraction fills the memory gap. Key deliverables: worktree serialization hooks (INFRA_HOOKS), task skill 4-step decomposition, assertNoSymlinkInPath, readFile error hardening, mergeClaudeMd boundary fix, 18 new tests.
 
 ### [2026-03-29] Task: v1.10.1 hotfix (#515) — PR #516
+
 - **Agents**: implementing: Deming, reviewers: Szabo, Knuth, Brooks
 - **Rounds**: 1
 - **Findings**:
@@ -169,6 +181,7 @@
 - **[RISK] Zero-overrule alert**: Rolling overrule rate remains 0% at n>=94 in-team findings (v1.2.0 through v1.10.1). Per research brief #490, healthy adversarial review shows 1-10% overrule rate.
 
 ### [2026-03-29] Task: v1.11.0 delivery (#519-#548) — PRs #550-#557
+
 - **Agents**: implementing: Deming, Beck, Tufte; reviewers: Szabo, Knuth, Brooks
 - **Rounds**: 1 per PR (8 PRs)
 - **Findings**:
@@ -186,6 +199,7 @@
 - **[RISK] Zero-overrule alert**: Rolling overrule rate remains 0% at n>=112 in-team findings (v1.2.0 through v1.11.0). Per research brief #490, healthy adversarial review shows 1-10% overrule rate. Acceptance rate (6%) is below the healthy band (60-85%) but this is attributable to the release scope (hardening/docs) rather than signal quality. When excluding pure-hardening releases, the rolling acceptance rate is within the healthy band.
 
 ### [2026-03-30] Task: v1.11.1 hotfix (#563) — PR #565
+
 - **Agents**: implementing: Deming, reviewers: Knuth
 - **Rounds**: 1 (LIGHT)
 - **Findings**:
@@ -199,6 +213,7 @@
 - **[RISK] Zero-overrule alert**: Rolling overrule rate remains 0% at n>=113 in-team findings (v1.2.0 through v1.11.1).
 
 ### [2026-03-30] Task: v2.0 multi-runtime portability (#501, #502, #503, #504, #505, #506, #508, #525) — PRs #569, #570, #571, #572
+
 - **Agents**: implementing: Deming; reviewers: Szabo, Knuth, Brooks; research: Turing; extract: Borges
 - **Rounds**: 1 per branch (4 branches)
 - **Findings**:
@@ -214,4 +229,3 @@
 - **Duration**: single session, 4 branches
 - **Notes**: First MAJOR release. Research-first (Turing #508, #525) → 2 ADRs (036, 037). 5 runtime adapters (claude, agents-md, copilot, codex, cursor, windsurf) + MCP enforcement server. ~3,300 new lines, 8 new test files, 554 total tests. Key architectural patterns: adapter registry (ADR-036), MCP enforcement (ADR-037), canonical format as identity of current format. Dual code path (hook vs MCP) flagged as tech debt. Duplicate import in init.ts noted for cleanup.
 - **[RISK] Zero-overrule alert**: Rolling overrule rate remains 0% at n>=148 in-team findings (v1.2.0 through v2.0). Per research brief #490, healthy adversarial review shows 1-10% overrule rate. Acceptance rate (~75%) is within the healthy band (60-85%).
-

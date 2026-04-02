@@ -1,4 +1,5 @@
 # ADR-027: Turing pre-implementation researcher agent
+
 Date: 2026-03-25
 Status: accepted
 
