@@ -70,6 +70,10 @@ const MIGRATIONS: Migration[] = [
     version: "1.0.0",
     skillRemovals: ["dev-team-merge", "dev-team-security-status"],
   },
+  {
+    version: "3.1.1",
+    skillRemovals: ["merge"],
+  },
 ];
 
 /**
