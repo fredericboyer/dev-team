@@ -49,7 +49,15 @@ function loadPatterns() {
         if (re === null) {
           const src = Array.isArray(p) ? p[0] : p;
           const check = safeRegex(src);
-          console.error('[dev-team] skipping unsafe pattern in "' + key + '": ' + src + ' (' + check.reason + ')');
+          console.error(
+            '[dev-team] skipping unsafe pattern in "' +
+              key +
+              '": ' +
+              src +
+              " (" +
+              check.reason +
+              ")",
+          );
           continue;
         }
         compiled.push(re);
@@ -65,7 +73,9 @@ function loadPatterns() {
       if (re === null) {
         const src = Array.isArray(value.pattern) ? value.pattern[0] : value.pattern;
         const check = safeRegex(src);
-        console.error('[dev-team] skipping unsafe pattern in "' + key + '": ' + src + ' (' + check.reason + ')');
+        console.error(
+          '[dev-team] skipping unsafe pattern in "' + key + '": ' + src + " (" + check.reason + ")",
+        );
         continue;
       }
       result[key] = { compiled: re };

@@ -25,7 +25,10 @@ describe("agent-patterns safeRegex integration", () => {
       for (const entry of entries) {
         const source = Array.isArray(entry) ? entry[0] : entry;
         const result = safeRegex(source);
-        assert.ok(result.safe, "pattern " + source + " in " + key + " should be safe: " + result.reason);
+        assert.ok(
+          result.safe,
+          "pattern " + source + " in " + key + " should be safe: " + result.reason,
+        );
       }
     }
   });
@@ -35,12 +38,17 @@ describe("agent-patterns safeRegex integration", () => {
     var libTmpDir = path.join(tmpDir, "lib");
     fs.mkdirSync(libTmpDir);
     fs.copyFileSync(path.join(libDir, "safe-regex.js"), path.join(libTmpDir, "safe-regex.js"));
-    fs.copyFileSync(path.join(libDir, "agent-patterns.js"), path.join(libTmpDir, "agent-patterns.js"));
+    fs.copyFileSync(
+      path.join(libDir, "agent-patterns.js"),
+      path.join(libTmpDir, "agent-patterns.js"),
+    );
     var fakeData = { testCat: { agent: "test", label: "test", patterns: ["safe", "(.*)+"] } };
     fs.writeFileSync(path.join(tmpDir, "agent-patterns.json"), JSON.stringify(fakeData));
     var warnings = [];
     var origErr = console.error;
-    console.error = function(m) { warnings.push(m); };
+    console.error = function (m) {
+      warnings.push(m);
+    };
     try {
       var { loadPatterns } = require(path.join(libTmpDir, "agent-patterns"));
       var result = loadPatterns();
@@ -58,12 +66,17 @@ describe("agent-patterns safeRegex integration", () => {
     var libTmpDir = path.join(tmpDir, "lib");
     fs.mkdirSync(libTmpDir);
     fs.copyFileSync(path.join(libDir, "safe-regex.js"), path.join(libTmpDir, "safe-regex.js"));
-    fs.copyFileSync(path.join(libDir, "agent-patterns.js"), path.join(libTmpDir, "agent-patterns.js"));
+    fs.copyFileSync(
+      path.join(libDir, "agent-patterns.js"),
+      path.join(libTmpDir, "agent-patterns.js"),
+    );
     var fakeData = { bad: { pattern: "(a+)+" }, good: { pattern: "\\.test\\." } };
     fs.writeFileSync(path.join(tmpDir, "agent-patterns.json"), JSON.stringify(fakeData));
     var warnings = [];
     var origErr = console.error;
-    console.error = function(m) { warnings.push(m); };
+    console.error = function (m) {
+      warnings.push(m);
+    };
     try {
       var { loadPatterns } = require(path.join(libTmpDir, "agent-patterns"));
       var result = loadPatterns();
