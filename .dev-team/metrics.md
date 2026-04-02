@@ -215,3 +215,19 @@
 - **Notes**: First MAJOR release. Research-first (Turing #508, #525) → 2 ADRs (036, 037). 5 runtime adapters (claude, agents-md, copilot, codex, cursor, windsurf) + MCP enforcement server. ~3,300 new lines, 8 new test files, 554 total tests. Key architectural patterns: adapter registry (ADR-036), MCP enforcement (ADR-037), canonical format as identity of current format. Dual code path (hook vs MCP) flagged as tech debt. Duplicate import in init.ts noted for cleanup.
 - **[RISK] Zero-overrule alert**: Rolling overrule rate remains 0% at n>=148 in-team findings (v1.2.0 through v2.0). Per research brief #490, healthy adversarial review shows 1-10% overrule rate. Acceptance rate (~75%) is within the healthy band (60-85%).
 
+
+### [2026-04-01] Task: v3.2.0 delivery (22 PRs, 27 issues)
+- **Agents**: implementing: Voss (×8), Deming (×3), Hamilton (×1); pre-assessment: Brooks; reviewers: Copilot (automated); audit: Szabo, Knuth, Deming
+- **Rounds**: Wave 1 (12 agents, 10 PRs) + Wave 2 (8 agents, 7 PRs) + direct orchestrator (5 PRs)
+- **Findings**:
+  - Copilot: ~60 inline comments across 22 PRs (addressed via reply + GraphQL thread resolution)
+  - Pre-release audit (Szabo): 0 DEFECT, 4 RISK, 5 SUGGESTION
+  - Pre-release audit (Knuth): 1 DEFECT, 5 RISK, 2 SUGGESTION
+  - Pre-release audit (Deming): 2 DEFECT, 5 RISK, 5 SUGGESTION
+- **Acceptance rate**: ~85% (majority of Copilot findings fixed, remainder tracked in issues)
+- **Overrule rate**: 0%
+- **Fix rate (DEFECTs)**: 100% (3/3 audit DEFECTs fixed in-session)
+- **Defer rate (advisory)**: ~15% (8 findings deferred to v3.3.0 issues #663-667)
+- **Duration**: single session (~4 hours)
+- **Notes**: First use of Mergify merge queue. First use of GraphQL `resolveReviewThread`. Process failures identified and codified: orchestrator validation loop (#653), agent concurrency cap (4-6), task completion verification. 6 PRs initially merged without addressing Copilot comments (follow-up PR #643 fixed). Beck agent retired. Merge skill rewritten (ADR-040). Implement skill extracted (ADR-039).
+- **[RISK] Process regression**: v3.2.0 repeated v1.8.0 pattern — PRs merged without review. Root cause: merge agents didn't follow the merge skill. Fix: Mergify enforces `#review-threads-unresolved = 0` at platform level.

@@ -130,7 +130,6 @@ if (isCodeFile && !isTestFile) {
   }
 }
 
-
 if (flags.length === 0) {
   process.exit(0);
 }
