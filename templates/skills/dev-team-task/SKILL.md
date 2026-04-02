@@ -12,57 +12,7 @@ Start a task loop for: $ARGUMENTS
    - `--max-iterations N` (default: 10)
    - Reviewer selection is handled by `/dev-team:review` based on changed file patterns — no `--reviewers` flag needed
 
-2. Determine the right implementing agent based on the task:
-   - Backend/API/data work -> @dev-team-voss
-   - Frontend/UI work -> @dev-team-mori
-   - Tooling/config -> @dev-team-deming
-   - Documentation -> @dev-team-tufte
-   - Release/versioning -> @dev-team-conway
-   - Infrastructure/CI/Docker/deployment -> @dev-team-hamilton
-
-   For tasks that require **research/investigation** before implementation, optionally spawn @dev-team-turing as a pre-implementation research agent before selecting the implementing agent above. Turing is read-only — it produces research briefs, not code changes.
-
-3. **Architect pre-assessment** (skip for bug fixes, typo fixes, config tweaks):
-   Spawn @dev-team-brooks to assess:
-   - Does this task introduce a new pattern, tool, or convention?
-   - Does it change module boundaries, dependency direction, or layer responsibilities?
-   - Does it contradict or extend an existing ADR?
-
-   Architect returns:
-   - `ADR needed: yes/no`. If yes: `topic: <X>, proposed title: ADR-NNN: <title>`.
-   - `Complexity: SIMPLE | COMPLEX`
-
-   **Complexity classification:**
-   - **SIMPLE** — single-file changes, documentation updates, config tweaks, straightforward bug fixes, test additions for existing code
-   - **COMPLEX** — multi-file changes, new architectural patterns, ADR-needed work, new integrations, cross-module refactors
-
-   The complexity classification determines **review intensity** (see Step 2) and whether a **Definition of Done** negotiation is required (see below).
-
-   If an ADR is needed, include "Write ADR-NNN: <title>" in the implementation task. The implementing agent writes the ADR file. Architect reviews it post-implementation alongside code review.
-
-   **Timeout**: If the pre-assessment agent has not reported progress (status file or message) within 2 minutes, send a status ping. If no response within 1 additional minute, terminate the agent and either perform the pre-assessment yourself or skip it with a note explaining why.
-
-## Definition of Done (COMPLEX tasks only)
-
-For tasks classified as **COMPLEX**, negotiate acceptance criteria before implementation begins. Skip this step entirely for **SIMPLE** tasks.
-
-1. The implementing agent proposes **3-5 testable acceptance criteria** based on the task description and Brooks' pre-assessment. Criteria must specify **WHAT** (observable outcomes) not **HOW** (implementation details).
-
-   Example criteria format:
-   ```
-   - [ ] New API endpoint returns 200 with valid payload and 422 with invalid input
-   - [ ] Existing integration tests continue to pass without modification
-   - [ ] ADR-NNN documents the caching strategy trade-offs
-   - [ ] Config change is backward-compatible with previous schema version
-   ```
-
-2. The orchestrator reviews and confirms the criteria before proceeding to Step 1. If criteria are unclear or incomplete, request revision (one round).
-
-3. Confirmed criteria become the **exit checklist** for Step 1 validation — in addition to the standard validation checks (non-empty diff, tests pass, relevance, clean tree), the implementing agent must demonstrate each criterion is met.
-
-## Pre-implementation: best-practices research
-
-Before the first iteration, the implementing agent should research current best practices relevant to the task — checking official documentation for the tools, frameworks, and platforms involved. This ensures decisions are based on current ecosystem recommendations, not stale assumptions. When current best practices conflict with established codebase conventions, prefer consistency and flag the newer approach as a `[SUGGESTION]` with a migration path.
+2. Agent selection, pre-assessment, and Definition of Done are handled by `/dev-team:implement`. See that skill for details on agent routing, Brooks pre-assessment, and complexity classification.
 
 ## Four-step model
 
@@ -102,20 +52,11 @@ Phase markers are consistent with agent-level progress reporting (ADR-026).
 
 ## Step 1: Implement
 
-The implementing agent works on the task on a feature branch.
+Call `/dev-team:implement --embedded` with the task description. The implement skill handles agent selection, Brooks pre-assessment, Definition of Done negotiation, best-practices research, implementation, validation, and PR creation.
 
-**Timeout**: If the implementing agent has not reported progress (status file, message, or commit) within 2 minutes, send a status ping. If no response within 1 additional minute, terminate the agent, assess what was completed, and either resume the work yourself or re-spawn a fresh agent with the remaining tasks.
+For SIMPLE tasks (or when `--skip-assessment` is appropriate), pass that flag through.
 
-**Validation** — before exiting Step 1, verify:
-- Non-empty diff: `git diff` shows actual changes
-- Tests pass: test command executed with exit code 0
-- Relevance: changed files relate to the stated issue
-- Clean working tree: no uncommitted debris
-- If validation fails, route back to implementer with specific failure reason. If it fails twice, escalate to human.
-
-**Deliver the work**: Create the PR. The PR body must include the platform's issue-closing keyword (e.g., `Closes #NNN` for GitHub, `Closes <PROJ>-NNN` for Jira/Linear — check `.dev-team/config.json` for `platform` and `issueTracker` settings).
-
-**Clean up worktree**: If the work was done in a worktree, clean it up after the branch is pushed and the PR is created. Do not wait for merge to clean the worktree.
+The implement skill returns: branch name, PR number, files changed, complexity classification, and whether an ADR was written. Use the complexity classification to determine review intensity in Step 2.
 
 ## Step 2: Review
 
