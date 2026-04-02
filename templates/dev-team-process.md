@@ -74,14 +74,19 @@ Drucker coordinates the review wave after all implementations complete.
 
 When issues are sequenced due to file conflicts, ensure each completed change is integrated into the shared codebase before starting the next. Working from a stale baseline causes integration conflicts.
 
-### Handling unresponsive agents
+### Orchestration validation loop
 
-Background agents can get stuck without producing output. Apply this escalation pattern:
-1. If an agent has not reported progress (status file, message, or commit) within **2 minutes**, send a status ping via `SendMessage`.
-2. If no response within **1 additional minute**, terminate the agent.
-3. Assess what was completed: check for partial output (status files, commits, branch changes).
-4. Either re-spawn a fresh agent with the remaining work, or complete the work yourself.
-5. Do not wait indefinitely — an unresponsive agent will not recover on its own.
+The orchestrator has a **continuous obligation** to monitor all active work at every turn during any active workflow.
+
+**At every turn, check:**
+
+1. **PR pipeline** — for each open PR: check CI, check unresolved review threads (via GraphQL `reviewThreads`). If CI passes and threads exist: read, reply, resolve via `resolveReviewThread`. Start reviews/merges immediately as each PR lands — don't batch.
+
+2. **Agent liveness** — for each in-progress task: verify a branch or PR exists within 4 minutes. Ping unresponsive agents at 2 minutes. Terminate and re-spawn (or do directly) at 3 minutes. Cap parallel agents at 4-6 per wave.
+
+3. **Task completion verification** — for each "completed" task: verify a PR was actually created. If no PR exists, reopen the task.
+
+4. **Work continuity** — if blocked tasks are now unblocked, spawn the next agent. If pending tasks have no owner, assign or do directly.
 
 ### Drucker delegation note
 
