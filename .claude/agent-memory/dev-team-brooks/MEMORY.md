@@ -179,13 +179,13 @@
 - **Last-verified**: 2026-04-02
 - **Context**: Brooks pre-assessment correctly identified #671 (Mergify ADR) as COMPLEX requiring ADR and FULL review. The FULL review subsequently caught the sole DEFECT. Pre-assessment also correctly identified file independence across the 7 issues, enabling parallelization.
 
-### [2026-04-02] v3.3.0: Branch contamination recurred — 3rd occurrence
+### [2026-04-02] Branch contamination — persistent pattern across releases
 - **Type**: PATTERN [verified]
-- **Source**: v3.3.0 delivery observation
+- **Source**: v3.3.0 + v3.4.0 delivery observations
 - **Tags**: architecture, agent-teams, worktrees, contamination
 - **Outcome**: accepted
-- **Last-verified**: 2026-04-02
-- **Context**: Branch contamination recurred on 3 branches (feat/666, feat/672, feat/671) in shared working directory. Worktree-isolated agents (664, 672-r2, 666-r2, 677-fix) did not experience contamination. Seen: 3 times (v1.7.0, v1.10.0, v3.3.0). Pattern is persistent — worktree isolation is not optional for parallel work.
+- **Last-verified**: 2026-04-03
+- **Context**: Cross-branch contamination recurred in v3.4.0 (PR #694 picked up #688's research doc, PR #698 picked up #691 and #683 files). Additionally, shared file contamination was universal — every worktree agent committed Borges memory and metrics changes from unpushed local main (aeda27f). Seen: 4 times (v1.7.0, v1.10.0, v3.3.0, v3.4.0). Root cause in v3.4.0: worktrees branched from local main with unpushed commits. Worktree isolation prevents cross-branch contamination but not stale-base contamination.
 
 ## Calibration Log
 <!-- Challenges accepted/overruled — tunes adversarial intensity over time -->

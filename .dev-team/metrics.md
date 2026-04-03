@@ -251,3 +251,20 @@
 - **Duration**: single session, 7 branches + 4 research briefs
 - **Notes**: First release with LIGHT/FULL review tier differentiation in practice. All SIMPLE tasks got LIGHT (advisory-only) reviews; the COMPLEX task (#671 — Mergify ADR) got FULL review which caught the sole DEFECT (missing inline comment in .mergify.yml). Branch contamination recurred on 3 branches (feat/666, feat/672, feat/671) — worktree-isolated agents did not experience contamination. 4 Turing research briefs completed (agent coordination, platform capabilities, Kairos memory, harness best practices). GitHub native auto-merge handled all merges despite Mergify being configured. Follow-up issue #683 created for worktree hook hardening.
 - **[RISK] Zero-overrule alert**: Rolling overrule rate remains 0% at n>=199 in-team findings (v1.2.0 through v3.3.0). Per research brief #490, healthy adversarial review shows 1-10% overrule rate. Acceptance rate (71%) is within the healthy band (60-85%).
+
+### [2026-04-03] Task: v3.4.0 delivery (#665, #683, #686, #687, #688, #689, #690, #691, #699, #703, #704)
+- **Agents**: implementing: Voss (#683, #686, #699), Knuth (#665), Turing (research #687, #688, #689, #690, #691), Tufte (docs #703, #704), Conway (release); pre-assessment: Brooks; reviewers: Copilot
+- **Rounds**: max 2 (PR #694 had 2 Copilot rounds), most branches 0-1
+- **Findings**:
+  - Copilot: 3 DEFECT (3 fixed — realpathSync fallback, missing symlink test, .claude/worktrees symlink), 19 SUGGESTION (17 accepted, 2 fixed)
+- **Unique findings**: 22
+- **Acceptance rate**: 86% (19 accepted-or-fixed / 22 total)
+- **Overrule rate**: 0% (0/22)
+- **Fix rate (DEFECTs)**: 100% (3/3)
+- **Defer rate (advisory)**: 0% (0/19)
+- **Ignore rate (advisory)**: 0% (0/19)
+- **Duration**: single session, 11 branches (6 with Copilot findings)
+- **Notes**: Copilot was sole reviewer — no adversarial agent reviews executed. This is the same process gap as v1.8.0 and v1.6.0. COMPLEX issues #687 and #689 should have had FULL reviews per the task skill protocol but received only Copilot review. The 3 DEFECTs (all on #683 worktree hook hardening) were legitimate symlink bypass gaps caught by Copilot. 5 Turing research briefs completed (#687, #688, #689, #690, #691). Shared file contamination was universal — every worktree agent committed Borges memory and metrics changes from unpushed local main. Cross-branch contamination recurred on 2 PRs (#694 picked up #688's research doc, #698 picked up #691 and #683 files). Merge cascade delays from strict_required_status_checks_policy + 6 parallel PRs.
+- **[RISK] Process gap**: No adversarial agent review executed. Copilot-only review is acceptable for SIMPLE/research tasks but COMPLEX issues should have had FULL reviews.
+- **[RISK] Shared file contamination pattern**: Worktree agents branched from local main with unpushed commits (aeda27f retro extraction). Every worktree inherited stale Borges memory and metrics files. Root cause: unpushed commits on main before branching.
+- **[RISK] Zero-overrule alert**: Rolling overrule rate remains 0% at n>=199 in-team findings (Copilot findings excluded from rolling count — no new in-team findings this release). Per research brief #490, healthy adversarial review shows 1-10% overrule rate.

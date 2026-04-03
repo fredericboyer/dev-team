@@ -166,6 +166,14 @@
 - **Last-verified**: 2026-04-02
 - **Context**: Copilot flagged test hermeticity (review-gate tests) and hash computation robustness as advisory. Both accepted — tests use tmpdir for isolation, hash computation follows existing patterns. No functional risk.
 
+### [2026-04-03] v3.4.0: TOML escaping test coverage added (#665)
+- **Type**: PATTERN [new]
+- **Source**: #665, PR feat/665-toml-escaping-tests
+- **Tags**: testing, toml, escaping, coverage
+- **Outcome**: fixed
+- **Last-verified**: 2026-04-03
+- **Context**: Tests added for TOML string escaping edge cases. 0 agent review rounds — Copilot only. Continues the test coverage expansion pattern from v1.7.0/v1.8.0/v1.11.0.
+
 ### [2026-03-30] v2.0: Comprehensive test suites for canonical format and all adapters
 - **Type**: PATTERN [new]
 - **Source**: PRs #569, #570, #571, #572

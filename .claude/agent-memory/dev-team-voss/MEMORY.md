@@ -82,8 +82,16 @@
 - **Source**: #670, PR fix/670-worktree-path-traversal
 - **Tags**: security, worktree, path-traversal, defense-in-depth
 - **Outcome**: fixed
-- **Last-verified**: 2026-04-02
-- **Context**: worktree-create.js hardened with character validation for path traversal. Null byte not in character check (accepted — defense-in-depth catches it). Symlink bypass and err.status null deferred to #683.
+- **Last-verified**: 2026-04-03
+- **Context**: worktree-create.js hardened with character validation for path traversal. Null byte not in character check (accepted — defense-in-depth catches it). Symlink bypass and err.status null deferred to #683, now fixed in v3.4.0.
+
+### [2026-04-03] v3.4.0: worktree hook hardening — 3 symlink bypass DEFECTs fixed (#683)
+- **Type**: DEFECT [fixed]
+- **Source**: #683, PR fix/683-worktree-hook-hardening, Copilot findings #1-#3
+- **Tags**: security, worktree, symlink, defense-in-depth
+- **Outcome**: fixed
+- **Last-verified**: 2026-04-03
+- **Context**: Three symlink bypass gaps fixed: (1) realpathSync fallback to path.resolve defeated symlink guard — fixed by resolving basePath instead of worktreesDir. (2) No symlink regression test — added .claude symlink test. (3) .claude/worktrees itself could be symlinked — added lstatSync check for worktrees dir. Completes the deferred work from v3.3.0 #670.
 
 ## Calibration Log
 <!-- Challenges accepted/overruled — tunes adversarial intensity over time -->

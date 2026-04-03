@@ -106,12 +106,12 @@
 - **Context**: Review found `?` quantifier not in safe-regex check and O(n*g^2) worst-case complexity. Both accepted — 1024 char limit mitigates complexity risk, `?` is non-repeating so not a ReDoS vector. Bare `{` handling was also flagged as subtle — correct behavior confirmed. Reinforces: safe-regex covers the dangerous cases (nested quantifiers), advisory findings on edge cases are appropriate for the trust boundary.
 
 ### [2026-04-02] v3.3.0: worktree-create null byte and symlink bypass — deferred to #683
-- **Type**: RISK [deferred]
+- **Type**: RISK [fixed]
 - **Source**: #670, review-678 + Copilot findings
 - **Tags**: worktree, path-traversal, symlink, null-byte, security
-- **Outcome**: deferred
-- **Last-verified**: 2026-04-02
-- **Context**: worktree-create.js hardened with character validation, but null byte not in char check and symlink bypass on containment noted. Both deferred to #683 for worktree hook hardening. Defense-in-depth catches null bytes. Symlink bypass is a legitimate concern tracked for follow-up.
+- **Outcome**: fixed
+- **Last-verified**: 2026-04-03
+- **Context**: worktree-create.js hardened with character validation, but null byte not in char check and symlink bypass on containment noted. Deferred to #683. **Fixed in v3.4.0**: PR #683 added realpathSync resolution for basePath, lstatSync check for .claude/worktrees dir, and symlink regression test. Defense-in-depth on null bytes remains accepted.
 
 ### [2026-03-26] Platform detection defaults to github — no fallback risk
 - **Type**: RISK [fixed]

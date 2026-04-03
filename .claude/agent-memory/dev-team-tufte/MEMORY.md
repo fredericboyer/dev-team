@@ -121,6 +121,14 @@
 - **Last-verified**: 2026-04-02
 - **Context**: ADR-041 documents Mergify merge queue adoption. FULL review (review-677) caught 1 DEFECT: missing inline comment in .mergify.yml pull_request_rules. 2 SUGGESTION deferred (cosmetic — missing ADR cross-ref, bold text). This is the first real validation of LIGHT vs FULL review tiers — FULL review on a COMPLEX task caught a real defect that LIGHT would have missed.
 
+### [2026-04-03] v3.4.0: Ruleset documentation (#703) and architecture doc (#704) added
+- **Type**: DECISION [new]
+- **Source**: #703, #704, PRs feat/703-ruleset-documentation, feat/704-architecture-doc
+- **Tags**: documentation, ruleset, architecture, github
+- **Outcome**: accepted
+- **Last-verified**: 2026-04-03
+- **Context**: Two documentation additions. #703 documents GitHub branch protection rulesets (replacing Mergify enforcement context from ADR-042). #704 adds architecture documentation. Both were 0-round review (no Copilot findings). Continues the documentation pattern from v1.7.0 and v3.3.0.
+
 ### [2026-03-29] v1.11.0: Review tiers, DoD, context docs, and anti-pattern sections added
 - **Type**: DECISION [new]
 - **Source**: #519, #520, #523, #524, PR #551
