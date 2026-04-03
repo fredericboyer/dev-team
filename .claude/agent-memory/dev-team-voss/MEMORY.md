@@ -93,5 +93,21 @@
 - **Last-verified**: 2026-04-03
 - **Context**: Three symlink bypass gaps fixed: (1) realpathSync fallback to path.resolve defeated symlink guard — fixed by resolving basePath instead of worktreesDir. (2) No symlink regression test — added .claude symlink test. (3) .claude/worktrees itself could be symlinked — added lstatSync check for worktrees dir. Completes the deferred work from v3.3.0 #670.
 
+### [2026-04-03] v3.5.0: Codex adapter learnings path — nonexistent templates/rules/ path (#713)
+- **Type**: DEFECT [fixed]
+- **Source**: #713, PR fix/713-codex-learnings-path
+- **Tags**: adapters, codex, path-correctness, learnings
+- **Outcome**: fixed
+- **Last-verified**: 2026-04-03
+- **Context**: Codex adapter was generating instructions pointing to `templates/rules/` which does not exist. Real template path is `.dev-team/` or `.claude/rules/`. Fixed to use actual template content. Copilot finding: weak assertion (fixed — replaced with content assertion); stub migration and fragile assertion were advisory (deferred/ignored). Path correctness pattern continues — Seen: 7th occurrence across adapters/skills/agents.
+
+### [2026-04-03] v3.5.0: init.ts/update.ts test strategy — testable exports vs CLI entry points (#715)
+- **Type**: DECISION [new]
+- **Source**: #715, PR feat/715-init-update-tests
+- **Tags**: testing, init, update, coverage, architecture
+- **Outcome**: accepted
+- **Last-verified**: 2026-04-03
+- **Context**: Test strategy for init.ts/update.ts: test exported constants (ALL_AGENTS, QUALITY_HOOKS, INFRA_HOOKS, PRESETS) and pure utility functions (compareSemver, cleanupLegacyMemoryDirs, migrateToV3Layout). Interactive run() branches not tested — CLI entry point mocking excluded from scope per issue design. 657 lines added. Known gaps deferred to #719 (symlink coverage) and #720 (compareSemver edge cases).
+
 ## Calibration Log
 <!-- Challenges accepted/overruled — tunes adversarial intensity over time -->

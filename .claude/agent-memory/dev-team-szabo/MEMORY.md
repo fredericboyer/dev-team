@@ -145,6 +145,14 @@
 - **Last-verified**: 2026-03-30
 - **Context**: registerAdapter allowed replacing built-in adapters with user-registered ones, potentially masking the Claude Code identity transform with a malicious adapter. Fixed: BUILTIN_IDS set prevents replacement of built-in adapters.
 
+### [2026-04-03] v3.5.0: Symlink guard coverage gaps in init.ts/update.ts — deferred to #719 (S-01)
+- **Type**: RISK [deferred]
+- **Source**: #715, PR #718, Szabo finding S-01
+- **Tags**: symlink, path-traversal, testing, coverage, security
+- **Outcome**: deferred — #719
+- **Last-verified**: 2026-04-03
+- **Context**: New test suite for init.ts/update.ts covers functional behavior but lacks symlink guard regression tests for ancestor-path traversal scenarios (assertNoSymlinkInPath edge cases in the main entry points). Deferred to #719 — confirms symlink guard coverage is a recurring gap that needs dedicated tracking. S-02 (path boundary validation) and S-03 (temp dir prefix) were advisory and ignored (self-evident from existing conventions).
+
 ### [2026-03-30] v2.0: MCP filePath traversal validation — FIXED (R-02)
 - **Type**: RISK [fixed]
 - **Source**: PR #572, Szabo finding R-02

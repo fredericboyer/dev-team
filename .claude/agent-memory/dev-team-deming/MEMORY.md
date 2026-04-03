@@ -24,7 +24,7 @@
 - **Source**: .github/workflows/ci.yml analysis
 - **Tags**: ci, validation, agents, hooks
 - **Outcome**: verified
-- **Last-verified**: 2026-03-29
+- **Last-verified**: 2026-04-03
 - **Context**: scripts/validate-agents.js checks agent frontmatter. scripts/validate-hooks.js verifies hook scripts load without errors. Both are separate CI jobs. Hook validation runs cross-platform.
 
 ### [2026-03-25] TypeScript with NodeNext resolution — pretest builds before test
@@ -59,27 +59,11 @@
 - **Last-verified**: 2026-03-29
 - **Context**: Orchestration skills (task, review, audit, retro) get `disable-model-invocation: true` to prevent accidental autonomous firing. Advisory/read-only skills (scorecard, challenge) can be autonomous. This is a design principle in CLAUDE.md.
 
-### [2026-03-26] Language delegation: hooks detect ecosystem, agents interpret
-- **Type**: DECISION [verified]
-- **Source**: Issue #385, PR #419, ADR-034
-- **Tags**: hooks, language-neutral, delegation
-- **Outcome**: accepted
-- **Last-verified**: 2026-03-26
-- **Context**: Hooks replaced JS/TS-specific patterns with language-agnostic structural proxies (nesting depth, control flow density). Test file detection expanded to Go/Python/Java conventions. Complexity scoring no longer keyword-based. Key principle: hooks handle detection and gating, agents handle language-specific interpretation.
-
-### [2026-03-27] cachedGitDiff extracted to shared hook module
-- **Type**: DECISION [verified]
-- **Source**: Issue #436, branch fix/436-extract-cached-git-diff
-- **Tags**: hooks, duplication, shared-module, dx
-- **Outcome**: fixed
-- **Last-verified**: 2026-03-27
-- **Context**: cachedGitDiff was copy-pasted across 3 hooks (tdd-enforce, pre-commit-gate, review-gate). Extracted to `templates/hooks/lib/git-cache.js`. All 3 hooks now `require("./lib/git-cache")`. init.ts and update.ts updated to copy lib/ directory. Remaining duplication: fallback pattern arrays (#437, still open).
-
-### [2026-03-27] v1.7.0 era — audit-derived fixes (consolidated)
+### [2026-03-26] v1.6.0-v1.7.0 era hook improvements (consolidated)
 - **Type**: PATTERN [verified]
-- **Tags**: ci, testing, duplication, dx
+- **Tags**: hooks, language-neutral, shared-module, ci, dx
 - **Last-verified**: 2026-03-27
-- **Context**: Three audit-derived improvements consolidated: (1) npm audit CI step added (#440). (2) review-gate.test.js added to test script, runGate helper switched from execFileSync to spawnSync (#435). (3) ensureSymlink() extracted from init.ts/update.ts to files.ts (#441).
+- **Context**: (1) Language delegation (ADR-034): hooks use structural proxies (nesting depth, control flow) instead of JS/TS-specific patterns — hooks detect, agents interpret. (2) cachedGitDiff extracted to `templates/hooks/lib/git-cache.js` from 3 hooks. (3) npm audit CI step added (#440). (4) review-gate.test.js added, runGate switched to spawnSync (#435). (5) ensureSymlink() extracted to files.ts (#441).
 
 ## Calibration Log
 <!-- Challenges accepted/overruled — tunes adversarial intensity over time -->
@@ -179,6 +163,14 @@
 - **Outcome**: fixed
 - **Last-verified**: 2026-04-02
 - **Context**: CLI tests expanded with negative assertions (error path coverage). Hook unit tests added for review-gate. Advisory finding: assertion in catch block can be silently swallowed — accepted.
+
+### [2026-04-03] v3.5.0: validate:docs npm script parity fix (#714)
+- **Type**: DEFECT [fixed]
+- **Source**: #714, PR fix/714-validate-docs-script
+- **Tags**: ci, scripts, package-json, parity, dx
+- **Outcome**: fixed
+- **Last-verified**: 2026-04-03
+- **Context**: CI referenced `validate:docs` script but it was absent from package.json. This caused CI/local parity gap — the script ran in CI (via npm run) but couldn't be run locally without the package.json entry. Zero review findings on this PR. Reinforces: every CI npm run step must have a matching script in package.json.
 
 ### [2026-03-30] v2.0.1: Scope reduction — cursor/windsurf adapters and MCP server removed
 - **Type**: DECISION [removed]
