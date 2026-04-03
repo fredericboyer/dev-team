@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * dev-team-lint-format.js
+ * lint-format.js
  * PostToolUse hook on Edit/Write.
  *
  * Runs oxlint and oxfmt --write on the modified file.
