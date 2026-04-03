@@ -28,6 +28,9 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
 
+      - name: Configure git defaults
+        run: git config --global init.defaultBranch main
+
       - run: npm ci
 
       - name: Build
@@ -36,7 +39,7 @@ jobs:
       - name: Run tests
         run: npm test
 
-  lint-and-format:
+  lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -51,8 +54,32 @@ jobs:
       - name: Lint
         run: npm run lint
 
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - run: npm ci
+
       - name: Typecheck
         run: npm run typecheck
+
+  format-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - run: npm ci
 
       - name: Format check
         run: npm run format:check
@@ -75,9 +102,6 @@ jobs:
 
       - name: Validate README accuracy
         run: node scripts/validate-readme.js
-
-      - name: Validate hook scripts
-        run: node scripts/validate-hooks.js
 
   # No npm ci — hooks have zero npm dependencies (ADR-002); node --check needs only Node.js
   validate-hooks:
@@ -109,4 +133,3 @@ jobs:
 
       - name: Audit dependencies
         run: npm audit --audit-level=moderate
-
