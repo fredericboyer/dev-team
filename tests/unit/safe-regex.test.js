@@ -118,12 +118,10 @@ describe("safeRegex", () => {
     assert.equal(result.safe, true);
   });
 
-  it("rejects overlapping alternation in outer quantified group ((feat|fix|fea|fi|f)(t|x|eat|ix))*", () => {
-    // Build pattern dynamically to avoid CodeQL static ReDoS detection —
-    // this is an intentionally unsafe pattern for testing safeRegex rejection
+  it("rejects overlapping alternation in outer quantified group", () => {
     const alts1 = ["feat", "fix", "fea", "fi", "f"].join("|");
     const alts2 = ["t", "x", "eat", "ix"].join("|");
-    const result = safeRegex(`((${alts1})(${alts2}))*\\/`);
+    const result = safeRegex("((" + alts1 + ")(" + alts2 + "))*\\/");
     assert.equal(result.safe, false);
     assert.ok(result.reason.includes("overlapping alternation"));
   });
@@ -147,5 +145,61 @@ describe("safeRegex", () => {
   it("rejects the exact #623 branch pattern with nested quantified overlapping alternation", () => {
     const result = safeRegex("^((feat|fix|fea|fi|f)\\/)+");
     assert.equal(result.safe, false);
+  });
+
+  // --- Char class handling (#663) ---
+
+  it("accepts quantifier inside character class ([a+])+", () => {
+    const result = safeRegex("([a+])+");
+    assert.equal(result.safe, true);
+  });
+
+  it("accepts star inside character class ([a*b])*", () => {
+    const result = safeRegex("([a*b])*");
+    assert.equal(result.safe, true);
+  });
+
+  // --- Nested quantified groups (#663) ---
+
+  it("rejects nested quantified groups ((a+)+)", () => {
+    const result = safeRegex("((a+)+)");
+    assert.equal(result.safe, false);
+    assert.ok(result.reason.includes("nested quantifiers"));
+  });
+
+  it("rejects deeply nested quantified groups (((a+))+)", () => {
+    const result = safeRegex("(((a+))+)");
+    assert.equal(result.safe, false);
+    assert.ok(result.reason.includes("nested quantifiers"));
+  });
+
+  it("rejects outer quantified group with inner quantifier ((a+))+", () => {
+    const result = safeRegex("((a+))+");
+    assert.equal(result.safe, false);
+    assert.ok(result.reason.includes("nested quantifiers"));
+  });
+
+  // --- Group prefix parsing (#663) ---
+
+  it("rejects non-capturing group with nested quantifiers (?:(a+))+", () => {
+    const result = safeRegex("(?:(a+))+");
+    assert.equal(result.safe, false);
+    assert.ok(result.reason.includes("nested quantifiers"));
+  });
+
+  it("accepts lookbehind with quantifier inside (?<=a+)b", () => {
+    const result = safeRegex("(?<=a+)b");
+    assert.equal(result.safe, true);
+  });
+
+  it("accepts named group without nested quantifiers (?<name>abc)+", () => {
+    const result = safeRegex("(?<name>abc)+");
+    assert.equal(result.safe, true);
+  });
+
+  it("rejects named group with nested quantifiers (?<name>a+)+", () => {
+    const result = safeRegex("(?<name>a+)+");
+    assert.equal(result.safe, false);
+    assert.ok(result.reason.includes("nested quantifiers"));
   });
 });
