@@ -144,7 +144,7 @@ describe("cleanupLegacyMemoryDirs", () => {
 
     const log = cleanupLegacyMemoryDirs(claudeDir);
 
-    assert.ok(log.some((l) => l.includes("Removed legacy directory: dev-team-architect")));
+    assert.ok(log.some((l) => l === "Removed legacy directory: dev-team-architect/"));
     assert.ok(!fs.existsSync(legacyDir), "legacy dir should be removed");
   });
 
@@ -226,7 +226,7 @@ describe("cleanupLegacyMemoryDirs", () => {
     for (const { legacy } of legacyPairs) {
       assert.ok(!fs.existsSync(path.join(memoryDir, legacy)), `${legacy} should be removed`);
       assert.ok(
-        log.some((l) => l.includes(`Removed legacy directory: ${legacy}`)),
+        log.some((l) => l === `Removed legacy directory: ${legacy}/`),
         `log should mention ${legacy}`,
       );
     }
