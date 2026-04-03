@@ -5,12 +5,19 @@
  * PreToolUse hook on Bash — blocks `gh pr merge` when no review evidence exists.
  *
  * Intercepts `gh pr merge` commands (including --auto) and enforces that at
- * least one review sidecar file exists in `.dev-team/.reviews/` for the current
- * branch before allowing the merge to proceed.
+ * least one review sidecar file exists in `.dev-team/.reviews/` for the branch
+ * being merged before allowing the merge to proceed.
  *
- * Sidecar files are written by review agents to `.dev-team/.reviews/`.
- * The hook checks for ANY sidecar file (not per-file like the review-gate),
- * because at merge time we need evidence that the PR was reviewed as a whole.
+ * Branch detection (in priority order):
+ *   1. Explicit branch in the `gh pr merge` command (e.g., `gh pr merge feat/123`)
+ *   2. PR number -> branch lookup via `gh pr view`
+ *   3. Current branch via `git rev-parse --abbrev-ref HEAD`
+ *
+ * Sidecar validation:
+ *   The hook validates that at least one sidecar matches the branch being
+ *   merged, preventing stale sidecars from a previous branch from satisfying
+ *   the gate. Matching uses the sidecar `branch` JSON field, or falls back to
+ *   checking if the sanitized branch name appears in the filename.
  *
  * Escape hatch:
  *   - --skip-review in the gh pr merge command bypasses the gate (logged)
@@ -48,30 +55,65 @@ if (/--skip-review\b/.test(command)) {
   process.exit(0);
 }
 
-// Determine current branch
-let currentBranch = "";
-try {
-  currentBranch = execFileSync("git", ["rev-parse", "--abbrev-ref", "HEAD"], {
-    encoding: "utf-8",
-    timeout: 5000,
-  }).trim();
-} catch {
-  // Not in a git repo or git not available — allow
-  process.exit(0);
+/**
+ * Sanitize a branch name for sidecar filename matching.
+ * Replaces non-alphanumeric characters (except hyphens) with hyphens.
+ */
+function sanitizeBranch(branch) {
+  return branch.replace(/[^a-zA-Z0-9-]/g, "-");
 }
 
-// Skip gating when the current branch cannot be determined meaningfully
-// (for example, detached HEAD or an empty branch name)
-if (currentBranch === "HEAD" || currentBranch === "") {
+/**
+ * Extract the branch name for the PR being merged.
+ *
+ * Priority:
+ *   1. Explicit branch/PR-number argument after `gh pr merge`
+ *   2. Current git branch (fallback)
+ */
+function detectBranch(cmd) {
+  const match = cmd.match(/\bgh\s+pr\s+merge\s+([^\s-][^\s]*)/);
+  if (match) {
+    const arg = match[1];
+    if (/^\d+$/.test(arg)) {
+      try {
+        const branch = execFileSync(
+          "gh",
+          ["pr", "view", arg, "--json", "headRefName", "-q", ".headRefName"],
+          { encoding: "utf-8", timeout: 10000 },
+        ).trim();
+        if (branch) return branch;
+      } catch {
+        // gh not available or PR not found — fall through
+      }
+    } else {
+      return arg;
+    }
+  }
+
+  try {
+    const branch = execFileSync("git", ["rev-parse", "--abbrev-ref", "HEAD"], {
+      encoding: "utf-8",
+      timeout: 5000,
+    }).trim();
+    if (branch && branch !== "HEAD") return branch;
+  } catch {
+    // Not in a git repo — fall through
+  }
+
+  return "";
+}
+
+const mergeBranch = detectBranch(command);
+
+if (mergeBranch === "") {
   process.exit(0);
 }
 
 const reviewsDir = path.join(process.cwd(), ".dev-team", ".reviews");
 
-// Check if reviews directory exists
 if (!fs.existsSync(reviewsDir)) {
   console.error(
-    "[dev-team merge-gate] BLOCKED — no review evidence found for branch: " + currentBranch,
+    "[dev-team merge-gate] BLOCKED — no review evidence found for branch: " + mergeBranch,
   );
   console.error("\nNo .dev-team/.reviews/ directory exists.");
   console.error(
@@ -80,18 +122,16 @@ if (!fs.existsSync(reviewsDir)) {
   process.exit(2);
 }
 
-// Look for any sidecar file — at least one review must exist
+const sanitizedBranch = sanitizeBranch(mergeBranch);
 let sidecars = [];
 try {
   sidecars = fs
     .readdirSync(reviewsDir)
     .filter((f) => f.endsWith(".json") && f !== ".cleanup-manifest.json");
 } catch {
-  // Can't read directory — fail open
   process.exit(0);
 }
 
-// Filter out symlinks and validate at least one real sidecar exists
 const validSidecars = sidecars.filter((f) => {
   const sidecarPath = path.join(reviewsDir, f);
   try {
@@ -102,16 +142,34 @@ const validSidecars = sidecars.filter((f) => {
   }
 });
 
-if (validSidecars.length === 0) {
+const branchMatchingSidecars = validSidecars.filter((f) => {
+  const sidecarPath = path.join(reviewsDir, f);
+  try {
+    const data = JSON.parse(fs.readFileSync(sidecarPath, "utf-8"));
+    if (data.branch) {
+      return data.branch === mergeBranch;
+    }
+    return f.includes(sanitizedBranch);
+  } catch {
+    return false;
+  }
+});
+
+if (branchMatchingSidecars.length === 0) {
   console.error(
-    "[dev-team merge-gate] BLOCKED — no review evidence found for branch: " + currentBranch,
+    "[dev-team merge-gate] BLOCKED — no review evidence found for branch: " + mergeBranch,
   );
-  console.error("\n.dev-team/.reviews/ is empty. No review has been recorded for this branch.");
+  if (validSidecars.length > 0) {
+    console.error("\n.dev-team/.reviews/ contains sidecars, but none match branch: " + mergeBranch);
+    console.error("Existing sidecars may be from a previous branch.");
+  } else {
+    console.error("\n.dev-team/.reviews/ is empty. No review has been recorded for this branch.");
+  }
   console.error(
     "Run review agents before merging, or use --skip-review to bypass (logged as deviation).",
   );
   process.exit(2);
 }
 
-// Review evidence found — allow the merge
+// Review evidence found for the correct branch — allow the merge
 process.exit(0);
