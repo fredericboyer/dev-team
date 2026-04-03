@@ -310,3 +310,20 @@
 - **[RISK] Process gap**: No adversarial agent review executed. Copilot-only review is acceptable for SIMPLE/research tasks but COMPLEX issues should have had FULL reviews.
 - **[RISK] Shared file contamination pattern**: Worktree agents branched from local main with unpushed commits (aeda27f retro extraction). Every worktree inherited stale Borges memory and metrics files. Root cause: unpushed commits on main before branching.
 - **[RISK] Zero-overrule alert**: Rolling overrule rate remains 0% at n>=199 in-team findings (Copilot findings excluded from rolling count — no new in-team findings this release). Per research brief #490, healthy adversarial review shows 1-10% overrule rate.
+
+### [2026-04-03] Audit: Full codebase audit v3.6.0 (Szabo, Knuth, Deming)
+- **Agents**: reviewers: Szabo (security), Knuth (quality), Deming (tooling)
+- **Rounds**: 1
+- **Findings**:
+  - Szabo: 0 DEFECT, 0 RISK, 1 QUESTION (1 accepted), 5 SUGGESTION (5 accepted) — 6 total
+  - Knuth: 0 DEFECT, 2 RISK (2 accepted), 3 SUGGESTION (2 accepted / 1 deferred), 1 QUESTION (1 accepted) — 7 total (1 deferred: K-05 #720)
+  - Deming: 0 DEFECT, 5 RISK (5 accepted), 2 QUESTION (2 accepted), 4 SUGGESTION (4 accepted) — 11 total
+- **Unique findings**: 24
+- **Acceptance rate**: 96% (23 accepted / 24 total)
+- **Overrule rate**: 0% (0/24)
+- **Fix rate (DEFECTs)**: N/A (0 DEFECTs)
+- **Defer rate (advisory)**: 4% (1/24 — K-05 compareSemver, already tracked #720)
+- **Ignore rate (advisory)**: 0% (0/24)
+- **Duration**: single session, 3 parallel agents
+- **Notes**: Second full codebase audit (first was 2026-03-26). Zero DEFECTs — codebase security posture is strong. Key themes: hook test gaps (K-01 merge-gate, K-02 worktree-remove), CI optimization (R-01 dedup, R-03 parallelization), pre-stable tooling risk (Q-01 oxfmt, D-S-03 TypeScript 6), zero runtime dependencies (S-07 positive finding). Compared to first audit (37 findings, 2 DEFECTs, 11 issues): finding count down 35%, zero DEFECTs (was 2), no new issues needed — findings are optimization/hardening not correctness. The codebase has matured significantly between audits.
+- **[RISK] Zero-overrule alert**: Rolling overrule rate remains 0% at n>=237 in-team findings (v1.2.0 through v3.6.0 audit). Per research brief #490, healthy adversarial review shows 1-10% overrule rate.

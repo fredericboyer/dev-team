@@ -50,7 +50,7 @@
 - **Source**: Codebase audit (S3/S4), Issue #433, PR #454
 - **Tags**: symlink, path-traversal, file-system, security
 - **Outcome**: fixed — assertNotSymlink() + assertNoSymlinkInPath() guards added
-- **Last-verified**: 2026-04-03
+- **Last-verified**: 2026-04-03 (v3.6.0 audit S-03 confirmed write-side guards comprehensive)
 - **Context**: Fixed in two waves: v1.7.0 added assertNotSymlink() leaf check (lstatSync on target). v1.8.0 added assertNoSymlinkInPath() ancestor traversal (walks parent dirs to root). Both applied to copyFile and renameSync calls. Residual TOCTOU gap accepted as inherent to POSIX.
 
 
@@ -168,3 +168,19 @@
 - **Outcome**: fixed
 - **Last-verified**: 2026-03-30
 - **Context**: MCP review_gate tool accepts filePath from MCP client. Without validation, absolute paths or `..` traversals could check files outside the project. Fixed: path.normalize + reject if starts with `..` or is absolute. Same pattern as the adapter name validation (F-01) — validate at the input boundary.
+
+### [2026-04-03] v3.6.0 audit: Safety guard regex bypass vectors — advisory (S-01)
+- **Type**: SUGGESTION [accepted]
+- **Source**: v3.6.0 full codebase audit, Szabo S-01
+- **Tags**: regex, safety-guard, bypass, security
+- **Outcome**: accepted
+- **Last-verified**: 2026-04-03
+- **Context**: Safety guard regex patterns have potential bypass vectors (trailing `$` anchors, split flags). Accepted as advisory — the Claude Code sandbox is the real security boundary. Safety guards are defense-in-depth, not primary protection. Pattern: when evaluating regex guard findings, consider the trust boundary — sandbox enforcement makes regex bypasses a lower-severity risk.
+
+### [2026-04-03] v3.6.0 audit: Zero runtime dependencies — maintain posture (S-07)
+- **Type**: PATTERN [verified]
+- **Source**: v3.6.0 full codebase audit, Szabo S-07
+- **Tags**: dependencies, supply-chain, security, posture
+- **Outcome**: accepted
+- **Last-verified**: 2026-04-03
+- **Context**: Positive security finding: dev-team has zero runtime dependencies. All functionality is implemented directly. This eliminates supply-chain attack surface entirely for runtime. Maintain this posture — any proposal to add a runtime dependency should require explicit justification.
