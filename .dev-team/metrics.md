@@ -231,3 +231,23 @@
 - **Duration**: single session (~4 hours)
 - **Notes**: First use of Mergify merge queue. First use of GraphQL `resolveReviewThread`. Process failures identified and codified: orchestrator validation loop (#653), agent concurrency cap (4-6), task completion verification. 6 PRs initially merged without addressing Copilot comments (follow-up PR #643 fixed). Beck agent retired. Merge skill rewritten (ADR-040). Implement skill extracted (ADR-039).
 - **[RISK] Process regression**: v3.2.0 repeated v1.8.0 pattern — PRs merged without review. Root cause: merge agents didn't follow the merge skill. Fix: Mergify enforces `#review-threads-unresolved = 0` at platform level.
+
+### [2026-04-02] Task: v3.3.0 delivery (#663, #664, #666, #667, #670, #671, #672)
+- **Agents**: implementing: Voss (×4), Deming (×2), Tufte (×1); pre-assessment: Brooks; reviewers: review-675 through review-680 (LIGHT), review-677 (FULL), Copilot; research: Turing (×4)
+- **Rounds**: 1 per branch (except #671: 2 rounds — FULL review caught 1 DEFECT)
+- **Findings**:
+  - review-676: 0 DEFECT, 1 RISK (1 accepted), 1 SUGGESTION (1 fixed — contamination)
+  - review-677: 1 DEFECT (1 fixed), 2 SUGGESTION (2 deferred — cosmetic)
+  - review-678: 0 DEFECT, 0 RISK, 2 SUGGESTION (2 accepted)
+  - review-679: 0 DEFECT, 0 RISK, 1 SUGGESTION (1 accepted)
+  - review-680: 0 DEFECT, 1 RISK (1 accepted), 2 SUGGESTION (2 accepted)
+  - Copilot: 0 DEFECT, 0 RISK, 7 SUGGESTION (2 accepted, 4 deferred to #683, 1 fixed)
+- **Unique findings**: 21
+- **Acceptance rate**: 71% (15 accepted-or-fixed / 21 total)
+- **Overrule rate**: 0% (0/21)
+- **Fix rate (DEFECTs)**: 100% (1/1)
+- **Defer rate (advisory)**: 30% (6/20 — 4 to #683, 2 cosmetic)
+- **Ignore rate (advisory)**: 0% (0/20)
+- **Duration**: single session, 7 branches + 4 research briefs
+- **Notes**: First release with LIGHT/FULL review tier differentiation in practice. All SIMPLE tasks got LIGHT (advisory-only) reviews; the COMPLEX task (#671 — Mergify ADR) got FULL review which caught the sole DEFECT (missing inline comment in .mergify.yml). Branch contamination recurred on 3 branches (feat/666, feat/672, feat/671) — worktree-isolated agents did not experience contamination. 4 Turing research briefs completed (agent coordination, platform capabilities, Kairos memory, harness best practices). GitHub native auto-merge handled all merges despite Mergify being configured. Follow-up issue #683 created for worktree hook hardening.
+- **[RISK] Zero-overrule alert**: Rolling overrule rate remains 0% at n>=199 in-team findings (v1.2.0 through v3.3.0). Per research brief #490, healthy adversarial review shows 1-10% overrule rate. Acceptance rate (71%) is within the healthy band (60-85%).

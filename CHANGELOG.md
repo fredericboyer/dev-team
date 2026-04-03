@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.3.0] - 2026-04-02
+
+### Added
+- Explicit oxfmt config file to prevent formatting drift (#666, PR #682).
+- Unit tests for all shipped review-gate hooks — 25 new tests (#664, PR #681).
+- Negative assertions for CLI flag parsing tests (#672, PR #679).
+- ADR-041: Mergify no-approval design decision (#671, PR #677).
+- 4 Turing research briefs: agent coordination, platform capabilities, Kairos memory, harness best practices (#603, #604, #605, #606, #607, #662, #669, #674).
+
+### Fixed
+- `safeRegex` nested group detection now catches all patterns (#663, PR #680).
+- Worktree path traversal validation hardened (#670, PR #678).
+
+### Security
+- npm audit tightened to moderate level in CI (#667, PR #675).
+
 ## [3.2.0] - 2026-04-01
 
 ### Added

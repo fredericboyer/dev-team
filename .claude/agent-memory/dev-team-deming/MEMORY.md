@@ -89,7 +89,7 @@
 - **Source**: Issue #434, branch fix/434-redos-guard
 - **Tags**: hooks, security, shared-module, regex
 - **Outcome**: fixed
-- **Last-verified**: 2026-03-27
+- **Last-verified**: 2026-04-02
 - **Context**: User-controlled regex from config.json (watchLists[].pattern, taskBranchPattern) was compiled without validation. Created `templates/hooks/lib/safe-regex.js` — checks for nested quantifiers and quantified backreferences, rejects patterns >1024 chars. Applied to dev-team-watch-list.js and dev-team-pre-commit-gate.js. agent-patterns.js left unchanged — it reads developer-authored agent-patterns.json (different trust boundary). Pattern: hooks should validate at system boundaries (user config) but can trust shipped data files.
 
 ### [2026-03-29] v1.8.0: Worktree serialization hooks — temporary infrastructure workaround
@@ -163,6 +163,22 @@
 - **Outcome**: fixed
 - **Last-verified**: 2026-03-30
 - **Context**: Agent definitions formalized via CanonicalAgentDefinition interface (portable + runtime-specific fields). Adapter registry pattern extracts agent copy logic from init.ts/update.ts. ClaudeCodeAdapter is identity transform — backward compatible. init.ts and update.ts now iterate registered adapters via getAdaptersForRuntimes(). `runtimes` config field + `--runtime` CLI flag control which adapters run. Duplicate `import "./adapters/index.js"` in init.ts noted but not blocking.
+
+### [2026-04-02] v3.3.0: oxfmt config file (.oxfmtrc.json) added (#666)
+- **Type**: DECISION [new]
+- **Source**: #666, PR feat/666-oxfmt-config
+- **Tags**: formatting, oxfmt, tooling, dx
+- **Outcome**: fixed
+- **Last-verified**: 2026-04-02
+- **Context**: .oxfmtrc.json added to configure oxfmt behavior. Schema refs local node_modules path — standard practice for node tools. Branch contamination occurred on first attempt; redone in worktree isolation.
+
+### [2026-04-02] v3.3.0: CLI negative assertions and hook unit tests (#672, #664)
+- **Type**: DECISION [new]
+- **Source**: #672, #664, PRs feat/672-cli-negative-assertions, feat/664-hook-unit-tests
+- **Tags**: testing, cli, hooks, dx
+- **Outcome**: fixed
+- **Last-verified**: 2026-04-02
+- **Context**: CLI tests expanded with negative assertions (error path coverage). Hook unit tests added for review-gate. Advisory finding: assertion in catch block can be silently swallowed — accepted.
 
 ### [2026-03-30] v2.0: 5 runtime adapters — agents-md, copilot, codex, cursor, windsurf
 - **Type**: DECISION [removed in v2.0.1]

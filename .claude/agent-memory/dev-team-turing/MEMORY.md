@@ -107,6 +107,14 @@
 - **Last-verified**: 2026-03-30
 - **Calibration**: Codex CLI has near-identical skill format (~95% transfer rate) but experimental hook system with limited Bash scope (~30% coverage). The recommendation is: adapt skills and instructions fully, skip hooks. Hooks are Claude Code's differentiator. MCP enforcement was removed in v2.0.1 — hooks remain primary enforcement mechanism. This research directly shaped the Codex adapter implementation (skills + AGENTS.md, no hooks).
 
+### [2026-04-02] v3.3.0: 4 research briefs — agent coordination, platform capabilities, Kairos memory, harness best practices
+- **Type**: RESEARCH [completed]
+- **Source**: #605/#604/#674, #662/#603/#607, #606, #669
+- **Tags**: research, agent-coordination, platform, memory, harness
+- **Outcome**: completed
+- **Last-verified**: 2026-04-02
+- **Context**: 4 briefs in single session. Agent coordination (#605/#604/#674) consolidated multi-issue research. Platform capabilities (#662/#603/#607) likewise. Kairos memory (#606) is a standalone brief. Harness best practices (#669) informs test infrastructure. All briefs stored in docs/research/. No code changes from research — purely informational for future task planning.
+
 ### [2026-03-26] Research-first approach validated in v1.6.0
 - **Type**: PATTERN [verified]
 - **Source**: v1.6.0 session (#406, #407 research briefs)

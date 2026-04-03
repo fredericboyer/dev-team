@@ -42,7 +42,7 @@
 - **Source**: Codebase audit (S1/S2), Issue #434, PR #455
 - **Tags**: regex, redos, input-validation, security
 - **Outcome**: fixed — safe-regex.js shared module added
-- **Last-verified**: 2026-03-27
+- **Last-verified**: 2026-04-02
 - **Context**: Fixed: `templates/hooks/lib/safe-regex.js` validates user-supplied patterns (nested quantifiers, quantified backreferences, >1024 char rejection). Applied to watch-list and pre-commit-gate hooks. Agent-patterns.json left unguarded (developer-authored, different trust boundary).
 
 ### [2026-03-26] Symlink-following in file operations — path traversal risk
@@ -96,6 +96,22 @@
 - **Outcome**: ignored (self-answered)
 - **Last-verified**: 2026-03-29
 - **Context**: Szabo raised $ARGUMENTS trust boundary question for /dev-team:extract skill. Self-answered — skill is invoked only by other orchestration skills (task, review, retro), not by untrusted input. Acceptable trust boundary for skill-to-skill invocation. No action needed.
+
+### [2026-04-02] v3.3.0: safe-regex ? quantifier and complexity accepted as advisory
+- **Type**: CALIBRATION
+- **Source**: #663, review-680 findings #15-#16
+- **Tags**: regex, safe-regex, calibration, security
+- **Outcome**: accepted
+- **Last-verified**: 2026-04-02
+- **Context**: Review found `?` quantifier not in safe-regex check and O(n*g^2) worst-case complexity. Both accepted — 1024 char limit mitigates complexity risk, `?` is non-repeating so not a ReDoS vector. Bare `{` handling was also flagged as subtle — correct behavior confirmed. Reinforces: safe-regex covers the dangerous cases (nested quantifiers), advisory findings on edge cases are appropriate for the trust boundary.
+
+### [2026-04-02] v3.3.0: worktree-create null byte and symlink bypass — deferred to #683
+- **Type**: RISK [deferred]
+- **Source**: #670, review-678 + Copilot findings
+- **Tags**: worktree, path-traversal, symlink, null-byte, security
+- **Outcome**: deferred
+- **Last-verified**: 2026-04-02
+- **Context**: worktree-create.js hardened with character validation, but null byte not in char check and symlink bypass on containment noted. Both deferred to #683 for worktree hook hardening. Defense-in-depth catches null bytes. Symlink bypass is a legitimate concern tracked for follow-up.
 
 ### [2026-03-26] Platform detection defaults to github — no fallback risk
 - **Type**: RISK [fixed]

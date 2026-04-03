@@ -115,7 +115,7 @@
 - **Source**: PR #509 finding #8, PR #511 finding #9
 - **Tags**: agent-teams, working-directory, contention, stray-commits
 - **Outcome**: accepted
-- **Last-verified**: 2026-03-29
+- **Last-verified**: 2026-04-02
 - **Context**: PR #509 bundled commits from #490 + #494; PR #511 bundled #490 + #493. Both caused by agents sharing a working directory. Reinforces v1.7.0 finding — worktree isolation prevents cross-branch contamination. Seen: 2nd occurrence (v1.7.0 had 3 stray commits, v1.10.0 had 2 bundled PRs).
 
 ### [2026-03-29] v1.10.1: 3 findings ignored — defense-in-depth, test scope, error handling
@@ -149,6 +149,22 @@
 - **Outcome**: fixed
 - **Last-verified**: 2026-03-30
 - **Context**: Initial MCP review_gate implementation used hardcoded agent routing instead of loading from agent-patterns.json. This diverged from the hook's approach and would drift as patterns evolve. Fixed: MCP tool now loads and parses agent-patterns.json with proper fallback. This is the dual-code-path sync risk noted in ADR-037 — first instance of the pattern drifting.
+
+### [2026-04-02] v3.3.0: .mergify.yml inline comment DEFECT — FULL review justified
+- **Type**: DEFECT [fixed]
+- **Source**: #671, review-677 finding #4
+- **Tags**: mergify, config, review-tier, quality
+- **Outcome**: fixed
+- **Last-verified**: 2026-04-02
+- **Context**: FULL review on COMPLEX task (#671 Mergify ADR) found missing inline comment in .mergify.yml pull_request_rules. Fixed in commit 959bd64. This validates the LIGHT/FULL review tier system — LIGHT reviews (advisory-only) wouldn't have caught this.
+
+### [2026-04-02] v3.3.0: Hook unit test hermeticity and hash robustness — advisory
+- **Type**: SUGGESTION [accepted]
+- **Source**: #664, Copilot findings #20-#21
+- **Tags**: testing, hooks, hermeticity, advisory
+- **Outcome**: accepted
+- **Last-verified**: 2026-04-02
+- **Context**: Copilot flagged test hermeticity (review-gate tests) and hash computation robustness as advisory. Both accepted — tests use tmpdir for isolation, hash computation follows existing patterns. No functional risk.
 
 ### [2026-03-30] v2.0: Comprehensive test suites for canonical format and all adapters
 - **Type**: PATTERN [new]
