@@ -146,3 +146,11 @@
 - **Outcome**: verified
 - **Last-verified**: 2026-03-30
 - **Context**: First major version release extraction. 4 branches, 4 PRs, ~35 findings across 3 review rounds. 4 DEFECTs (all fixed): path traversal via name (F-01), registerAdapter replacement (F-02), side-effect imports (S2), MCP deriveRequiredAgents divergence (K10). Research-first pattern validated again (2 briefs → 2 ADRs). New entries written: Deming (3), Szabo (3), Knuth (2), Brooks (4), Turing (1), Conway (1). Last-verified bumped on 3 existing entries. 3 new shared learnings: adapter registry design principle, dual code path tech debt, input boundary validation benchmark. Brooks at 185 lines — monitor for next release. All agents remain under 200-line cap.
+
+### [2026-04-02] v3.3.0 extraction — 7 branches, 21 findings, 71% acceptance, review tiers validated
+- **Type**: MILESTONE [verified]
+- **Source**: v3.3.0 task loop (7 issues, 7 PRs + 4 research briefs)
+- **Tags**: metrics, calibration, extraction, review-tiers
+- **Outcome**: verified
+- **Last-verified**: 2026-04-02
+- **Context**: First release with LIGHT/FULL review tier differentiation. 21 findings (1 DEFECT fixed, 14 accepted, 6 deferred), 0 overruled. FULL review on COMPLEX task caught the only DEFECT — tier system validated. Branch contamination recurred (3rd occurrence). New entries written: Voss (2), Deming (2), Tufte (1), Szabo (2), Knuth (2), Brooks (2), Turing (1). Brooks compressed from 201→191 lines. Last-verified bumped on 3 existing entries (Szabo ReDoS, Deming ReDoS, Knuth stray commits). 1 new shared learning (review tier validation). Zero-overrule alert continues at n>=199. No temporal decay needed — all entries within 30-day window.

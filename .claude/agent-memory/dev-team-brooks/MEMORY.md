@@ -69,21 +69,11 @@
 - **Last-verified**: 2026-03-26
 - **Context**: ADR-033 uses `.claude/rules/` for automatic shared context loading (replaces explicit read instructions). ADR-034 delegates language-specific knowledge from hooks to agents (hooks detect, agents interpret). Both support the "discoverable-only" and "language-neutral" design principles.
 
-### [2026-03-27] v1.7.0: Working directory contention — agent teams need worktree isolation
-- **Type**: PATTERN [new]
-- **Source**: v1.7.0 delivery operational observation
-- **Tags**: architecture, agent-teams, worktrees, contention
-- **Outcome**: accepted
+### [2026-03-27] v1.7.0 era — merge ordering and lib copy (consolidated)
+- **Type**: PATTERN [verified]
+- **Tags**: architecture, update, lib-copy, merge-ordering
 - **Last-verified**: 2026-03-27
-- **Context**: Multiple agent teams sharing a single working directory caused cross-branch contamination: branch switches under each other, stray commits on wrong branches, stale stashes. Architectural recommendation: one worktree per agent for multi-branch parallel work. This is a coordination architecture concern, not just a process issue.
-
-### [2026-03-27] v1.7.0: Hardcoded single-file lib copy superseded by recursive approach
-- **Type**: RISK [accepted]
-- **Source**: PR #454 (Chain A, #446)
-- **Tags**: architecture, update, lib-copy
-- **Outcome**: accepted
-- **Last-verified**: 2026-03-27
-- **Context**: Chain A hardcoded a single lib file copy in update.ts. Chain B replaced this with recursive lib/ directory copy. Accepted as the merge ordering naturally resolved this — no architectural debt remaining.
+- **Context**: Consolidated: (1) Hardcoded single-file lib copy superseded by recursive lib/ directory copy — resolved by natural merge ordering. (2) Working directory contention first observed — superseded by v3.3.0 entry with 3 occurrences.
 
 ### [2026-03-29] v1.8.0: INFRA_HOOKS array — infrastructure vs quality hook separation
 - **Type**: DECISION [new]
@@ -180,6 +170,22 @@
 - **Outcome**: accepted
 - **Last-verified**: 2026-03-30
 - **Context**: MCP enforcement server removed in v2.0.1, eliminating the dual code path sync risk. review_gate logic now exists only in dev-team-review-gate.js (hook). The K10 divergence finding validated the risk — removal was the simplest resolution.
+
+### [2026-04-02] v3.3.0: Pre-assessment correctly identified ADR need for #671
+- **Type**: CALIBRATION
+- **Source**: v3.3.0 pre-assessment
+- **Tags**: pre-assessment, adr, mergify, calibration
+- **Outcome**: verified
+- **Last-verified**: 2026-04-02
+- **Context**: Brooks pre-assessment correctly identified #671 (Mergify ADR) as COMPLEX requiring ADR and FULL review. The FULL review subsequently caught the sole DEFECT. Pre-assessment also correctly identified file independence across the 7 issues, enabling parallelization.
+
+### [2026-04-02] v3.3.0: Branch contamination recurred — 3rd occurrence
+- **Type**: PATTERN [verified]
+- **Source**: v3.3.0 delivery observation
+- **Tags**: architecture, agent-teams, worktrees, contamination
+- **Outcome**: accepted
+- **Last-verified**: 2026-04-02
+- **Context**: Branch contamination recurred on 3 branches (feat/666, feat/672, feat/671) in shared working directory. Worktree-isolated agents (664, 672-r2, 666-r2, 677-fix) did not experience contamination. Seen: 3 times (v1.7.0, v1.10.0, v3.3.0). Pattern is persistent — worktree isolation is not optional for parallel work.
 
 ## Calibration Log
 <!-- Challenges accepted/overruled — tunes adversarial intensity over time -->

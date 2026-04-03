@@ -69,5 +69,21 @@
 - **Last-verified**: 2026-03-29
 - **Context**: Extends the v1.7.0 assertNotSymlink leaf check. Walks from target to root checking each ancestor directory with lstatSync. realpathSync resolves system-level symlinks before the walk — design tradeoff documented (can resolve away attacker symlinks at deepest level). Applied alongside assertNotSymlink in file operation guards.
 
+### [2026-04-02] v3.3.0: safe-regex nested quantifier fix — bare { handling and O(n*g^2) accepted
+- **Type**: PATTERN [verified]
+- **Source**: #663, PR fix/663-safe-regex-nested
+- **Tags**: security, regex, safe-regex, boundary-condition
+- **Outcome**: fixed
+- **Last-verified**: 2026-04-02
+- **Context**: safe-regex.js fixed to handle nested quantifiers involving bare `{` (e.g., `a{2}{3}`). Review found `?` quantifier not handled and O(n*g^2) worst case — both accepted as the 1024 char limit mitigates the complexity. Char class `]` edge case also accepted as advisory.
+
+### [2026-04-02] v3.3.0: worktree-create path traversal hardening (#670)
+- **Type**: PATTERN [verified]
+- **Source**: #670, PR fix/670-worktree-path-traversal
+- **Tags**: security, worktree, path-traversal, defense-in-depth
+- **Outcome**: fixed
+- **Last-verified**: 2026-04-02
+- **Context**: worktree-create.js hardened with character validation for path traversal. Null byte not in character check (accepted — defense-in-depth catches it). Symlink bypass and err.status null deferred to #683.
+
 ## Calibration Log
 <!-- Challenges accepted/overruled — tunes adversarial intensity over time -->

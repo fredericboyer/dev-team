@@ -113,6 +113,14 @@
 - **Last-verified**: 2026-03-26
 - **Context**: Seven design principles codified: workflow-agnostic, platform-neutral, language-neutral, discoverable-only, process-driven, rules for shared context, skill invocation control. These are the product's template design contract — all future template changes must comply.
 
+### [2026-04-02] v3.3.0: ADR-041 Mergify merge queue — FULL review caught DEFECT
+- **Type**: DECISION [verified]
+- **Source**: #671, PR feat/671-mergify-adr
+- **Tags**: adr, mergify, documentation, review-tier
+- **Outcome**: fixed
+- **Last-verified**: 2026-04-02
+- **Context**: ADR-041 documents Mergify merge queue adoption. FULL review (review-677) caught 1 DEFECT: missing inline comment in .mergify.yml pull_request_rules. 2 SUGGESTION deferred (cosmetic — missing ADR cross-ref, bold text). This is the first real validation of LIGHT vs FULL review tiers — FULL review on a COMPLEX task caught a real defect that LIGHT would have missed.
+
 ### [2026-03-29] v1.11.0: Review tiers, DoD, context docs, and anti-pattern sections added
 - **Type**: DECISION [new]
 - **Source**: #519, #520, #523, #524, PR #551
