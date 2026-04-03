@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.5.0] — 2026-04-03
+
+### Fixed
+- **Codex adapter**: reads learnings template from correct path (`templates/dev-team-learnings.md` instead of nonexistent `templates/rules/dev-team-learnings.md`) (#713)
+- **CI/local parity**: added missing `validate:docs` npm script that CI runs directly but was unavailable via `npm run` (#714)
+
+### Added
+- **Unit tests for core modules**: dedicated test suites for `init.ts` and `update.ts` — covering PRESETS, ALL_AGENTS, QUALITY_HOOKS, INFRA_HOOKS contract assertions, `compareSemver` edge cases (pre-release, build metadata), `cleanupLegacyMemoryDirs`, and `migrateToV3Layout` (#715)
+
 ## [3.4.0] - 2026-04-03
 
 ### Added
