@@ -169,6 +169,61 @@ function hasPrefixOverlap(alternatives) {
 }
 
 /**
+ * Detect nested quantifiers structurally, properly handling char classes and nesting.
+ * A nested quantifier is any quantified atom inside a quantified group.
+ */
+function hasNestedQuantifiers(pattern) {
+  const groupMap = buildGroupMap(pattern);
+  for (let i = 0; i < pattern.length; i++) {
+    if (pattern[i] === "\\") {
+      i++;
+      continue;
+    }
+    // Skip character classes entirely — quantifier chars inside [...] are literals
+    if (pattern[i] === "[") {
+      i++;
+      while (i < pattern.length && pattern[i] !== "]") {
+        if (pattern[i] === "\\") i++;
+        i++;
+      }
+      continue;
+    }
+    // Found a quantifier character?
+    if (/[+*]/.test(pattern[i]) || (pattern[i] === "{" && /^\{\d+,/.test(pattern.slice(i)))) {
+      const qPos = i;
+      const atomEnd = i - 1;
+      if (atomEnd < 0) continue;
+      if (pattern[atomEnd] === ")") {
+        // Quantified group — check if any ancestor group is also quantified
+        for (const [open, close] of groupMap) {
+          if (close === atomEnd) {
+            for (const [aOpen, aClose] of groupMap) {
+              if (aOpen < open && aClose > close) {
+                if (aClose + 1 < pattern.length && /[+*{]/.test(pattern[aClose + 1])) {
+                  return true;
+                }
+              }
+            }
+            break;
+          }
+        }
+      }
+      // Quantified non-group atom (a+, \d*, etc.) — check if inside a quantified group
+      if (pattern[atomEnd] !== ")") {
+        for (const [open, close] of groupMap) {
+          if (open < qPos && close > qPos) {
+            if (close + 1 < pattern.length && /[+*{]/.test(pattern[close + 1])) {
+              return true;
+            }
+          }
+        }
+      }
+    }
+  }
+  return false;
+}
+
+/**
  * Check whether a regex pattern is likely safe from ReDoS.
  *
  * @param {string} pattern - The regex source string
@@ -186,9 +241,9 @@ function safeRegex(pattern) {
   }
 
   // Detect nested quantifiers — the primary ReDoS vector.
-  // Matches: group with quantifier inside, followed by outer quantifier.
-  // Examples: (.*)+  (a+)*  (\d*)+  ([^x]+)*  (a{1,}){2,}
-  if (/\([^)]*[+*{][^)]*\)[+*{]/.test(pattern)) {
+  // Uses structural analysis to handle char classes and nested groups correctly.
+  // Examples: (.*)+  (a+)*  (\d*)+  ([^x]+)*  (a{1,}){2,}  ((a+)+)
+  if (hasNestedQuantifiers(pattern)) {
     return { safe: false, reason: "nested quantifiers detected (potential ReDoS)" };
   }
 
@@ -210,7 +265,7 @@ function safeRegex(pattern) {
     const regex = new RegExp(pattern);
     return { safe: true, regex };
   } catch (err) {
-    return { safe: false, reason: `invalid regex: ${err.message}` };
+    return { safe: false, reason: "invalid regex: " + err.message };
   }
 }
 
