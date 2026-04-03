@@ -142,6 +142,14 @@
 - **Last-verified**: 2026-04-03
 - **Context**: compareSemver has a known parsing bug: multi-segment pre-release strings (e.g. "1.0.0-1.0.0") are misparsed when the pre-release label contains dots resembling a version tuple. Separately, mixed pre-release vs release comparison (e.g. "1.0.0-beta" vs "1.0.0") may produce inconsistent ordering. Both deferred to #720 — out of scope for the test coverage PR.
 
+### [2026-04-03] v3.6.0: Regex edge cases in review gate hook — accepted (PR #736)
+- **Type**: RISK [accepted]
+- **Source**: PR #736, Copilot findings (x3)
+- **Tags**: hooks, regex, review-gate, edge-cases
+- **Outcome**: accepted
+- **Last-verified**: 2026-04-03
+- **Context**: Three regex edge cases flagged in the review gate hook (PR #736), all accepted. Deferred hook unit tests and stale sidecar risk also noted. Pattern: the review gate hook accumulates deferred findings — stale sidecar, branch detection, regex edge cases, and missing unit tests are now a cluster of known debt in this file. A dedicated hardening issue should consolidate these.
+
 ### [2026-04-03] v3.4.0: TOML escaping test coverage added (#665)
 - **Type**: PATTERN [new]
 - **Source**: #665, PR feat/665-toml-escaping-tests

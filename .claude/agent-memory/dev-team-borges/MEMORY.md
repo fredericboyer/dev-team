@@ -155,6 +155,14 @@
 - **Last-verified**: 2026-04-02
 - **Context**: First release with LIGHT/FULL review tier differentiation. 21 findings (1 DEFECT fixed, 14 accepted, 6 deferred), 0 overruled. FULL review on COMPLEX task caught the only DEFECT — tier system validated. Branch contamination recurred (3rd occurrence). New entries written: Voss (2), Deming (2), Tufte (1), Szabo (2), Knuth (2), Brooks (2), Turing (1). Brooks compressed from 201→191 lines. Last-verified bumped on 3 existing entries (Szabo ReDoS, Deming ReDoS, Knuth stray commits). 1 new shared learning (review tier validation). Zero-overrule alert continues at n>=199. No temporal decay needed — all entries within 30-day window.
 
+### [2026-04-03] v3.6.0 extraction — 11 issues, 18 findings, 72% acceptance, Copilot-only review
+- **Type**: MILESTONE [verified]
+- **Source**: v3.6.0 task loop (11 issues, 12 PRs #733-#742 + release)
+- **Tags**: metrics, calibration, extraction, process-gap
+- **Outcome**: verified
+- **Last-verified**: 2026-04-03
+- **Context**: 3 waves (5+4+2). 18 findings (1 DEFECT fixed, 10 fixed/accepted, 3 deferred, 0 ignored). 72% acceptance — within healthy band. Copilot-only review — same process gap as v3.4.0/v1.8.0/v1.6.0. 1 DEFECT: existsSync unreliable for symlinks (PR #735). Review gate hook (PR #736) has a cluster of 3 deferred findings (stale sidecar, branch detection, unit tests). Cross-branch contamination recurred (5th time in Brooks memory). "Require up-to-date branches" disabled mid-release — valid trade-off when branches known-clean. New entries: Szabo (1), Deming (2+bump), Brooks (2+bump), Knuth (1). Last-verified bumped on Deming hooks, Szabo symlinks, Brooks contamination.
+
 ### [2026-04-03] v3.5.0 extraction — 3 branches, 14 findings, 29% acceptance, LIGHT/FULL tier validated
 - **Type**: MILESTONE [verified]
 - **Source**: v3.5.0 task loop (3 issues, 3 PRs #716-#718)

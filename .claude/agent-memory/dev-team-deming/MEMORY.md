@@ -16,7 +16,7 @@
 - **Source**: templates/hooks/ analysis
 - **Tags**: hooks, enforcement, dx
 - **Outcome**: verified
-- **Last-verified**: 2026-03-29
+- **Last-verified**: 2026-04-03
 - **Context**: dev-team-tdd-enforce.js (TDD), dev-team-safety-guard.js (safety), dev-team-post-change-review.js (review spawning), dev-team-pre-commit-lint.js (lint), dev-team-pre-commit-gate.js (blocking gate), dev-team-watch-list.js (file watch triggers). ADR-001: hooks over CLAUDE.md for enforcement.
 
 ### [2026-03-25] Agent and hook validation scripts run in CI
@@ -171,6 +171,22 @@
 - **Outcome**: fixed
 - **Last-verified**: 2026-04-03
 - **Context**: CI referenced `validate:docs` script but it was absent from package.json. This caused CI/local parity gap — the script ran in CI (via npm run) but couldn't be run locally without the package.json entry. Zero review findings on this PR. Reinforces: every CI npm run step must have a matching script in package.json.
+
+### [2026-04-03] v3.6.0: console.warn over stderr, Windows chmod skip, type cast cleanup (PR #733)
+- **Type**: PATTERN [verified]
+- **Source**: PR #733, Copilot findings (5 SUGGESTION, all fixed)
+- **Tags**: dx, tooling, windows, console, types
+- **Outcome**: fixed
+- **Last-verified**: 2026-04-03
+- **Context**: Cluster of DX improvements: (1) Use `console.warn` not `process.stderr.write` for warning output — consistent with Node.js idiom. (2) Skip `chmod` on Windows where it's a no-op. (3) Cast to `NodeJS.ErrnoException` instead of `any` for typed error handling. (4) Keep JSDoc up-to-date when function signatures change. (5) Maintain warning prefix consistency (same prefix across all warning paths). Small fixes but pattern: when writing cross-platform Node.js CLI code, always consider Windows paths for chmod/permissions.
+
+### [2026-04-03] v3.6.0: Review gate stale sidecar + branch detection risks — deferred (#736)
+- **Type**: RISK [deferred]
+- **Source**: PR #736, Copilot findings
+- **Tags**: review-gate, sidecar, branch-detection, hooks, deferred
+- **Outcome**: deferred
+- **Last-verified**: 2026-04-03
+- **Context**: Two risks deferred from PR #736: (1) Stale sidecar concern — sidecar files in `.dev-team/.reviews/` may persist across branch switches, causing stale review evidence to match a new commit. (2) Branch detection via HEAD — using HEAD for branch name detection can give wrong result in detached HEAD state or during rebase. Both accepted as known limitations for now. Unit tests for the hook were also deferred. Regex edge cases (x3) were accepted.
 
 ### [2026-03-30] v2.0.1: Scope reduction — cursor/windsurf adapters and MCP server removed
 - **Type**: DECISION [removed]
