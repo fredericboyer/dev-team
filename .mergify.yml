@@ -34,6 +34,8 @@ pull_request_rules:
       - "#check-success >= 1"
       - "#check-pending = 0"
       - "#check-failure = 0"
+      # Quality gate: all review threads must be resolved. No approval
+      # count required — see ADR-041 for rationale.
       - "#review-threads-unresolved = 0"
     actions:
       queue:
