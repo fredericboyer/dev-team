@@ -51,6 +51,9 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Typecheck
+        run: npm run typecheck
+
       - name: Format check
         run: npm run format:check
 
@@ -71,6 +74,9 @@ jobs:
 
       - name: Validate README accuracy
         run: node scripts/validate-readme.js
+
+      - name: Validate hook scripts
+        run: node scripts/validate-hooks.js
 
   validate-hooks:
     runs-on: ${{ matrix.os }}
