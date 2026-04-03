@@ -50,31 +50,41 @@ describe("CLI --help flag", () => {
 describe("--preset flag parsing", () => {
   it("does not match --presets as a preset flag", () => {
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "dt-test-"));
+    let combined = "";
     try {
       // --presets with --all to avoid interactive mode; should NOT be treated as --preset
-      execFileSync(process.execPath, [bin, "init", "--all", "--presets"], {
+      const stdout = execFileSync(process.execPath, [bin, "init", "--all", "--presets"], {
         encoding: "utf-8",
         cwd: tmpDir,
         timeout: 10000,
       });
-    } catch {
-      // May exit non-zero — that's fine
+      combined = stdout;
+    } catch (err) {
+      // May exit non-zero — that's fine; capture any output
+      combined = (err.stdout || "") + (err.stderr || "");
     }
-    // Verify no preset-related output was generated (--presets is not a valid flag)
+    assert.ok(!combined.includes("Using preset:"), "--presets should not trigger preset behavior");
     fs.rmSync(tmpDir, { recursive: true, force: true });
   });
 
   it("does not match --presetfoo as a preset flag", () => {
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "dt-test-"));
+    let combined = "";
     try {
-      execFileSync(process.execPath, [bin, "init", "--all", "--presetfoo"], {
+      const stdout = execFileSync(process.execPath, [bin, "init", "--all", "--presetfoo"], {
         encoding: "utf-8",
         cwd: tmpDir,
         timeout: 10000,
       });
-    } catch {
-      // May exit non-zero — that's fine
+      combined = stdout;
+    } catch (err) {
+      // May exit non-zero — that's fine; capture any output
+      combined = (err.stdout || "") + (err.stderr || "");
     }
+    assert.ok(
+      !combined.includes("Using preset:"),
+      "--presetfoo should not trigger preset behavior",
+    );
     fs.rmSync(tmpDir, { recursive: true, force: true });
   });
 
@@ -272,6 +282,25 @@ describe("--all flag combinations", () => {
       assert.ok(output.includes("Voss"), "should include Voss");
       assert.ok(output.includes("Drucker"), "should include Drucker");
       assert.ok(output.includes("Rams"), "should include Rams");
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe("retired agents", () => {
+  it("Beck is not in the ALL_AGENTS list", () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "dt-test-"));
+    try {
+      const output = execFileSync(process.execPath, [bin, "init", "--all"], {
+        encoding: "utf-8",
+        cwd: tmpDir,
+        timeout: 10000,
+      });
+      assert.ok(
+        !output.includes("Beck"),
+        "Beck should not appear in agent output (retired in v3.2.0)",
+      );
     } finally {
       fs.rmSync(tmpDir, { recursive: true, force: true });
     }
