@@ -34,10 +34,6 @@
           {
             "type": "command",
             "command": "node .dev-team/hooks/dev-team-review-gate.js"
-          },
-          {
-            "type": "command",
-            "command": "node .dev-team/hooks/dev-team-merge-gate.js"
           }
         ]
       },
