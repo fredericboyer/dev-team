@@ -85,6 +85,34 @@ describe("compareSemver", () => {
     it("equal pre-release strings return 0", () => {
       assert.equal(compareSemver("1.0.0-alpha.1", "1.0.0-alpha.1"), 0);
     });
+
+    // K2: mixed numeric+string pre-release identifiers (e.g. 1.0.0-1.alpha)
+    // Per semver spec: numeric identifiers compare numerically, string identifiers
+    // compare lexically, and numeric < string when at the same field position.
+    it("1.0.0-1.alpha < 1.0.0-2.alpha (numeric first field differs)", () => {
+      assert.ok(compareSemver("1.0.0-1.alpha", "1.0.0-2.alpha") < 0);
+    });
+
+    it("1.0.0-2.alpha > 1.0.0-1.alpha", () => {
+      assert.ok(compareSemver("1.0.0-2.alpha", "1.0.0-1.alpha") > 0);
+    });
+
+    it("1.0.0-1.alpha == 1.0.0-1.alpha", () => {
+      assert.equal(compareSemver("1.0.0-1.alpha", "1.0.0-1.alpha"), 0);
+    });
+
+    it("1.0.0-1.alpha < 1.0.0-1.beta (string second field differs)", () => {
+      assert.ok(compareSemver("1.0.0-1.alpha", "1.0.0-1.beta") < 0);
+    });
+
+    it("1.0.0-1.alpha < 1.0.0-alpha.alpha (numeric field < string field at same position)", () => {
+      // At position 0: "1" is numeric, "alpha" is string — numeric < string per semver spec
+      assert.ok(compareSemver("1.0.0-1.alpha", "1.0.0-alpha.alpha") < 0);
+    });
+
+    it("1.0.0-0.alpha < 1.0.0-1.alpha (numeric zero less than one)", () => {
+      assert.ok(compareSemver("1.0.0-0.alpha", "1.0.0-1.alpha") < 0);
+    });
   });
 
   describe("build metadata equality", () => {

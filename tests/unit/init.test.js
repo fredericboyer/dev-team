@@ -1,10 +1,7 @@
 "use strict";
 
-const { describe, it, beforeEach, afterEach } = require("node:test");
+const { describe, it } = require("node:test");
 const assert = require("node:assert/strict");
-const fs = require("fs");
-const path = require("path");
-const os = require("os");
 
 const { PRESETS, ALL_AGENTS, QUALITY_HOOKS, INFRA_HOOKS } = require("../../dist/init");
 
@@ -258,6 +255,57 @@ describe("PRESETS", () => {
   it("preset label matches its key", () => {
     for (const [key, preset] of Object.entries(PRESETS)) {
       assert.equal(preset.label, key, `Preset key '${key}' should match its label property`);
+    }
+  });
+});
+
+// ─── Preset flag parsing (--preset=name form) ────────────────────────────────
+// K3: the equals-delimiter form of --preset was untested at the unit level.
+// Mirror the parsing logic from init.ts run() and verify it against PRESETS.
+
+describe("preset flag parsing — equals-delimiter form", () => {
+  // Mirrors: `presetFlag.includes("=") ? presetFlag.split("=")[1] : flags[idx + 1]`
+  function parsePresetFlag(flags) {
+    const presetFlag = flags.find((f) => f === "--preset" || f.startsWith("--preset="));
+    if (!presetFlag) return undefined;
+    const idx = flags.indexOf(presetFlag);
+    return presetFlag.includes("=") ? presetFlag.split("=")[1] : flags[idx + 1];
+  }
+
+  it("--preset=backend resolves to 'backend' (valid preset key)", () => {
+    const name = parsePresetFlag(["--preset=backend"]);
+    assert.equal(name, "backend");
+    assert.ok(name in PRESETS, "resolved name should be a valid preset key");
+  });
+
+  it("--preset=fullstack resolves to 'fullstack'", () => {
+    const name = parsePresetFlag(["--preset=fullstack"]);
+    assert.equal(name, "fullstack");
+    assert.ok(name in PRESETS);
+  });
+
+  it("--preset=data resolves to 'data'", () => {
+    const name = parsePresetFlag(["--preset=data"]);
+    assert.equal(name, "data");
+    assert.ok(name in PRESETS);
+  });
+
+  it("--preset backend (space form) resolves to 'backend'", () => {
+    const name = parsePresetFlag(["--preset", "backend"]);
+    assert.equal(name, "backend");
+    assert.ok(name in PRESETS);
+  });
+
+  it("returns undefined when no --preset flag present", () => {
+    const name = parsePresetFlag(["--all"]);
+    assert.equal(name, undefined);
+  });
+
+  it("equals-delimiter and space form produce the same result for all known presets", () => {
+    for (const key of Object.keys(PRESETS)) {
+      const equalsForm = parsePresetFlag([`--preset=${key}`]);
+      const spaceForm = parsePresetFlag(["--preset", key]);
+      assert.equal(equalsForm, spaceForm, `Mismatch for preset '${key}'`);
     }
   });
 });
