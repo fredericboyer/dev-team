@@ -623,6 +623,34 @@ describe("listFilesRecursive", () => {
     );
     assert.ok(!result.some((f) => f.endsWith("linked.txt")), "should exclude symlinked file");
   });
+
+  it("skips unreadable directories without throwing", () => {
+    // Skip on Windows (chmod doesn't restrict directory access) and root
+    if (process.platform === "win32") return;
+    if (process.getuid && process.getuid() === 0) return;
+
+    const d = path.join(tmpDir, "perm-test");
+    const restricted = path.join(d, "restricted");
+    const accessible = path.join(d, "accessible");
+    fs.mkdirSync(restricted, { recursive: true });
+    fs.mkdirSync(accessible, { recursive: true });
+    fs.writeFileSync(path.join(accessible, "visible.txt"), "yes");
+    fs.writeFileSync(path.join(restricted, "hidden.txt"), "no");
+    fs.chmodSync(restricted, 0o000);
+
+    let result;
+    try {
+      result = listFilesRecursive(d);
+    } finally {
+      fs.chmodSync(restricted, 0o755);
+    }
+
+    assert.ok(
+      result.some((f) => f.endsWith("visible.txt")),
+      "should include accessible files",
+    );
+    assert.ok(!result.some((f) => f.endsWith("hidden.txt")), "should skip restricted directory");
+  });
 });
 
 describe("getPackageVersion", () => {

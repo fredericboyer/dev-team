@@ -375,11 +375,24 @@ export function getPackageVersion(): string {
  * @param dir - Directory to scan
  * @param maxDepth - Maximum directory depth to recurse into (default 10). Guards against
  *   runaway recursion in deeply nested or circular filesystem structures.
+ * @remarks Unreadable directories (EACCES/EPERM) are skipped with a warning printed to stderr.
  */
 export function listFilesRecursive(dir: string, maxDepth: number = 10): string[] {
   if (maxDepth < 0) return [];
   const results: string[] = [];
-  const entries = fs.readdirSync(dir, { withFileTypes: true });
+  let entries: fs.Dirent[];
+  try {
+    entries = fs.readdirSync(dir, { withFileTypes: true });
+  } catch (err: unknown) {
+    const error = err as NodeJS.ErrnoException;
+    if (error.code === "EACCES" || error.code === "EPERM") {
+      console.warn(
+        `Warning: skipping unreadable directory: ${dir} (${error.code}: ${error.message})`,
+      );
+      return [];
+    }
+    throw err;
+  }
   for (const entry of entries) {
     const fullPath = path.join(dir, entry.name);
     if (entry.isDirectory() && !entry.isSymbolicLink()) {
