@@ -154,3 +154,11 @@
 - **Outcome**: verified
 - **Last-verified**: 2026-04-02
 - **Context**: First release with LIGHT/FULL review tier differentiation. 21 findings (1 DEFECT fixed, 14 accepted, 6 deferred), 0 overruled. FULL review on COMPLEX task caught the only DEFECT — tier system validated. Branch contamination recurred (3rd occurrence). New entries written: Voss (2), Deming (2), Tufte (1), Szabo (2), Knuth (2), Brooks (2), Turing (1). Brooks compressed from 201→191 lines. Last-verified bumped on 3 existing entries (Szabo ReDoS, Deming ReDoS, Knuth stray commits). 1 new shared learning (review tier validation). Zero-overrule alert continues at n>=199. No temporal decay needed — all entries within 30-day window.
+
+### [2026-04-03] v3.4.0 extraction — 11 branches, 22 findings, 86% acceptance, Copilot-only review
+- **Type**: MILESTONE [verified]
+- **Source**: v3.4.0 task loop (11 issues, 11 branches, release PR #707)
+- **Tags**: metrics, calibration, extraction, process-gap
+- **Outcome**: verified
+- **Last-verified**: 2026-04-03
+- **Context**: 22 findings (3 DEFECT fixed, 19 SUGGESTION accepted/fixed), all from Copilot. No adversarial agent reviews — same process gap as v1.8.0 and v1.6.0. COMPLEX issues (#687, #689) should have had FULL reviews. 3 DEFECTs on #683 (worktree symlink bypass) were legitimate catches by Copilot. Shared file contamination was universal (unpushed local commits). Cross-branch contamination on 2 PRs (#694, #698). New entries written: Voss (1 new + 1 updated), Szabo (1 updated), Knuth (1), Turing (1), Tufte (1), Brooks (1 updated), Conway (1 bumped), Deming (1 bumped). No new shared learnings needed — contamination pattern already documented. Zero-overrule alert continues at n>=199 (no new in-team findings).

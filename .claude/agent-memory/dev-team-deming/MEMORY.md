@@ -97,7 +97,7 @@
 - **Source**: #482, PR #482
 - **Tags**: hooks, worktrees, infrastructure, temporary
 - **Outcome**: accepted
-- **Last-verified**: 2026-03-29
+- **Last-verified**: 2026-04-03
 - **Context**: WorktreeCreate/WorktreeRemove hooks use mkdir-based locking to serialize worktree creation (workaround for anthropics/claude-code#34645 and #39680). Classified as INFRA_HOOKS — always installed, not user-selectable. TEMPORARY: remove when upstream fixes land. Hooks are JS, no dependencies, cross-platform. Lock dir: `.dev-team/.worktree-lock`.
 
 ### [2026-03-29] v1.8.0: Retro skill verifies tech debt against issue tracker (#473)

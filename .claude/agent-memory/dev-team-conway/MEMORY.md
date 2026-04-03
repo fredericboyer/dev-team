@@ -16,7 +16,7 @@
 - **Source**: .github/workflows/release.yml analysis
 - **Tags**: release, workflow, npm
 - **Outcome**: verified
-- **Last-verified**: 2026-03-25
+- **Last-verified**: 2026-04-03
 - **Context**: Release process: bump version in package.json, update CHANGELOG.md, commit, push tag v*. Release workflow validates semver match, runs full test suite + lint + validation, publishes to npm with provenance, then creates GitHub Release with extracted changelog notes.
 
 ### [2026-03-25] npm package scope: @fredericboyer/dev-team, public access

@@ -115,6 +115,14 @@
 - **Last-verified**: 2026-04-02
 - **Context**: 4 briefs in single session. Agent coordination (#605/#604/#674) consolidated multi-issue research. Platform capabilities (#662/#603/#607) likewise. Kairos memory (#606) is a standalone brief. Harness best practices (#669) informs test infrastructure. All briefs stored in docs/research/. No code changes from research — purely informational for future task planning.
 
+### [2026-04-03] v3.4.0: 5 research briefs — safety guards, model calibration, bug capture, batch skills, checkpoint tags
+- **Type**: RESEARCH [completed]
+- **Source**: #687, #688, #689, #690, #691
+- **Tags**: research, safety-guard, model-calibration, bug-capture, batch-skills, checkpoint-tags
+- **Outcome**: completed
+- **Last-verified**: 2026-04-03
+- **Context**: 5 briefs in single session. Safety guard assessment (#687) evaluates current guard efficacy. Model calibration process (#688) proposes systematic calibration workflow. Bug capture mechanism (#689) designs structured bug capture. Batch skill evaluation (#690) assesses batch processing patterns. Checkpoint tags evaluation (#691) evaluates git tag-based checkpointing. All advisory — research docs for future implementation decisions. Copilot caught minor wording/formatting issues across all briefs (findings #6-#22).
+
 ### [2026-03-26] Research-first approach validated in v1.6.0
 - **Type**: PATTERN [verified]
 - **Source**: v1.6.0 session (#406, #407 research briefs)
