@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.4.0] - 2026-04-03
+
+### Added
+- ARCHITECTURE.md with Mermaid diagrams documenting system structure (#704, PR #706).
+- Recommended GitHub ruleset configuration guide (#703, PR #705).
+- Auto-mode + PreToolUse hook interaction tests (#686, PR #698).
+- TOML escaping edge case tests for Codex adapter (#665, PR #693).
+
+### Changed
+- Removed Mergify — GitHub native rulesets sufficient (#699, PR #702).
+
+### Fixed
+- Worktree hook hardened: symlink guard, err.status normalization, test hermeticity (#683, PR #694).
+
+### Documentation
+- Turing research: mid-implementation bug capture mechanism (#689, PR #701).
+- Turing research: safety-guard hook assessment (#687, PR #700).
+- Model upgrade calibration process (#688, PR #697).
+- Turing research: checkpoint tags evaluation (#691, PR #695).
+- Turing research: /batch skill evaluation (#690, PR #696).
+
 ## [3.3.0] - 2026-04-02
 
 ### Added
