@@ -1,6 +1,6 @@
 {
   "name": "@fredericboyer/dev-team",
-  "version": "3.3.0",
+  "version": "3.4.0",
   "description": "Adversarial AI agent team for any project — installs Claude Code agents, hooks, and skills that enforce quality through productive friction",
   "main": "dist/init.js",
   "types": "dist/init.d.ts",
