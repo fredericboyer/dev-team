@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * dev-team-copilot-merge-gate.js
+ * merge-skill-gate.js
  * PreToolUse hook on Bash.
  *
  * Blocks direct PR merge commands that bypass Copilot review verification.
@@ -69,7 +69,7 @@ for (const { pattern, allow, reason } of MERGE_PATTERNS) {
   if (pattern.test(command)) {
     // If this pattern has an allow exception and the command matches it, skip blocking
     if (allow && allow.test(command)) continue;
-    console.error(`[dev-team copilot-merge-gate] BLOCKED: ${reason}`);
+    console.error(`[dev-team merge-skill-gate] BLOCKED: ${reason}`);
     process.exit(2);
   }
 }

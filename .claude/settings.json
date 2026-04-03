@@ -14,7 +14,7 @@
           },
           {
             "type": "command",
-            "command": "node .claude/hooks/copilot-merge-gate.js"
+            "command": "node .claude/hooks/merge-skill-gate.js"
           },
           {
             "type": "command",
