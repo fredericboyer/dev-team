@@ -2056,11 +2056,7 @@ describe("dev-team-worktree-remove", () => {
   });
 
   it("exits 0 with warning when worktree_path traverses outside project root (#725)", () => {
-    const result = runWorktreeHook(
-      hook,
-      { worktree_path: "/tmp/../../etc" },
-      { cwd: tmpDir },
-    );
+    const result = runWorktreeHook(hook, { worktree_path: "/tmp/../../etc" }, { cwd: tmpDir });
     assert.equal(result.code, 0, "Should exit 0 (non-fatal)");
     assert.ok(
       result.stderr.includes("resolves outside project root"),
