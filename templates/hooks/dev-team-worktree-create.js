@@ -101,7 +101,19 @@ try {
 } catch {
   // .claude doesn't exist yet — safe, will be created by mkdir below
 }
-const resolvedWorktreesDir = path.join(resolvedBase, ".claude", "worktrees");
+const worktreesDirResolved = path.join(resolvedBase, ".claude", "worktrees");
+try {
+  const wstat = fs.lstatSync(worktreesDirResolved);
+  if (wstat.isSymbolicLink()) {
+    process.stderr.write(
+      `[dev-team worktree-create] .claude/worktrees is a symlink — potential containment bypass\n`,
+    );
+    process.exit(1);
+  }
+} catch {
+  // worktrees doesn't exist yet — safe, will be created by mkdir below
+}
+const resolvedWorktreesDir = worktreesDirResolved;
 const resolvedWorktree = path.join(resolvedWorktreesDir, worktreeName);
 const worktreeRel = path.relative(resolvedWorktreesDir, resolvedWorktree);
 if (worktreeRel.startsWith("..") || path.isAbsolute(worktreeRel) || worktreeRel !== worktreeName) {
