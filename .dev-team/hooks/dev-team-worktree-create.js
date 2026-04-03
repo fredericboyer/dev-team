@@ -65,6 +65,15 @@ if (!worktreeName) {
   process.exit(1);
 }
 
+// Validate worktree_name against path traversal (fixes #670)
+// Input boundary validation: reject before it reaches path.join()
+if (worktreeName.includes("..") || worktreeName.includes("/") || worktreeName.includes("\\")) {
+  process.stderr.write(
+    `[dev-team worktree-create] worktree_name "${worktreeName}" contains path traversal characters\n`,
+  );
+  process.exit(1);
+}
+
 // Validate basePath contains a .git directory before operating (fixes #537)
 if (!fs.existsSync(path.join(basePath, ".git"))) {
   process.stderr.write("[dev-team worktree-create] basePath does not contain a .git directory\n");
@@ -74,6 +83,16 @@ if (!fs.existsSync(path.join(basePath, ".git"))) {
 const worktreesDir = path.join(basePath, ".claude", "worktrees");
 const worktreePath = path.join(worktreesDir, worktreeName);
 const lockFile = path.join(basePath, ".git", "worktree-create.lock");
+
+// Defense-in-depth: verify resolved path stays within worktrees directory (fixes #670)
+const resolvedWorktree = path.resolve(worktreesDir, worktreeName);
+const worktreeRel = path.relative(worktreesDir, resolvedWorktree);
+if (worktreeRel.startsWith("..") || path.isAbsolute(worktreeRel) || worktreeRel !== worktreeName) {
+  process.stderr.write(
+    `[dev-team worktree-create] worktree_name "${worktreeName}" resolves outside worktrees directory\n`,
+  );
+  process.exit(1);
+}
 
 /**
  * Acquire an exclusive lock using mkdir (atomic on all platforms).
