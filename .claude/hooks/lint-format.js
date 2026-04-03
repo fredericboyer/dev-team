@@ -26,12 +26,6 @@ if (!filePath) {
   process.exit(0);
 }
 
-const ext = path.extname(filePath);
-const LINTABLE = [".js", ".ts", ".jsx", ".tsx"];
-if (!LINTABLE.includes(ext)) {
-  process.exit(0);
-}
-
 const oxlintBin = path.resolve("node_modules/.bin/oxlint");
 const oxfmtBin = path.resolve("node_modules/.bin/oxfmt");
 
