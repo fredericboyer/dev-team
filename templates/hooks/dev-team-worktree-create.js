@@ -85,8 +85,15 @@ const worktreePath = path.join(worktreesDir, worktreeName);
 const lockFile = path.join(basePath, ".git", "worktree-create.lock");
 
 // Defense-in-depth: verify resolved path stays within worktrees directory (fixes #670)
-const resolvedWorktree = path.resolve(worktreesDir, worktreeName);
-const worktreeRel = path.relative(worktreesDir, resolvedWorktree);
+// Use realpathSync to resolve symlinks — path.resolve is lexical only (fixes #683)
+let resolvedWorktreesDir;
+try {
+  resolvedWorktreesDir = fs.realpathSync(worktreesDir);
+} catch {
+  resolvedWorktreesDir = path.resolve(worktreesDir);
+}
+const resolvedWorktree = path.join(resolvedWorktreesDir, worktreeName);
+const worktreeRel = path.relative(resolvedWorktreesDir, resolvedWorktree);
 if (worktreeRel.startsWith("..") || path.isAbsolute(worktreeRel) || worktreeRel !== worktreeName) {
   process.stderr.write(
     `[dev-team worktree-create] worktree_name "${worktreeName}" resolves outside worktrees directory\n`,
