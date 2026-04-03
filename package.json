@@ -24,6 +24,7 @@
     "format": "oxfmt --write src/ scripts/ templates/hooks/ tests/",
     "format:check": "oxfmt --check src/ scripts/ templates/hooks/ tests/",
     "validate:agents": "node scripts/validate-agents.js",
+    "validate:docs": "node scripts/validate-docs.js",
     "validate:hooks": "node scripts/validate-hooks.js",
     "validate:readme": "node scripts/validate-readme.js",
     "prepublishOnly": "npm run build"
