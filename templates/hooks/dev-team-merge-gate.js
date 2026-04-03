@@ -60,7 +60,8 @@ try {
   process.exit(0);
 }
 
-// Default branch (main/master) typically doesn't need a review gate at merge time
+// Skip gating when the current branch cannot be determined meaningfully
+// (for example, detached HEAD or an empty branch name)
 if (currentBranch === "HEAD" || currentBranch === "") {
   process.exit(0);
 }
