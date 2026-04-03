@@ -1,5 +1,5 @@
 ---
-name: dev-team:retro
+name: dev-team-retro
 description: Audit the health of your project's dev-team knowledge base — learnings, agent memory, and CLAUDE.md. Finds stale entries, contradictions, enforcement gaps, and promotion opportunities. Use periodically or after major changes.
 disable-model-invocation: true
 ---
