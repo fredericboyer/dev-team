@@ -1,5 +1,9 @@
 #!/usr/bin/env node
 
+// Hooks have zero npm dependencies (ADR-002), so this script runs without npm ci.
+// Uses only Node.js built-ins. If a hook ever gains an npm dep, this will fail
+// with MODULE_NOT_FOUND — that's intentional, to surface the invariant violation.
+
 "use strict";
 
 const { execFileSync } = require("child_process");

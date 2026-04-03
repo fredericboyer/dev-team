@@ -57,6 +57,7 @@ jobs:
       - name: Format check
         run: npm run format:check
 
+  # No npm ci — validation scripts use only Node.js built-ins (ADR-002: zero runtime deps)
   validate:
     runs-on: ubuntu-latest
     steps:
@@ -78,6 +79,7 @@ jobs:
       - name: Validate hook scripts
         run: node scripts/validate-hooks.js
 
+  # No npm ci — hooks have zero npm dependencies (ADR-002); node --check needs only Node.js
   validate-hooks:
     runs-on: ${{ matrix.os }}
     strategy:
