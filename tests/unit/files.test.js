@@ -644,7 +644,10 @@ describe("listFilesRecursive", () => {
       fs.chmodSync(restricted, 0o755);
     }
 
-    assert.ok(result.some((f) => f.endsWith("visible.txt")), "should include accessible files");
+    assert.ok(
+      result.some((f) => f.endsWith("visible.txt")),
+      "should include accessible files",
+    );
     assert.ok(!result.some((f) => f.endsWith("hidden.txt")), "should skip restricted directory");
   });
 });
