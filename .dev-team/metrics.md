@@ -252,6 +252,25 @@
 - **Notes**: First release with LIGHT/FULL review tier differentiation in practice. All SIMPLE tasks got LIGHT (advisory-only) reviews; the COMPLEX task (#671 — Mergify ADR) got FULL review which caught the sole DEFECT (missing inline comment in .mergify.yml). Branch contamination recurred on 3 branches (feat/666, feat/672, feat/671) — worktree-isolated agents did not experience contamination. 4 Turing research briefs completed (agent coordination, platform capabilities, Kairos memory, harness best practices). GitHub native auto-merge handled all merges despite Mergify being configured. Follow-up issue #683 created for worktree hook hardening.
 - **[RISK] Zero-overrule alert**: Rolling overrule rate remains 0% at n>=199 in-team findings (v1.2.0 through v3.3.0). Per research brief #490, healthy adversarial review shows 1-10% overrule rate. Acceptance rate (71%) is within the healthy band (60-85%).
 
+### [2026-04-03] Task: v3.5.0 delivery (#713, #714, #715) — PRs #716, #717, #718
+- **Agents**: implementing: Voss (#713, #715), Deming (#714); reviewers: Knuth (FULL — #718), Szabo (FULL — #718), Copilot (#716, #717, #718); extract: Borges
+- **Rounds**: 1 round per branch (all converged in 1; #718 FULL review addressed inline)
+- **Findings**:
+  - Copilot (#716 fix/713): 1 SUGGESTION fixed (weak assertion), 1 SUGGESTION deferred, 1 SUGGESTION ignored — 3 total
+  - Copilot (#717 fix/714): 0 findings
+  - Knuth (#718 feat/715, FULL): 3 RISK (1 fixed/K1, 2 deferred/K2-K3), 2 SUGGESTION (2 deferred/K4-K5→#719/#720), 2 QUESTION (2 ignored/K6-K7) — 7 total
+  - Szabo (#718 feat/715, FULL): 1 RISK (1 deferred/S-01→#719), 2 SUGGESTION (2 ignored/S-02-S-03) — 3 total
+  - Copilot (#718): 1 SUGGESTION (ignored — unused imports) — 1 total
+- **Unique findings**: 14 (after dedup across Copilot/Knuth/Szabo)
+- **Acceptance rate**: 29% (4 fixed-or-accepted / 14 total)
+- **Overrule rate**: 0% (0/14)
+- **Fix rate (DEFECTs)**: N/A (0 DEFECTs)
+- **Defer rate (advisory)**: 36% (5/14 — symlink coverage → #719, compareSemver edge cases → #720)
+- **Ignore rate (advisory)**: 36% (5/14 — minor suggestions, questions, advisory on in-scope boundaries)
+- **Duration**: single session, 3 branches
+- **Notes**: Small release — 3 issues. LIGHT/FULL tier applied correctly: SIMPLE branches (#713, #714) got LIGHT reviews (Copilot only); COMPLEX branch (#715 — 657 lines of new tests) got FULL review (Knuth + Szabo). Zero DEFECTs across all 3 branches. Cross-branch contamination recurred (package.json leaked between branches) — 5th documented occurrence. Two follow-up issues created: #719 (symlink guard tests), #720 (compareSemver edge cases). Low acceptance rate (29%) reflects the test-only nature of the COMPLEX branch — test code is lower-risk, advisory findings appropriately deferred/ignored.
+- **[RISK] Zero-overrule alert**: Rolling overrule rate remains 0% at n>=213 in-team findings (v1.2.0 through v3.5.0, in-team only). Acceptance rate (29%) is below healthy band (60-85%) but attributable to test-only scope.
+
 ### [2026-04-03] Task: v3.4.0 delivery (#665, #683, #686, #687, #688, #689, #690, #691, #699, #703, #704)
 - **Agents**: implementing: Voss (#683, #686, #699), Knuth (#665), Turing (research #687, #688, #689, #690, #691), Tufte (docs #703, #704), Conway (release); pre-assessment: Brooks; reviewers: Copilot
 - **Rounds**: max 2 (PR #694 had 2 Copilot rounds), most branches 0-1
