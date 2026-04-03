@@ -1,5 +1,5 @@
 ---
-name: dev-team:scorecard
+name: dev-team-scorecard
 description: Audit process conformance after a workflow completes (task, review, or audit). Checks Borges ran, findings acknowledged, metrics recorded, review executed, memory updated, and conditionally checks ADR written and issue closed.
 user_invocable: false
 ---
