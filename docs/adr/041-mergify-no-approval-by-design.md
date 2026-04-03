@@ -1,7 +1,7 @@
 # ADR-041: Mergify no-approval merge queue by design
 
 Date: 2026-04-02
-Status: accepted
+Status: superseded by ADR-042
 
 ## Context
 

@@ -23,14 +23,14 @@ GitHub's GraphQL API provides `reviewThreads` which returns all threads regardle
 
 3. **Two-phase Copilot workflow polling.** When Copilot code review is configured, poll for the workflow to appear (phase 1, 2 min timeout), then poll for completion (phase 2, 3 min timeout). When not configured, skip — the thread query still catches any manually-submitted reviews.
 
-4. **Resolve threads via GraphQL.** After replying to each thread, resolve it with `resolveReviewThread`. This enables Mergify's `#review-threads-unresolved = 0` condition and GitHub ruleset enforcement.
+4. **Resolve threads via GraphQL.** After replying to each thread, resolve it with `resolveReviewThread`. This enables GitHub ruleset enforcement via `required_review_thread_resolution`.
 
 ## Consequences
 
 **Positive:**
 - Merge skill is simpler (~100 lines vs ~230 lines)
 - Catches ALL review comments, not just Copilot's
-- GraphQL thread resolution enables platform-level enforcement (Mergify, rulesets)
+- GraphQL thread resolution enables platform-level enforcement (GitHub rulesets with `required_review_thread_resolution`)
 - No more multi-signal Copilot detection complexity
 
 **Negative:**

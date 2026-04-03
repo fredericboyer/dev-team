@@ -25,7 +25,7 @@ Merge a pull request with full monitoring: $ARGUMENTS
 
 ## Step 1: Wait for automated reviews and address threads
 
-This step only **polls** for automated reviewers (Copilot). Human reviewers work on their own schedule — the skill does not block waiting for them. If no reviews exist yet and no automated reviewer is configured, proceed to Step 2 (set auto-merge) and let platform gates (Mergify, rulesets) enforce review requirements at merge time.
+This step only **polls** for automated reviewers (Copilot). Human reviewers work on their own schedule — the skill does not block waiting for them. If no reviews exist yet and no automated reviewer is configured, proceed to Step 2 (set auto-merge) and let GitHub branch protection rulesets enforce review requirements at merge time.
 
 ### 1a. Wait for Copilot code review workflow (if configured)
 
@@ -103,7 +103,7 @@ mutation($threadId: ID!) {
 }' -f threadId="{thread_id}"
 ```
 
-This is required — Mergify (and GitHub rulesets) can enforce `#review-threads-unresolved = 0` as a merge condition. Unresolved threads block merging.
+This is required — GitHub branch protection rulesets enforce `required_review_thread_resolution` as a merge condition. Unresolved threads block merging.
 
 ### 1e. Verify and loop
 
@@ -119,7 +119,7 @@ After addressing and resolving all threads:
 gh pr merge {number} --squash --auto --delete-branch
 ```
 
-If Mergify is configured, it handles the merge queue automatically. If not, this sets GitHub's auto-merge to trigger when all required checks pass.
+This sets GitHub's auto-merge to trigger when all required checks pass and branch protection rules are satisfied.
 
 ## Step 3: Monitor CI and merge
 
@@ -127,7 +127,7 @@ If Mergify is configured, it handles the merge queue automatically. If not, this
 gh pr checks {number}
 ```
 
-**If all checks pass:** PR will merge automatically (via auto-merge or Mergify queue).
+**If all checks pass:** PR will merge automatically via GitHub auto-merge.
 
 **If checks are pending:** Report that auto-merge is set and CI is running. Poll every 30 seconds:
 ```bash
