@@ -209,7 +209,7 @@ export class CodexAdapter implements RuntimeAdapter {
   private genRules(codexDir: string): void {
     const rulesPath = path.join(codexDir, "rules", "dev-team-learnings.md");
     if (fileExists(rulesPath)) return;
-    const src = path.join(templateDir(), "rules", "dev-team-learnings.md");
+    const src = path.join(templateDir(), "dev-team-learnings.md");
     const content = readFile(src);
     writeFile(
       rulesPath,
