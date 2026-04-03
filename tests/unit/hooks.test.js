@@ -1073,6 +1073,153 @@ describe("dev-team-tdd-enforce", () => {
       }
     },
   );
+
+  describe("test correspondence check (session-level)", () => {
+    let tmpDir;
+    let originalCwd;
+
+    beforeEach(() => {
+      tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "dev-team-tdd-corr-"));
+      originalCwd = process.cwd();
+      process.chdir(tmpDir);
+      execFileSync("git", ["init"], { cwd: tmpDir, encoding: "utf-8" });
+      execFileSync("git", ["config", "user.email", "test@test.com"], {
+        cwd: tmpDir,
+        encoding: "utf-8",
+      });
+      execFileSync("git", ["config", "user.name", "Test"], { cwd: tmpDir, encoding: "utf-8" });
+      fs.writeFileSync(path.join(tmpDir, "init.txt"), "init");
+      execFileSync("git", ["add", "."], { cwd: tmpDir, encoding: "utf-8" });
+      execFileSync("git", ["commit", "-m", "init"], { cwd: tmpDir, encoding: "utf-8" });
+    });
+
+    afterEach(() => {
+      process.chdir(originalCwd);
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    });
+
+    it("blocks implementation when only unrelated test files are changed", () => {
+      fs.mkdirSync(path.join(tmpDir, "src"), { recursive: true });
+      fs.writeFileSync(path.join(tmpDir, "src", "other.test.js"), 'test("other", () => {})');
+      execFileSync("git", ["add", "src/other.test.js"], { cwd: tmpDir, encoding: "utf-8" });
+
+      const implFile = path.join(tmpDir, "src", "handler.js");
+      fs.writeFileSync(implFile, "module.exports = {}");
+      const input = JSON.stringify({ tool_input: { file_path: implFile } });
+      try {
+        execFileSync(process.execPath, [path.join(HOOKS_DIR, hook), input], {
+          encoding: "utf-8",
+          timeout: 5000,
+          cwd: tmpDir,
+        });
+        assert.fail("Should have exited with code 2");
+      } catch (err) {
+        assert.equal(err.status, 2, "unrelated test changes should not exempt implementation");
+        assert.ok(err.stderr.includes("TDD violation"));
+      }
+    });
+
+    it("allows implementation when corresponding test file is changed", () => {
+      fs.mkdirSync(path.join(tmpDir, "src"), { recursive: true });
+      fs.writeFileSync(path.join(tmpDir, "src", "handler.test.js"), 'test("handler", () => {})');
+      execFileSync("git", ["add", "src/handler.test.js"], { cwd: tmpDir, encoding: "utf-8" });
+
+      const implFile = path.join(tmpDir, "src", "handler.js");
+      fs.writeFileSync(implFile, "module.exports = {}");
+      const input = JSON.stringify({ tool_input: { file_path: implFile } });
+      execFileSync(process.execPath, [path.join(HOOKS_DIR, hook), input], {
+        encoding: "utf-8",
+        timeout: 5000,
+        cwd: tmpDir,
+      });
+      assert.ok(true);
+    });
+
+    it("allows implementation when corresponding .spec test file is changed", () => {
+      fs.mkdirSync(path.join(tmpDir, "src"), { recursive: true });
+      fs.writeFileSync(path.join(tmpDir, "src", "handler.spec.ts"), 'it("works", () => {})');
+      execFileSync("git", ["add", "src/handler.spec.ts"], { cwd: tmpDir, encoding: "utf-8" });
+
+      const implFile = path.join(tmpDir, "src", "handler.ts");
+      fs.writeFileSync(implFile, "export default {}");
+      const input = JSON.stringify({ tool_input: { file_path: implFile } });
+      execFileSync(process.execPath, [path.join(HOOKS_DIR, hook), input], {
+        encoding: "utf-8",
+        timeout: 5000,
+        cwd: tmpDir,
+      });
+      assert.ok(true);
+    });
+  });
+
+  describe("top-level tests/ directory matching", () => {
+    let tmpDir;
+    let originalCwd;
+
+    beforeEach(() => {
+      tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "dev-team-tdd-toplevel-"));
+      originalCwd = process.cwd();
+      process.chdir(tmpDir);
+      execFileSync("git", ["init"], { cwd: tmpDir, encoding: "utf-8" });
+      execFileSync("git", ["config", "user.email", "test@test.com"], {
+        cwd: tmpDir,
+        encoding: "utf-8",
+      });
+      execFileSync("git", ["config", "user.name", "Test"], { cwd: tmpDir, encoding: "utf-8" });
+      fs.writeFileSync(path.join(tmpDir, "init.txt"), "init");
+      execFileSync("git", ["add", "."], { cwd: tmpDir, encoding: "utf-8" });
+      execFileSync("git", ["commit", "-m", "init"], { cwd: tmpDir, encoding: "utf-8" });
+    });
+
+    afterEach(() => {
+      process.chdir(originalCwd);
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    });
+
+    it("allows implementation when test exists in top-level tests/ directory", () => {
+      fs.mkdirSync(path.join(tmpDir, "src"), { recursive: true });
+      const implFile = path.join(tmpDir, "src", "handler.js");
+      fs.writeFileSync(implFile, "module.exports = {}");
+
+      fs.mkdirSync(path.join(tmpDir, "tests", "unit"), { recursive: true });
+      fs.writeFileSync(
+        path.join(tmpDir, "tests", "unit", "handler.test.js"),
+        'test("handler", () => {})',
+      );
+
+      const input = JSON.stringify({ tool_input: { file_path: implFile } });
+      execFileSync(process.execPath, [path.join(HOOKS_DIR, hook), input], {
+        encoding: "utf-8",
+        timeout: 5000,
+        cwd: tmpDir,
+      });
+      assert.ok(true);
+    });
+
+    it("blocks when test in tests/ does not match the implementation name", () => {
+      fs.mkdirSync(path.join(tmpDir, "src"), { recursive: true });
+      const implFile = path.join(tmpDir, "src", "handler.js");
+      fs.writeFileSync(implFile, "module.exports = {}");
+
+      fs.mkdirSync(path.join(tmpDir, "tests", "unit"), { recursive: true });
+      fs.writeFileSync(
+        path.join(tmpDir, "tests", "unit", "other.test.js"),
+        'test("other", () => {})',
+      );
+
+      const input = JSON.stringify({ tool_input: { file_path: implFile } });
+      try {
+        execFileSync(process.execPath, [path.join(HOOKS_DIR, hook), input], {
+          encoding: "utf-8",
+          timeout: 5000,
+          cwd: tmpDir,
+        });
+        assert.fail("Should have exited with code 2");
+      } catch (err) {
+        assert.equal(err.status, 2, "non-matching test in tests/ should not exempt");
+      }
+    });
+  });
 });
 
 // ─── Pre-commit Gate ─────────────────────────────────────────────────────────
