@@ -121,13 +121,13 @@
 - **Last-verified**: 2026-03-26
 - **Context**: Skills now detect platform from config (default: github). When platform field is absent (pre-v1.5 installs), skills default to github rather than failing. update.ts backfills the platform field on upgrade.
 
-### [2026-03-29] v1.11.0: Semgrep SAST deferred to full enforcement
-- **Type**: SUGGESTION [deferred]
-- **Source**: PR #552, Szabo finding
+### [2026-03-29] v1.11.0–v3.2.0: Semgrep SAST added then removed
+- **Type**: SUGGESTION [removed]
+- **Source**: PR #552 (added), #595 (removed)
 - **Tags**: ci, sast, semgrep, security
-- **Outcome**: deferred
-- **Last-verified**: 2026-03-29
-- **Context**: Semgrep SAST added to CI but configured as silent (non-blocking) on failure per Brooks suggestion. Szabo recommended full Semgrep config with custom rules. Deferred — current setup provides visibility without blocking CI. Full enforcement tracked for future hardening pass.
+- **Outcome**: removed
+- **Last-verified**: 2026-04-02
+- **Context**: Semgrep SAST added in v1.11.0 (#552) as silent/non-blocking. Removed in v3.2.0 (#595) due to CI complexity and overlap with GitHub CodeQL. CodeQL provides equivalent SAST coverage natively. No further Semgrep enforcement planned.
 
 ### [2026-03-30] v2.0: Path traversal via adapter name field — FIXED (F-01)
 - **Type**: DEFECT [fixed]

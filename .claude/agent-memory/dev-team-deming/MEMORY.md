@@ -180,18 +180,10 @@
 - **Last-verified**: 2026-04-02
 - **Context**: CLI tests expanded with negative assertions (error path coverage). Hook unit tests added for review-gate. Advisory finding: assertion in catch block can be silently swallowed — accepted.
 
-### [2026-03-30] v2.0: 5 runtime adapters — agents-md, copilot, codex, cursor, windsurf
-- **Type**: DECISION [removed in v2.0.1]
-- **Source**: #502, #504, #505, #506, PRs #570, #571
-- **Tags**: adapters, multi-runtime, copilot, codex, cursor, windsurf, agents-md, dx
-- **Outcome**: fixed
-- **Last-verified**: 2026-03-30
-- **Context**: Five adapters registered via barrel file (src/adapters/index.ts). AgentsMd generates single AGENTS.md at root. Copilot generates .github/copilot-instructions.md + per-agent .github/instructions/. Codex generates .agents/AGENTS.md + skills + .codex/config.toml. Cursor and Windsurf adapters removed in v2.0.1. Current adapters: claude, agents-md, copilot, codex. All adapters implement generate() + update() interface.
-
-### [2026-03-30] v2.0: MCP enforcement server (ADR-037)
-- **Type**: DECISION [removed in v2.0.1]
-- **Source**: #503, PR #572
-- **Tags**: mcp, enforcement, review-gate, multi-runtime, dx
-- **Outcome**: fixed
-- **Last-verified**: 2026-03-30
-- **Context**: MCP enforcement server removed in v2.0.1. Original design: JSON-RPC 2.0 over stdio, zero dependencies. Tool registry pattern with review_gate as first tool. Removed due to scope reduction — hooks remain the primary enforcement mechanism.
+### [2026-03-30] v2.0.1: Scope reduction — cursor/windsurf adapters and MCP server removed
+- **Type**: DECISION [removed]
+- **Source**: #502–#506, #503, PRs #569–#572
+- **Tags**: adapters, mcp, scope-reduction, dx
+- **Outcome**: removed
+- **Last-verified**: 2026-04-02
+- **Context**: v2.0.1 removed cursor and windsurf adapters (current: claude, agents-md, copilot, codex) and the MCP enforcement server (ADR-037). MCP removed due to scope reduction — hooks remain primary enforcement. Adapter registry pattern retained for remaining runtimes.
