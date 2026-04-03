@@ -36,7 +36,7 @@ jobs:
       - name: Run tests
         run: npm test
 
-  lint-and-format:
+  lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -51,8 +51,32 @@ jobs:
       - name: Lint
         run: npm run lint
 
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - run: npm ci
+
       - name: Typecheck
         run: npm run typecheck
+
+  format-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - run: npm ci
 
       - name: Format check
         run: npm run format:check
@@ -74,9 +98,6 @@ jobs:
 
       - name: Validate README accuracy
         run: node scripts/validate-readme.js
-
-      - name: Validate hook scripts
-        run: node scripts/validate-hooks.js
 
   validate-hooks:
     runs-on: ${{ matrix.os }}
@@ -107,4 +128,3 @@ jobs:
 
       - name: Audit dependencies
         run: npm audit --audit-level=moderate
-
