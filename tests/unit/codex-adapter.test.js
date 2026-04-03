@@ -155,6 +155,21 @@ describe("CodexAdapter", () => {
     const content = fs.readFileSync(rp, "utf-8");
     assert.ok(content.includes("User-specific content"), "existing learnings should be preserved");
   });
+
+  it("generate() reads learnings content from templates/dev-team-learnings.md not templates/rules/", () => {
+    new CodexAdapter().generate(SAMPLE_DEFS, tmpDir);
+    const rp = path.join(tmpDir, ".codex", "rules", "dev-team-learnings.md");
+    const content = fs.readFileSync(rp, "utf-8");
+    // The real template contains a Tier 1 comment; the fallback string does not
+    assert.ok(
+      content.includes("Tier 1") || content.includes("Shared Team Learnings"),
+      "learnings should be populated from the real template, not the fallback stub",
+    );
+    assert.ok(
+      !content.includes("Add project-specific learnings here"),
+      "content should not be the fallback stub — indicates wrong or missing template path",
+    );
+  });
 });
 
 describe("renderAgentToml", () => {
