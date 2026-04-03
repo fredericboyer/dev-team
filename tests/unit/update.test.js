@@ -409,7 +409,10 @@ describe("migrateToV3Layout", () => {
     );
 
     // The symlink and the external directory must be untouched
-    assert.ok(fs.lstatSync(symlinkAgentsDir).isSymbolicLink(), "symlink should remain as a symlink");
+    assert.ok(
+      fs.lstatSync(symlinkAgentsDir).isSymbolicLink(),
+      "symlink should remain as a symlink",
+    );
     assert.ok(
       fs.existsSync(path.join(externalAgentsDir, "dev-team-voss.md")),
       "external dir contents should be untouched",
