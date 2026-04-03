@@ -1,7 +1,6 @@
 # dev-team
 
 [![CI](https://img.shields.io/github/actions/workflow/status/fredericboyer/dev-team/ci.yml?label=CI)](https://github.com/fredericboyer/dev-team/actions/workflows/ci.yml)
-[![CodeQL](https://github.com/fredericboyer/dev-team/actions/workflows/250332076/badge.svg)](https://github.com/fredericboyer/dev-team/security/code-scanning)
 [![npm version](https://img.shields.io/npm/v/@fredericboyer/dev-team)](https://www.npmjs.com/package/@fredericboyer/dev-team)
 [![License: MIT](https://img.shields.io/npm/l/@fredericboyer/dev-team)](https://github.com/fredericboyer/dev-team/blob/main/LICENSE)
 
