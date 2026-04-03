@@ -403,16 +403,13 @@ describe("migrateToV3Layout", () => {
     const symlinkAgentsDir = path.join(devTeamDir, "agents");
     fs.symlinkSync(externalAgentsDir, symlinkAgentsDir);
 
-    let threw = false;
-    try {
-      migrateToV3Layout(tmpDir);
-    } catch {
-      threw = true;
-    }
-    assert.ok(!threw, "migrateToV3Layout should not propagate symlink errors");
+    assert.doesNotThrow(
+      () => migrateToV3Layout(tmpDir),
+      "migrateToV3Layout should not propagate symlink errors",
+    );
 
     // The symlink and the external directory must be untouched
-    assert.ok(fs.existsSync(symlinkAgentsDir), "symlink should remain");
+    assert.ok(fs.lstatSync(symlinkAgentsDir).isSymbolicLink(), "symlink should remain as a symlink");
     assert.ok(
       fs.existsSync(path.join(externalAgentsDir, "dev-team-voss.md")),
       "external dir contents should be untouched",
@@ -438,7 +435,11 @@ describe("migrateToV3Layout", () => {
 
     const log = migrateToV3Layout(tmpDir);
 
-    assert.ok(!fs.existsSync(staleSymlink), "stale symlink should be removed");
+    assert.throws(
+      () => fs.lstatSync(staleSymlink),
+      (err) => err.code === "ENOENT",
+      "stale symlink should be removed (lstatSync must throw ENOENT)",
+    );
     assert.ok(fs.existsSync(realSkillDir), "real skill directory should be preserved");
     assert.ok(
       log.some((l) => l.includes("stale symlink")),
