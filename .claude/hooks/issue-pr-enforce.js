@@ -28,10 +28,6 @@ function isGitCommit(cmd) {
   return /\bgit\s+commit\b/.test(cmd);
 }
 
-function isGitPush(cmd) {
-  return /\bgit\s+push\b/.test(cmd);
-}
-
 function isPushToMain(cmd) {
   return /\bgit\s+push\b.*\b(main|master)\b/.test(cmd);
 }

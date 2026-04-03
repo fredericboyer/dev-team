@@ -25,7 +25,8 @@
     "Watch list",
     "Review gate",
     "Worktree create",
-    "Worktree remove"
+    "Worktree remove",
+    "Merge gate"
   ],
   "issueTracker": "GitHub Issues",
   "branchConvention": "feat/123-description",
