@@ -14,7 +14,7 @@
 - **Review gate enforces the adversarial loop at commit time** (ADR-029). Two stateless gates: review evidence + findings resolution. Sidecar files in `.dev-team/.reviews/` keyed by agent + content hash. LIGHT reviews are advisory only. `--skip-review` is the escape hatch.
 - **Research-first for architectural releases.** When a release involves architectural changes, run Turing research briefs before implementation. Findings shape ADRs and design decisions, reducing rework. Validated in v1.6.0 (2 briefs → 2 ADRs + 7 design principles) and v2.0 (2 briefs → 2 ADRs + adapter architecture).
 - **Verify platform behavior against official docs, not third-party sources.** Turing research #406 initially got rules inheritance wrong by relying on inferred behavior. Always check official Claude Code documentation for behavioral claims about rules, subagents, and agent teams.
-- **Agent teams sharing a working directory cause cross-branch contamination.** Recurred in v1.7.0 (stray commits on wrong branches: #447→#438, #436→#446, #440→#434), v1.10.0 (stashes went stale), v3.3.0 (oxfmt config branch contaminated, redone in worktree), and v3.4.0 (2 PRs picked up files from other branches). Worktree isolation prevents cross-branch contamination but not stale-base contamination. Prefer worktree-isolated agents for multi-branch parallel work.
+- **Agent teams sharing a working directory cause cross-branch contamination.** Recurred in v1.7.0 (stray commits on wrong branches: #447→#438, #436→#446, #440→#434), v1.10.0 (stashes went stale), v3.3.0 (oxfmt config branch contaminated, redone in worktree), v3.4.0 (2 PRs picked up files from other branches), and v3.5.0 (package.json leaked between branches, fixed manually). Worktree isolation prevents cross-branch contamination but not stale-base contamination. Prefer worktree-isolated agents for multi-branch parallel work.
 - **Push local commits before branching worktrees.** v3.4.0 had universal shared file contamination — every worktree agent inherited unpushed Borges memory and metrics changes from local main (aeda27f). Root cause: worktrees branched from local main with unpushed commits. Ensure main is clean and pushed before spawning worktree agents.
 - **Start reviews/merges immediately as each PR lands — don't batch.** The task skill says "review each branch the moment its implementing agent finishes." v3.2.0 repeated the v1.8.0 pattern: waited for all Wave 1 agents to finish before starting any reviews. Pipeline: implement → review → merge per branch, not implement-all → review-all → merge-all.
 - **Verify task completion — "completed" doesn't mean delivered.** v3.2.0 had an agent mark a task completed without creating a PR. The orchestrator must verify that a PR exists for every completed implementation task before accepting the completion.
@@ -35,6 +35,8 @@
 ## Known Tech Debt
 
 - **INFRA_HOOKS worktree serialization is temporary** — workaround for Claude Code bugs anthropics/claude-code#34645 and #39680. Remove when upstream fixes land.
+- **compareSemver multi-segment pre-release parsing gap** — deferred to #720. Known edge case: `compareSemver("1.0.0-1.0.0", ...)` misparses when pre-release string contains dots resembling version segments (Knuth K2/K3, v3.5.0 review).
+- **Symlink guard coverage gaps in init.ts/update.ts** — deferred to #719. Symlink test coverage for ancestor-path traversal scenarios in the main entry points (Szabo S-01, Knuth K4, v3.5.0 review).
 
 ## Quality Benchmarks
 
@@ -44,6 +46,8 @@
 - **Migration completeness**: Any change that moves/renames files must audit all modules that reference those paths. doctor.ts, status.ts, and skill definitions are recurring victims of path drift (3 instances across v1.5.0–v1.6.0).
 - **process.exit stubs must throw a sentinel error.** When testing functions that call `process.exit()`, a no-op stub lets execution continue past the exit point, causing false passes. Use a throw-sentinel pattern (e.g., `throw new Error('__EXIT__')`). Independently confirmed by Szabo, Knuth, and Brooks in v1.7.0 review.
 - **Input boundary validation for string-to-path conversions.** v2.0 had a path traversal finding (F-01 adapter name). All user-facing strings that become file paths must be validated at the parsing/input boundary — not deeper in the call stack.
+- ~~**init.ts and update.ts core entry points have no unit tests.**~~ **Resolved in v3.5.0 (#715, PR #718).** 657 lines of tests added covering exported constants, pure utility functions (compareSemver, cleanupLegacyMemoryDirs, migrateToV3Layout). Interactive run() branches remain untested by design.
+- ~~**CI scripts must exist in package.json for local parity.**~~ **Resolved in v3.5.0 (#714, PR #717).** validate:docs script added to package.json.
 
 ## Overruled Challenges
 <\!-- When the human overrules an agent, record why — prevents re-flagging -->

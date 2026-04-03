@@ -155,6 +155,14 @@
 - **Last-verified**: 2026-04-02
 - **Context**: First release with LIGHT/FULL review tier differentiation. 21 findings (1 DEFECT fixed, 14 accepted, 6 deferred), 0 overruled. FULL review on COMPLEX task caught the only DEFECT — tier system validated. Branch contamination recurred (3rd occurrence). New entries written: Voss (2), Deming (2), Tufte (1), Szabo (2), Knuth (2), Brooks (2), Turing (1). Brooks compressed from 201→191 lines. Last-verified bumped on 3 existing entries (Szabo ReDoS, Deming ReDoS, Knuth stray commits). 1 new shared learning (review tier validation). Zero-overrule alert continues at n>=199. No temporal decay needed — all entries within 30-day window.
 
+### [2026-04-03] v3.5.0 extraction — 3 branches, 14 findings, 29% acceptance, LIGHT/FULL tier validated
+- **Type**: MILESTONE [verified]
+- **Source**: v3.5.0 task loop (3 issues, 3 PRs #716-#718)
+- **Tags**: metrics, calibration, extraction, review-tiers
+- **Outcome**: verified
+- **Last-verified**: 2026-04-03
+- **Context**: Small focused release. 3 branches: 2 SIMPLE (Copilot-only), 1 COMPLEX (FULL: Knuth + Szabo). 14 findings total: 4 fixed/accepted, 5 deferred (#719 symlink, #720 semver), 5 ignored. 0 DEFECTs. Cross-branch contamination recurred (5th occurrence — package.json leaked between branches). Tech debt resolved: init.ts/update.ts tests and validate:docs script. New tech debt tracked: compareSemver pre-release parsing (#720), symlink guard coverage (#719). LIGHT/FULL tier correctly applied — COMPLEX branch got FULL review and produced the richest findings. Low acceptance rate (29%) attributable to test-only scope, not signal quality. New entries: Voss (2), Deming (1+bump), Knuth (updated+1), Szabo (1). Shared learnings updated: 2 tech debt items resolved, 2 new tech debt items added, contamination entry updated for v3.5.0.
+
 ### [2026-04-03] v3.4.0 extraction — 11 branches, 22 findings, 86% acceptance, Copilot-only review
 - **Type**: MILESTONE [verified]
 - **Source**: v3.4.0 task loop (11 issues, 11 branches, release PR #707)

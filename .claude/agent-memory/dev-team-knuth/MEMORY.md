@@ -40,51 +40,11 @@
 ## Calibration Log
 <!-- Challenges accepted/overruled — tunes adversarial intensity over time -->
 
-### [2026-03-25] v1.2.0 — 17 findings, 0 overruled, 3/3 DEFECTs fixed
-- All 3 DEFECTs accepted and fixed in round 2. Zero pushback.
-- Advisory findings: 7 accepted, 7 deferred (follow-up issues), 0 overruled.
-- Deferred items are legitimate follow-ups, not rejections. Calibration signal: advisory finding quality is good but volume could be tuned — 7 deferred out of 14 advisory suggests some findings are premature for the current scope.
-- Watch: "section name collision" and "overlap" findings tend to get deferred. Consider raising threshold for naming/overlap suggestions unless they cause functional ambiguity.
-
-### [2026-03-26] Audit baseline: 11 findings (2 DEFECT, 4 RISK, 4 SUGGESTION, 1 QUESTION)
+### [2026-03-25] v1.2.0–v1.7.0 calibration baseline (consolidated)
 - **Type**: CALIBRATION
-- **Source**: Full codebase audit 2026-03-26
-- **Tags**: audit, calibration, baseline
-- **Outcome**: 2 DEFECTs → v1.6.1, rest → v1.7.0
-- **Last-verified**: 2026-03-26
-- **Context**: First full quality audit. 2 DEFECTs: doctor.ts hookFileMap missing Agent teams guide (#431), status.ts checking wrong learnings path after v1.6.0 migration (#432). Both are migration drift — modules not updated when v1.6.0 moved files to new paths. Pattern: migration completeness is a recurring quality gap.
-
-### [2026-03-26] Migration drift: doctor.ts and status.ts lag behind path changes
-- **Type**: PATTERN [new]
-- **Source**: Codebase audit (K1/K3), Issues #431, #432
-- **Tags**: migration, drift, path-correctness, quality
-- **Outcome**: accepted — issues created for v1.6.1
-- **Last-verified**: 2026-03-26
-- **Context**: When v1.6.0 migrated files from .dev-team/ to .claude/rules/, doctor.ts and status.ts were not updated to check the new paths. This is the same class of bug as the review skill path issue (PR #365). Watch for: any migration that moves files must audit all modules that reference those paths.
-
-### [2026-03-26] Zero test coverage on doctor.ts, status.ts, prompts.ts
-- **Type**: RISK [fixed]
-- **Source**: Codebase audit (K4/K5), Issue #438, PR #453
-- **Tags**: testing, coverage, quality-gap
-- **Outcome**: fixed — tests added in v1.7.0
+- **Tags**: audit, calibration, migration, path-correctness, testing
 - **Last-verified**: 2026-03-27
-- **Context**: Fixed: doctor.test.js, status.test.js, prompts.test.js added. Uses sentinel-throw pattern for process.exit stubs. All three registered in package.json test script.
-
-### [2026-03-27] v1.7.0: Memory file at wrong path — dev-team-deming/ not deming/
-- **Type**: DEFECT [fixed]
-- **Source**: PR #450 (#440)
-- **Tags**: path-correctness, memory, naming-convention
-- **Outcome**: fixed
-- **Last-verified**: 2026-03-27
-- **Context**: Agent memory directory was `deming/` instead of `dev-team-deming/`. Inconsistent with naming convention used by all other agents. Path correctness pattern continues — Seen: 4 times (doctor.ts K1, status.ts K3, review skill path, memory dir). Migration-completeness learning applies beyond code to data directories.
-
-### [2026-03-27] v1.7.0: lib copy merge ordering — Chain B recursive approach supersedes Chain A
-- **Type**: SUGGESTION [accepted]
-- **Source**: PR #455 (Chain B, #434)
-- **Tags**: update, lib-copy, merge-ordering
-- **Outcome**: accepted
-- **Last-verified**: 2026-03-27
-- **Context**: Chain A added single-file lib copy for ensureSymlink; Chain B added recursive lib/ directory copy for git-cache.js + safe-regex.js. At merge, Chain B's recursive approach naturally superseded Chain A's single-file approach. No code conflict, just ordering awareness.
+- **Context**: v1.2.0: 17 findings, 0 overruled, 3/3 DEFECTs fixed. Naming/overlap suggestions tend to get deferred — raise threshold unless functionally ambiguous. Full audit (2026-03-26): 11 findings, all accepted. 2 DEFECTs were migration drift (doctor.ts + status.ts not updated when v1.6.0 moved files to .claude/rules/) — fixed in v1.6.1/v1.7.0. Coverage gaps on doctor.ts/status.ts/prompts.ts fixed (sentinel-throw pattern). Memory path deming/ → dev-team-deming/ fixed (path-correctness, 4th occurrence). lib copy: Chain B recursive approach superseded Chain A single-file at merge.
 
 ### [2026-03-29] v1.9.0: Skill composability — skill-calls-skill pattern verified
 - **Type**: PATTERN [verified]
@@ -165,6 +125,22 @@
 - **Outcome**: accepted
 - **Last-verified**: 2026-04-02
 - **Context**: Copilot flagged test hermeticity (review-gate tests) and hash computation robustness as advisory. Both accepted — tests use tmpdir for isolation, hash computation follows existing patterns. No functional risk.
+
+### [2026-04-03] v3.5.0: init.ts/update.ts tests (#715, PR #718) — coverage pattern
+- **Type**: PATTERN [verified]
+- **Source**: #715, PR #718
+- **Tags**: testing, coverage, init, update
+- **Outcome**: fixed
+- **Last-verified**: 2026-04-03
+- **Context**: Tests cover exported constants (ALL_AGENTS, QUALITY_HOOKS, INFRA_HOOKS, PRESETS) and pure utility functions (compareSemver, cleanupLegacyMemoryDirs, migrateToV3Layout) — testable without CLI mocking. Interactive run() branches remain untested (issue-scoped exclusion). FULL review (2 rounds): K1 (log format includes() — fixed), K2 (mixed pre-release compareSemver bug — deferred to #720), K3 (preset parsing gap — deferred to #720), K4 (step 5 symlink test — deferred to #719). cleanupLegacyMemoryDirs log format inconsistency was the K1 finding — source appends "/" to dir names but test matched with includes() missing the mismatch.
+
+### [2026-04-03] v3.5.0: compareSemver pre-release parsing gap — deferred to #720 (K2/K3)
+- **Type**: RISK [deferred]
+- **Source**: #715, PR #718, Knuth findings K2/K3
+- **Tags**: semver, compareSemver, edge-case, parsing
+- **Outcome**: deferred — #720
+- **Last-verified**: 2026-04-03
+- **Context**: compareSemver has a known parsing bug: multi-segment pre-release strings (e.g. "1.0.0-1.0.0") are misparsed when the pre-release label contains dots resembling a version tuple. Separately, mixed pre-release vs release comparison (e.g. "1.0.0-beta" vs "1.0.0") may produce inconsistent ordering. Both deferred to #720 — out of scope for the test coverage PR.
 
 ### [2026-04-03] v3.4.0: TOML escaping test coverage added (#665)
 - **Type**: PATTERN [new]
