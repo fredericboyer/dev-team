@@ -65,3 +65,4 @@ What becomes easier or more difficult?
 | [038](038-runtime-native-directory-layout.md) | Runtime-native directory layout | accepted |
 | [039](039-decompose-task-into-composable-skills.md) | Decompose task skill into composable sub-skills | accepted |
 | [040](040-github-first-reviewer-agnostic-merge.md) | GitHub-first platform, reviewer-agnostic merge skill | accepted |
+| [041](041-mergify-no-approval-by-design.md) | Mergify no-approval merge queue by design | accepted |
