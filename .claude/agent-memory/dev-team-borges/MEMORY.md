@@ -178,3 +178,11 @@
 - **Outcome**: verified
 - **Last-verified**: 2026-04-03
 - **Context**: 22 findings (3 DEFECT fixed, 19 SUGGESTION accepted/fixed), all from Copilot. No adversarial agent reviews — same process gap as v1.8.0 and v1.6.0. COMPLEX issues (#687, #689) should have had FULL reviews. 3 DEFECTs on #683 (worktree symlink bypass) were legitimate catches by Copilot. Shared file contamination was universal (unpushed local commits). Cross-branch contamination on 2 PRs (#694, #698). New entries written: Voss (1 new + 1 updated), Szabo (1 updated), Knuth (1), Turing (1), Tufte (1), Brooks (1 updated), Conway (1 bumped), Deming (1 bumped). No new shared learnings needed — contamination pattern already documented. Zero-overrule alert continues at n>=199 (no new in-team findings).
+
+### [2026-04-03] v3.6.0 audit extraction — 24 findings, 0 DEFECTs, 96% acceptance, codebase matured
+- **Type**: MILESTONE [verified]
+- **Source**: /dev-team:audit v3.6.0 (Szabo, Knuth, Deming)
+- **Tags**: metrics, calibration, extraction, audit
+- **Outcome**: verified
+- **Last-verified**: 2026-04-03
+- **Context**: Second full codebase audit. 24 findings (0 DEFECT, 7 RISK, 6 QUESTION, 11 SUGGESTION), 96% acceptance, 0% overrule, 1 deferred (K-05 compareSemver — already tracked). Compared to first audit (2026-03-26: 37 findings, 2 DEFECTs): finding count down 35%, zero DEFECTs, no new issues needed. Key themes: hook test gaps (merge-gate, worktree-remove), CI optimization (dedup, parallelization), pre-stable tooling (oxfmt, TS6), zero-runtime-deps positive. New entries: Szabo (2 new + 1 bumped), Knuth (2 new + 2 bumped), Deming (3 new + 1 bumped, compressed 5 entries to 1). Deming compressed 221→189 lines. All agents under 200-line cap. Zero-overrule alert continues at n>=237.

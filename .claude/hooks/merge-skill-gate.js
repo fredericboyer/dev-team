@@ -16,7 +16,7 @@
 let input = {};
 try {
   input = JSON.parse(process.argv[2] || "{}");
-} catch (err) {
+} catch {
   process.exit(0); // don't block on parse failure — other hooks handle that
 }
 
