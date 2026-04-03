@@ -206,6 +206,37 @@ describe("cleanupLegacyMemoryDirs", () => {
     assert.equal(afterMerge, currentContent, "current MEMORY.md should be unchanged");
   });
 
+  it("throws when legacy MEMORY.md is a symlink (symlink guard)", () => {
+    const claudeDir = path.join(tmpDir, ".claude");
+    const memoryDir = path.join(claudeDir, "agent-memory");
+    const legacyDir = path.join(memoryDir, "dev-team-architect");
+    fs.mkdirSync(legacyDir, { recursive: true });
+
+    // Create a real file outside the tree, then symlink MEMORY.md to it
+    const externalFile = path.join(tmpDir, "external-memory.md");
+    fs.writeFileSync(externalFile, "# External memory\n");
+    const symlinkPath = path.join(legacyDir, "MEMORY.md");
+    fs.symlinkSync(externalFile, symlinkPath);
+
+    // cleanupLegacyMemoryDirs hits assertNotSymlink on the legacy MEMORY.md path —
+    // the guard throws to prevent renaming the symlink into a new location
+    assert.throws(
+      () => cleanupLegacyMemoryDirs(claudeDir),
+      /Refusing to operate on symlink/,
+      "should throw when legacy MEMORY.md is a symlink",
+    );
+
+    // The symlink target (external file) must remain untouched
+    assert.ok(fs.existsSync(externalFile), "external file should be untouched");
+
+    // No MEMORY.md should have been moved to the current agent dir
+    const currentMemory = path.join(memoryDir, "dev-team-brooks", "MEMORY.md");
+    assert.ok(
+      !fs.existsSync(currentMemory),
+      "MEMORY.md must not be moved when source is a symlink",
+    );
+  });
+
   it("handles all four known legacy mappings", () => {
     const legacyPairs = [
       { legacy: "dev-team-architect", current: "dev-team-brooks" },
@@ -358,5 +389,60 @@ describe("migrateToV3Layout", () => {
     // old dir is removed, calling again should not throw
     const log2 = migrateToV3Layout(tmpDir);
     assert.deepEqual(log2, []);
+  });
+
+  it("skips .dev-team/agents/ removal when directory is a symlink (symlink guard)", () => {
+    // Create a real directory that will be the symlink target
+    const externalAgentsDir = path.join(tmpDir, "external-agents");
+    fs.mkdirSync(externalAgentsDir, { recursive: true });
+    fs.writeFileSync(path.join(externalAgentsDir, "dev-team-voss.md"), "# Voss");
+
+    // Symlink .dev-team/agents/ → external dir
+    const devTeamDir = path.join(tmpDir, ".dev-team");
+    fs.mkdirSync(devTeamDir, { recursive: true });
+    const symlinkAgentsDir = path.join(devTeamDir, "agents");
+    fs.symlinkSync(externalAgentsDir, symlinkAgentsDir);
+
+    let threw = false;
+    try {
+      migrateToV3Layout(tmpDir);
+    } catch {
+      threw = true;
+    }
+    assert.ok(!threw, "migrateToV3Layout should not propagate symlink errors");
+
+    // The symlink and the external directory must be untouched
+    assert.ok(fs.existsSync(symlinkAgentsDir), "symlink should remain");
+    assert.ok(
+      fs.existsSync(path.join(externalAgentsDir, "dev-team-voss.md")),
+      "external dir contents should be untouched",
+    );
+  });
+
+  it("removes stale .dev-team/skills/ symlinks from .claude/skills/ (step 5)", () => {
+    const claudeSkillsDir = path.join(tmpDir, ".claude", "skills");
+    fs.mkdirSync(claudeSkillsDir, { recursive: true });
+
+    // Create a real .dev-team/skills/ directory as symlink target
+    const devTeamSkillsDir = path.join(tmpDir, ".dev-team", "skills");
+    fs.mkdirSync(devTeamSkillsDir, { recursive: true });
+
+    // Create a stale symlink in .claude/skills/ pointing into .dev-team/skills/
+    const staleSymlink = path.join(claudeSkillsDir, "dev-team-task");
+    fs.symlinkSync(path.join(devTeamSkillsDir, "dev-team-task"), staleSymlink);
+
+    // Create a real directory in .claude/skills/ (should not be removed)
+    const realSkillDir = path.join(claudeSkillsDir, "my-custom-skill");
+    fs.mkdirSync(realSkillDir, { recursive: true });
+    fs.writeFileSync(path.join(realSkillDir, "SKILL.md"), "# Custom skill");
+
+    const log = migrateToV3Layout(tmpDir);
+
+    assert.ok(!fs.existsSync(staleSymlink), "stale symlink should be removed");
+    assert.ok(fs.existsSync(realSkillDir), "real skill directory should be preserved");
+    assert.ok(
+      log.some((l) => l.includes("stale symlink")),
+      "log should mention stale symlink removal",
+    );
   });
 });
