@@ -160,9 +160,9 @@ describe("CodexAdapter", () => {
     new CodexAdapter().generate(SAMPLE_DEFS, tmpDir);
     const rp = path.join(tmpDir, ".codex", "rules", "dev-team-learnings.md");
     const content = fs.readFileSync(rp, "utf-8");
-    // The real template contains a Tier 1 comment; the fallback string does not
+    // The real template contains this section heading; the fallback stub does not
     assert.ok(
-      content.includes("Tier 1") || content.includes("Shared Team Learnings"),
+      content.includes("What NOT to write here"),
       "learnings should be populated from the real template, not the fallback stub",
     );
     assert.ok(
