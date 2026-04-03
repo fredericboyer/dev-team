@@ -53,27 +53,11 @@
 - **Last-verified**: 2026-03-26
 - **Context**: Common agent protocol sections extracted to SHARED.md to reduce duplication. ~16% reduction in total agent definition lines. Brooks should watch for drift between SHARED.md and individual agent overrides.
 
-### [2026-03-26] Process-driven agents: capabilities in definitions, steps in process.md
+### [2026-03-26] v1.6.0–v1.7.0 architectural decisions (consolidated)
 - **Type**: DECISION [verified]
-- **Source**: Issue #405, v1.6.0 design principles
-- **Tags**: architecture, agents, process, separation-of-concerns
-- **Outcome**: accepted
-- **Last-verified**: 2026-03-26
-- **Context**: Agent definitions describe what the agent can do (capabilities), not how a specific project uses them (workflow steps). Steps live in `.claude/rules/dev-team-process.md` which each project customizes. This separates stable agent identity from variable project workflow. Brooks should flag agent definitions that embed workflow steps.
-
-### [2026-03-26] Two new ADRs in v1.6.0: 033 (rules-based context), 034 (language delegation)
-- **Type**: DECISION [verified]
-- **Source**: PRs #425, #419
-- **Tags**: architecture, adr
-- **Outcome**: accepted
-- **Last-verified**: 2026-03-26
-- **Context**: ADR-033 uses `.claude/rules/` for automatic shared context loading (replaces explicit read instructions). ADR-034 delegates language-specific knowledge from hooks to agents (hooks detect, agents interpret). Both support the "discoverable-only" and "language-neutral" design principles.
-
-### [2026-03-27] v1.7.0 era — merge ordering and lib copy (consolidated)
-- **Type**: PATTERN [verified]
-- **Tags**: architecture, update, lib-copy, merge-ordering
+- **Tags**: architecture, agents, process, adr, skills
 - **Last-verified**: 2026-03-27
-- **Context**: Consolidated: (1) Hardcoded single-file lib copy superseded by recursive lib/ directory copy — resolved by natural merge ordering. (2) Working directory contention first observed — superseded by v3.3.0 entry with 3 occurrences.
+- **Context**: Key decisions from v1.6.0–v1.7.0: (1) Process-driven agents — capabilities in definitions, workflow steps in dev-team-process.md (Issue #405). (2) ADR-033: `.claude/rules/` for automatic shared context loading. (3) ADR-034: language delegation — hooks detect, agents interpret. (4) Recursive lib/ copy superseded single-file approach (merge ordering). Working directory contention first observed (superseded by contamination pattern entry).
 
 ### [2026-03-29] v1.8.0: INFRA_HOOKS array — infrastructure vs quality hook separation
 - **Type**: DECISION [new]
@@ -181,11 +165,27 @@
 
 ### [2026-04-02] Branch contamination — persistent pattern across releases
 - **Type**: PATTERN [verified]
-- **Source**: v3.3.0 + v3.4.0 delivery observations
+- **Source**: v3.3.0 + v3.4.0 + v3.6.0 delivery observations
 - **Tags**: architecture, agent-teams, worktrees, contamination
 - **Outcome**: accepted
 - **Last-verified**: 2026-04-03
-- **Context**: Cross-branch contamination recurred in v3.4.0 (PR #694 picked up #688's research doc, PR #698 picked up #691 and #683 files). Additionally, shared file contamination was universal — every worktree agent committed Borges memory and metrics changes from unpushed local main (aeda27f). Seen: 4 times (v1.7.0, v1.10.0, v3.3.0, v3.4.0). Root cause in v3.4.0: worktrees branched from local main with unpushed commits. Worktree isolation prevents cross-branch contamination but not stale-base contamination.
+- **Context**: Cross-branch contamination recurred in v3.4.0 (PR #694 picked up #688's research doc, PR #698 picked up #691 and #683 files). Additionally, shared file contamination was universal — every worktree agent committed Borges memory and metrics changes from unpushed local main (aeda27f). Seen: 5 times (v1.7.0, v1.10.0, v3.3.0, v3.4.0, v3.6.0). Root cause in v3.4.0: worktrees branched from local main with unpushed commits. v3.6.0: stashed changes + agent teams sharing working directory. Worktree isolation prevents cross-branch contamination but not stale-base contamination.
+
+### [2026-04-03] v3.6.0: Skill name changes propagate to all installed projects (PR #734)
+- **Type**: RISK [accepted]
+- **Source**: PR #734, Copilot finding (x8 files)
+- **Tags**: skills, breaking-change, propagation, installed-projects
+- **Outcome**: accepted
+- **Last-verified**: 2026-04-03
+- **Context**: A skill rename touched 8 files and will affect all projects that have dev-team installed. Skill names are part of the user-facing contract — renaming them is a breaking change for users who invoke skills by name in workflows, CLAUDE.md files, or scripts. Pattern: treat skill name changes as breaking changes; note in release notes and changelog. Conway should include skill renames in the breaking changes section.
+
+### [2026-04-03] v3.6.0: Duplicated parser logic across modules (PR #738)
+- **Type**: RISK [accepted]
+- **Source**: PR #738, Copilot finding
+- **Tags**: architecture, duplication, parser, refactoring
+- **Outcome**: accepted — deferred refactor
+- **Last-verified**: 2026-04-03
+- **Context**: Copilot flagged duplicated parser logic in PR #738. Accepted as advisory — deferred refactor. Pattern: parser duplication is a recurring architectural smell in the codebase (see also K10 MCP deriveRequiredAgents divergence, dual code path risk). Watch for parser logic that should live in a shared utility to avoid drift.
 
 ## Calibration Log
 <!-- Challenges accepted/overruled — tunes adversarial intensity over time -->

@@ -155,6 +155,14 @@
 - **Last-verified**: 2026-04-02
 - **Context**: First release with LIGHT/FULL review tier differentiation. 21 findings (1 DEFECT fixed, 14 accepted, 6 deferred), 0 overruled. FULL review on COMPLEX task caught the only DEFECT — tier system validated. Branch contamination recurred (3rd occurrence). New entries written: Voss (2), Deming (2), Tufte (1), Szabo (2), Knuth (2), Brooks (2), Turing (1). Brooks compressed from 201→191 lines. Last-verified bumped on 3 existing entries (Szabo ReDoS, Deming ReDoS, Knuth stray commits). 1 new shared learning (review tier validation). Zero-overrule alert continues at n>=199. No temporal decay needed — all entries within 30-day window.
 
+### [2026-04-03] v3.6.0 extraction — 11 issues, 18 findings, 72% acceptance, Copilot-only review
+- **Type**: MILESTONE [verified]
+- **Source**: v3.6.0 task loop (11 issues, 12 PRs #733-#742 + release)
+- **Tags**: metrics, calibration, extraction, process-gap
+- **Outcome**: verified
+- **Last-verified**: 2026-04-03
+- **Context**: 3 waves (5+4+2). 18 findings (1 DEFECT fixed, 10 fixed/accepted, 3 deferred, 0 ignored). 72% acceptance — within healthy band. Copilot-only review — same process gap as v3.4.0/v1.8.0/v1.6.0. 1 DEFECT: existsSync unreliable for symlinks (PR #735). Review gate hook (PR #736) has a cluster of 3 deferred findings (stale sidecar, branch detection, unit tests). Cross-branch contamination recurred (5th time in Brooks memory). "Require up-to-date branches" disabled mid-release — valid trade-off when branches known-clean. New entries: Szabo (1), Deming (2+bump), Brooks (2+bump), Knuth (1). Last-verified bumped on Deming hooks, Szabo symlinks, Brooks contamination.
+
 ### [2026-04-03] v3.5.0 extraction — 3 branches, 14 findings, 29% acceptance, LIGHT/FULL tier validated
 - **Type**: MILESTONE [verified]
 - **Source**: v3.5.0 task loop (3 issues, 3 PRs #716-#718)
@@ -170,3 +178,11 @@
 - **Outcome**: verified
 - **Last-verified**: 2026-04-03
 - **Context**: 22 findings (3 DEFECT fixed, 19 SUGGESTION accepted/fixed), all from Copilot. No adversarial agent reviews — same process gap as v1.8.0 and v1.6.0. COMPLEX issues (#687, #689) should have had FULL reviews. 3 DEFECTs on #683 (worktree symlink bypass) were legitimate catches by Copilot. Shared file contamination was universal (unpushed local commits). Cross-branch contamination on 2 PRs (#694, #698). New entries written: Voss (1 new + 1 updated), Szabo (1 updated), Knuth (1), Turing (1), Tufte (1), Brooks (1 updated), Conway (1 bumped), Deming (1 bumped). No new shared learnings needed — contamination pattern already documented. Zero-overrule alert continues at n>=199 (no new in-team findings).
+
+### [2026-04-03] v3.6.0 audit extraction — 24 findings, 0 DEFECTs, 96% acceptance, codebase matured
+- **Type**: MILESTONE [verified]
+- **Source**: /dev-team:audit v3.6.0 (Szabo, Knuth, Deming)
+- **Tags**: metrics, calibration, extraction, audit
+- **Outcome**: verified
+- **Last-verified**: 2026-04-03
+- **Context**: Second full codebase audit. 24 findings (0 DEFECT, 7 RISK, 6 QUESTION, 11 SUGGESTION), 96% acceptance, 0% overrule, 1 deferred (K-05 compareSemver — already tracked). Compared to first audit (2026-03-26: 37 findings, 2 DEFECTs): finding count down 35%, zero DEFECTs, no new issues needed. Key themes: hook test gaps (merge-gate, worktree-remove), CI optimization (dedup, parallelization), pre-stable tooling (oxfmt, TS6), zero-runtime-deps positive. New entries: Szabo (2 new + 1 bumped), Knuth (2 new + 2 bumped), Deming (3 new + 1 bumped, compressed 5 entries to 1). Deming compressed 221→189 lines. All agents under 200-line cap. Zero-overrule alert continues at n>=237.

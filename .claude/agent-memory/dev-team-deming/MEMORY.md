@@ -16,7 +16,7 @@
 - **Source**: templates/hooks/ analysis
 - **Tags**: hooks, enforcement, dx
 - **Outcome**: verified
-- **Last-verified**: 2026-03-29
+- **Last-verified**: 2026-04-03
 - **Context**: dev-team-tdd-enforce.js (TDD), dev-team-safety-guard.js (safety), dev-team-post-change-review.js (review spawning), dev-team-pre-commit-lint.js (lint), dev-team-pre-commit-gate.js (blocking gate), dev-team-watch-list.js (file watch triggers). ADR-001: hooks over CLAUDE.md for enforcement.
 
 ### [2026-03-25] Agent and hook validation scripts run in CI
@@ -84,45 +84,13 @@
 - **Last-verified**: 2026-04-03
 - **Context**: WorktreeCreate/WorktreeRemove hooks use mkdir-based locking to serialize worktree creation (workaround for anthropics/claude-code#34645 and #39680). Classified as INFRA_HOOKS — always installed, not user-selectable. TEMPORARY: remove when upstream fixes land. Hooks are JS, no dependencies, cross-platform. Lock dir: `.dev-team/.worktree-lock`.
 
-### [2026-03-29] v1.8.0: Retro skill verifies tech debt against issue tracker (#473)
-- **Type**: DECISION [new]
-- **Source**: #456, PR #473
-- **Tags**: retro, tech-debt, staleness, dx
+### [2026-03-29] v1.8.0–v1.10.0: Skill architecture evolution (consolidated)
+- **Type**: DECISION [verified]
+- **Source**: PRs #473, #492, #496, #510, #512
+- **Tags**: skills, composability, extract, review, merge, retro, dx
 - **Outcome**: fixed
 - **Last-verified**: 2026-03-29
-- **Context**: Retro skill Phase 1 (Learnings audit) now cross-checks Known Tech Debt entries against closed issues before reporting. Addresses the v1.7.0 finding where 5 of 7 tech debt entries were already resolved. Uses generic "check the issue tracker" language (not hardcoded gh CLI).
-
-### [2026-03-29] v1.9.0: Extract skill — Borges extraction decomposed into standalone skill
-- **Type**: DECISION [new]
-- **Source**: #485, PR #492
-- **Tags**: skills, extract, borges, dx, composability
-- **Outcome**: accepted
-- **Last-verified**: 2026-03-29
-- **Context**: Borges extraction logic extracted from task and retro skills into /dev-team:extract. Orchestration skill with disable-model-invocation:true. Reduces duplication between task and retro (both previously embedded Borges instructions). Retro now delegates to extract instead of inlining. Task Step 4 invokes extract as sub-skill. This is the first instance of the skill-calls-skill composability pattern.
-
-### [2026-03-29] v1.9.0: Review delegation — task skill delegates to /dev-team:review
-- **Type**: DECISION [new]
-- **Source**: #486, PR #496
-- **Tags**: skills, review, task, delegation, dx
-- **Outcome**: accepted
-- **Last-verified**: 2026-03-29
-- **Context**: Task skill Step 2 (Review) now delegates to /dev-team:review with --embedded flag instead of inlining review instructions. Review skill gains --embedded mode for compact output consumed by task orchestration. Compact summary passthrough documented for subsequent review rounds. --reviewers flag removed from review skill (breaking change — task controls reviewer selection).
-
-### [2026-03-29] v1.10.0: Merge skill auto-merge timing guard (#489)
-- **Type**: DECISION [new]
-- **Source**: #489, PR #512
-- **Tags**: skills, merge, auto-merge, timing, dx
-- **Outcome**: fixed
-- **Last-verified**: 2026-03-29
-- **Context**: Merge skill now enforces: wait for Copilot review → address all findings → then set auto-merge. Previously auto-merge could be set preemptively, causing PRs to merge with unresolved Copilot findings (v1.8.0 PR #484). Guard applies to both .dev-team/ and .claude/ copies.
-
-### [2026-03-29] v1.10.0: Scorecard skill updated for /dev-team:extract awareness (#494)
-- **Type**: DECISION [new]
-- **Source**: #494, PR #510
-- **Tags**: skills, scorecard, extract, borges, dx
-- **Outcome**: fixed
-- **Last-verified**: 2026-03-29
-- **Context**: Scorecard now checks for /dev-team:extract invocation (the new Borges entry point) in addition to direct Borges agent spawning. Without this, scorecard would always report "Borges not spawned" for v1.9.0+ workflows that use the extract skill.
+- **Context**: Consolidated from 5 entries. Key decisions: (1) Retro skill cross-checks tech debt against issue tracker (#473). (2) Extract skill decomposed from task/retro into standalone /dev-team:extract — first skill-calls-skill instance (#492). (3) Review delegation: task delegates to /dev-team:review --embedded (#496). (4) Merge skill auto-merge timing guard — wait for Copilot before auto-merge (#512). (5) Scorecard updated for /dev-team:extract awareness (#510). All stable — no changes since v1.10.0.
 
 ### [2026-03-29] v1.10.1: init/update bug trio — config completeness, init guard, settings merge
 - **Type**: DECISION [new]
@@ -153,7 +121,7 @@
 - **Source**: #666, PR feat/666-oxfmt-config
 - **Tags**: formatting, oxfmt, tooling, dx
 - **Outcome**: fixed
-- **Last-verified**: 2026-04-02
+- **Last-verified**: 2026-04-03 (v3.6.0 audit Q-01 reconfirmed oxfmt pre-stable status; D-S-03 flagged TypeScript 6 also pre-stable)
 - **Context**: .oxfmtrc.json added to configure oxfmt behavior. Schema refs local node_modules path — standard practice for node tools. Branch contamination occurred on first attempt; redone in worktree isolation.
 
 ### [2026-04-02] v3.3.0: CLI negative assertions and hook unit tests (#672, #664)
@@ -172,6 +140,22 @@
 - **Last-verified**: 2026-04-03
 - **Context**: CI referenced `validate:docs` script but it was absent from package.json. This caused CI/local parity gap — the script ran in CI (via npm run) but couldn't be run locally without the package.json entry. Zero review findings on this PR. Reinforces: every CI npm run step must have a matching script in package.json.
 
+### [2026-04-03] v3.6.0: console.warn over stderr, Windows chmod skip, type cast cleanup (PR #733)
+- **Type**: PATTERN [verified]
+- **Source**: PR #733, Copilot findings (5 SUGGESTION, all fixed)
+- **Tags**: dx, tooling, windows, console, types
+- **Outcome**: fixed
+- **Last-verified**: 2026-04-03
+- **Context**: Cluster of DX improvements: (1) Use `console.warn` not `process.stderr.write` for warning output — consistent with Node.js idiom. (2) Skip `chmod` on Windows where it's a no-op. (3) Cast to `NodeJS.ErrnoException` instead of `any` for typed error handling. (4) Keep JSDoc up-to-date when function signatures change. (5) Maintain warning prefix consistency (same prefix across all warning paths). Small fixes but pattern: when writing cross-platform Node.js CLI code, always consider Windows paths for chmod/permissions.
+
+### [2026-04-03] v3.6.0: Review gate stale sidecar + branch detection risks — deferred (#736)
+- **Type**: RISK [deferred]
+- **Source**: PR #736, Copilot findings
+- **Tags**: review-gate, sidecar, branch-detection, hooks, deferred
+- **Outcome**: deferred
+- **Last-verified**: 2026-04-03
+- **Context**: Two risks deferred from PR #736: (1) Stale sidecar concern — sidecar files in `.dev-team/.reviews/` may persist across branch switches, causing stale review evidence to match a new commit. (2) Branch detection via HEAD — using HEAD for branch name detection can give wrong result in detached HEAD state or during rebase. Both accepted as known limitations for now. Unit tests for the hook were also deferred. Regex edge cases (x3) were accepted.
+
 ### [2026-03-30] v2.0.1: Scope reduction — cursor/windsurf adapters and MCP server removed
 - **Type**: DECISION [removed]
 - **Source**: #502–#506, #503, PRs #569–#572
@@ -179,3 +163,27 @@
 - **Outcome**: removed
 - **Last-verified**: 2026-04-02
 - **Context**: v2.0.1 removed cursor and windsurf adapters (current: claude, agents-md, copilot, codex) and the MCP enforcement server (ADR-037). MCP removed due to scope reduction — hooks remain primary enforcement. Adapter registry pattern retained for remaining runtimes.
+
+### [2026-04-03] v3.6.0 audit: CI optimization opportunities — parallel jobs and validation dedup (R-01/R-03)
+- **Type**: RISK [accepted]
+- **Source**: v3.6.0 full codebase audit, Deming R-01/R-03
+- **Tags**: ci, optimization, parallel, validation, dx
+- **Outcome**: accepted
+- **Last-verified**: 2026-04-03
+- **Context**: Two CI optimization findings: (1) R-01: duplicate hook validation — validate-hooks runs both as standalone job and within test suite. Remove from validate job to reduce redundancy. (2) R-03: lint/typecheck/format run sequentially in CI but are independent — split into parallel jobs for faster CI. Both accepted — actionable CI improvements.
+
+### [2026-04-03] v3.6.0 audit: Pre-stable tooling risk — oxfmt and TypeScript 6 (Q-01/D-S-03)
+- **Type**: RISK [accepted]
+- **Source**: v3.6.0 full codebase audit, Deming Q-01/D-S-03
+- **Tags**: tooling, oxfmt, typescript, pre-stable, risk
+- **Outcome**: accepted
+- **Last-verified**: 2026-04-03
+- **Context**: Both oxfmt and TypeScript 6 are pre-stable (pre-1.0 semver). Breaking changes possible on minor bumps. Monitor release channels for both. Mitigation: pin versions in package.json, test after upgrades. Acceptable risk given the speed benefits (oxfmt) and language features (TS 6).
+
+### [2026-04-03] v3.6.0 audit: actions/checkout@v6 resolution unverified (R-05)
+- **Type**: RISK [accepted]
+- **Source**: v3.6.0 full codebase audit, Deming R-05
+- **Tags**: ci, github-actions, checkout, version-pinning
+- **Outcome**: accepted
+- **Last-verified**: 2026-04-03
+- **Context**: CI uses actions/checkout@v6 but resolution to a specific commit SHA was not verified. If v6 tag is moved or compromised, CI could pull unexpected code. Best practice: pin to full SHA or verify the tag resolves to expected commit. Low urgency — GitHub-owned actions have strong supply chain controls.

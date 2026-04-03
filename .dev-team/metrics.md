@@ -271,6 +271,29 @@
 - **Notes**: Small release — 3 issues. LIGHT/FULL tier applied correctly: SIMPLE branches (#713, #714) got LIGHT reviews (Copilot only); COMPLEX branch (#715 — 657 lines of new tests) got FULL review (Knuth + Szabo). Zero DEFECTs across all 3 branches. Cross-branch contamination recurred (package.json leaked between branches) — 5th documented occurrence. Two follow-up issues created: #719 (symlink guard tests), #720 (compareSemver edge cases). Low acceptance rate (29%) reflects the test-only nature of the COMPLEX branch — test code is lower-risk, advisory findings appropriately deferred/ignored.
 - **[RISK] Zero-overrule alert**: Rolling overrule rate remains 0% at n>=213 in-team findings (v1.2.0 through v3.5.0, in-team only). Acceptance rate (29%) is below healthy band (60-85%) but attributable to test-only scope.
 
+### [2026-04-03] Task: v3.6.0 delivery (11 issues, 12 PRs #733-#742 + release)
+- **Agents**: implementing: various (3 waves: 5+4+2); reviewers: Copilot; extract: Borges
+- **Rounds**: 1 per branch (Copilot-only review, no adversarial agent wave)
+- **Findings**:
+  - Copilot (#733): 0 DEFECT, 0 RISK, 5 SUGGESTION (5 fixed)
+  - Copilot (#734): 0 DEFECT, 1 RISK (1 accepted)
+  - Copilot (#735): 1 DEFECT (1 fixed), 1 SUGGESTION (1 fixed)
+  - Copilot (#736): 0 DEFECT, 3 RISK (1 fixed/comment, 2 deferred), 2 SUGGESTION (1 deferred/unit tests, 1 fixed/comment), [RISK] stale sidecar (deferred), [RISK] branch detection (deferred)
+  - Copilot (#737): 0 DEFECT, 1 RISK (1 accepted)
+  - Copilot (#738): 0 DEFECT, 1 RISK (1 accepted)
+  - Copilot (#740): 0 DEFECT, 0 RISK, 1 SUGGESTION (1 accepted)
+  - Copilot (#742): 0 DEFECT, 0 RISK, 2 SUGGESTION (2 accepted)
+- **Unique findings**: 18
+- **Acceptance rate**: 72% (13 fixed-or-accepted / 18 total)
+- **Overrule rate**: 0% (0/18)
+- **Fix rate (DEFECTs)**: 100% (1/1)
+- **Defer rate (advisory)**: 17% (3/18 — stale sidecar, branch detection, hook unit tests)
+- **Ignore rate (advisory)**: 0% (0/18)
+- **Duration**: single session, 11 issues across 3 waves (5+4+2)
+- **Notes**: Copilot-only review — no adversarial agent review wave (same process gap as v3.4.0, v1.8.0, v1.6.0). 1 DEFECT (existsSync unreliable for symlinks, PR #735) found and fixed. Three findings deferred from PR #736 (review gate hook): stale sidecar, branch detection via HEAD, hook unit tests — cluster of deferred debt in this file. Cross-branch contamination recurred (stashed changes, agent teams sharing working directory) despite worktree isolation. "Require up-to-date branches" protection disabled mid-release to reduce cascade overhead. Acceptance rate (72%) is within the healthy band.
+- **[RISK] Process gap**: No adversarial agent review executed. COMPLEX issues may have benefited from FULL review (per tier protocol).
+- **[RISK] Zero-overrule alert**: Rolling overrule rate remains 0% at n>=213 in-team findings (Copilot findings excluded from rolling count). Per research brief #490, healthy adversarial review shows 1-10% overrule rate.
+
 ### [2026-04-03] Task: v3.4.0 delivery (#665, #683, #686, #687, #688, #689, #690, #691, #699, #703, #704)
 - **Agents**: implementing: Voss (#683, #686, #699), Knuth (#665), Turing (research #687, #688, #689, #690, #691), Tufte (docs #703, #704), Conway (release); pre-assessment: Brooks; reviewers: Copilot
 - **Rounds**: max 2 (PR #694 had 2 Copilot rounds), most branches 0-1
@@ -287,3 +310,20 @@
 - **[RISK] Process gap**: No adversarial agent review executed. Copilot-only review is acceptable for SIMPLE/research tasks but COMPLEX issues should have had FULL reviews.
 - **[RISK] Shared file contamination pattern**: Worktree agents branched from local main with unpushed commits (aeda27f retro extraction). Every worktree inherited stale Borges memory and metrics files. Root cause: unpushed commits on main before branching.
 - **[RISK] Zero-overrule alert**: Rolling overrule rate remains 0% at n>=199 in-team findings (Copilot findings excluded from rolling count — no new in-team findings this release). Per research brief #490, healthy adversarial review shows 1-10% overrule rate.
+
+### [2026-04-03] Audit: Full codebase audit v3.6.0 (Szabo, Knuth, Deming)
+- **Agents**: reviewers: Szabo (security), Knuth (quality), Deming (tooling)
+- **Rounds**: 1
+- **Findings**:
+  - Szabo: 0 DEFECT, 0 RISK, 1 QUESTION (1 accepted), 5 SUGGESTION (5 accepted) — 6 total
+  - Knuth: 0 DEFECT, 2 RISK (2 accepted), 3 SUGGESTION (2 accepted / 1 deferred), 1 QUESTION (1 accepted) — 7 total (1 deferred: K-05 #720)
+  - Deming: 0 DEFECT, 5 RISK (5 accepted), 2 QUESTION (2 accepted), 4 SUGGESTION (4 accepted) — 11 total
+- **Unique findings**: 24
+- **Acceptance rate**: 96% (23 accepted / 24 total)
+- **Overrule rate**: 0% (0/24)
+- **Fix rate (DEFECTs)**: N/A (0 DEFECTs)
+- **Defer rate (advisory)**: 4% (1/24 — K-05 compareSemver, already tracked #720)
+- **Ignore rate (advisory)**: 0% (0/24)
+- **Duration**: single session, 3 parallel agents
+- **Notes**: Second full codebase audit (first was 2026-03-26). Zero DEFECTs — codebase security posture is strong. Key themes: hook test gaps (K-01 merge-gate, K-02 worktree-remove), CI optimization (R-01 dedup, R-03 parallelization), pre-stable tooling risk (Q-01 oxfmt, D-S-03 TypeScript 6), zero runtime dependencies (S-07 positive finding). Compared to first audit (37 findings, 2 DEFECTs, 11 issues): finding count down 35%, zero DEFECTs (was 2), no new issues needed — findings are optimization/hardening not correctness. The codebase has matured significantly between audits.
+- **[RISK] Zero-overrule alert**: Rolling overrule rate remains 0% at n>=237 in-team findings (v1.2.0 through v3.6.0 audit). Per research brief #490, healthy adversarial review shows 1-10% overrule rate.

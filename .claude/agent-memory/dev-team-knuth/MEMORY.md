@@ -8,7 +8,7 @@
 - **Source**: package.json analysis
 - **Tags**: testing, coverage
 - **Outcome**: verified
-- **Last-verified**: 2026-03-26
+- **Last-verified**: 2026-04-03 (v3.6.0 audit K-07 reconfirmed; Node 22 built-in --experimental-test-coverage available)
 - **Context**: No c8, istanbul, or similar coverage tool in devDependencies or scripts. Coverage gaps must be identified by code review, not metrics.
 
 ### [2026-03-29] mergeClaudeMd duplicate BEGIN — FIXED in v1.8.0
@@ -139,8 +139,16 @@
 - **Source**: #715, PR #718, Knuth findings K2/K3
 - **Tags**: semver, compareSemver, edge-case, parsing
 - **Outcome**: deferred — #720
-- **Last-verified**: 2026-04-03
+- **Last-verified**: 2026-04-03 (v3.6.0 audit K-05 reconfirmed — still open)
 - **Context**: compareSemver has a known parsing bug: multi-segment pre-release strings (e.g. "1.0.0-1.0.0") are misparsed when the pre-release label contains dots resembling a version tuple. Separately, mixed pre-release vs release comparison (e.g. "1.0.0-beta" vs "1.0.0") may produce inconsistent ordering. Both deferred to #720 — out of scope for the test coverage PR.
+
+### [2026-04-03] v3.6.0: Regex edge cases in review gate hook — accepted (PR #736)
+- **Type**: RISK [accepted]
+- **Source**: PR #736, Copilot findings (x3)
+- **Tags**: hooks, regex, review-gate, edge-cases
+- **Outcome**: accepted
+- **Last-verified**: 2026-04-03
+- **Context**: Three regex edge cases flagged in the review gate hook (PR #736), all accepted. Deferred hook unit tests and stale sidecar risk also noted. Pattern: the review gate hook accumulates deferred findings — stale sidecar, branch detection, regex edge cases, and missing unit tests are now a cluster of known debt in this file. A dedicated hardening issue should consolidate these.
 
 ### [2026-04-03] v3.4.0: TOML escaping test coverage added (#665)
 - **Type**: PATTERN [new]
@@ -157,3 +165,19 @@
 - **Outcome**: fixed
 - **Last-verified**: 2026-03-30
 - **Context**: Test suites added for canonical format and adapters. cursor-adapter.test.js, windsurf-adapter.test.js, mcp-server.test.js, and mcp-review-gate.test.js removed in v2.0.1. Current adapter test files: canonical.test.js, agents-md-adapter.test.js, copilot-adapter.test.js, codex-adapter.test.js. Each adapter has generate+update tests.
+
+### [2026-04-03] v3.6.0 audit: Merge-gate hook has zero unit tests (K-01)
+- **Type**: RISK [accepted]
+- **Source**: v3.6.0 full codebase audit, Knuth K-01
+- **Tags**: testing, hooks, merge-gate, coverage
+- **Outcome**: accepted
+- **Last-verified**: 2026-04-03
+- **Context**: dev-team-merge-gate.js shipped in v3.6.0 (PR #736) without unit tests. Highest priority test gap from this audit. The review gate hook (dev-team-review-gate.js) already accumulates deferred test debt — merge-gate adds to the untested hooks cluster. Pattern: new hooks should ship with tests. Seen: 2nd hook test gap (review-gate + merge-gate).
+
+### [2026-04-03] v3.6.0 audit: Worktree-remove containment check untested (K-02)
+- **Type**: RISK [accepted]
+- **Source**: v3.6.0 full codebase audit, Knuth K-02
+- **Tags**: testing, hooks, worktree, containment, coverage
+- **Outcome**: accepted
+- **Last-verified**: 2026-04-03
+- **Context**: worktree-remove hook containment check (path traversal guard from #725 fix) has no regression test. If the containment logic regresses, worktree removal could operate outside the project boundary. Lower priority than K-01 but important for security regression protection.

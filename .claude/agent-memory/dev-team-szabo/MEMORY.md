@@ -50,7 +50,7 @@
 - **Source**: Codebase audit (S3/S4), Issue #433, PR #454
 - **Tags**: symlink, path-traversal, file-system, security
 - **Outcome**: fixed — assertNotSymlink() + assertNoSymlinkInPath() guards added
-- **Last-verified**: 2026-03-29
+- **Last-verified**: 2026-04-03 (v3.6.0 audit S-03 confirmed write-side guards comprehensive)
 - **Context**: Fixed in two waves: v1.7.0 added assertNotSymlink() leaf check (lstatSync on target). v1.8.0 added assertNoSymlinkInPath() ancestor traversal (walks parent dirs to root). Both applied to copyFile and renameSync calls. Residual TOCTOU gap accepted as inherent to POSIX.
 
 
@@ -153,6 +153,14 @@
 - **Last-verified**: 2026-04-03
 - **Context**: New test suite for init.ts/update.ts covers functional behavior but lacks symlink guard regression tests for ancestor-path traversal scenarios (assertNoSymlinkInPath edge cases in the main entry points). Deferred to #719 — confirms symlink guard coverage is a recurring gap that needs dedicated tracking. S-02 (path boundary validation) and S-03 (temp dir prefix) were advisory and ignored (self-evident from existing conventions).
 
+### [2026-04-03] v3.6.0: existsSync unreliable for symlinks — FIXED (PR #735)
+- **Type**: DEFECT [fixed]
+- **Source**: PR #735, Copilot finding
+- **Tags**: symlink, file-system, security, existsSync
+- **Outcome**: fixed
+- **Last-verified**: 2026-04-03
+- **Context**: `existsSync` follows symlinks, so a symlink pointing to a missing target returns false — making it unreliable for "file exists" checks when symlinks may be involved. Fixed in PR #735. Pattern: prefer `lstatSync` over `existsSync` when symlink presence is security-relevant. Complements the assertNotSymlink/assertNoSymlinkInPath guard pattern established in v1.7.0–v1.8.0.
+
 ### [2026-03-30] v2.0: MCP filePath traversal validation — FIXED (R-02)
 - **Type**: RISK [fixed]
 - **Source**: PR #572, Szabo finding R-02
@@ -160,3 +168,19 @@
 - **Outcome**: fixed
 - **Last-verified**: 2026-03-30
 - **Context**: MCP review_gate tool accepts filePath from MCP client. Without validation, absolute paths or `..` traversals could check files outside the project. Fixed: path.normalize + reject if starts with `..` or is absolute. Same pattern as the adapter name validation (F-01) — validate at the input boundary.
+
+### [2026-04-03] v3.6.0 audit: Safety guard regex bypass vectors — advisory (S-01)
+- **Type**: SUGGESTION [accepted]
+- **Source**: v3.6.0 full codebase audit, Szabo S-01
+- **Tags**: regex, safety-guard, bypass, security
+- **Outcome**: accepted
+- **Last-verified**: 2026-04-03
+- **Context**: Safety guard regex patterns have potential bypass vectors (trailing `$` anchors, split flags). Accepted as advisory — the Claude Code sandbox is the real security boundary. Safety guards are defense-in-depth, not primary protection. Pattern: when evaluating regex guard findings, consider the trust boundary — sandbox enforcement makes regex bypasses a lower-severity risk.
+
+### [2026-04-03] v3.6.0 audit: Zero runtime dependencies — maintain posture (S-07)
+- **Type**: PATTERN [verified]
+- **Source**: v3.6.0 full codebase audit, Szabo S-07
+- **Tags**: dependencies, supply-chain, security, posture
+- **Outcome**: accepted
+- **Last-verified**: 2026-04-03
+- **Context**: Positive security finding: dev-team has zero runtime dependencies. All functionality is implemented directly. This eliminates supply-chain attack surface entirely for runtime. Maintain this posture — any proposal to add a runtime dependency should require explicit justification.
