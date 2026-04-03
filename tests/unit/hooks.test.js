@@ -2201,6 +2201,40 @@ describe("dev-team-worktree-remove", () => {
     const result = runWorktreeHook(hook, undefined);
     assert.equal(result.code, 0, "Should exit 0 with no input");
   });
+
+  it("exits 0 with warning when worktree_path traverses outside project root (#725)", () => {
+    const result = runWorktreeHook(hook, { worktree_path: "/tmp/../../etc" }, { cwd: tmpDir });
+    assert.equal(result.code, 0, "Should exit 0 (non-fatal)");
+    assert.ok(
+      result.stderr.includes("resolves outside project root"),
+      "Should warn about path traversal",
+    );
+  });
+
+  it("proceeds normally when worktree_path is inside project root (#725)", () => {
+    initGitRepo(tmpDir);
+    const wtPath = path.join(tmpDir, "inside-wt");
+    execFileSync("git", ["-C", tmpDir, "worktree", "add", "-b", "inside-branch", wtPath], {
+      stdio: "pipe",
+    });
+    assert.ok(fs.existsSync(wtPath), "Worktree should exist before removal");
+
+    const result = runWorktreeHook(hook, { worktree_path: wtPath }, { cwd: tmpDir });
+    assert.equal(result.code, 0);
+    assert.ok(!result.stderr.includes("resolves outside project root"), "Should not warn");
+    assert.ok(!fs.existsSync(wtPath), "Worktree should be removed");
+  });
+
+  it("uses unresolved path for containment check when realpathSync fails (#725)", () => {
+    const danglingPath = path.join(tmpDir, "nonexistent-wt");
+    // danglingPath is inside tmpDir, so containment check passes with unresolved path
+    const result = runWorktreeHook(hook, { worktree_path: danglingPath }, { cwd: tmpDir });
+    assert.equal(result.code, 0);
+    assert.ok(
+      !result.stderr.includes("resolves outside project root"),
+      "Should not reject — dangling path inside project root uses unresolved fallback",
+    );
+  });
 });
 
 // ─── Review Gate ──────────────────────────────────────────────────────────────
