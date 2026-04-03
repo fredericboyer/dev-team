@@ -22,7 +22,7 @@ Semantic versioning (semver). Version source: `package.json`.
 - **Every piece of work starts with a GitHub Issue.** No exceptions.
 - Link PRs to issues in the body (`Closes #NNN`) for auto-close on merge.
 - **Always use `/merge` to merge PRs.** Do not use raw `gh pr merge` or check Copilot comments separately. The merge skill handles Copilot check run monitoring, auto-merge, CI verification, and post-merge actions. This applies to all PRs — including those created by background agents.
-- **Mergify does not require human approval by design (ADR-041).** Quality is enforced through automated review bots and thread resolution (`#review-threads-unresolved = 0`), not approval count. Humans can still block PRs by opening review threads.
+- **No human approval required for merge by design (ADR-041, ADR-042).** Quality is enforced through automated review bots and thread resolution (`required_review_thread_resolution` in GitHub branch protection rulesets), not approval count. Humans can still block PRs by opening review threads.
 - Merge completed PRs promptly as they pass CI. Do not batch merges at the end of a session — stale branches accumulate conflicts.
 - For sequential chains (issues touching the same files), merge each PR before spawning the next agent. Branching from stale main nullifies the sequencing benefit.
 
