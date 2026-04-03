@@ -379,7 +379,19 @@ export function getPackageVersion(): string {
 export function listFilesRecursive(dir: string, maxDepth: number = 10): string[] {
   if (maxDepth < 0) return [];
   const results: string[] = [];
-  const entries = fs.readdirSync(dir, { withFileTypes: true });
+  let entries: fs.Dirent[];
+  try {
+    entries = fs.readdirSync(dir, { withFileTypes: true });
+  } catch (err: unknown) {
+    if (
+      (err as NodeJS.ErrnoException).code === "EACCES" ||
+      (err as NodeJS.ErrnoException).code === "EPERM"
+    ) {
+      process.stderr.write(`dev-team: skipping unreadable directory: ${dir}\n`);
+      return [];
+    }
+    throw err;
+  }
   for (const entry of entries) {
     const fullPath = path.join(dir, entry.name);
     if (entry.isDirectory() && !entry.isSymbolicLink()) {
