@@ -5,8 +5,10 @@
  * PostToolUse hook on Edit/Write.
  *
  * Blocks implementation file changes unless:
- * - A test file has been modified in the current session, OR
+ * - A corresponding test file has been modified in the current session, OR
  * - A corresponding test file already exists (allows refactoring)
+ *
+ * Also searches top-level tests/ directory for matching test files.
  *
  * New implementation files with no existing tests are blocked.
  * Exit 2 = block, exit 0 = allow.
@@ -89,7 +91,9 @@ if (SKIP_PATTERNS.some((p) => p.test(filePath))) {
   process.exit(0);
 }
 
-// Check if any test file has been modified in this session
+// Check if a corresponding test file has been modified in this session.
+// Only tests that match the implementation file's name are accepted —
+// unrelated test changes do NOT exempt arbitrary implementation files.
 let changedFiles = "";
 try {
   changedFiles = cachedGitDiff(["diff", "--name-only"], 2000);
@@ -98,22 +102,50 @@ try {
   process.exit(0);
 }
 
-const hasTestChanges = changedFiles
+const dir = path.dirname(filePath);
+const name = path.basename(filePath, ext);
+
+/**
+ * Check whether a file path looks like a test file for the given implementation name.
+ * Matches: name.test.*, name.spec.*, name_test.*, test_name.*, nameTest.*
+ */
+function isCorrespondingTest(testPath, implName) {
+  const testBase = path.basename(testPath, path.extname(testPath));
+  return (
+    testBase === `${implName}.test` ||
+    testBase === `${implName}.spec` ||
+    testBase === `${implName}_test` ||
+    testBase === `test_${implName}` ||
+    testBase === `${implName}Test`
+  );
+}
+
+const changedTestFiles = changedFiles
   .split("\n")
   .filter(Boolean)
   .map((f) => f.split("\\").join("/"))
-  .some((f) => TEST_PATTERNS.some((p) => p.test(f)));
+  .filter((f) => TEST_PATTERNS.some((p) => p.test(f)));
 
-if (hasTestChanges) {
-  // Tests were modified in this session — allow
+const hasCorrespondingTestChanges = changedTestFiles.some((f) => isCorrespondingTest(f, name));
+
+if (hasCorrespondingTestChanges) {
+  // A corresponding test was modified in this session — allow
   process.exit(0);
 }
 
-// No test changes — check if a corresponding test file already exists.
+// No corresponding test changes — check if a corresponding test file already exists.
 // This allows refactoring (modifying existing tested code) without
 // requiring the test file to also be modified.
-const dir = path.dirname(filePath);
-const name = path.basename(filePath, ext);
+
+// Find the project root (git root) for top-level tests/ lookup
+let projectRoot = "";
+try {
+  projectRoot = require("child_process")
+    .execFileSync("git", ["rev-parse", "--show-toplevel"], { encoding: "utf-8", timeout: 2000 })
+    .trim();
+} catch {
+  projectRoot = "";
+}
 
 // Language-aware candidate test file patterns.
 // Covers JS/TS (.test, .spec, __tests__), Go (_test), Python (test_), and Java (Test suffix).
@@ -131,6 +163,34 @@ const CANDIDATE_PATTERNS = [
   // Java convention: FooTest.java alongside Foo.java
   path.join(dir, `${name}Test${ext}`),
 ];
+
+// Top-level tests/ directory — search for matching test files recursively
+if (projectRoot) {
+  const topTestsDir = path.join(projectRoot, "tests");
+  try {
+    if (fs.statSync(topTestsDir).isDirectory()) {
+      const walkForTests = (dirPath) => {
+        let entries;
+        try {
+          entries = fs.readdirSync(dirPath, { withFileTypes: true });
+        } catch {
+          return;
+        }
+        for (const entry of entries) {
+          const fullPath = path.join(dirPath, entry.name);
+          if (entry.isDirectory()) {
+            walkForTests(fullPath);
+          } else if (entry.isFile() && isCorrespondingTest(fullPath, name)) {
+            CANDIDATE_PATTERNS.push(fullPath);
+          }
+        }
+      };
+      walkForTests(topTestsDir);
+    }
+  } catch {
+    // No top-level tests/ directory — fine
+  }
+}
 
 const hasExistingTests = CANDIDATE_PATTERNS.some((candidate) => {
   try {
