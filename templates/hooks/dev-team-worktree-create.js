@@ -85,13 +85,23 @@ const worktreePath = path.join(worktreesDir, worktreeName);
 const lockFile = path.join(basePath, ".git", "worktree-create.lock");
 
 // Defense-in-depth: verify resolved path stays within worktrees directory (fixes #670)
-// Use realpathSync to resolve symlinks — path.resolve is lexical only (fixes #683)
-let resolvedWorktreesDir;
+// Resolve basePath (always exists) via realpathSync to follow symlinks, then build
+// the worktrees path from the resolved base. Also reject symlinked .claude directory
+// to prevent symlink-based containment bypass (fixes #683).
+const resolvedBase = fs.realpathSync(basePath);
+const claudeDir = path.join(resolvedBase, ".claude");
 try {
-  resolvedWorktreesDir = fs.realpathSync(worktreesDir);
+  const stat = fs.lstatSync(claudeDir);
+  if (stat.isSymbolicLink()) {
+    process.stderr.write(
+      `[dev-team worktree-create] .claude directory is a symlink — potential containment bypass\n`,
+    );
+    process.exit(1);
+  }
 } catch {
-  resolvedWorktreesDir = path.resolve(worktreesDir);
+  // .claude doesn't exist yet — safe, will be created by mkdir below
 }
+const resolvedWorktreesDir = path.join(resolvedBase, ".claude", "worktrees");
 const resolvedWorktree = path.join(resolvedWorktreesDir, worktreeName);
 const worktreeRel = path.relative(resolvedWorktreesDir, resolvedWorktree);
 if (worktreeRel.startsWith("..") || path.isAbsolute(worktreeRel) || worktreeRel !== worktreeName) {

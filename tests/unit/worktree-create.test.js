@@ -57,6 +57,28 @@ describe("dev-team-worktree-create path traversal", () => {
     assert.match(result.stderr, /Missing worktree_name/);
   });
 
+  it("rejects symlinked .claude directory", () => {
+    // Regression test for #683 symlink bypass
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "worktree-symlink-"));
+    const realClaude = path.join(tmpDir, "real-claude");
+    const symlinkClaude = path.join(tmpDir, "repo", ".claude");
+    const repoDir = path.join(tmpDir, "repo");
+    fs.mkdirSync(realClaude, { recursive: true });
+    fs.mkdirSync(repoDir, { recursive: true });
+    fs.mkdirSync(path.join(repoDir, ".git"));
+    fs.symlinkSync(realClaude, symlinkClaude);
+    try {
+      const result = runHook(
+        { base_path: repoDir, worktree_name: "test-worktree" },
+        { cwd: repoDir },
+      );
+      assert.notEqual(result.code, 0);
+      assert.ok(result.stderr.includes("symlink"), "should detect symlinked .claude directory");
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+
   it("allows a simple worktree name past traversal validation", () => {
     // Use a temp directory with a .git dir so the test is hermetic (fixes #683)
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "worktree-test-"));
