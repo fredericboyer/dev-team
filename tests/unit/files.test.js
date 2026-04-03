@@ -625,7 +625,8 @@ describe("listFilesRecursive", () => {
   });
 
   it("skips unreadable directories without throwing", () => {
-    // Skip on root (chmod doesn't restrict root)
+    // Skip on Windows (chmod doesn't restrict directory access) and root
+    if (process.platform === "win32") return;
     if (process.getuid && process.getuid() === 0) return;
 
     const d = path.join(tmpDir, "perm-test");
