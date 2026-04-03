@@ -2055,3 +2055,382 @@ describe("dev-team-worktree-remove", () => {
     assert.equal(result.code, 0, "Should exit 0 with no input");
   });
 });
+
+// ─── Review Gate ──────────────────────────────────────────────────────────────
+
+describe("dev-team-review-gate", () => {
+  const hook = "dev-team-review-gate.js";
+
+  // ─── Pass-through: non-commit commands ────────────────────────────────────
+
+  describe("passes through non-commit commands (exit 0)", () => {
+    const passThrough = [
+      { name: "git status", command: "git status" },
+      { name: "git push", command: "git push origin main" },
+      { name: "git diff", command: "git diff --cached" },
+      { name: "git log", command: "git log --oneline" },
+      { name: "git add", command: "git add ." },
+      { name: "git commit-tree", command: "git commit-tree abc123" },
+      { name: "git commit-graph", command: "git commit-graph write" },
+      { name: "non-git command", command: "npm test" },
+    ];
+
+    for (const { name, command } of passThrough) {
+      it(`passes through: ${name}`, () => {
+        const result = runHook(hook, { command });
+        assert.equal(result.code, 0, `Expected exit 0 for "${command}"`);
+      });
+    }
+  });
+
+  // ─── Escape hatch: --skip-review ──────────────────────────────────────────
+
+  describe("--skip-review escape hatch", () => {
+    // Use spawnSync to capture stderr even on exit 0
+    function runGateRaw(command) {
+      const input = JSON.stringify({ tool_input: { command } });
+      const result = spawnSync(process.execPath, [path.join(HOOKS_DIR, hook), input], {
+        encoding: "utf-8",
+        timeout: 5000,
+        env: { ...process.env, PATH: process.env.PATH },
+      });
+      return { code: result.status, stdout: result.stdout || "", stderr: result.stderr || "" };
+    }
+
+    it("bypasses gates with --skip-review flag", () => {
+      const result = runGateRaw('git commit --skip-review -m "test"');
+      assert.equal(result.code, 0);
+      assert.ok(
+        result.stderr.includes("--skip-review used"),
+        "should warn about skip-review bypass",
+      );
+    });
+
+    it("does not trigger on --skip-review inside commit message", () => {
+      // --skip-review after -m should NOT be treated as a flag
+      // The hook strips the message before checking for --skip-review
+      const result = runGateRaw("git commit -m '--skip-review is not a flag'");
+      // This should proceed to the gate logic, not bypass
+      // It will exit 0 because we're not in a real git repo (no staged files)
+      assert.equal(result.code, 0);
+      assert.ok(
+        !result.stderr.includes("--skip-review used"),
+        "should not treat --skip-review in message as escape hatch",
+      );
+    });
+
+    it("--skip-review before -m is treated as a flag", () => {
+      const result = runGateRaw("git commit --skip-review -m 'my message'");
+      assert.equal(result.code, 0);
+      assert.ok(
+        result.stderr.includes("--skip-review used"),
+        "should detect --skip-review before -m",
+      );
+    });
+  });
+
+  // ─── Malformed input handling ─────────────────────────────────────────────
+
+  it("exits 0 on malformed JSON (fails open)", () => {
+    try {
+      execFileSync(process.execPath, [path.join(HOOKS_DIR, hook), "not-json"], {
+        encoding: "utf-8",
+        timeout: 5000,
+      });
+      assert.ok(true, "should exit 0 on malformed JSON");
+    } catch (err) {
+      assert.fail(`Expected exit 0 (fail open), got exit ${err.status}`);
+    }
+  });
+
+  it("exits 0 with no input", () => {
+    try {
+      execFileSync(process.execPath, [path.join(HOOKS_DIR, hook)], {
+        encoding: "utf-8",
+        timeout: 5000,
+      });
+      assert.ok(true, "should exit 0 with no input");
+    } catch (err) {
+      assert.fail(`Expected exit 0, got exit ${err.status}`);
+    }
+  });
+
+  it("exits 0 with empty command", () => {
+    const result = runHook(hook, { command: "" });
+    assert.equal(result.code, 0, "empty command should pass through");
+  });
+
+  // ─── Gate tests with real git repos ───────────────────────────────────────
+
+  describe("gate logic with staged files", () => {
+    let tmpDir;
+
+    beforeEach(() => {
+      tmpDir = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "review-gate-")));
+      initGitRepo(tmpDir);
+    });
+
+    afterEach(() => {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    });
+
+    /**
+     * Helper: run the review-gate hook in a specific cwd with a git commit command.
+     */
+    function runGate(commitCmd, opts = {}) {
+      const input = JSON.stringify({ tool_input: { command: commitCmd } });
+      const result = spawnSync(process.execPath, [path.join(HOOKS_DIR, hook), input], {
+        encoding: "utf-8",
+        timeout: opts.timeout || 10000,
+        cwd: opts.cwd || tmpDir,
+        env: { ...process.env, PATH: process.env.PATH },
+      });
+      return { code: result.status, stdout: result.stdout || "", stderr: result.stderr || "" };
+    }
+
+    /**
+     * Helper: stage a file and return its content hash (first 12 chars of SHA-256).
+     */
+    function stageFile(filePath, content) {
+      const dir = path.dirname(filePath);
+      fs.mkdirSync(dir, { recursive: true });
+      fs.writeFileSync(filePath, content);
+      execFileSync("git", ["-C", tmpDir, "add", filePath], { stdio: "pipe" });
+      const { createHash } = require("crypto");
+      return createHash("sha256").update(Buffer.from(content)).digest("hex").slice(0, 12);
+    }
+
+    /**
+     * Helper: write a review sidecar file.
+     */
+    function writeSidecar(agent, contentHash, data = {}) {
+      const reviewsDir = path.join(tmpDir, ".dev-team", ".reviews");
+      fs.mkdirSync(reviewsDir, { recursive: true });
+      const sidecarPath = path.join(reviewsDir, `${agent}--${contentHash}.json`);
+      fs.writeFileSync(sidecarPath, JSON.stringify(data));
+    }
+
+    // ─── Gate 1: Review evidence ──────────────────────────────────────────
+
+    it("exits 0 when only non-code files are staged (not gated)", () => {
+      stageFile(path.join(tmpDir, "README.md"), "# Hello");
+      const result = runGate('git commit -m "docs only"');
+      assert.equal(result.code, 0, "non-code files should not be gated");
+    });
+
+    it("exits 0 when only test files are staged (not gated)", () => {
+      stageFile(path.join(tmpDir, "src", "handler.test.js"), 'test("works", () => {})');
+      const result = runGate('git commit -m "test only"');
+      assert.equal(result.code, 0, "test files should not be gated");
+    });
+
+    it("blocks when implementation file is staged without review sidecars", () => {
+      stageFile(path.join(tmpDir, "src", "handler.js"), "module.exports = {}");
+      const result = runGate('git commit -m "no review"');
+      assert.equal(result.code, 2, "should block without review sidecars");
+      assert.ok(result.stderr.includes("BLOCKED"), "should print BLOCKED");
+      assert.ok(result.stderr.includes("reviews missing"), "should mention missing reviews");
+    });
+
+    it("exits 0 when all required sidecars exist", () => {
+      const content = "module.exports = {}";
+      const hash = stageFile(path.join(tmpDir, "src", "handler.js"), content);
+      // handler.js in src/ triggers knuth + brooks (non-test code file)
+      writeSidecar("dev-team-knuth", hash);
+      writeSidecar("dev-team-brooks", hash);
+      const result = runGate('git commit -m "reviewed"');
+      assert.equal(result.code, 0, `Expected exit 0, stderr: ${result.stderr}`);
+    });
+
+    it("blocks when only some required sidecars exist", () => {
+      const content = "module.exports = {}";
+      const hash = stageFile(path.join(tmpDir, "src", "handler.js"), content);
+      // Only provide knuth, missing brooks
+      writeSidecar("dev-team-knuth", hash);
+      const result = runGate('git commit -m "partial review"');
+      assert.equal(result.code, 2, "should block with partial reviews");
+      assert.ok(result.stderr.includes("dev-team-brooks"), "should list missing agent");
+    });
+
+    it("blocks when sidecar hash does not match staged content", () => {
+      const content = "module.exports = {}";
+      stageFile(path.join(tmpDir, "src", "handler.js"), content);
+      // Write sidecars with wrong hash (stale review)
+      writeSidecar("dev-team-knuth", "wronghash1234");
+      writeSidecar("dev-team-brooks", "wronghash1234");
+      const result = runGate('git commit -m "stale review"');
+      assert.equal(result.code, 2, "stale review sidecars should not match");
+    });
+
+    it("requires security agent (szabo) for auth files", () => {
+      const content = "module.exports = {}";
+      const hash = stageFile(path.join(tmpDir, "src", "auth", "login.js"), content);
+      // Provide knuth and brooks but not szabo
+      writeSidecar("dev-team-knuth", hash);
+      writeSidecar("dev-team-brooks", hash);
+      const result = runGate('git commit -m "auth without szabo"');
+      assert.equal(result.code, 2, "should require szabo for auth files");
+      assert.ok(result.stderr.includes("dev-team-szabo"), "should list szabo as missing");
+    });
+
+    it("passes when all agents including szabo review auth files", () => {
+      const content = "module.exports = {}";
+      const hash = stageFile(path.join(tmpDir, "src", "auth", "login.js"), content);
+      writeSidecar("dev-team-szabo", hash);
+      writeSidecar("dev-team-knuth", hash);
+      writeSidecar("dev-team-brooks", hash);
+      const result = runGate('git commit -m "auth fully reviewed"');
+      assert.equal(result.code, 0, `Expected exit 0, stderr: ${result.stderr}`);
+    });
+
+    // ─── Gate 2: Findings resolution ──────────────────────────────────────
+
+    it("blocks on unresolved [DEFECT] findings", () => {
+      const content = "module.exports = {}";
+      const hash = stageFile(path.join(tmpDir, "src", "handler.js"), content);
+      writeSidecar("dev-team-knuth", hash, {
+        findings: [
+          { classification: "[DEFECT]", description: "Null pointer risk", resolved: false },
+        ],
+      });
+      writeSidecar("dev-team-brooks", hash);
+      const result = runGate('git commit -m "has defect"');
+      assert.equal(result.code, 2, "should block on unresolved defects");
+      assert.ok(result.stderr.includes("[DEFECT]"), "should mention DEFECT");
+      assert.ok(result.stderr.includes("Null pointer risk"), "should include description");
+    });
+
+    it("allows resolved [DEFECT] findings", () => {
+      const content = "module.exports = {}";
+      const hash = stageFile(path.join(tmpDir, "src", "handler.js"), content);
+      writeSidecar("dev-team-knuth", hash, {
+        findings: [{ classification: "[DEFECT]", description: "Fixed issue", resolved: true }],
+      });
+      writeSidecar("dev-team-brooks", hash);
+      const result = runGate('git commit -m "defect resolved"');
+      assert.equal(result.code, 0, `Expected exit 0, stderr: ${result.stderr}`);
+    });
+
+    it("allows [RISK] findings (advisory, not blocking)", () => {
+      const content = "module.exports = {}";
+      const hash = stageFile(path.join(tmpDir, "src", "handler.js"), content);
+      writeSidecar("dev-team-knuth", hash, {
+        findings: [
+          { classification: "[RISK]", description: "Potential perf issue", resolved: false },
+        ],
+      });
+      writeSidecar("dev-team-brooks", hash);
+      const result = runGate('git commit -m "risk is advisory"');
+      assert.equal(result.code, 0, `Expected exit 0, stderr: ${result.stderr}`);
+    });
+
+    it("allows [SUGGESTION] findings (advisory, not blocking)", () => {
+      const content = "module.exports = {}";
+      const hash = stageFile(path.join(tmpDir, "src", "handler.js"), content);
+      writeSidecar("dev-team-knuth", hash, {
+        findings: [
+          { classification: "[SUGGESTION]", description: "Could refactor", resolved: false },
+        ],
+      });
+      writeSidecar("dev-team-brooks", hash);
+      const result = runGate('git commit -m "suggestion is advisory"');
+      assert.equal(result.code, 0, `Expected exit 0, stderr: ${result.stderr}`);
+    });
+
+    // ─── LIGHT review depth: advisory only ────────────────────────────────
+
+    it("skips defect check for LIGHT review depth (advisory only)", () => {
+      const content = "module.exports = {}";
+      const hash = stageFile(path.join(tmpDir, "src", "handler.js"), content);
+      writeSidecar("dev-team-knuth", hash, {
+        reviewDepth: "LIGHT",
+        findings: [{ classification: "[DEFECT]", description: "Minor issue", resolved: false }],
+      });
+      writeSidecar("dev-team-brooks", hash);
+      const result = runGate('git commit -m "light review"');
+      assert.equal(result.code, 0, "LIGHT reviews should be advisory only");
+    });
+
+    // ─── Sidecar robustness ─────────────────────────────────────────────
+
+    it("handles sidecar with non-array findings (sanitized to empty)", () => {
+      const content = "module.exports = {}";
+      const hash = stageFile(path.join(tmpDir, "src", "handler.js"), content);
+      writeSidecar("dev-team-knuth", hash, { findings: "not-an-array" });
+      writeSidecar("dev-team-brooks", hash);
+      const result = runGate('git commit -m "malformed findings"');
+      assert.equal(
+        result.code,
+        0,
+        `Malformed findings should be sanitized, stderr: ${result.stderr}`,
+      );
+    });
+
+    it("handles sidecar with null findings entries (filtered out)", () => {
+      const content = "module.exports = {}";
+      const hash = stageFile(path.join(tmpDir, "src", "handler.js"), content);
+      writeSidecar("dev-team-knuth", hash, {
+        findings: [null, { classification: "[RISK]", description: "ok", resolved: false }],
+      });
+      writeSidecar("dev-team-brooks", hash);
+      const result = runGate('git commit -m "null findings"');
+      assert.equal(result.code, 0, `Null findings should be filtered, stderr: ${result.stderr}`);
+    });
+
+    it("rejects sidecar that is a symlink", { skip: process.platform === "win32" }, () => {
+      const content = "module.exports = {}";
+      const hash = stageFile(path.join(tmpDir, "src", "handler.js"), content);
+      // Create a valid sidecar, then replace with symlink
+      const reviewsDir = path.join(tmpDir, ".dev-team", ".reviews");
+      fs.mkdirSync(reviewsDir, { recursive: true });
+      const targetFile = path.join(tmpDir, "sidecar-target.json");
+      fs.writeFileSync(targetFile, JSON.stringify({}));
+      const sidecarPath = path.join(reviewsDir, `dev-team-knuth--${hash}.json`);
+      fs.symlinkSync(targetFile, sidecarPath);
+      writeSidecar("dev-team-brooks", hash);
+      const result = runGate('git commit -m "symlink sidecar"');
+      assert.equal(result.code, 2, "symlink sidecars should be rejected");
+    });
+
+    // ─── Cleanup manifest ───────────────────────────────────────────────
+
+    it("writes cleanup manifest on successful gate pass", () => {
+      const content = "module.exports = {}";
+      const hash = stageFile(path.join(tmpDir, "src", "handler.js"), content);
+      writeSidecar("dev-team-knuth", hash);
+      writeSidecar("dev-team-brooks", hash);
+      const result = runGate('git commit -m "with cleanup"');
+      assert.equal(result.code, 0, `Expected exit 0, stderr: ${result.stderr}`);
+      const manifestPath = path.join(tmpDir, ".dev-team", ".reviews", ".cleanup-manifest.json");
+      assert.ok(fs.existsSync(manifestPath), "cleanup manifest should be written");
+      const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf-8"));
+      assert.ok(Array.isArray(manifest), "manifest should be an array");
+      assert.ok(manifest.length > 0, "manifest should contain entries");
+    });
+
+    // ─── Mixed file types ───────────────────────────────────────────────
+
+    it("only gates implementation files, not co-staged non-code files", () => {
+      stageFile(path.join(tmpDir, "README.md"), "# Updated docs");
+      const content = "module.exports = {}";
+      const hash = stageFile(path.join(tmpDir, "src", "handler.js"), content);
+      writeSidecar("dev-team-knuth", hash);
+      writeSidecar("dev-team-brooks", hash);
+      const result = runGate('git commit -m "mixed files"');
+      assert.equal(
+        result.code,
+        0,
+        `Non-code files should not affect gating, stderr: ${result.stderr}`,
+      );
+    });
+
+    // ─── --skip-review in git repo context ──────────────────────────────
+
+    it("--skip-review bypasses gates even with staged impl files", () => {
+      stageFile(path.join(tmpDir, "src", "handler.js"), "module.exports = {}");
+      const result = runGate('git commit --skip-review -m "bypass"');
+      assert.equal(result.code, 0, "--skip-review should bypass");
+      assert.ok(result.stderr.includes("--skip-review used"), "should warn about bypass");
+    });
+  });
+});
