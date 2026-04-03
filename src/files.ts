@@ -386,7 +386,9 @@ export function listFilesRecursive(dir: string, maxDepth: number = 10): string[]
   } catch (err: unknown) {
     const error = err as NodeJS.ErrnoException;
     if (error.code === "EACCES" || error.code === "EPERM") {
-      console.warn(`Warning: skipping unreadable directory: ${dir} (${error.code}: ${error.message})`);
+      console.warn(
+        `Warning: skipping unreadable directory: ${dir} (${error.code}: ${error.message})`,
+      );
       return [];
     }
     throw err;
