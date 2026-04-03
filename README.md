@@ -137,7 +137,7 @@ npx @fredericboyer/dev-team create-agent <name>     # Scaffold a custom agent
 
 **Opus** agents do deep analysis — Szabo, Knuth, Brooks, and Turing are read-only; Drucker uses opus for orchestration with full access. **Sonnet** agents implement (faster, full write access). Borges runs at end-of-workflow for memory consolidation. Rams reviews design system compliance.
 
-### Hooks (10)
+### Hooks (11)
 
 | Hook | Trigger | Behavior |
 |------|---------|----------|
