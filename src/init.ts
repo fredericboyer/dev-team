@@ -152,6 +152,11 @@ const QUALITY_HOOKS: HookDefinition[] = [
     file: "dev-team-review-gate.js",
     description: "Enforce adversarial review loop via stateless commit gates",
   },
+  {
+    label: "Merge gate",
+    file: "dev-team-merge-gate.js",
+    description: "Block gh pr merge when no review evidence exists for the branch",
+  },
 ];
 
 interface PresetDefinition {
