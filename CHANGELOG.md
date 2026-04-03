@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.6.0] — 2026-04-03
+
+### Fixed
+- **Skill name compatibility**: replaced colons with hyphens in skill names for Copilot skill loader compatibility (#724)
+- **Worktree security**: added path containment validation to worktree-remove hook (#725)
+- **Directory traversal**: handle EACCES in `listFilesRecursive` to skip unreadable directories (#726)
+- **Lint-format hook**: use `node_modules/.bin` instead of `npx` to avoid version resolution issues (#728)
+- **Hook naming consistency**: renamed `copilot-merge-gate` to `merge-skill-gate` to align filename and header in project-specific hooks (#712)
+
+### Added
+- **Merge-gate hook**: enforces review completion before PR merge (#709)
+- **Simplified lint-format hook**: delegates file filtering to tool config instead of hook-level logic (#711)
+
+### Tests
+- **Symlink guard coverage**: added tests for `update.ts` migration functions and symlink guard scenarios (#719)
+- **compareSemver edge cases**: added coverage for multi-segment pre-release parsing and preset parsing edge cases (#720)
+
+### Chores
+- **oxlint config baseline**: added `.oxlintrc.json` and fixed unused-var warnings (#727)
+- **CI/tooling improvements**: validate consistency checks, `--tsconfig` flag, and new `typecheck` script (#729)
+- **Dependency updates**: updated all dependencies to latest (#730)
+
 ## [3.5.0] — 2026-04-03
 
 ### Fixed
