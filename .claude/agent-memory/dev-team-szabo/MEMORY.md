@@ -184,3 +184,11 @@
 - **Outcome**: accepted
 - **Last-verified**: 2026-04-03
 - **Context**: Positive security finding: dev-team has zero runtime dependencies. All functionality is implemented directly. This eliminates supply-chain attack surface entirely for runtime. Maintain this posture — any proposal to add a runtime dependency should require explicit justification.
+
+### [2026-04-04] v3.8.0: Sanitization mismatch cross-convergence with Knuth (PR #793)
+- **Type**: RISK [fixed]
+- **Source**: #781, PR #793, Szabo S-01 + Knuth K-01/K-02
+- **Tags**: sanitization, cross-agent, hooks, review-gate, merge-gate, security
+- **Outcome**: fixed
+- **Last-verified**: 2026-04-04
+- **Context**: Branch sanitization mismatch between review-gate and merge-gate hooks. Szabo S-01 converged independently with Knuth K-02 — strong cross-agent coherence signal. Unified to ADR-043 spec. Pattern: when security-relevant string transformations (branch names, paths) are used across multiple hooks, they must reference a shared spec or module to prevent drift.

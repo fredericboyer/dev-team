@@ -1,7 +1,7 @@
 ---
 name: dev-team-implement
 description: Implement a task on a feature branch with architect pre-assessment, agent selection, and validation. Use standalone or as Step 1 of /dev-team:task.
-disable-model-invocation: true
+disable-model-invocation: false
 ---
 
 Implement: $ARGUMENTS
@@ -37,6 +37,20 @@ Implement: $ARGUMENTS
 
    If an ADR is needed, include "Write ADR-NNN: <title>" in the implementation task. The implementing agent writes the ADR file.
 
+   **Write assessment sidecar** — after the pre-assessment completes, write the complexity classification to `.dev-team/.assessments/<sanitized-branch>.json` so the merge gate can enforce the correct review tier:
+
+   ```json
+   {
+     "branch": "<branch-name>",
+     "complexity": "SIMPLE | COMPLEX",
+     "reviewTier": "LIGHT | FULL",
+     "requiredReviewers": ["szabo", "knuth"],
+     "assessedAt": "<ISO-8601 timestamp>"
+   }
+   ```
+
+   For SIMPLE tasks, `requiredReviewers` should be an empty array (Copilot-only is sufficient). For COMPLEX tasks, include the agents that must review before merge. Sanitize the branch name for the filename by replacing non-alphanumeric characters (except hyphens) with hyphens.
+
    **Timeout**: If the pre-assessment agent has not reported progress within 2 minutes, send a status ping. If no response within 1 additional minute, terminate and either perform the pre-assessment yourself or skip it.
 
 ## Definition of Done (COMPLEX tasks only)
@@ -60,6 +74,7 @@ The implementing agent works on the task on a feature branch.
 **Timeout**: If the implementing agent has not reported progress (status file, message, or commit) within 2 minutes, send a status ping. If no response within 1 additional minute, terminate the agent, assess what was completed, and either resume the work yourself or re-spawn a fresh agent with the remaining tasks.
 
 **Validation** — before completion, verify:
+
 - Non-empty diff: `git diff` shows actual changes
 - Tests pass: test command executed with exit code 0
 - Relevance: changed files relate to the stated issue
@@ -72,14 +87,15 @@ The implementing agent works on the task on a feature branch.
 
 ## Output
 
-When invoked with `--embedded` (from `/dev-team:task`), return a compact summary:
+Return a structured summary:
+
 - Branch name
 - PR number
 - Files changed
 - Complexity classification
 - Whether ADR was written
 
-When invoked standalone, report the PR URL and wait for the user's next action.
+Report the PR URL on completion.
 
 ## Security preamble
 

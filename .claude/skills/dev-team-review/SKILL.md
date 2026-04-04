@@ -1,30 +1,31 @@
 ---
 name: dev-team-review
 description: Orchestrated multi-agent parallel review. Use to review a PR, branch, or set of changes with multiple specialist agents simultaneously. Spawns agents based on changed file patterns and produces a unified review summary.
-disable-model-invocation: true
+disable-model-invocation: false
 ---
 
 Run a multi-agent parallel review of: $ARGUMENTS
 
-## Invocation modes
-
-This skill supports two invocation modes:
-
-- **Standalone** (user calls `/dev-team:review` directly): Full review lifecycle including the Completion section (finding outcome log + `/dev-team:extract`).
-- **Embedded** (called by `/dev-team:task` during Step 2): Produce the review report and return findings to the caller. **Skip the Completion section entirely** — the task skill handles finding routing, iteration, and extraction in its own Steps 2 and 4. When called with the flag `--embedded`, operate in embedded mode.
-
-In embedded mode, the review skill produces its report and returns control to the task skill. The review report output (findings, filtered, verdict sections) is identical in both modes — the Completion section is a post-report lifecycle action, not part of the report itself.
-
 ## Setup
 
-0. **Parse flags:** If `$ARGUMENTS` contains `--embedded`, note embedded mode and strip the flag. If `$ARGUMENTS` contains `--light`, note LIGHT review mode and strip the flag. Process the remaining arguments as the review target.
+0. **Parse flags:** If `$ARGUMENTS` contains `--light`, note LIGHT review mode and strip the flag. Process the remaining arguments as the review target.
 
 1. Determine what to review:
    - If a PR number or branch is given, use `git diff` to get the changed files
    - If a directory or file pattern is given, review those files
    - If no argument, review all uncommitted changes (`git diff HEAD`)
 
-2. Categorize changed files by domain to determine which agents to spawn. File-pattern-to-agent routing follows `.dev-team/hooks/agent-patterns.json` — the same patterns used by the post-change-review and review-gate hooks. Read that file to map changed files to the appropriate specialist agents.
+2. Categorize changed files by domain to determine which agents to spawn. This skill is the **sole authority** for agent selection — the hooks no longer determine which agents to run. Use the following domain-to-agent routing to select reviewers based on the diff:
+   - Security/auth/crypto/token → @dev-team-szabo
+   - API routes/contracts/schemas → @dev-team-mori
+   - Frontend/UI/components → @dev-team-rams
+   - Config/data model/migrations → @dev-team-voss
+   - Tooling/build/CI/linting → @dev-team-deming
+   - Documentation/ADRs → @dev-team-tufte
+   - Architecture/abstractions/boundaries → @dev-team-brooks
+   - Release artifacts/versioning → @dev-team-conway
+   - Infrastructure/deployment/ops → @dev-team-hamilton
+   - Any implementation code (catch-all) → @dev-team-knuth + @dev-team-brooks
 
 3. **Always-on reviewers** (spawn regardless of file patterns):
    - **@dev-team-szabo** — always included (security review)
@@ -108,13 +109,46 @@ Original finding summary.
 
 State the verdict clearly. List what must be fixed for approval if requesting changes.
 
+### Review sidecar (ADR-044)
+
+After completing the review, write a sidecar file so the review-gate hook can verify the branch has been reviewed:
+
+**Location:** `.dev-team/.reviews/<agent>--<sanitized-branch>.json`
+
+**Branch sanitization:** Replace any character that is not alphanumeric or a hyphen with a hyphen.
+Example: `feat/787-sidecar` → `feat-787-sidecar`
+
+**Schema:**
+```json
+{
+  "agent": "dev-team-knuth",
+  "branch": "feat/787-sidecar",
+  "reviewDepth": "FULL",
+  "findings": [
+    {
+      "classification": "[DEFECT]",
+      "description": "...",
+      "line": 42,
+      "resolved": false
+    }
+  ]
+}
+```
+
+- `branch` — the full unsanitized branch name
+- `reviewDepth` — `"LIGHT"` (advisory only, gate will not enforce) or `"FULL"` (blocking)
+- `findings` — array of all findings; empty array if none
+- `resolved` — set to `true` only when the finding has been explicitly addressed
+
+In LIGHT review mode, set `reviewDepth: "LIGHT"` — the review-gate will treat all findings as advisory and will not block commits.
+
+One sidecar per reviewing agent. Each agent writes its own sidecar. The filename prefix is the agent name (e.g., `dev-team-knuth`, `dev-team-szabo`).
+
 ### Platform detection
 
 Before issuing any `gh issue`, `gh pr`, or other platform-specific CLI commands, check `.dev-team/config.json` for the `platform` and `issueTracker` fields. If the project specifies a non-GitHub platform (e.g., `"gitlab"`, `"bitbucket"`, `"other"`), adapt issue tracker and PR commands accordingly — use `glab` for GitLab, the Bitbucket API, or the appropriate CLI for the configured platform. If `platform` is absent from config.json, default to `"github"`. The steps in this skill assume GitHub by default.
 
 ### Completion
-
-**Standalone mode only** (skip this section entirely when `--embedded` flag is present):
 
 After the review report is delivered:
 1. Format the **finding outcome log** with every finding's classification, source agent, and outcome (accepted/overruled/ignored), including reasoning for overrules. Then call `/dev-team:extract` with the formatted log.
