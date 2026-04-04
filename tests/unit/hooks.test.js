@@ -2815,6 +2815,108 @@ describe("dev-team-merge-gate", () => {
     });
   });
 
+  // ─── Complexity-aware enforcement ─────────────────────────────────────────
+
+  describe("complexity-aware merge gate", () => {
+    const branch = "feat/747-complexity-gate";
+    const mergeCmd = `gh pr merge ${branch}`;
+    const sanitized = branch.replace(/[^a-zA-Z0-9-]/g, "-");
+
+    function setupDirs() {
+      const reviewsDir = path.join(tmpDir, ".dev-team", ".reviews");
+      const assessmentsDir = path.join(tmpDir, ".dev-team", ".assessments");
+      fs.mkdirSync(reviewsDir, { recursive: true });
+      fs.mkdirSync(assessmentsDir, { recursive: true });
+      return { reviewsDir, assessmentsDir };
+    }
+
+    function writeAssessment(assessmentsDir, data) {
+      fs.writeFileSync(path.join(assessmentsDir, sanitized + ".json"), JSON.stringify(data));
+    }
+
+    function writeSidecar(reviewsDir, agent, branchName) {
+      const sidecar = { branch: branchName, agent, hash: "h" + agent, tier: "FULL" };
+      fs.writeFileSync(path.join(reviewsDir, `${agent}-h${agent}.json`), JSON.stringify(sidecar));
+    }
+
+    it("allows COMPLEX merge when all required reviewers present (exit 0)", () => {
+      const { reviewsDir, assessmentsDir } = setupDirs();
+      writeAssessment(assessmentsDir, {
+        branch,
+        complexity: "COMPLEX",
+        reviewTier: "FULL",
+        requiredReviewers: ["szabo", "knuth"],
+        assessedAt: "2026-04-03T18:45:00Z",
+      });
+      writeSidecar(reviewsDir, "szabo", branch);
+      writeSidecar(reviewsDir, "knuth", branch);
+      const result = runMergeGate(mergeCmd);
+      assert.equal(result.code, 0, "all required reviewers present should allow merge");
+    });
+
+    it("blocks COMPLEX merge when a required reviewer is missing (exit 2)", () => {
+      const { reviewsDir, assessmentsDir } = setupDirs();
+      writeAssessment(assessmentsDir, {
+        branch,
+        complexity: "COMPLEX",
+        reviewTier: "FULL",
+        requiredReviewers: ["szabo", "knuth"],
+        assessedAt: "2026-04-03T18:45:00Z",
+      });
+      writeSidecar(reviewsDir, "szabo", branch);
+      // knuth missing
+      const result = runMergeGate(mergeCmd);
+      assert.equal(result.code, 2, "missing required reviewer should block");
+      assert.ok(result.stderr.includes("knuth"), "should name the missing reviewer");
+      assert.ok(result.stderr.includes("COMPLEX"), "should mention COMPLEX");
+    });
+
+    it("allows SIMPLE assessment with any sidecar (exit 0)", () => {
+      const { reviewsDir, assessmentsDir } = setupDirs();
+      writeAssessment(assessmentsDir, {
+        branch,
+        complexity: "SIMPLE",
+        reviewTier: "LIGHT",
+        requiredReviewers: [],
+        assessedAt: "2026-04-03T18:45:00Z",
+      });
+      writeSidecar(reviewsDir, "szabo", branch);
+      const result = runMergeGate(mergeCmd);
+      assert.equal(result.code, 0, "SIMPLE with any sidecar should allow merge");
+    });
+
+    it("falls back to any-sidecar when no assessment file exists (exit 0)", () => {
+      const { reviewsDir } = setupDirs();
+      // No assessment written
+      writeSidecar(reviewsDir, "szabo", branch);
+      const result = runMergeGate(mergeCmd);
+      assert.equal(result.code, 0, "no assessment should fall back to any-sidecar");
+    });
+
+    it("falls back to any-sidecar when assessment has malformed JSON (exit 0)", () => {
+      const { reviewsDir, assessmentsDir } = setupDirs();
+      fs.writeFileSync(path.join(assessmentsDir, sanitized + ".json"), "not-valid-json{{{");
+      writeSidecar(reviewsDir, "szabo", branch);
+      const result = runMergeGate(mergeCmd);
+      assert.equal(result.code, 0, "malformed assessment should fall back to any-sidecar");
+    });
+
+    it("is case-insensitive for reviewer agent names", () => {
+      const { reviewsDir, assessmentsDir } = setupDirs();
+      writeAssessment(assessmentsDir, {
+        branch,
+        complexity: "COMPLEX",
+        reviewTier: "FULL",
+        requiredReviewers: ["Szabo", "Knuth"],
+        assessedAt: "2026-04-03T18:45:00Z",
+      });
+      writeSidecar(reviewsDir, "szabo", branch);
+      writeSidecar(reviewsDir, "knuth", branch);
+      const result = runMergeGate(mergeCmd);
+      assert.equal(result.code, 0, "case-insensitive matching should allow merge");
+    });
+  });
+
   // ─── detectBranch: PR number lookup ───────────────────────────────────────
 
   describe("detectBranch with PR number", () => {

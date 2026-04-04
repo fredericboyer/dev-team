@@ -171,5 +171,63 @@ if (branchMatchingSidecars.length === 0) {
   process.exit(2);
 }
 
-// Review evidence found for the correct branch — allow the merge
+// ─── Complexity-aware enforcement ──────────────────────────────────────────
+// If a Brooks assessment exists for this branch and classifies it as COMPLEX,
+// require sidecar evidence from each agent in requiredReviewers.
+// If no assessment exists or it's SIMPLE, the any-sidecar check above suffices.
+
+const assessmentsDir = path.join(process.cwd(), ".dev-team", ".assessments");
+const assessmentPath = path.join(assessmentsDir, sanitizedBranch + ".json");
+
+let assessment = null;
+try {
+  if (fs.existsSync(assessmentPath)) {
+    assessment = JSON.parse(fs.readFileSync(assessmentPath, "utf-8"));
+  }
+} catch {
+  // Malformed assessment JSON — fall back to any-sidecar behavior
+  assessment = null;
+}
+
+if (
+  assessment &&
+  assessment.complexity === "COMPLEX" &&
+  Array.isArray(assessment.requiredReviewers) &&
+  assessment.requiredReviewers.length > 0
+) {
+  // Extract the agent name from each matching sidecar
+  const reviewedAgents = new Set();
+  for (const f of branchMatchingSidecars) {
+    const sidecarPath = path.join(reviewsDir, f);
+    try {
+      const data = JSON.parse(fs.readFileSync(sidecarPath, "utf-8"));
+      if (data.agent) {
+        reviewedAgents.add(data.agent.toLowerCase());
+      }
+    } catch {
+      // skip unparseable sidecars
+    }
+  }
+
+  const missing = assessment.requiredReviewers.filter((r) => !reviewedAgents.has(r.toLowerCase()));
+
+  if (missing.length > 0) {
+    console.error(
+      "[dev-team merge-gate] BLOCKED — COMPLEX task missing required reviewers: " +
+        missing.join(", "),
+    );
+    console.error("\nBranch: " + mergeBranch);
+    console.error("Assessment requires reviews from: " + assessment.requiredReviewers.join(", "));
+    console.error(
+      "Reviews found from: " +
+        (reviewedAgents.size > 0 ? [...reviewedAgents].join(", ") : "(none)"),
+    );
+    console.error(
+      "\nRun the missing review agents, or use --skip-review to bypass (logged as deviation).",
+    );
+    process.exit(2);
+  }
+}
+
+// Review evidence found (and complexity requirements satisfied) — allow the merge
 process.exit(0);
