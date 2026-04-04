@@ -17,7 +17,14 @@ import {
 } from "./files.js";
 import type { HookSettings, HookMatcher } from "./files.js";
 import fs from "fs";
-import { ALL_AGENTS, QUALITY_HOOKS, INFRA_HOOKS } from "./init.js";
+import {
+  ALL_AGENTS,
+  QUALITY_HOOKS,
+  INFRA_HOOKS,
+  DEFAULT_WORKFLOW,
+  mergeWorkflowConfig,
+} from "./init.js";
+import type { WorkflowConfig } from "./init.js";
 import { parseAgentDefinition } from "./formats/canonical.js";
 import { getAdaptersForRuntimes } from "./formats/adapters.js";
 import "./adapters/index.js";
@@ -367,6 +374,7 @@ interface Preferences {
   branchConvention: string;
   platform?: string;
   agentTeams?: boolean;
+  workflow?: Partial<WorkflowConfig>;
 }
 
 interface UpdateSummary {
@@ -1004,6 +1012,10 @@ export async function update(targetDir: string): Promise<void> {
   if (!prefs.platform) {
     prefs.platform = "github";
   }
+
+  // Backfill workflow config — merge existing user values with new defaults (additive only)
+  // Never removes user-set keys; new keys from DEFAULT_WORKFLOW are added with their defaults.
+  prefs.workflow = mergeWorkflowConfig(prefs.workflow ?? {});
 
   // Clean up ghost entries (labels from removed hooks/agents)
   prefs.hooks = prefs.hooks.filter((label) => Object.hasOwn(HOOK_FILES, label));

@@ -20,6 +20,91 @@ import { parseAgentDefinition } from "./formats/canonical.js";
 import { getAdaptersForRuntimes } from "./formats/adapters.js";
 import "./adapters/index.js";
 
+export type WorkflowToggle = boolean | "complex";
+export type WorkflowSwitch = boolean;
+
+export interface WorkflowConfig {
+  research: WorkflowToggle;
+  challenge: WorkflowToggle;
+  implement: WorkflowSwitch;
+  review: WorkflowToggle;
+  pr: WorkflowSwitch;
+  merge: WorkflowSwitch;
+  release: WorkflowSwitch;
+  learn: WorkflowSwitch;
+}
+
+export const DEFAULT_WORKFLOW: WorkflowConfig = {
+  research: true,
+  challenge: false,
+  implement: true,
+  review: true,
+  pr: true,
+  merge: true,
+  release: false,
+  learn: true,
+};
+
+export interface WorkflowValidationWarning {
+  step: string;
+  reason: string;
+  action: string;
+}
+
+/**
+ * Validates workflow config dependency rules.
+ * - merge requires pr
+ * - release requires merge
+ * - challenge: "complex" requires Brooks pre-assessment
+ *
+ * Returns a list of warnings. Steps that fail dependencies are flagged
+ * but callers decide whether to block or warn.
+ */
+export function validateWorkflowConfig(
+  workflow: Partial<WorkflowConfig>,
+): WorkflowValidationWarning[] {
+  const warnings: WorkflowValidationWarning[] = [];
+
+  if (workflow.merge && !workflow.pr) {
+    warnings.push({
+      step: "merge",
+      reason: "merge requires pr to be enabled",
+      action: "merge will be skipped",
+    });
+  }
+
+  if (workflow.release && !workflow.merge) {
+    warnings.push({
+      step: "release",
+      reason: "release requires merge to be enabled",
+      action: "release will be skipped",
+    });
+  }
+
+  if (workflow.challenge === "complex") {
+    warnings.push({
+      step: "challenge",
+      reason: 'challenge: "complex" requires Brooks pre-assessment before implementation',
+      action: "Brooks will be spawned for pre-assessment on complex tasks",
+    });
+  }
+
+  return warnings;
+}
+
+/**
+ * Merges a partial workflow config into the defaults, preserving all user-set values
+ * and adding new keys with their defaults.
+ */
+export function mergeWorkflowConfig(existing: Partial<WorkflowConfig>): WorkflowConfig {
+  return {
+    ...DEFAULT_WORKFLOW,
+    ...Object.fromEntries(
+      Object.entries(existing).filter(([key]) => Object.hasOwn(DEFAULT_WORKFLOW, key)),
+    ),
+  } as WorkflowConfig;
+}
+
 interface AgentDefinition {
   label: string;
   file: string;
@@ -510,6 +595,7 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
     taskBranchPattern: "(feat|fix)\\/",
     platform: "github",
     agentTeams: agentTeamsEnabled,
+    workflow: DEFAULT_WORKFLOW,
   };
   if (preset) {
     prefs.preset = preset.label;

@@ -3,7 +3,15 @@
 const { describe, it } = require("node:test");
 const assert = require("node:assert/strict");
 
-const { PRESETS, ALL_AGENTS, QUALITY_HOOKS, INFRA_HOOKS } = require("../../dist/init");
+const {
+  PRESETS,
+  ALL_AGENTS,
+  QUALITY_HOOKS,
+  INFRA_HOOKS,
+  DEFAULT_WORKFLOW,
+  validateWorkflowConfig,
+  mergeWorkflowConfig,
+} = require("../../dist/init");
 
 // ─── ALL_AGENTS ───────────────────────────────────────────────────────────────
 
@@ -339,5 +347,194 @@ describe("hook selection rules", () => {
         `Infra hook file '${hook.file}' should be dev-team-*.js`,
       );
     }
+  });
+});
+
+// ─── DEFAULT_WORKFLOW ─────────────────────────────────────────────────────────
+
+describe("DEFAULT_WORKFLOW", () => {
+  it("contains all required workflow keys", () => {
+    const requiredKeys = [
+      "research",
+      "challenge",
+      "implement",
+      "review",
+      "pr",
+      "merge",
+      "release",
+      "learn",
+    ];
+    for (const key of requiredKeys) {
+      assert.ok(Object.hasOwn(DEFAULT_WORKFLOW, key), `DEFAULT_WORKFLOW should have key: ${key}`);
+    }
+  });
+
+  it("defaults match the specified values", () => {
+    assert.equal(DEFAULT_WORKFLOW.research, true);
+    assert.equal(DEFAULT_WORKFLOW.challenge, false);
+    assert.equal(DEFAULT_WORKFLOW.implement, true);
+    assert.equal(DEFAULT_WORKFLOW.review, true);
+    assert.equal(DEFAULT_WORKFLOW.pr, true);
+    assert.equal(DEFAULT_WORKFLOW.merge, true);
+    assert.equal(DEFAULT_WORKFLOW.release, false);
+    assert.equal(DEFAULT_WORKFLOW.learn, true);
+  });
+
+  it("WorkflowToggle fields accept boolean or 'complex'", () => {
+    // research, challenge, review are WorkflowToggle (boolean | "complex")
+    // DEFAULT_WORKFLOW values are booleans — the type allows "complex" too
+    assert.ok(
+      typeof DEFAULT_WORKFLOW.research === "boolean" || DEFAULT_WORKFLOW.research === "complex",
+    );
+    assert.ok(
+      typeof DEFAULT_WORKFLOW.challenge === "boolean" || DEFAULT_WORKFLOW.challenge === "complex",
+    );
+    assert.ok(
+      typeof DEFAULT_WORKFLOW.review === "boolean" || DEFAULT_WORKFLOW.review === "complex",
+    );
+  });
+
+  it("WorkflowSwitch fields are booleans", () => {
+    // implement, pr, merge, release, learn are WorkflowSwitch (boolean only)
+    assert.equal(typeof DEFAULT_WORKFLOW.implement, "boolean");
+    assert.equal(typeof DEFAULT_WORKFLOW.pr, "boolean");
+    assert.equal(typeof DEFAULT_WORKFLOW.merge, "boolean");
+    assert.equal(typeof DEFAULT_WORKFLOW.release, "boolean");
+    assert.equal(typeof DEFAULT_WORKFLOW.learn, "boolean");
+  });
+});
+
+// ─── validateWorkflowConfig ───────────────────────────────────────────────────
+
+describe("validateWorkflowConfig", () => {
+  it("returns no warnings for a valid default config", () => {
+    const warnings = validateWorkflowConfig(DEFAULT_WORKFLOW);
+    // DEFAULT_WORKFLOW has challenge:false so no complex warning; pr:true so merge is fine
+    assert.equal(warnings.length, 0);
+  });
+
+  it("warns when merge is enabled but pr is disabled", () => {
+    const warnings = validateWorkflowConfig({ merge: true, pr: false });
+    assert.ok(warnings.length > 0, "should produce at least one warning");
+    const mergeWarning = warnings.find((w) => w.step === "merge");
+    assert.ok(mergeWarning, "should warn about merge step");
+    assert.ok(mergeWarning.reason.includes("pr"), "warning should mention pr dependency");
+    assert.ok(
+      mergeWarning.action.includes("skip") || mergeWarning.action.includes("merge"),
+      "action should describe consequence",
+    );
+  });
+
+  it("warns when release is enabled but merge is disabled", () => {
+    const warnings = validateWorkflowConfig({ release: true, merge: false });
+    const releaseWarning = warnings.find((w) => w.step === "release");
+    assert.ok(releaseWarning, "should warn about release step");
+    assert.ok(releaseWarning.reason.includes("merge"), "warning should mention merge dependency");
+  });
+
+  it("warns when release is enabled but both pr and merge are disabled (cascading)", () => {
+    const warnings = validateWorkflowConfig({ release: true, merge: false, pr: false });
+    const releaseWarning = warnings.find((w) => w.step === "release");
+    assert.ok(releaseWarning, "should warn about release when merge is off");
+  });
+
+  it("does not warn about merge when pr is enabled", () => {
+    const warnings = validateWorkflowConfig({ merge: true, pr: true });
+    const mergeWarning = warnings.find((w) => w.step === "merge");
+    assert.equal(mergeWarning, undefined, "should not warn when pr is enabled");
+  });
+
+  it("does not warn about release when merge is enabled", () => {
+    const warnings = validateWorkflowConfig({ release: true, merge: true, pr: true });
+    const releaseWarning = warnings.find((w) => w.step === "release");
+    assert.equal(releaseWarning, undefined, "should not warn when merge is enabled");
+  });
+
+  it("warns when challenge is set to 'complex'", () => {
+    const warnings = validateWorkflowConfig({ challenge: "complex" });
+    const challengeWarning = warnings.find((w) => w.step === "challenge");
+    assert.ok(challengeWarning, "should warn when challenge is 'complex'");
+    assert.ok(
+      challengeWarning.reason.includes("Brooks"),
+      "warning should mention Brooks pre-assessment",
+    );
+  });
+
+  it("does not warn when challenge is boolean false", () => {
+    const warnings = validateWorkflowConfig({ challenge: false });
+    const challengeWarning = warnings.find((w) => w.step === "challenge");
+    assert.equal(challengeWarning, undefined, "should not warn for boolean challenge");
+  });
+
+  it("does not warn when challenge is boolean true", () => {
+    const warnings = validateWorkflowConfig({ challenge: true });
+    const challengeWarning = warnings.find((w) => w.step === "challenge");
+    assert.equal(challengeWarning, undefined, "should not warn for boolean challenge");
+  });
+
+  it("returns empty array for empty config (all defaults apply, no conflicts)", () => {
+    const warnings = validateWorkflowConfig({});
+    assert.deepEqual(warnings, []);
+  });
+});
+
+// ─── mergeWorkflowConfig ──────────────────────────────────────────────────────
+
+describe("mergeWorkflowConfig", () => {
+  it("returns default workflow when called with empty object", () => {
+    const merged = mergeWorkflowConfig({});
+    assert.deepEqual(merged, DEFAULT_WORKFLOW);
+  });
+
+  it("preserves existing user values for known keys", () => {
+    const merged = mergeWorkflowConfig({ release: true, challenge: "complex" });
+    assert.equal(merged.release, true, "should preserve user-set release:true");
+    assert.equal(merged.challenge, "complex", "should preserve user-set challenge:'complex'");
+  });
+
+  it("fills in missing keys with defaults", () => {
+    const merged = mergeWorkflowConfig({ pr: false });
+    assert.equal(merged.pr, false, "user-set pr:false preserved");
+    assert.equal(merged.research, DEFAULT_WORKFLOW.research, "missing key filled from default");
+    assert.equal(merged.implement, DEFAULT_WORKFLOW.implement, "missing key filled from default");
+    assert.equal(merged.learn, DEFAULT_WORKFLOW.learn, "missing key filled from default");
+  });
+
+  it("ignores unknown keys (only known workflow keys are merged)", () => {
+    const merged = mergeWorkflowConfig({ unknownKey: true });
+    assert.ok(!Object.hasOwn(merged, "unknownKey"), "unknown key should not appear in result");
+  });
+
+  it("result always contains all DEFAULT_WORKFLOW keys", () => {
+    const merged = mergeWorkflowConfig({});
+    for (const key of Object.keys(DEFAULT_WORKFLOW)) {
+      assert.ok(Object.hasOwn(merged, key), `merged result should contain key: ${key}`);
+    }
+  });
+
+  it("does not mutate the DEFAULT_WORKFLOW", () => {
+    const before = { ...DEFAULT_WORKFLOW };
+    mergeWorkflowConfig({ release: true, pr: false, challenge: "complex" });
+    assert.deepEqual(DEFAULT_WORKFLOW, before, "DEFAULT_WORKFLOW must not be mutated");
+  });
+
+  it("update scenario: preserves all user values and adds new defaults", () => {
+    // Simulates an old config missing the 'learn' key
+    const oldConfig = {
+      research: false,
+      challenge: "complex",
+      implement: true,
+      review: true,
+      pr: true,
+      merge: true,
+      release: true,
+    };
+    const merged = mergeWorkflowConfig(oldConfig);
+    // Old values preserved
+    assert.equal(merged.research, false);
+    assert.equal(merged.challenge, "complex");
+    assert.equal(merged.release, true);
+    // New key added with default
+    assert.equal(merged.learn, DEFAULT_WORKFLOW.learn);
   });
 });
