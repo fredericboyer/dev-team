@@ -41,7 +41,7 @@ Field rules:
 
 Branch name sanitization: replace any character that is not alphanumeric or a hyphen with a hyphen. Example: `feat/771-adr-contract` → `feat-771-adr-contract`.
 
-The `.dev-team/.assessments/` directory is gitignored — assessment files are ephemeral process state, not version-controlled artifacts.
+The `.dev-team/.assessments/` directory should be gitignored — assessment files are ephemeral process state, not version-controlled artifacts. Projects must add `.dev-team/.assessments/` to their `.gitignore` (alongside `.dev-team/.reviews/`).
 
 ### Writer
 
@@ -57,15 +57,16 @@ Brooks (via the implement skill pre-assessment step). The orchestrating skill wr
 
 1. **Created** — during `implement` skill pre-assessment, written by the orchestrator immediately after Brooks returns its classification
 2. **Consumed** — at `gh pr merge` time, read by the merge-gate hook to enforce tier requirements
-3. **Cleaned up** — after merge, as part of the same cleanup that removes review sidecars from `.dev-team/.reviews/`
+3. **Retention** — there is currently no automatic post-merge cleanup for `.dev-team/.assessments/`. Assessment sidecars are ephemeral local process state and may persist until removed manually or by future automation. This mirrors the current behavior of review sidecars in `.dev-team/.reviews/`
 
 ### Validation rules
 
-The merge-gate hook applies these rules when reading an assessment:
+The merge-gate hook currently applies these rules when reading an assessment:
 
-- `branch` field must match the branch being merged (exact string match, unsanitized)
-- `complexity` must be `"SIMPLE"` or `"COMPLEX"` (uppercase)
-- `requiredReviewers` must be a non-empty array when `complexity` is `"COMPLEX"`
+- Assessment file is located by sanitized branch name in the filename (the `branch` JSON field is written but not yet validated by the hook — #769 will add branch field validation)
+- `complexity` is read to determine enforcement tier; any value other than `"COMPLEX"` falls back to any-sidecar behavior
+- `requiredReviewers` is checked only when `complexity` is `"COMPLEX"` — each listed agent must have a corresponding review sidecar
+- `reviewTier` and `assessedAt` are informational metadata (written for debugging and audit purposes, not enforced by the hook)
 - A malformed or unparseable assessment JSON causes the hook to fall back to any-sidecar behavior (fail open), not block the merge
 
 ### Escape hatch
