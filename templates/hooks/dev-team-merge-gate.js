@@ -128,7 +128,11 @@ try {
   sidecars = fs
     .readdirSync(reviewsDir)
     .filter((f) => f.endsWith(".json") && f !== ".cleanup-manifest.json");
-} catch {
+} catch (err) {
+  console.warn(
+    "[dev-team merge-gate] WARNING: could not read .dev-team/.reviews/ — failing open. Error: " +
+      (err && err.message),
+  );
   process.exit(0);
 }
 
@@ -182,7 +186,27 @@ const assessmentPath = path.join(assessmentsDir, sanitizedBranch + ".json");
 let assessment = null;
 try {
   if (fs.existsSync(assessmentPath)) {
-    assessment = JSON.parse(fs.readFileSync(assessmentPath, "utf-8"));
+    const stat = fs.lstatSync(assessmentPath);
+    if (!stat.isFile() || stat.isSymbolicLink()) {
+      console.warn(
+        "[dev-team merge-gate] WARNING: assessment file is a symlink or non-regular file — skipping. Path: " +
+          assessmentPath,
+      );
+    } else {
+      const parsed = JSON.parse(fs.readFileSync(assessmentPath, "utf-8"));
+      // Validate branch field matches if present
+      if (parsed.branch !== undefined && parsed.branch !== mergeBranch) {
+        console.warn(
+          "[dev-team merge-gate] WARNING: assessment branch field mismatch — expected '" +
+            mergeBranch +
+            "', got '" +
+            parsed.branch +
+            "'. Skipping assessment.",
+        );
+      } else {
+        assessment = parsed;
+      }
+    }
   }
 } catch {
   // Malformed assessment JSON — fall back to any-sidecar behavior
@@ -191,7 +215,8 @@ try {
 
 if (
   assessment &&
-  assessment.complexity === "COMPLEX" &&
+  typeof assessment.complexity === "string" &&
+  assessment.complexity.toUpperCase() === "COMPLEX" &&
   Array.isArray(assessment.requiredReviewers) &&
   assessment.requiredReviewers.length > 0
 ) {
