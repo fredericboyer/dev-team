@@ -72,7 +72,7 @@ describe("Python project scenario", () => {
       encoding: "utf-8",
       timeout: 5000,
     });
-    assert.ok(stdout.includes("@dev-team-knuth"), "should flag Knuth for .py files");
+    assert.ok(stdout.includes("ACTION REQUIRED"), "should notify about .py file change");
   });
 
   it("tdd-enforce recognizes Python test patterns", async () => {

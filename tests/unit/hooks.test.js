@@ -102,99 +102,10 @@ describe("dev-team-safety-guard", () => {
   });
 });
 
-// ─── Post-change Review ─────────────────────────────────────────────────────
+// ─── Post-change Review ─────────────────────────────────────────────────────────
 
 describe("dev-team-post-change-review", () => {
   const hook = "dev-team-post-change-review.js";
-
-  it("flags Szabo for security-related files", () => {
-    const result = runHook(hook, { file_path: "/app/src/auth/login.ts" });
-    assert.equal(result.code, 0);
-    assert.ok(result.stdout.includes("@dev-team-szabo"));
-  });
-
-  it("flags Mori for API files", () => {
-    const result = runHook(hook, { file_path: "/app/src/api/users.ts" });
-    assert.equal(result.code, 0);
-    assert.ok(result.stdout.includes("@dev-team-mori"));
-  });
-
-  it("flags Hamilton for infrastructure files", () => {
-    const result = runHook(hook, { file_path: "/app/docker-compose.yml" });
-    assert.equal(result.code, 0);
-    assert.ok(result.stdout.includes("@dev-team-hamilton"));
-  });
-
-  it("flags Voss for app config files", () => {
-    const result = runHook(hook, { file_path: "/app/config/database.yml" });
-    assert.equal(result.code, 0);
-    assert.ok(result.stdout.includes("@dev-team-voss"));
-  });
-
-  it("flags Deming for tooling files", () => {
-    const result = runHook(hook, { file_path: "/app/package.json" });
-    assert.equal(result.code, 0);
-    assert.ok(result.stdout.includes("@dev-team-deming"));
-  });
-
-  it("flags Knuth for non-test implementation files", () => {
-    const result = runHook(hook, { file_path: "/app/src/utils/helpers.ts" });
-    assert.equal(result.code, 0);
-    assert.ok(result.stdout.includes("@dev-team-knuth"));
-  });
-
-  it("flags Brooks for non-test implementation files (quality attributes)", () => {
-    const result = runHook(hook, { file_path: "/app/src/utils/helpers.ts" });
-    assert.equal(result.code, 0);
-    assert.ok(
-      result.stdout.includes("@dev-team-brooks"),
-      "should flag Brooks for quality attribute review",
-    );
-  });
-
-  it("does not flag Knuth for test files", () => {
-    const result = runHook(hook, { file_path: "/app/tests/unit/helpers.test.ts" });
-    assert.equal(result.code, 0);
-    assert.ok(!result.stdout.includes("@dev-team-knuth"));
-  });
-
-  it("does not flag Brooks for test files", () => {
-    const result = runHook(hook, { file_path: "/app/tests/unit/helpers.test.ts" });
-    assert.equal(result.code, 0);
-    assert.ok(!result.stdout.includes("@dev-team-brooks"));
-  });
-
-  it("does not flag Knuth for Go test files (_test.go)", () => {
-    const result = runHook(hook, { file_path: "/app/handler_test.go" });
-    assert.equal(result.code, 0);
-    assert.ok(!result.stdout.includes("@dev-team-knuth"), "should not flag Knuth for _test.go");
-  });
-
-  it("flags Brooks only once for arch boundary files (no duplicate)", () => {
-    const result = runHook(hook, { file_path: "/app/src/core/engine.ts" });
-    assert.equal(result.code, 0);
-    const matches = result.stdout.match(/@dev-team-brooks/g) || [];
-    assert.equal(
-      matches.length,
-      1,
-      "Brooks should appear exactly once even when both arch and code triggers match",
-    );
-  });
-
-  it("flags multiple agents when patterns overlap", () => {
-    const result = runHook(hook, { file_path: "/app/src/api/auth/oauth.ts" });
-    assert.equal(result.code, 0);
-    assert.ok(result.stdout.includes("@dev-team-szabo"), "should flag Szabo for auth");
-    assert.ok(result.stdout.includes("@dev-team-mori"), "should flag Mori for api");
-    assert.ok(result.stdout.includes("@dev-team-knuth"), "should flag Knuth for code");
-    assert.ok(result.stdout.includes("@dev-team-brooks"), "should flag Brooks for code");
-  });
-
-  it("flags Docs for documentation files", () => {
-    const result = runHook(hook, { file_path: "/app/README.md" });
-    assert.equal(result.code, 0);
-    assert.ok(result.stdout.includes("@dev-team-tufte"), "should flag Tufte for .md files");
-  });
 
   it("exits 0 with no file path", () => {
     const result = runHook(hook, {});
@@ -202,282 +113,68 @@ describe("dev-team-post-change-review", () => {
   });
 
   it("always exits 0 (advisory only)", () => {
-    // Even security files should not block
     const result = runHook(hook, { file_path: "/app/src/crypto/encrypt.ts" });
     assert.equal(result.code, 0);
   });
 
-  it("flags Szabo for Windows-style backslash paths", () => {
-    const result = runHook(hook, { file_path: "C:\\app\\src\\auth\\login.ts" });
-    assert.equal(result.code, 0);
-    assert.ok(
-      result.stdout.includes("@dev-team-szabo"),
-      "should flag Szabo for auth path with backslashes",
-    );
-  });
-
-  // ─── Tufte doc-drift detection ───────────────────────────────────────────
-
-  it("flags Tufte for src/ implementation files (doc-drift)", () => {
-    const result = runHook(hook, { file_path: "/app/src/utils/helpers.ts" });
-    assert.equal(result.code, 0);
-    assert.ok(result.stdout.includes("@dev-team-tufte"), "should flag Tufte for src/ changes");
-    assert.ok(result.stdout.includes("doc drift"), "should mention doc drift");
-  });
-
-  it("flags Tufte for new agent definitions (doc-drift)", () => {
-    const result = runHook(hook, { file_path: "/app/templates/agents/dev-team-new-agent.md" });
-    assert.equal(result.code, 0);
-    assert.ok(result.stdout.includes("@dev-team-tufte"), "should flag Tufte for agent changes");
-  });
-
-  it("flags Tufte for new skill definitions (doc-drift)", () => {
-    const result = runHook(hook, { file_path: "/app/templates/skills/new-skill.md" });
-    assert.equal(result.code, 0);
-    assert.ok(result.stdout.includes("@dev-team-tufte"), "should flag Tufte for skill changes");
-  });
-
-  it("flags Tufte for new hook definitions (doc-drift)", () => {
-    const result = runHook(hook, { file_path: "/app/templates/hooks/new-hook.js" });
-    assert.equal(result.code, 0);
-    assert.ok(result.stdout.includes("@dev-team-tufte"), "should flag Tufte for hook changes");
-  });
-
-  it("flags Tufte for init.ts changes (doc-drift)", () => {
-    const result = runHook(hook, { file_path: "/app/src/init.ts" });
-    assert.equal(result.code, 0);
-    assert.ok(result.stdout.includes("@dev-team-tufte"), "should flag Tufte for init.ts changes");
-  });
-
-  it("flags Tufte for cli.ts changes (doc-drift)", () => {
-    const result = runHook(hook, { file_path: "/app/src/cli.ts" });
-    assert.equal(result.code, 0);
-    assert.ok(result.stdout.includes("@dev-team-tufte"), "should flag Tufte for cli.ts changes");
-  });
-
-  it("flags Tufte for bin/ changes (doc-drift)", () => {
-    const result = runHook(hook, { file_path: "/app/bin/dev-team.js" });
-    assert.equal(result.code, 0);
-    assert.ok(result.stdout.includes("@dev-team-tufte"), "should flag Tufte for bin/ changes");
-  });
-
-  it("flags Tufte for package.json changes (doc-drift)", () => {
-    const result = runHook(hook, { file_path: "/app/package.json" });
-    assert.equal(result.code, 0);
-    assert.ok(
-      result.stdout.includes("@dev-team-tufte"),
-      "should flag Tufte for package.json changes",
-    );
-  });
-
-  it("does not double-flag Tufte when doc file also matches drift patterns", () => {
-    // README.md matches DOC_PATTERNS — should NOT also get a doc-drift flag
+  it("exits 0 and emits no output for non-code files", () => {
     const result = runHook(hook, { file_path: "/app/README.md" });
     assert.equal(result.code, 0);
-    const tufteMatches = result.stdout.match(/@dev-team-tufte/g);
-    assert.equal(tufteMatches.length, 1, "Tufte should appear exactly once");
-    assert.ok(
-      result.stdout.includes("documentation changed"),
-      "should use doc-change message, not drift",
-    );
+    assert.equal(result.stdout.trim(), "", "should emit no output for non-code files");
   });
 
-  it("flags Tufte for repo-relative paths without leading slash (doc-drift)", () => {
-    const result = runHook(hook, { file_path: "src/utils/helpers.ts" });
+  it("exits 0 and emits no output for test files", () => {
+    const result = runHook(hook, { file_path: "/app/tests/unit/helpers.test.ts" });
     assert.equal(result.code, 0);
-    assert.ok(
-      result.stdout.includes("@dev-team-tufte"),
-      "should flag Tufte for repo-relative src/ path",
-    );
-    assert.ok(result.stdout.includes("doc drift"), "should mention doc drift");
+    assert.equal(result.stdout.trim(), "", "should emit no output for test files");
   });
 
-  it("existing doc-file triggers still work", () => {
-    const docFiles = ["/app/docs/guide.md", "/app/src/api-doc/index.html", "/app/CHANGELOG.md"];
-    for (const file_path of docFiles) {
-      const result = runHook(hook, { file_path });
-      assert.equal(result.code, 0);
-      assert.ok(result.stdout.includes("@dev-team-tufte"), `should flag Tufte for ${file_path}`);
-    }
-  });
-
-  // ─── Hamilton operations reviewer ──────────────────────────────────────
-
-  it("flags Hamilton for Dockerfile", () => {
-    const result = runHook(hook, { file_path: "/app/Dockerfile" });
+  it("exits 0 and emits no output for Go test files (_test.go)", () => {
+    const result = runHook(hook, { file_path: "/app/handler_test.go" });
     assert.equal(result.code, 0);
-    assert.ok(result.stdout.includes("@dev-team-hamilton"), "should flag Hamilton for Dockerfile");
+    assert.equal(result.stdout.trim(), "", "should emit no output for _test.go");
   });
 
-  it("flags Hamilton for docker-compose files", () => {
-    const result = runHook(hook, { file_path: "/app/docker-compose.yml" });
+  it("emits ACTION REQUIRED notification for implementation files", () => {
+    const result = runHook(hook, { file_path: "/app/src/utils/helpers.ts" });
     assert.equal(result.code, 0);
-    assert.ok(
-      result.stdout.includes("@dev-team-hamilton"),
-      "should flag Hamilton for docker-compose",
-    );
+    assert.ok(result.stdout.includes("ACTION REQUIRED"), "should include ACTION REQUIRED");
   });
 
-  it("flags Hamilton for GitHub workflow files", () => {
-    const result = runHook(hook, { file_path: "/app/.github/workflows/deploy.yml" });
+  it("does not list specific agent names in output", () => {
+    const result = runHook(hook, { file_path: "/app/src/auth/login.ts" });
     assert.equal(result.code, 0);
-    assert.ok(
-      result.stdout.includes("@dev-team-hamilton"),
-      "should flag Hamilton for CI workflows",
-    );
+    assert.ok(!result.stdout.includes("@dev-team-szabo"), "should not name szabo");
+    assert.ok(!result.stdout.includes("@dev-team-mori"), "should not name mori");
+    assert.ok(!result.stdout.includes("@dev-team-knuth"), "should not name knuth");
+    assert.ok(!result.stdout.includes("@dev-team-brooks"), "should not name brooks");
+    assert.ok(!result.stdout.includes("@dev-team-tufte"), "should not name tufte");
+    assert.ok(!result.stdout.includes("@dev-team-hamilton"), "should not name hamilton");
   });
 
-  it("flags Hamilton for Terraform files", () => {
-    const result = runHook(hook, { file_path: "/app/terraform/main.tf" });
-    assert.equal(result.code, 0);
-    assert.ok(result.stdout.includes("@dev-team-hamilton"), "should flag Hamilton for .tf files");
-  });
-
-  it("flags Hamilton for Helm charts", () => {
-    const result = runHook(hook, { file_path: "/app/helm/values.yaml" });
-    assert.equal(result.code, 0);
-    assert.ok(
-      result.stdout.includes("@dev-team-hamilton"),
-      "should flag Hamilton for helm directory",
-    );
-  });
-
-  it("flags Hamilton for k8s manifests", () => {
-    const result = runHook(hook, { file_path: "/app/k8s/deployment.yaml" });
-    assert.equal(result.code, 0);
-    assert.ok(
-      result.stdout.includes("@dev-team-hamilton"),
-      "should flag Hamilton for k8s directory",
-    );
-  });
-
-  it("flags Hamilton for health check files", () => {
-    const result = runHook(hook, { file_path: "/app/src/healthcheck.ts" });
-    assert.equal(result.code, 0);
-    assert.ok(
-      result.stdout.includes("@dev-team-hamilton"),
-      "should flag Hamilton for health check files",
-    );
-  });
-
-  it("flags Hamilton for monitoring config", () => {
-    const result = runHook(hook, { file_path: "/app/monitoring/prometheus.yml" });
-    assert.equal(result.code, 0);
-    assert.ok(
-      result.stdout.includes("@dev-team-hamilton"),
-      "should flag Hamilton for monitoring config",
-    );
-  });
-
-  it("flags Hamilton for .env.example", () => {
-    const result = runHook(hook, { file_path: "/app/.env.example" });
-    assert.equal(result.code, 0);
-    assert.ok(
-      result.stdout.includes("@dev-team-hamilton"),
-      "should flag Hamilton for .env.example",
-    );
-  });
-
-  it("flags Hamilton for .dockerignore", () => {
-    const result = runHook(hook, { file_path: "/app/.dockerignore" });
-    assert.equal(result.code, 0);
-    assert.ok(
-      result.stdout.includes("@dev-team-hamilton"),
-      "should flag Hamilton for .dockerignore",
-    );
-  });
-
-  it("flags Hamilton for tfvars files", () => {
-    const result = runHook(hook, { file_path: "/app/infra/prod.tfvars" });
-    assert.equal(result.code, 0);
-    assert.ok(
-      result.stdout.includes("@dev-team-hamilton"),
-      "should flag Hamilton for .tfvars files",
-    );
-  });
-
-  it("does not flag Hamilton for regular source files", () => {
+  it("includes review depth in output", () => {
     const result = runHook(hook, { file_path: "/app/src/utils/helpers.ts" });
     assert.equal(result.code, 0);
     assert.ok(
-      !result.stdout.includes("@dev-team-hamilton"),
-      "should not flag Hamilton for regular code",
+      result.stdout.includes("Review depth:") || result.stdout.includes("review depth:"),
+      "should include review depth",
     );
   });
 
-  it("does not flag Hamilton for src/logging.ts", () => {
-    const result = runHook(hook, { file_path: "/app/src/logging.ts" });
+  it("includes complexity score in output", () => {
+    const result = runHook(hook, {
+      file_path: "/app/src/utils/helpers.ts",
+      old_string: "x",
+      new_string: "y",
+    });
     assert.equal(result.code, 0);
     assert.ok(
-      !result.stdout.includes("@dev-team-hamilton"),
-      "should not flag Hamilton for src/logging.ts",
+      result.stdout.includes("complexity score:"),
+      "should include complexity score in output",
     );
   });
-
-  it("does not flag Hamilton for src/monitoring/dashboard.tsx", () => {
-    const result = runHook(hook, { file_path: "/app/src/monitoring/dashboard.tsx" });
-    assert.equal(result.code, 0);
-    assert.ok(
-      !result.stdout.includes("@dev-team-hamilton"),
-      "should not flag Hamilton for src/monitoring/dashboard.tsx",
-    );
-  });
-
-  it("does not flag Hamilton for src/alerting.ts", () => {
-    const result = runHook(hook, { file_path: "/app/src/alerting.ts" });
-    assert.equal(result.code, 0);
-    assert.ok(
-      !result.stdout.includes("@dev-team-hamilton"),
-      "should not flag Hamilton for src/alerting.ts",
-    );
-  });
-
-  it("does not flag Hamilton for src/observability/tracer.ts", () => {
-    const result = runHook(hook, { file_path: "/app/src/observability/tracer.ts" });
-    assert.equal(result.code, 0);
-    assert.ok(
-      !result.stdout.includes("@dev-team-hamilton"),
-      "should not flag Hamilton for src/observability/tracer.ts",
-    );
-  });
-
-  it("flags Hamilton for config/logging.yml", () => {
-    const result = runHook(hook, { file_path: "/app/config/logging.yml" });
-    assert.equal(result.code, 0);
-    assert.ok(
-      result.stdout.includes("@dev-team-hamilton"),
-      "should flag Hamilton for config/logging.yml",
-    );
-  });
-
-  it("flags Hamilton for alerting.yaml", () => {
-    const result = runHook(hook, { file_path: "/app/alerting.yaml" });
-    assert.equal(result.code, 0);
-    assert.ok(
-      result.stdout.includes("@dev-team-hamilton"),
-      "should flag Hamilton for alerting.yaml",
-    );
-  });
-
-  it("flags Hamilton for observability.json", () => {
-    const result = runHook(hook, { file_path: "/app/observability.json" });
-    assert.equal(result.code, 0);
-    assert.ok(
-      result.stdout.includes("@dev-team-hamilton"),
-      "should flag Hamilton for observability.json",
-    );
-  });
-
-  it("flags Hamilton for otel.yaml config", () => {
-    const result = runHook(hook, { file_path: "/app/otel.yaml" });
-    assert.equal(result.code, 0);
-    assert.ok(result.stdout.includes("@dev-team-hamilton"), "should flag Hamilton for otel.yaml");
-  });
-
-  // ─── Complexity-based review depth triage ─────────────────────────────
 
   it("outputs review depth LIGHT for trivial changes", () => {
-    // Small edit: just a typo fix (few characters changed)
     const result = runHook(hook, {
       file_path: "/app/src/utils/helpers.ts",
       old_string: "const x = 1;",
@@ -492,7 +189,6 @@ describe("dev-team-post-change-review", () => {
   });
 
   it("outputs review depth STANDARD for moderate changes", () => {
-    // Moderate edit with some control flow
     const newCode = Array(15)
       .fill("const x = 1;")
       .concat(["function foo() { if (a) { return b; } else { return c; } }"])
@@ -510,7 +206,6 @@ describe("dev-team-post-change-review", () => {
   });
 
   it("outputs review depth DEEP for complex changes", () => {
-    // Large change with many complexity indicators
     const complexCode = Array(30)
       .fill("export async function handler() { try { await fetch(); } catch (e) { throw e; } }")
       .join("\n");
@@ -528,30 +223,15 @@ describe("dev-team-post-change-review", () => {
   });
 
   it("boosts complexity score for security-sensitive files", () => {
-    // Same small change but in a security file — should be elevated
     const result = runHook(hook, {
       file_path: "/app/src/auth/login.ts",
       old_string: "const x = 1;\nconst y = 2;\nconst z = 3;",
       new_string: "const x = 2;\nconst y = 3;\nconst z = 4;",
     });
     assert.equal(result.code, 0);
-    // Security boost of 20 should push even a small change above LIGHT threshold
     assert.ok(
       !result.stdout.includes("Review depth: LIGHT"),
       "security files should not get LIGHT review",
-    );
-  });
-
-  it("includes complexity score in output", () => {
-    const result = runHook(hook, {
-      file_path: "/app/src/utils/helpers.ts",
-      old_string: "x",
-      new_string: "y",
-    });
-    assert.equal(result.code, 0);
-    assert.ok(
-      result.stdout.includes("complexity score:"),
-      "should include complexity score in output",
     );
   });
 });
@@ -2413,24 +2093,22 @@ describe("dev-team-review-gate", () => {
       assert.ok(result.stderr.includes("reviews missing"), "should mention missing reviews");
     });
 
-    it("exits 0 when all required sidecars exist", () => {
+    it("exits 0 when any sidecar exists (SIMPLE task)", () => {
       const content = "module.exports = {}";
       const hash = stageFile(path.join(tmpDir, "src", "handler.js"), content);
-      // handler.js in src/ triggers knuth + brooks (non-test code file)
+      // SIMPLE task: any sidecar for the content hash suffices
       writeSidecar("dev-team-knuth", hash);
-      writeSidecar("dev-team-brooks", hash);
       const result = runGate('git commit -m "reviewed"');
       assert.equal(result.code, 0, `Expected exit 0, stderr: ${result.stderr}`);
     });
 
-    it("blocks when only some required sidecars exist", () => {
+    it("blocks when implementation staged with no sidecars (SIMPLE task)", () => {
       const content = "module.exports = {}";
-      const hash = stageFile(path.join(tmpDir, "src", "handler.js"), content);
-      // Only provide knuth, missing brooks
-      writeSidecar("dev-team-knuth", hash);
-      const result = runGate('git commit -m "partial review"');
-      assert.equal(result.code, 2, "should block with partial reviews");
-      assert.ok(result.stderr.includes("dev-team-brooks"), "should list missing agent");
+      stageFile(path.join(tmpDir, "src", "handler.js"), content);
+      // No sidecars written — SIMPLE task requires at least one
+      const result = runGate('git commit -m "no sidecars"');
+      assert.equal(result.code, 2, "should block with no sidecars");
+      assert.ok(result.stderr.includes("no review found"), "should indicate no review found");
     });
 
     it("blocks when sidecar hash does not match staged content", () => {
@@ -2443,24 +2121,54 @@ describe("dev-team-review-gate", () => {
       assert.equal(result.code, 2, "stale review sidecars should not match");
     });
 
-    it("requires security agent (szabo) for auth files", () => {
+    it("COMPLEX task: blocks when required reviewer sidecar is missing", () => {
       const content = "module.exports = {}";
       const hash = stageFile(path.join(tmpDir, "src", "auth", "login.js"), content);
-      // Provide knuth and brooks but not szabo
+      // Write assessment sidecar marking this as COMPLEX with szabo required
+      const assessmentsDir = path.join(tmpDir, ".dev-team", ".assessments");
+      fs.mkdirSync(assessmentsDir, { recursive: true });
+      const branchResult = require("child_process")
+        .execFileSync("git", ["-C", tmpDir, "rev-parse", "--abbrev-ref", "HEAD"], {
+          encoding: "utf-8",
+        })
+        .trim();
+      const safeBranch = branchResult.replace(/[^a-zA-Z0-9._-]/g, "_");
+      fs.writeFileSync(
+        path.join(assessmentsDir, `${safeBranch}.json`),
+        JSON.stringify({
+          complexity: "COMPLEX",
+          requiredReviewers: ["dev-team-szabo", "dev-team-knuth"],
+        }),
+      );
+      // Provide knuth but not szabo
       writeSidecar("dev-team-knuth", hash);
-      writeSidecar("dev-team-brooks", hash);
-      const result = runGate('git commit -m "auth without szabo"');
-      assert.equal(result.code, 2, "should require szabo for auth files");
+      const result = runGate('git commit -m "complex without szabo"');
+      assert.equal(result.code, 2, "COMPLEX task should require szabo");
       assert.ok(result.stderr.includes("dev-team-szabo"), "should list szabo as missing");
     });
 
-    it("passes when all agents including szabo review auth files", () => {
+    it("COMPLEX task: exits 0 when all required reviewers present", () => {
       const content = "module.exports = {}";
       const hash = stageFile(path.join(tmpDir, "src", "auth", "login.js"), content);
+      // Write assessment sidecar marking this as COMPLEX
+      const assessmentsDir = path.join(tmpDir, ".dev-team", ".assessments");
+      fs.mkdirSync(assessmentsDir, { recursive: true });
+      const branchResult = require("child_process")
+        .execFileSync("git", ["-C", tmpDir, "rev-parse", "--abbrev-ref", "HEAD"], {
+          encoding: "utf-8",
+        })
+        .trim();
+      const safeBranch = branchResult.replace(/[^a-zA-Z0-9._-]/g, "_");
+      fs.writeFileSync(
+        path.join(assessmentsDir, `${safeBranch}.json`),
+        JSON.stringify({
+          complexity: "COMPLEX",
+          requiredReviewers: ["dev-team-szabo", "dev-team-knuth"],
+        }),
+      );
       writeSidecar("dev-team-szabo", hash);
       writeSidecar("dev-team-knuth", hash);
-      writeSidecar("dev-team-brooks", hash);
-      const result = runGate('git commit -m "auth fully reviewed"');
+      const result = runGate('git commit -m "complex fully reviewed"');
       assert.equal(result.code, 0, `Expected exit 0, stderr: ${result.stderr}`);
     });
 
@@ -2568,7 +2276,7 @@ describe("dev-team-review-gate", () => {
       fs.writeFileSync(targetFile, JSON.stringify({}));
       const sidecarPath = path.join(reviewsDir, `dev-team-knuth--${hash}.json`);
       fs.symlinkSync(targetFile, sidecarPath);
-      writeSidecar("dev-team-brooks", hash);
+      // No real sidecar — only the symlink exists, which is rejected
       const result = runGate('git commit -m "symlink sidecar"');
       assert.equal(result.code, 2, "symlink sidecars should be rejected");
     });
@@ -2596,7 +2304,6 @@ describe("dev-team-review-gate", () => {
       const content = "module.exports = {}";
       const hash = stageFile(path.join(tmpDir, "src", "handler.js"), content);
       writeSidecar("dev-team-knuth", hash);
-      writeSidecar("dev-team-brooks", hash);
       const result = runGate('git commit -m "mixed files"');
       assert.equal(
         result.code,

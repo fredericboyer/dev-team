@@ -2,90 +2,157 @@
 
 const { describe, it } = require("node:test");
 const assert = require("node:assert/strict");
+const { execFileSync } = require("child_process");
 const fs = require("fs");
 const path = require("path");
 const os = require("os");
 
-const libDir = path.join(__dirname, "..", "..", "templates", "hooks", "lib");
+const HOOKS_DIR = path.join(__dirname, "..", "..", "templates", "hooks");
 
-describe("agent-patterns safeRegex integration", () => {
-  it("loads all patterns from agent-patterns.json without errors", () => {
-    delete require.cache[require.resolve(path.join(libDir, "agent-patterns"))];
-    const { loadPatterns } = require(path.join(libDir, "agent-patterns"));
-    const patterns = loadPatterns();
-    assert.ok(Object.keys(patterns).length > 0, "should load at least one category");
+/**
+ * Helper: run a hook script with the given tool_input JSON.
+ */
+function runHook(hookFile, toolInput) {
+  const input = JSON.stringify({ tool_input: toolInput });
+  try {
+    const stdout = execFileSync(process.execPath, [path.join(HOOKS_DIR, hookFile), input], {
+      encoding: "utf-8",
+      timeout: 5000,
+      env: { ...process.env, PATH: process.env.PATH },
+    });
+    return { code: 0, stdout, stderr: "" };
+  } catch (err) {
+    return { code: err.status, stdout: err.stdout || "", stderr: err.stderr || "" };
+  }
+}
+
+/**
+ * Tests for dev-team-post-change-review.js — notification-only behavior.
+ * Agent selection is now the responsibility of the review skill, not this hook.
+ */
+describe("post-change-review notification behavior", () => {
+  const hook = "dev-team-post-change-review.js";
+
+  it("exits 0 with no file path (no output)", () => {
+    const result = runHook(hook, {});
+    assert.equal(result.code, 0);
+    assert.equal(result.stdout.trim(), "", "should emit no output without file_path");
   });
 
-  it("all real patterns pass safeRegex validation", () => {
-    const { safeRegex } = require(path.join(libDir, "safe-regex"));
-    const jsonPath = path.join(__dirname, "..", "..", "templates", "hooks", "agent-patterns.json");
-    const data = JSON.parse(fs.readFileSync(jsonPath, "utf-8"));
-    for (const [key, value] of Object.entries(data)) {
-      const entries = value.patterns || (value.pattern ? [value.pattern] : []);
-      for (const entry of entries) {
-        const source = Array.isArray(entry) ? entry[0] : entry;
-        const result = safeRegex(source);
-        assert.ok(
-          result.safe,
-          "pattern " + source + " in " + key + " should be safe: " + result.reason,
-        );
-      }
+  it("exits 0 and emits no output for non-code files", () => {
+    const nonCodeFiles = ["/app/README.md", "/app/docs/guide.md", "/app/.github/CODEOWNERS"];
+    for (const file_path of nonCodeFiles) {
+      const result = runHook(hook, { file_path });
+      assert.equal(result.code, 0, `should exit 0 for ${file_path}`);
+      assert.equal(result.stdout.trim(), "", `should emit no output for ${file_path}`);
     }
   });
 
-  it("skips unsafe patterns in multi-pattern categories", () => {
-    var tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "ap-test-"));
-    var libTmpDir = path.join(tmpDir, "lib");
-    fs.mkdirSync(libTmpDir);
-    fs.copyFileSync(path.join(libDir, "safe-regex.js"), path.join(libTmpDir, "safe-regex.js"));
-    fs.copyFileSync(
-      path.join(libDir, "agent-patterns.js"),
-      path.join(libTmpDir, "agent-patterns.js"),
-    );
-    var fakeData = { testCat: { agent: "test", label: "test", patterns: ["safe", "(.*)+"] } };
-    fs.writeFileSync(path.join(tmpDir, "agent-patterns.json"), JSON.stringify(fakeData));
-    var warnings = [];
-    var origErr = console.error;
-    console.error = function (m) {
-      warnings.push(m);
-    };
-    try {
-      var { loadPatterns } = require(path.join(libTmpDir, "agent-patterns"));
-      var result = loadPatterns();
-      assert.equal(result.testCat.compiled.length, 1, "unsafe pattern should be skipped");
-      assert.ok(result.testCat.compiled[0].test("safe"));
-      assert.ok(warnings.length > 0, "should log warning");
-    } finally {
-      console.error = origErr;
-      fs.rmSync(tmpDir, { recursive: true, force: true });
+  it("exits 0 and emits no output for test files", () => {
+    const testFiles = [
+      "/app/tests/unit/helpers.test.ts",
+      "/app/src/handler.spec.js",
+      "/app/handler_test.go",
+    ];
+    for (const file_path of testFiles) {
+      const result = runHook(hook, { file_path });
+      assert.equal(result.code, 0, `should exit 0 for ${file_path}`);
+      assert.equal(result.stdout.trim(), "", `should emit no output for ${file_path}`);
     }
   });
 
-  it("skips unsafe single-pattern entries", () => {
-    var tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "ap-test-"));
-    var libTmpDir = path.join(tmpDir, "lib");
-    fs.mkdirSync(libTmpDir);
-    fs.copyFileSync(path.join(libDir, "safe-regex.js"), path.join(libTmpDir, "safe-regex.js"));
-    fs.copyFileSync(
-      path.join(libDir, "agent-patterns.js"),
-      path.join(libTmpDir, "agent-patterns.js"),
+  it("emits ACTION REQUIRED notification for implementation files", () => {
+    const implFiles = [
+      "/app/src/utils/helpers.ts",
+      "/app/src/auth/login.ts",
+      "/app/src/api/users.js",
+    ];
+    for (const file_path of implFiles) {
+      const result = runHook(hook, { file_path });
+      assert.equal(result.code, 0, `should exit 0 for ${file_path}`);
+      assert.ok(
+        result.stdout.includes("ACTION REQUIRED"),
+        `should include ACTION REQUIRED for ${file_path}`,
+      );
+    }
+  });
+
+  it("does not list specific agent names in output", () => {
+    const result = runHook(hook, { file_path: "/app/src/auth/login.ts" });
+    assert.equal(result.code, 0);
+    const agentNames = [
+      "@dev-team-szabo",
+      "@dev-team-mori",
+      "@dev-team-knuth",
+      "@dev-team-brooks",
+      "@dev-team-tufte",
+      "@dev-team-hamilton",
+      "@dev-team-voss",
+      "@dev-team-deming",
+    ];
+    for (const agent of agentNames) {
+      assert.ok(!result.stdout.includes(agent), `should not name ${agent} in output`);
+    }
+  });
+
+  it("includes review depth and complexity score in output", () => {
+    const result = runHook(hook, {
+      file_path: "/app/src/utils/helpers.ts",
+      old_string: "x",
+      new_string: "y",
+    });
+    assert.equal(result.code, 0);
+    assert.ok(result.stdout.includes("Review depth:"), "should include Review depth");
+    assert.ok(result.stdout.includes("complexity score:"), "should include complexity score");
+  });
+
+  it("outputs LIGHT review depth for trivial changes", () => {
+    const result = runHook(hook, {
+      file_path: "/app/src/utils/helpers.ts",
+      old_string: "const x = 1;",
+      new_string: "const y = 1;",
+    });
+    assert.equal(result.code, 0);
+    assert.ok(result.stdout.includes("Review depth: LIGHT"), "should be LIGHT");
+    assert.ok(result.stdout.includes("advisory only"), "should mention advisory");
+  });
+
+  it("outputs DEEP review depth for complex changes", () => {
+    const complexCode = Array(30)
+      .fill("export async function handler() { try { await fetch(); } catch (e) { throw e; } }")
+      .join("\n");
+    const result = runHook(hook, {
+      file_path: "/app/src/utils/helpers.ts",
+      old_string: "",
+      new_string: complexCode,
+    });
+    assert.equal(result.code, 0);
+    assert.ok(result.stdout.includes("Review depth: DEEP"), "should be DEEP");
+    assert.ok(result.stdout.includes("thorough analysis"), "should mention thorough analysis");
+  });
+
+  it("boosts complexity for security-sensitive files (no LIGHT review)", () => {
+    const result = runHook(hook, {
+      file_path: "/app/src/auth/login.ts",
+      old_string: "const x = 1;",
+      new_string: "const y = 1;",
+    });
+    assert.equal(result.code, 0);
+    assert.ok(
+      !result.stdout.includes("Review depth: LIGHT"),
+      "auth file should not get LIGHT review",
     );
-    var fakeData = { bad: { pattern: "(a+)+" }, good: { pattern: "\\.test\\." } };
-    fs.writeFileSync(path.join(tmpDir, "agent-patterns.json"), JSON.stringify(fakeData));
-    var warnings = [];
-    var origErr = console.error;
-    console.error = function (m) {
-      warnings.push(m);
-    };
+  });
+
+  it("handles malformed JSON gracefully (exits 0)", () => {
     try {
-      var { loadPatterns } = require(path.join(libTmpDir, "agent-patterns"));
-      var result = loadPatterns();
-      assert.equal(result.bad, undefined, "unsafe single pattern should be skipped");
-      assert.ok(result.good, "safe single pattern should be loaded");
-      assert.ok(warnings.length > 0, "should log warning");
-    } finally {
-      console.error = origErr;
-      fs.rmSync(tmpDir, { recursive: true, force: true });
+      const { execFileSync: exec } = require("child_process");
+      exec(process.execPath, [path.join(HOOKS_DIR, hook), "not-json"], {
+        encoding: "utf-8",
+        timeout: 5000,
+      });
+    } catch (err) {
+      assert.fail(`Should exit 0 on malformed JSON, got exit ${err.status}`);
     }
   });
 });
