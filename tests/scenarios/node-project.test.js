@@ -57,7 +57,7 @@ describe("Node.js project scenario", () => {
 
     // Hooks installed in .dev-team/
     const hooks = fs.readdirSync(path.join(tmpDir, ".dev-team", "hooks"));
-    assert.equal(hooks.length, 12); // 9 quality hooks + 2 infra hooks + lib/ directory
+    assert.equal(hooks.length, 13); // 9 quality hooks + 2 infra hooks + lib/ directory + agent-patterns.json
 
     // Existing CLAUDE.md preserved
     const claudeMd = fs.readFileSync(path.join(tmpDir, "CLAUDE.md"), "utf-8");
@@ -97,7 +97,7 @@ describe("Node.js project scenario", () => {
     for (const file of hookFiles) {
       const fullPath = path.join(hookDir, file);
       if (fs.statSync(fullPath).isDirectory()) continue; // skip lib/ subdirectory
-      if (file.endsWith(".json")) continue; // skip data files
+      if (file.endsWith(".json")) continue; // skip data files (agent-patterns.json)
       const content = fs.readFileSync(fullPath, "utf-8");
       assert.ok(content.startsWith("#!/usr/bin/env node"), `${file} should have node shebang`);
     }

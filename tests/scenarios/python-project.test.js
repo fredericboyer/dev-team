@@ -63,7 +63,7 @@ describe("Python project scenario", () => {
   it("hooks work with Python file paths", async () => {
     await run(tmpDir, ["--all"]);
 
-    // The post-change-review hook should flag review needed for .py files
+    // The post-change-review hook should flag Knuth for .py files
     const { execFileSync } = require("child_process");
     const hookPath = path.join(tmpDir, ".dev-team", "hooks", "dev-team-post-change-review.js");
     const input = JSON.stringify({ tool_input: { file_path: "/app/src/my_app/main.py" } });
@@ -72,7 +72,7 @@ describe("Python project scenario", () => {
       encoding: "utf-8",
       timeout: 5000,
     });
-    assert.ok(stdout.includes("ACTION REQUIRED"), "should flag review needed for .py files");
+    assert.ok(stdout.includes("@dev-team-knuth"), "should flag Knuth for .py files");
   });
 
   it("tdd-enforce recognizes Python test patterns", async () => {
