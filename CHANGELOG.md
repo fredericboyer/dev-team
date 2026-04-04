@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.7.0] — 2026-04-04
+
+### Added
+- **Complexity-aware merge gate**: Brooks writes assessment sidecars (`.dev-team/.assessments/`), merge-gate enforces required reviewers for COMPLEX tasks (#747)
+- **test:coverage script**: `npm run test:coverage` using Node 22 built-in `--experimental-test-coverage` — zero dependencies (#755)
+
+### Fixed
+- **Merge-gate hardening**: stale sidecar detection validates branch match, branch detection from `gh pr merge` command args, comprehensive unit tests (#745, #749)
+- **TDD hook precision**: session-wide test exemption replaced with per-file test correspondence matching; top-level `tests/` directory walk for non-colocated test discovery (#748)
+- **Worktree-remove regression tests**: path containment validation for traversal attempts, inside-root paths, and realpathSync fallback (#750)
+
+### Changed
+- **CI parallelization**: split `lint-and-format` into parallel `lint`, `typecheck`, `format-check` jobs; removed duplicate hook validation from `validate` job (#751)
+- **oxlintrc.json review**: confirmed correctness-only rule defaults; fixed two pre-existing `no-unused-vars` errors (#756)
+
+### Chores
+- Suppress git init default branch hints in CI (#744)
+- Document no-npm-ci invariant for hook validation CI jobs per ADR-002 (#753)
+- Verify actions/checkout@v6 and actions/setup-node@v6 resolve correctly (#754)
+
 ## [3.6.0] — 2026-04-03
 
 ### Fixed
