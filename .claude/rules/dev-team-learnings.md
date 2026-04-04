@@ -28,7 +28,7 @@
 
 ## Design Principles
 
-- **Skill composability: orchestration skills can invoke other skills.** /dev-team:extract and /dev-team:review are invoked by /dev-team:task as sub-skills. Use `disable-model-invocation: true` on sub-skills to prevent autonomous firing. The `--embedded` flag signals compact output mode for skill-to-skill invocation. See ADR-035 for the formal pattern.
+- **Skill composability: orchestration skills can invoke other skills.** /dev-team:extract and /dev-team:review are invoked by /dev-team:task as pipeline steps. Pipeline step skills use `disable-model-invocation: false` (user-entry skills use `true`). The `--embedded` flag has been removed — pipeline skills always return structured output. See ADR-035 for the composability pattern.
 - **Don't encode what agents already know.** AI agents have built-in knowledge of languages, frameworks, conventions, and standards. Hardcoding language-specific patterns (test file regex, linter commands, complexity keywords) into hooks or config creates static encyclopedias that are always incomplete. Instead, hooks should detect the ecosystem (read manifest files) and delegate language-specific reasoning to the agent. Include only what agents can't discover: tool preferences, legacy traps, test quirks, custom middleware warnings. (See: "AGENTS.md Verdict" — if the agent can discover it from code, delete it.)
 - **Adapter registry for multi-runtime portability (ADR-036).** ~~Superseded by ADR-040 (GitHub-first, Claude Code-only). Non-Claude adapters planned for removal in #660.~~
 

@@ -1,7 +1,7 @@
 ---
 name: dev-team-implement
 description: Implement a task on a feature branch with architect pre-assessment, agent selection, and validation. Use standalone or as Step 1 of /dev-team:task.
-disable-model-invocation: true
+disable-model-invocation: false
 ---
 
 Implement: $ARGUMENTS
@@ -87,7 +87,7 @@ The implementing agent works on the task on a feature branch.
 
 ## Output
 
-When invoked with `--embedded` (from `/dev-team:task`), return a compact summary:
+Return a structured summary:
 
 - Branch name
 - PR number
@@ -95,7 +95,7 @@ When invoked with `--embedded` (from `/dev-team:task`), return a compact summary
 - Complexity classification
 - Whether ADR was written
 
-When invoked standalone, report the PR URL and wait for the user's next action.
+Report the PR URL on completion.
 
 ## Security preamble
 

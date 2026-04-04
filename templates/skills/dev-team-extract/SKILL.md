@@ -1,7 +1,7 @@
 ---
 name: dev-team-extract
 description: Borges memory extraction — spawns Borges to record metrics, extract memory entries, and verify completion gates. Called by task, review, audit, and retro skills after their primary work is done.
-disable-model-invocation: true
+disable-model-invocation: false
 ---
 
 Extract memory and metrics via @dev-team-borges for: $ARGUMENTS
