@@ -186,3 +186,11 @@
 - **Outcome**: verified
 - **Last-verified**: 2026-04-03
 - **Context**: Second full codebase audit. 24 findings (0 DEFECT, 7 RISK, 6 QUESTION, 11 SUGGESTION), 96% acceptance, 0% overrule, 1 deferred (K-05 compareSemver — already tracked). Compared to first audit (2026-03-26: 37 findings, 2 DEFECTs): finding count down 35%, zero DEFECTs, no new issues needed. Key themes: hook test gaps (merge-gate, worktree-remove), CI optimization (dedup, parallelization), pre-stable tooling (oxfmt, TS6), zero-runtime-deps positive. New entries: Szabo (2 new + 1 bumped), Knuth (2 new + 2 bumped), Deming (3 new + 1 bumped, compressed 5 entries to 1). Deming compressed 221→189 lines. All agents under 200-line cap. Zero-overrule alert continues at n>=237.
+
+### [2026-04-04] v3.8.0 extraction — 8 PRs, 48 findings, 65% acceptance, adversarial loop restored
+- **Type**: MILESTONE [verified]
+- **Source**: v3.8.0 task loop (8 issues, 8 PRs #789-#797)
+- **Tags**: metrics, calibration, extraction
+- **Outcome**: verified
+- **Last-verified**: 2026-04-04
+- **Context**: First in-team adversarial review since v3.3.0. 48 findings (3 DEFECT fixed, 31 accepted, 4 deferred, 10 ignored), 0 overruled. FULL reviews caught all 3 DEFECTs. Szabo/Knuth cross-convergence on sanitization mismatch (#793). New entries: Knuth (2), Szabo (1), Brooks (1+bump). 2 new shared learnings (Copilot re-review cascades, implementer guard). Contamination entry updated (6th occurrence). All agents under 200-line cap. Zero-overrule alert continues at n>=271.

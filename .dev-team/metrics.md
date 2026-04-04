@@ -327,3 +327,20 @@
 - **Duration**: single session, 3 parallel agents
 - **Notes**: Second full codebase audit (first was 2026-03-26). Zero DEFECTs — codebase security posture is strong. Key themes: hook test gaps (K-01 merge-gate, K-02 worktree-remove), CI optimization (R-01 dedup, R-03 parallelization), pre-stable tooling risk (Q-01 oxfmt, D-S-03 TypeScript 6), zero runtime dependencies (S-07 positive finding). Compared to first audit (37 findings, 2 DEFECTs, 11 issues): finding count down 35%, zero DEFECTs (was 2), no new issues needed — findings are optimization/hardening not correctness. The codebase has matured significantly between audits.
 - **[RISK] Zero-overrule alert**: Rolling overrule rate remains 0% at n>=237 in-team findings (v1.2.0 through v3.6.0 audit). Per research brief #490, healthy adversarial review shows 1-10% overrule rate.
+
+### [2026-04-04] Task: v3.8.0 delivery (#771, #770, #773, #786, #781, #769, #787, #795) — PRs #789-#794, #796, #797
+- **Agents**: implementing: Voss, Deming, others; pre-assessment: Brooks; reviewers: Szabo, Knuth
+- **Rounds**: 1 per branch (except #793: 2 rounds — DEFECTs fixed in round 2)
+- **Findings**:
+  - Szabo: 0 DEFECT, 1 RISK (1 fixed — S-01 sanitization mismatch), 5 SUGGESTION (4 accepted / 1 deferred), 1 QUESTION (1 accepted) — 7 total (across PRs #790, #793, #796)
+  - Knuth: 2 DEFECT (2 fixed — K-02 sanitization mismatch, K-03 CODE_FILE_PATTERN divergence), 6 RISK (5 accepted / 1 fixed — K-01 missing tests), 17 SUGGESTION (11 accepted / 2 deferred / 4 ignored), 2 QUESTION (2 accepted) — 27 total (across all 8 PRs)
+  - Cross-agent: Szabo S-01 and Knuth K-01/K-02 converged on same sanitization mismatch (#793) — unified to ADR-043 spec
+- **Unique findings**: 34 (after deduplication — S-01/K-01 merged)
+- **Acceptance rate**: 65% (31 accepted-or-fixed / 48 raw; 22/34 unique)
+- **Overrule rate**: 0% (0/48)
+- **Fix rate (DEFECTs)**: 100% (3/3)
+- **Defer rate (advisory)**: 8% (4/48)
+- **Ignore rate (advisory)**: 21% (10/48)
+- **Duration**: single session, 8 branches (4 LIGHT, 4 FULL)
+- **Notes**: First release with in-team adversarial review since v3.3.0. FULL reviews (PRs #790, #793, #796, #797) caught all 3 DEFECTs — LIGHT reviews caught 0. Tier system continues to validate: FULL review correctly concentrated on COMPLEX tasks. Szabo/Knuth cross-agent convergence on sanitization mismatch (#793) is a strong coherence signal. PR #793 was the only 2-round branch. Copilot re-reviews on push created thread resolution cascades requiring 2-3 rounds per PR. Implementer guard hook (#795) enforces agent liveness through review. Cross-branch contamination recurred heavily (shared working directory, stash conflicts, cherry-pick artifacts).
+- **[RISK] Zero-overrule alert**: Rolling overrule rate remains 0% at n>=271 in-team findings (v1.2.0 through v3.8.0). Per research brief #490, healthy adversarial review shows 1-10% overrule rate. Acceptance rate (65%) within healthy band (60-85%).

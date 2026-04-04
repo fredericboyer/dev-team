@@ -181,3 +181,19 @@
 - **Outcome**: accepted
 - **Last-verified**: 2026-04-03
 - **Context**: worktree-remove hook containment check (path traversal guard from #725 fix) has no regression test. If the containment logic regresses, worktree removal could operate outside the project boundary. Lower priority than K-01 but important for security regression protection.
+
+### [2026-04-04] v3.8.0: Sanitization mismatch cross-convergence with Szabo (PR #793)
+- **Type**: DEFECT [fixed]
+- **Source**: #781, PR #793, Knuth K-02 + Szabo S-01
+- **Tags**: sanitization, cross-agent, hooks, review-gate, merge-gate
+- **Outcome**: fixed
+- **Last-verified**: 2026-04-04
+- **Context**: Branch sanitization logic diverged between review-gate and merge-gate hooks. Knuth K-02 and Szabo S-01 independently converged on the same finding — unified to ADR-043 spec. CODE_FILE_PATTERN also diverged between hooks (K-03, fixed). Cross-agent convergence validates review quality. Pattern: when hooks share concepts (branch names, file patterns), keep logic in a shared module or spec reference.
+
+### [2026-04-04] v3.8.0: Boundary test gaps as recurring theme
+- **Type**: PATTERN [new]
+- **Source**: PRs #789-#797, multiple findings
+- **Tags**: testing, boundary, hooks, coverage
+- **Outcome**: accepted
+- **Last-verified**: 2026-04-04
+- **Context**: Boundary test gaps appeared across multiple PRs: boundary depth (5) untested (#791 K-04), no test for assessment sidecar branch mismatch (#793 K-04), missing branch field allows bypass (#794 K-02), no test for malformed assessment JSON (#794 K-03), no test for detached HEAD fail-open (#796 K-05). Seen: recurring pattern across v1.11.0, v3.5.0, v3.6.0, v3.8.0. Hook boundary conditions are consistently undertested.

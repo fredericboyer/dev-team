@@ -168,8 +168,8 @@
 - **Source**: v3.3.0 + v3.4.0 + v3.6.0 delivery observations
 - **Tags**: architecture, agent-teams, worktrees, contamination
 - **Outcome**: accepted
-- **Last-verified**: 2026-04-03
-- **Context**: Cross-branch contamination recurred in v3.4.0 (PR #694 picked up #688's research doc, PR #698 picked up #691 and #683 files). Additionally, shared file contamination was universal — every worktree agent committed Borges memory and metrics changes from unpushed local main (aeda27f). Seen: 5 times (v1.7.0, v1.10.0, v3.3.0, v3.4.0, v3.6.0). Root cause in v3.4.0: worktrees branched from local main with unpushed commits. v3.6.0: stashed changes + agent teams sharing working directory. Worktree isolation prevents cross-branch contamination but not stale-base contamination.
+- **Last-verified**: 2026-04-04
+- **Context**: Cross-branch contamination recurred in v3.4.0 (PR #694 picked up #688's research doc, PR #698 picked up #691 and #683 files). Additionally, shared file contamination was universal — every worktree agent committed Borges memory and metrics changes from unpushed local main (aeda27f). Seen: 6 times (v1.7.0, v1.10.0, v3.3.0, v3.4.0, v3.6.0, v3.8.0). Root cause in v3.4.0: worktrees branched from local main with unpushed commits. v3.6.0: stashed changes + agent teams sharing working directory. Worktree isolation prevents cross-branch contamination but not stale-base contamination.
 
 ### [2026-04-03] v3.6.0: Skill name changes propagate to all installed projects (PR #734)
 - **Type**: RISK [accepted]
@@ -186,6 +186,14 @@
 - **Outcome**: accepted — deferred refactor
 - **Last-verified**: 2026-04-03
 - **Context**: Copilot flagged duplicated parser logic in PR #738. Accepted as advisory — deferred refactor. Pattern: parser duplication is a recurring architectural smell in the codebase (see also K10 MCP deriveRequiredAgents divergence, dual code path risk). Watch for parser logic that should live in a shared utility to avoid drift.
+
+### [2026-04-04] v3.8.0: Shared hook logic drift — sanitization, CODE_FILE_PATTERN, sidecar model
+- **Type**: PATTERN [new]
+- **Source**: PRs #793, #794, #796
+- **Tags**: architecture, hooks, drift, shared-logic
+- **Outcome**: accepted
+- **Last-verified**: 2026-04-04
+- **Context**: v3.8.0 revealed multiple hook logic drift instances: branch sanitization diverged between review-gate and merge-gate (3 DEFECTs), CODE_FILE_PATTERN diverged between hooks, sidecar model needed centralization (#787). Pattern: hooks that share concepts (branch names, file patterns, sidecar format) need a shared module or ADR-level spec to prevent drift. See also v2.0 dual-code-path sync risk (K10). Architectural recommendation: consolidate shared hook logic into templates/hooks/lib/.
 
 ## Calibration Log
 <!-- Challenges accepted/overruled — tunes adversarial intensity over time -->

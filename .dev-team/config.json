@@ -1,5 +1,5 @@
 {
-  "version": "3.6.0",
+  "version": "3.8.0",
   "agents": [
     "Voss",
     "Hamilton",
@@ -32,5 +32,15 @@
   "branchConvention": "feat/123-description",
   "taskBranchPattern": "(feat|fix)\\/",
   "agentTeams": true,
-  "platform": "github"
+  "platform": "github",
+  "workflow": {
+    "research": true,
+    "challenge": false,
+    "implement": true,
+    "review": true,
+    "pr": true,
+    "merge": true,
+    "release": false,
+    "learn": true
+  }
 }
