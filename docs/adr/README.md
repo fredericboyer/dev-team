@@ -68,3 +68,4 @@ What becomes easier or more difficult?
 | [041](041-mergify-no-approval-by-design.md) | Mergify no-approval merge queue by design | superseded by ADR-042 |
 | [042](042-remove-mergify-github-rulesets-sufficient.md) | Remove Mergify — GitHub native rulesets sufficient | accepted |
 | [043](043-assessment-sidecar-contract.md) | Assessment sidecar contract for complexity-aware merge enforcement | accepted |
+| [044](044-branch-level-sidecar-keying.md) | Branch-level sidecar keying replaces content hashes | accepted |

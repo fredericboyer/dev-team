@@ -109,6 +109,41 @@ Original finding summary.
 
 State the verdict clearly. List what must be fixed for approval if requesting changes.
 
+### Review sidecar (ADR-044)
+
+After completing the review, write a sidecar file so the review-gate hook can verify the branch has been reviewed:
+
+**Location:** `.dev-team/.reviews/<agent>--<sanitized-branch>.json`
+
+**Branch sanitization:** Replace any character that is not alphanumeric or a hyphen with a hyphen.
+Example: `feat/787-sidecar` → `feat-787-sidecar`
+
+**Schema:**
+```json
+{
+  "agent": "dev-team-knuth",
+  "branch": "feat/787-sidecar",
+  "reviewDepth": "FULL",
+  "findings": [
+    {
+      "classification": "[DEFECT]",
+      "description": "...",
+      "line": 42,
+      "resolved": false
+    }
+  ]
+}
+```
+
+- `branch` — the full unsanitized branch name
+- `reviewDepth` — `"LIGHT"` (advisory only, gate will not enforce) or `"FULL"` (blocking)
+- `findings` — array of all findings; empty array if none
+- `resolved` — set to `true` only when the finding has been explicitly addressed
+
+In LIGHT review mode, set `reviewDepth: "LIGHT"` — the review-gate will treat all findings as advisory and will not block commits.
+
+One sidecar per reviewing agent. Each agent writes its own sidecar. The filename prefix is the agent name (e.g., `dev-team-knuth`, `dev-team-szabo`).
+
 ### Platform detection
 
 Before issuing any `gh issue`, `gh pr`, or other platform-specific CLI commands, check `.dev-team/config.json` for the `platform` and `issueTracker` fields. If the project specifies a non-GitHub platform (e.g., `"gitlab"`, `"bitbucket"`, `"other"`), adapt issue tracker and PR commands accordingly — use `glab` for GitLab, the Bitbucket API, or the appropriate CLI for the configured platform. If `platform` is absent from config.json, default to `"github"`. The steps in this skill assume GitHub by default.

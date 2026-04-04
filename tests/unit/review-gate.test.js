@@ -2,7 +2,6 @@
 
 const { describe, it } = require("node:test");
 const assert = require("node:assert/strict");
-const { createHash } = require("crypto");
 const { execFileSync, spawnSync } = require("child_process");
 const fs = require("fs");
 const path = require("path");
@@ -43,23 +42,27 @@ function createTempRepo() {
 }
 
 /**
- * Compute the content hash the same way the hook does (first 12 chars of SHA-256).
+ * Get the current branch name from a git repo and its sanitized form.
  */
-function contentHash(content) {
-  return createHash("sha256").update(content).digest("hex").slice(0, 12);
+function getBranchInfo(tmpDir) {
+  const branch = execFileSync("git", ["-C", tmpDir, "rev-parse", "--abbrev-ref", "HEAD"], {
+    encoding: "utf-8",
+  }).trim();
+  const sanitized = branch.replace(/[^a-zA-Z0-9-]/g, "-");
+  return { branch, sanitized };
 }
 
 /**
- * Write a sidecar file for a given agent and content hash.
+ * Write a sidecar file for a given agent and branch (sanitized).
  */
-function writeSidecar(tmpDir, agent, hash, sidecarData) {
+function writeSidecar(tmpDir, agent, sanitizedBranch, sidecarData) {
   const reviewsDir = path.join(tmpDir, ".dev-team", ".reviews");
   fs.mkdirSync(reviewsDir, { recursive: true });
-  const filename = `${agent}--${hash}.json`;
+  const filename = agent + "--" + sanitizedBranch + ".json";
   fs.writeFileSync(path.join(reviewsDir, filename), JSON.stringify(sidecarData, null, 2));
 }
 
-// ─── Basic behavior ──────────────────────────────────────────────────────────
+// --- Basic behavior ---
 
 describe("dev-team-review-gate", () => {
   it("exits 0 for non-commit commands", () => {
@@ -112,9 +115,9 @@ describe("dev-team-review-gate", () => {
     }
   });
 
-  // ─── Gate 1: Review evidence ──────────────────────────────────────────────
+  // --- Gate 1: Review evidence ---
 
-  describe("Gate 1 — review evidence", () => {
+  describe("Gate 1 - review evidence", () => {
     it("blocks when code is staged without review sidecars", () => {
       const tmpDir = createTempRepo();
       try {
@@ -130,99 +133,126 @@ describe("dev-team-review-gate", () => {
       }
     });
 
-    it("allows commit when all required sidecars exist", () => {
+    it("allows commit when a sidecar exists for the current branch", () => {
       const tmpDir = createTempRepo();
       try {
         const code = "module.exports = {}";
         fs.writeFileSync(path.join(tmpDir, "handler.js"), code);
         execFileSync("git", ["add", "handler.js"], { cwd: tmpDir, encoding: "utf-8" });
 
-        const hash = contentHash(code);
+        const { branch, sanitized } = getBranchInfo(tmpDir);
 
-        // handler.js triggers knuth and brooks (non-test impl file)
-        writeSidecar(tmpDir, "dev-team-knuth", hash, {
+        writeSidecar(tmpDir, "dev-team-knuth", sanitized, {
           agent: "dev-team-knuth",
-          file: "handler.js",
-          contentHash: hash,
-          reviewDepth: "STANDARD",
-          findings: [],
-        });
-        writeSidecar(tmpDir, "dev-team-brooks", hash, {
-          agent: "dev-team-brooks",
-          file: "handler.js",
-          contentHash: hash,
+          branch,
           reviewDepth: "STANDARD",
           findings: [],
         });
 
         const result = runGate({ command: "git commit -m 'feat'" }, tmpDir);
-        assert.equal(result.code, 0, `Expected exit 0, got ${result.code}: ${result.stderr}`);
+        assert.equal(result.code, 0, "Expected exit 0, got " + result.code + ": " + result.stderr);
       } finally {
         fs.rmSync(tmpDir, { recursive: true, force: true });
       }
     });
 
-    it("exits 0 when any single sidecar exists (SIMPLE task)", () => {
+    it("exits 0 when any single sidecar exists for the branch (SIMPLE task)", () => {
       const tmpDir = createTempRepo();
       try {
         const code = "module.exports = {}";
         fs.writeFileSync(path.join(tmpDir, "handler.js"), code);
         execFileSync("git", ["add", "handler.js"], { cwd: tmpDir, encoding: "utf-8" });
 
-        const hash = contentHash(code);
+        const { branch, sanitized } = getBranchInfo(tmpDir);
 
-        // SIMPLE task: only knuth sidecar — no assessment, so any sidecar suffices
-        writeSidecar(tmpDir, "dev-team-knuth", hash, {
+        // SIMPLE task: only one sidecar for the branch - no assessment, so any sidecar suffices
+        writeSidecar(tmpDir, "dev-team-knuth", sanitized, {
           agent: "dev-team-knuth",
-          file: "handler.js",
-          contentHash: hash,
+          branch,
           reviewDepth: "STANDARD",
           findings: [],
         });
 
         const result = runGate({ command: "git commit -m 'feat'" }, tmpDir);
-        assert.equal(result.code, 0, `SIMPLE task: one sidecar should suffice: ${result.stderr}`);
+        assert.equal(result.code, 0, "SIMPLE task: one sidecar should suffice: " + result.stderr);
       } finally {
         fs.rmSync(tmpDir, { recursive: true, force: true });
       }
     });
 
-    it("rejects stale sidecars (wrong content hash)", () => {
+    it("allows subsequent commits on the same branch after review fixes a defect", () => {
+      // This is the deadlock scenario from #787:
+      // - Review sidecar exists for branch
+      // - Implementer fixes a defect and commits again (different file content)
+      // - Branch-level keying means the sidecar is still valid - no deadlock
       const tmpDir = createTempRepo();
       try {
-        const code = "module.exports = { updated: true }";
+        // First commit: initial code
+        const code = "module.exports = {}";
         fs.writeFileSync(path.join(tmpDir, "handler.js"), code);
         execFileSync("git", ["add", "handler.js"], { cwd: tmpDir, encoding: "utf-8" });
 
-        // Write sidecar with old hash
-        const staleHash = contentHash("module.exports = {}");
+        const { branch, sanitized } = getBranchInfo(tmpDir);
 
-        writeSidecar(tmpDir, "dev-team-knuth", staleHash, {
+        writeSidecar(tmpDir, "dev-team-knuth", sanitized, {
           agent: "dev-team-knuth",
-          file: "handler.js",
-          contentHash: staleHash,
+          branch,
           reviewDepth: "STANDARD",
           findings: [],
         });
-        writeSidecar(tmpDir, "dev-team-brooks", staleHash, {
-          agent: "dev-team-brooks",
-          file: "handler.js",
-          contentHash: staleHash,
-          reviewDepth: "STANDARD",
-          findings: [],
-        });
+
+        const first = runGate({ command: "git commit -m 'feat'" }, tmpDir);
+        assert.equal(first.code, 0, "First commit should pass: " + first.stderr);
+
+        // Second commit: fixed code (different content than first review)
+        const fixedCode = "module.exports = { fixed: true }";
+        fs.writeFileSync(path.join(tmpDir, "handler.js"), fixedCode);
+        execFileSync("git", ["add", "handler.js"], { cwd: tmpDir, encoding: "utf-8" });
+
+        // Branch-level sidecar still exists and covers the fix - no new review needed
+        const second = runGate({ command: "git commit -m 'fix: apply review feedback'" }, tmpDir);
+        assert.equal(
+          second.code,
+          0,
+          "Second commit after fix should pass (branch-level sidecar still valid): " +
+            second.stderr,
+        );
+      } finally {
+        fs.rmSync(tmpDir, { recursive: true, force: true });
+      }
+    });
+
+    it("blocks when sidecar is for a different branch", () => {
+      const tmpDir = createTempRepo();
+      try {
+        fs.writeFileSync(path.join(tmpDir, "handler.js"), "module.exports = {}");
+        execFileSync("git", ["add", "handler.js"], { cwd: tmpDir, encoding: "utf-8" });
+
+        // Write sidecar keyed to a different branch
+        const otherBranch = "feat-other-feature";
+        const reviewsDir = path.join(tmpDir, ".dev-team", ".reviews");
+        fs.mkdirSync(reviewsDir, { recursive: true });
+        fs.writeFileSync(
+          path.join(reviewsDir, "dev-team-knuth--" + otherBranch + ".json"),
+          JSON.stringify({
+            agent: "dev-team-knuth",
+            branch: "feat/other-feature",
+            reviewDepth: "STANDARD",
+            findings: [],
+          }),
+        );
 
         const result = runGate({ command: "git commit -m 'feat'" }, tmpDir);
-        assert.equal(result.code, 2, "should block — sidecars are for old content");
+        assert.equal(result.code, 2, "should block - sidecar is for a different branch");
       } finally {
         fs.rmSync(tmpDir, { recursive: true, force: true });
       }
     });
   });
 
-  // ─── Gate 2: Findings resolution ──────────────────────────────────────────
+  // --- Gate 2: Findings resolution ---
 
-  describe("Gate 2 — findings resolution", () => {
+  describe("Gate 2 - findings resolution", () => {
     it("blocks when unresolved [DEFECT] findings exist", () => {
       const tmpDir = createTempRepo();
       try {
@@ -230,12 +260,11 @@ describe("dev-team-review-gate", () => {
         fs.writeFileSync(path.join(tmpDir, "handler.js"), code);
         execFileSync("git", ["add", "handler.js"], { cwd: tmpDir, encoding: "utf-8" });
 
-        const hash = contentHash(code);
+        const { branch, sanitized } = getBranchInfo(tmpDir);
 
-        writeSidecar(tmpDir, "dev-team-knuth", hash, {
+        writeSidecar(tmpDir, "dev-team-knuth", sanitized, {
           agent: "dev-team-knuth",
-          file: "handler.js",
-          contentHash: hash,
+          branch,
           reviewDepth: "STANDARD",
           findings: [
             {
@@ -245,13 +274,6 @@ describe("dev-team-review-gate", () => {
               resolved: false,
             },
           ],
-        });
-        writeSidecar(tmpDir, "dev-team-brooks", hash, {
-          agent: "dev-team-brooks",
-          file: "handler.js",
-          contentHash: hash,
-          reviewDepth: "STANDARD",
-          findings: [],
         });
 
         const result = runGate({ command: "git commit -m 'feat'" }, tmpDir);
@@ -270,12 +292,11 @@ describe("dev-team-review-gate", () => {
         fs.writeFileSync(path.join(tmpDir, "handler.js"), code);
         execFileSync("git", ["add", "handler.js"], { cwd: tmpDir, encoding: "utf-8" });
 
-        const hash = contentHash(code);
+        const { branch, sanitized } = getBranchInfo(tmpDir);
 
-        writeSidecar(tmpDir, "dev-team-knuth", hash, {
+        writeSidecar(tmpDir, "dev-team-knuth", sanitized, {
           agent: "dev-team-knuth",
-          file: "handler.js",
-          contentHash: hash,
+          branch,
           reviewDepth: "STANDARD",
           findings: [
             {
@@ -286,16 +307,9 @@ describe("dev-team-review-gate", () => {
             },
           ],
         });
-        writeSidecar(tmpDir, "dev-team-brooks", hash, {
-          agent: "dev-team-brooks",
-          file: "handler.js",
-          contentHash: hash,
-          reviewDepth: "STANDARD",
-          findings: [],
-        });
 
         const result = runGate({ command: "git commit -m 'feat'" }, tmpDir);
-        assert.equal(result.code, 0, `Expected exit 0: ${result.stderr}`);
+        assert.equal(result.code, 0, "Expected exit 0: " + result.stderr);
       } finally {
         fs.rmSync(tmpDir, { recursive: true, force: true });
       }
@@ -308,12 +322,11 @@ describe("dev-team-review-gate", () => {
         fs.writeFileSync(path.join(tmpDir, "handler.js"), code);
         execFileSync("git", ["add", "handler.js"], { cwd: tmpDir, encoding: "utf-8" });
 
-        const hash = contentHash(code);
+        const { branch, sanitized } = getBranchInfo(tmpDir);
 
-        writeSidecar(tmpDir, "dev-team-knuth", hash, {
+        writeSidecar(tmpDir, "dev-team-knuth", sanitized, {
           agent: "dev-team-knuth",
-          file: "handler.js",
-          contentHash: hash,
+          branch,
           reviewDepth: "STANDARD",
           findings: [
             { classification: "[RISK]", description: "Potential perf issue", resolved: false },
@@ -324,16 +337,9 @@ describe("dev-team-review-gate", () => {
             },
           ],
         });
-        writeSidecar(tmpDir, "dev-team-brooks", hash, {
-          agent: "dev-team-brooks",
-          file: "handler.js",
-          contentHash: hash,
-          reviewDepth: "STANDARD",
-          findings: [],
-        });
 
         const result = runGate({ command: "git commit -m 'feat'" }, tmpDir);
-        assert.equal(result.code, 0, `Non-defect findings should not block: ${result.stderr}`);
+        assert.equal(result.code, 0, "Non-defect findings should not block: " + result.stderr);
       } finally {
         fs.rmSync(tmpDir, { recursive: true, force: true });
       }
@@ -346,12 +352,11 @@ describe("dev-team-review-gate", () => {
         fs.writeFileSync(path.join(tmpDir, "handler.js"), code);
         execFileSync("git", ["add", "handler.js"], { cwd: tmpDir, encoding: "utf-8" });
 
-        const hash = contentHash(code);
+        const { branch, sanitized } = getBranchInfo(tmpDir);
 
-        writeSidecar(tmpDir, "dev-team-knuth", hash, {
+        writeSidecar(tmpDir, "dev-team-knuth", sanitized, {
           agent: "dev-team-knuth",
-          file: "handler.js",
-          contentHash: hash,
+          branch,
           reviewDepth: "LIGHT",
           findings: [
             {
@@ -361,23 +366,16 @@ describe("dev-team-review-gate", () => {
             },
           ],
         });
-        writeSidecar(tmpDir, "dev-team-brooks", hash, {
-          agent: "dev-team-brooks",
-          file: "handler.js",
-          contentHash: hash,
-          reviewDepth: "LIGHT",
-          findings: [],
-        });
 
         const result = runGate({ command: "git commit -m 'feat'" }, tmpDir);
-        assert.equal(result.code, 0, `LIGHT review should not block: ${result.stderr}`);
+        assert.equal(result.code, 0, "LIGHT review should not block: " + result.stderr);
       } finally {
         fs.rmSync(tmpDir, { recursive: true, force: true });
       }
     });
   });
 
-  // ─── Mixed staged files ─────────────────────────────────────────────────
+  // --- Mixed staged files ---
 
   describe("mixed staged files", () => {
     it("only requires sidecars for gated implementation files", () => {
@@ -392,36 +390,27 @@ describe("dev-team-review-gate", () => {
           encoding: "utf-8",
         });
 
-        const hash = contentHash(code);
+        const { branch, sanitized } = getBranchInfo(tmpDir);
 
-        // Only handler.js needs knuth + brooks sidecars (gated impl file)
-        // README.md is non-code, handler.test.js is a test file — neither gated
-        writeSidecar(tmpDir, "dev-team-knuth", hash, {
+        // Only handler.js needs a sidecar - README.md and handler.test.js are not gated
+        writeSidecar(tmpDir, "dev-team-knuth", sanitized, {
           agent: "dev-team-knuth",
-          file: "handler.js",
-          contentHash: hash,
-          reviewDepth: "STANDARD",
-          findings: [],
-        });
-        writeSidecar(tmpDir, "dev-team-brooks", hash, {
-          agent: "dev-team-brooks",
-          file: "handler.js",
-          contentHash: hash,
+          branch,
           reviewDepth: "STANDARD",
           findings: [],
         });
 
         const result = runGate({ command: "git commit -m 'feat: mixed files'" }, tmpDir);
-        assert.equal(result.code, 0, `Expected exit 0: ${result.stderr}`);
+        assert.equal(result.code, 0, "Expected exit 0: " + result.stderr);
       } finally {
         fs.rmSync(tmpDir, { recursive: true, force: true });
       }
     });
   });
 
-  // ─── QUESTION classification ───────────────────────────────────────────────
+  // --- QUESTION classification ---
 
-  describe("Gate 2 — [QUESTION] classification", () => {
+  describe("Gate 2 - [QUESTION] classification", () => {
     it("allows unresolved [QUESTION] findings without blocking", () => {
       const tmpDir = createTempRepo();
       try {
@@ -429,34 +418,26 @@ describe("dev-team-review-gate", () => {
         fs.writeFileSync(path.join(tmpDir, "handler.js"), code);
         execFileSync("git", ["add", "handler.js"], { cwd: tmpDir, encoding: "utf-8" });
 
-        const hash = contentHash(code);
+        const { branch, sanitized } = getBranchInfo(tmpDir);
 
-        writeSidecar(tmpDir, "dev-team-knuth", hash, {
+        writeSidecar(tmpDir, "dev-team-knuth", sanitized, {
           agent: "dev-team-knuth",
-          file: "handler.js",
-          contentHash: hash,
+          branch,
           reviewDepth: "STANDARD",
           findings: [
             { classification: "[QUESTION]", description: "Why is this exported?", resolved: false },
           ],
         });
-        writeSidecar(tmpDir, "dev-team-brooks", hash, {
-          agent: "dev-team-brooks",
-          file: "handler.js",
-          contentHash: hash,
-          reviewDepth: "STANDARD",
-          findings: [],
-        });
 
         const result = runGate({ command: "git commit -m 'feat'" }, tmpDir);
-        assert.equal(result.code, 0, `[QUESTION] should not block: ${result.stderr}`);
+        assert.equal(result.code, 0, "[QUESTION] should not block: " + result.stderr);
       } finally {
         fs.rmSync(tmpDir, { recursive: true, force: true });
       }
     });
   });
 
-  // ─── Cleanup manifest ─────────────────────────────────────────────────────
+  // --- Cleanup manifest ---
 
   describe("cleanup manifest", () => {
     it("writes .cleanup-manifest.json with correct sidecar filenames after gates pass", () => {
@@ -466,53 +447,52 @@ describe("dev-team-review-gate", () => {
         fs.writeFileSync(path.join(tmpDir, "handler.js"), code);
         execFileSync("git", ["add", "handler.js"], { cwd: tmpDir, encoding: "utf-8" });
 
-        const hash = contentHash(code);
+        const { branch, sanitized } = getBranchInfo(tmpDir);
 
-        writeSidecar(tmpDir, "dev-team-knuth", hash, {
+        writeSidecar(tmpDir, "dev-team-knuth", sanitized, {
           agent: "dev-team-knuth",
-          file: "handler.js",
-          contentHash: hash,
+          branch,
           reviewDepth: "STANDARD",
           findings: [],
         });
-        writeSidecar(tmpDir, "dev-team-brooks", hash, {
+        writeSidecar(tmpDir, "dev-team-brooks", sanitized, {
           agent: "dev-team-brooks",
-          file: "handler.js",
-          contentHash: hash,
+          branch,
           reviewDepth: "STANDARD",
           findings: [],
         });
 
         const result = runGate({ command: "git commit -m 'feat'" }, tmpDir);
-        assert.equal(result.code, 0, `Expected exit 0: ${result.stderr}`);
+        assert.equal(result.code, 0, "Expected exit 0: " + result.stderr);
 
         const manifestPath = path.join(tmpDir, ".dev-team", ".reviews", ".cleanup-manifest.json");
         assert.ok(fs.existsSync(manifestPath), "cleanup manifest should exist");
 
         const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf-8"));
         assert.ok(Array.isArray(manifest), "manifest should be an array");
-        assert.ok(manifest.includes(`dev-team-knuth--${hash}.json`));
-        assert.ok(manifest.includes(`dev-team-brooks--${hash}.json`));
+        assert.ok(manifest.includes("dev-team-knuth--" + sanitized + ".json"));
+        assert.ok(manifest.includes("dev-team-brooks--" + sanitized + ".json"));
       } finally {
         fs.rmSync(tmpDir, { recursive: true, force: true });
       }
     });
   });
 
-  // ─── Security-pattern files triggering Szabo ───────────────────────────────
+  // --- COMPLEX task - required reviewers from assessment sidecar ---
 
-  describe("COMPLEX task — required reviewers from assessment sidecar", () => {
+  describe("COMPLEX task - required reviewers from assessment sidecar", () => {
     function writeAssessment(tmpDir, requiredReviewers) {
       const branch = execFileSync("git", ["-C", tmpDir, "rev-parse", "--abbrev-ref", "HEAD"], {
         encoding: "utf-8",
       }).trim();
-      const safeBranch = branch.replace(/[^a-zA-Z0-9._-]/g, "_");
+      const safeBranch = branch.replace(/[^a-zA-Z0-9-]/g, "-");
       const assessmentsDir = path.join(tmpDir, ".dev-team", ".assessments");
       fs.mkdirSync(assessmentsDir, { recursive: true });
       fs.writeFileSync(
-        path.join(assessmentsDir, `${safeBranch}.json`),
-        JSON.stringify({ complexity: "COMPLEX", requiredReviewers }),
+        path.join(assessmentsDir, safeBranch + ".json"),
+        JSON.stringify({ branch, complexity: "COMPLEX", requiredReviewers }),
       );
+      return { branch, safeBranch };
     }
 
     it("COMPLEX task blocks when a required reviewer sidecar is missing", () => {
@@ -522,20 +502,21 @@ describe("dev-team-review-gate", () => {
         fs.writeFileSync(path.join(tmpDir, "auth.js"), code);
         execFileSync("git", ["add", "auth.js"], { cwd: tmpDir, encoding: "utf-8" });
 
-        const hash = contentHash(code);
-        writeAssessment(tmpDir, ["dev-team-szabo", "dev-team-knuth"]);
+        const { safeBranch: sanitized, branch } = writeAssessment(tmpDir, [
+          "dev-team-szabo",
+          "dev-team-knuth",
+        ]);
 
         // Provide knuth but NOT szabo (which is required by assessment)
-        writeSidecar(tmpDir, "dev-team-knuth", hash, {
+        writeSidecar(tmpDir, "dev-team-knuth", sanitized, {
           agent: "dev-team-knuth",
-          file: "auth.js",
-          contentHash: hash,
+          branch,
           reviewDepth: "STANDARD",
           findings: [],
         });
 
         const result = runGate({ command: "git commit -m 'feat: auth'" }, tmpDir);
-        assert.equal(result.code, 2, "should block — missing required szabo review");
+        assert.equal(result.code, 2, "should block - missing required szabo review");
         assert.ok(result.stderr.includes("dev-team-szabo"), "should mention szabo");
       } finally {
         fs.rmSync(tmpDir, { recursive: true, force: true });
@@ -549,33 +530,33 @@ describe("dev-team-review-gate", () => {
         fs.writeFileSync(path.join(tmpDir, "token-service.ts"), code);
         execFileSync("git", ["add", "token-service.ts"], { cwd: tmpDir, encoding: "utf-8" });
 
-        const hash = contentHash(code);
-        writeAssessment(tmpDir, ["dev-team-szabo", "dev-team-knuth"]);
+        const { safeBranch: sanitized, branch } = writeAssessment(tmpDir, [
+          "dev-team-szabo",
+          "dev-team-knuth",
+        ]);
 
-        writeSidecar(tmpDir, "dev-team-szabo", hash, {
+        writeSidecar(tmpDir, "dev-team-szabo", sanitized, {
           agent: "dev-team-szabo",
-          file: "token-service.ts",
-          contentHash: hash,
+          branch,
           reviewDepth: "STANDARD",
           findings: [],
         });
-        writeSidecar(tmpDir, "dev-team-knuth", hash, {
+        writeSidecar(tmpDir, "dev-team-knuth", sanitized, {
           agent: "dev-team-knuth",
-          file: "token-service.ts",
-          contentHash: hash,
+          branch,
           reviewDepth: "STANDARD",
           findings: [],
         });
 
         const result = runGate({ command: "git commit -m 'feat: token'" }, tmpDir);
-        assert.equal(result.code, 0, `Expected exit 0: ${result.stderr}`);
+        assert.equal(result.code, 0, "Expected exit 0: " + result.stderr);
       } finally {
         fs.rmSync(tmpDir, { recursive: true, force: true });
       }
     });
   });
 
-  // ─── Sidecar schema validation ─────────────────────────────────────────────
+  // --- Sidecar schema validation ---
 
   describe("sidecar schema validation", () => {
     it("skips malformed sidecar where findings is not an array", () => {
@@ -585,34 +566,26 @@ describe("dev-team-review-gate", () => {
         fs.writeFileSync(path.join(tmpDir, "handler.js"), code);
         execFileSync("git", ["add", "handler.js"], { cwd: tmpDir, encoding: "utf-8" });
 
-        const hash = contentHash(code);
+        const { branch, sanitized } = getBranchInfo(tmpDir);
 
         // Knuth sidecar has findings as a string instead of array
-        writeSidecar(tmpDir, "dev-team-knuth", hash, {
+        writeSidecar(tmpDir, "dev-team-knuth", sanitized, {
           agent: "dev-team-knuth",
-          file: "handler.js",
-          contentHash: hash,
+          branch,
           reviewDepth: "STANDARD",
           findings: "not an array",
         });
-        writeSidecar(tmpDir, "dev-team-brooks", hash, {
-          agent: "dev-team-brooks",
-          file: "handler.js",
-          contentHash: hash,
-          reviewDepth: "STANDARD",
-          findings: [],
-        });
 
-        // Gate 1 passes (sidecars exist), Gate 2 should skip malformed findings
+        // Gate 1 passes (sidecar exists for branch), Gate 2 should skip malformed findings
         const result = runGate({ command: "git commit -m 'feat'" }, tmpDir);
-        assert.equal(result.code, 0, `Malformed findings should be skipped: ${result.stderr}`);
+        assert.equal(result.code, 0, "Malformed findings should be skipped: " + result.stderr);
       } finally {
         fs.rmSync(tmpDir, { recursive: true, force: true });
       }
     });
   });
 
-  // ─── --skip-review strict matching ─────────────────────────────────────────
+  // --- --skip-review strict matching ---
 
   describe("--skip-review strict matching", () => {
     it("does NOT bypass when --skip-review appears only in -m message body", () => {
@@ -626,8 +599,8 @@ describe("dev-team-review-gate", () => {
           { command: "git commit -m 'fix: mentioned --skip-review in message'" },
           tmpDir,
         );
-        // Should still block — no sidecars present
-        assert.equal(result.code, 2, "should block — --skip-review in message should not bypass");
+        // Should still block - no sidecars present
+        assert.equal(result.code, 2, "should block - --skip-review in message should not bypass");
         assert.ok(result.stderr.includes("BLOCKED"));
       } finally {
         fs.rmSync(tmpDir, { recursive: true, force: true });
@@ -635,7 +608,7 @@ describe("dev-team-review-gate", () => {
     });
   });
 
-  // ─── Security ─────────────────────────────────────────────────────────────
+  // --- Security ---
 
   describe("security", () => {
     it("rejects symlinked sidecar files", () => {
@@ -647,7 +620,7 @@ describe("dev-team-review-gate", () => {
         fs.writeFileSync(path.join(tmpDir, "handler.js"), code);
         execFileSync("git", ["add", "handler.js"], { cwd: tmpDir, encoding: "utf-8" });
 
-        const hash = contentHash(code);
+        const { branch, sanitized } = getBranchInfo(tmpDir);
         const reviewsDir = path.join(tmpDir, ".dev-team", ".reviews");
         fs.mkdirSync(reviewsDir, { recursive: true });
 
@@ -657,15 +630,14 @@ describe("dev-team-review-gate", () => {
           realFile,
           JSON.stringify({
             agent: "dev-team-knuth",
-            file: "handler.js",
-            contentHash: hash,
+            branch,
             reviewDepth: "STANDARD",
             findings: [],
           }),
         );
-        fs.symlinkSync(realFile, path.join(reviewsDir, `dev-team-knuth--${hash}.json`));
+        fs.symlinkSync(realFile, path.join(reviewsDir, "dev-team-knuth--" + sanitized + ".json"));
 
-        // knuth is symlinked (rejected) and no other real sidecar exists — should block
+        // knuth is symlinked (rejected) and no other real sidecar exists - should block
         const result = runGate({ command: "git commit -m 'feat'" }, tmpDir);
         assert.equal(result.code, 2, "should reject symlinked sidecar");
       } finally {
