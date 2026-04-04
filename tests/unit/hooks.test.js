@@ -2635,7 +2635,6 @@ describe("dev-team-merge-gate", () => {
       timeout: 5000,
       cwd: opts.cwd || tmpDir,
       env,
-      windowsVerbatimArguments: true,
     });
     return { code: result.status, stdout: result.stdout || "", stderr: result.stderr || "" };
   }
