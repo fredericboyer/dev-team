@@ -2790,3 +2790,104 @@ describe("dev-team-merge-gate", () => {
     );
   });
 });
+
+// ─── Implementer Guard ──────────────────────────────────────────────────────
+
+describe("dev-team-implementer-guard", () => {
+  const HOOK = "dev-team-implementer-guard.js";
+  let tmpDir;
+
+  function runGuard(input, extraEnv = {}) {
+    const jsonInput = JSON.stringify(input);
+    try {
+      const stdout = execFileSync(process.execPath, [path.join(HOOKS_DIR, HOOK), jsonInput], {
+        encoding: "utf-8",
+        timeout: 5000,
+        cwd: tmpDir,
+        env: { ...process.env, PATH: process.env.PATH, ...extraEnv },
+      });
+      return { code: 0, stdout, stderr: "" };
+    } catch (err) {
+      return { code: err.status, stdout: err.stdout || "", stderr: err.stderr || "" };
+    }
+  }
+
+  beforeEach(() => {
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "impl-guard-"));
+    fs.mkdirSync(path.join(tmpDir, ".dev-team"), { recursive: true });
+    fs.writeFileSync(
+      path.join(tmpDir, ".dev-team", "config.json"),
+      JSON.stringify({ workflow: { review: true } }),
+    );
+    execFileSync("git", ["init"], { cwd: tmpDir, stdio: "pipe" });
+    execFileSync("git", ["checkout", "-b", "feat/123-test"], { cwd: tmpDir, stdio: "pipe" });
+  });
+
+  afterEach(() => {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  });
+
+  it("allows non-SendMessage tool calls", () => {
+    const result = runGuard({ tool_name: "Bash", tool_input: { command: "ls" } });
+    assert.equal(result.code, 0);
+  });
+
+  it("allows SendMessage that is not a shutdown_request", () => {
+    const result = runGuard({
+      tool_name: "SendMessage",
+      tool_input: { to: "voss-implement", message: "status update" },
+    });
+    assert.equal(result.code, 0);
+  });
+
+  it("allows shutdown of non-implement agents", () => {
+    const result = runGuard({
+      tool_name: "SendMessage",
+      tool_input: { to: "knuth-review", message: { type: "shutdown_request" } },
+    });
+    assert.equal(result.code, 0);
+  });
+
+  it("blocks shutdown of implementer without review evidence", () => {
+    const result = runGuard({
+      tool_name: "SendMessage",
+      tool_input: { to: "voss-implement-773", message: { type: "shutdown_request" } },
+    });
+    assert.equal(result.code, 2, "should block shutdown without review sidecars");
+    assert.ok(result.stderr.includes("BLOCKED"), "should include BLOCKED message");
+  });
+
+  it("allows shutdown of implementer with review evidence", () => {
+    const reviewsDir = path.join(tmpDir, ".dev-team", ".reviews");
+    fs.mkdirSync(reviewsDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(reviewsDir, "knuth--feat-123-test.json"),
+      JSON.stringify({ agent: "knuth", branch: "feat/123-test" }),
+    );
+    const result = runGuard({
+      tool_name: "SendMessage",
+      tool_input: { to: "voss-implement-773", message: { type: "shutdown_request" } },
+    });
+    assert.equal(result.code, 0, "should allow shutdown with review evidence");
+  });
+
+  it("allows shutdown when workflow.review is false", () => {
+    fs.writeFileSync(
+      path.join(tmpDir, ".dev-team", "config.json"),
+      JSON.stringify({ workflow: { review: false } }),
+    );
+    const result = runGuard({
+      tool_name: "SendMessage",
+      tool_input: { to: "voss-implement-773", message: { type: "shutdown_request" } },
+    });
+    assert.equal(result.code, 0, "should allow when review disabled");
+  });
+
+  it("allows --force-shutdown bypass", () => {
+    const result = runGuard({
+      tool_name: "SendMessage",
+      tool_input: { to: "voss-implement-773", message: "shutdown_request --force-shutdown" },
+    });
+    assert.equal(result.code, 0, "should allow with force-shutdown");
+  });
+});
