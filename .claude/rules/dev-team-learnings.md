@@ -11,7 +11,7 @@
 - Always use `/dev-team:task` for implementation work — dogfood the agents.
 - Spawn review agents as `general-purpose` subagents with the actual agent definition loaded from `.claude/agents/dev-team-*.agent.md`. Do NOT use `pr-review-toolkit:*` as proxies — they have different behavior.
 - Hooks over CLAUDE.md for enforcement (ADR-001). If agents keep flagging the same pattern, it should be a hook.
-- **Review gate enforces the adversarial loop at commit time** (ADR-029). Two stateless gates: review evidence + findings resolution. Sidecar files in `.dev-team/.reviews/` keyed by agent + content hash. LIGHT reviews are advisory only. `--skip-review` is the escape hatch.
+- **Review gate enforces the adversarial loop at commit time** (ADR-029, amended by ADR-044). Two stateless gates: review evidence + findings resolution. Sidecar files in `.dev-team/.reviews/` keyed by agent + sanitized branch name (ADR-044 replaced content-hash keying in v3.8.0). LIGHT reviews are advisory only. `--skip-review` is the escape hatch.
 - **Research-first for architectural releases.** When a release involves architectural changes, run Turing research briefs before implementation. Findings shape ADRs and design decisions, reducing rework. Validated in v1.6.0 (2 briefs → 2 ADRs + 7 design principles) and v2.0 (2 briefs → 2 ADRs + adapter architecture).
 - **Verify platform behavior against official docs, not third-party sources.** Turing research #406 initially got rules inheritance wrong by relying on inferred behavior. Always check official Claude Code documentation for behavioral claims about rules, subagents, and agent teams.
 - **Agent teams sharing a working directory cause cross-branch contamination.** Recurred in v1.7.0, v1.10.0, v3.3.0, v3.4.0, v3.5.0, v3.6.0, and v3.8.0 (shared working directory, stash conflicts, cherry-pick artifacts). Worktree isolation prevents cross-branch contamination but not stale-base contamination. Prefer worktree-isolated agents for multi-branch parallel work.
@@ -32,13 +32,13 @@
 
 - **Skill composability: orchestration skills can invoke other skills.** /dev-team:extract and /dev-team:review are invoked by /dev-team:task as pipeline steps. Pipeline step skills use `disable-model-invocation: false` (user-entry skills use `true`). The `--embedded` flag has been removed — pipeline skills always return structured output. See ADR-035 for the composability pattern.
 - **Don't encode what agents already know.** AI agents have built-in knowledge of languages, frameworks, conventions, and standards. Hardcoding language-specific patterns (test file regex, linter commands, complexity keywords) into hooks or config creates static encyclopedias that are always incomplete. Instead, hooks should detect the ecosystem (read manifest files) and delegate language-specific reasoning to the agent. Include only what agents can't discover: tool preferences, legacy traps, test quirks, custom middleware warnings. (See: "AGENTS.md Verdict" — if the agent can discover it from code, delete it.)
-- **Adapter registry for multi-runtime portability (ADR-036).** ~~Superseded by ADR-040 (GitHub-first, Claude Code-only). Non-Claude adapters planned for removal in #660.~~
+- ~~**Adapter registry for multi-runtime portability (ADR-036).**~~ **Superseded by ADR-040. Adapters removed in v3.4.0 (#660, closed).**
 
 ## Known Tech Debt
 
 - **INFRA_HOOKS worktree serialization is temporary** — workaround for Claude Code bugs anthropics/claude-code#34645 and #39680. Remove when upstream fixes land.
-- **compareSemver multi-segment pre-release parsing gap** — deferred to #720. Known edge case: `compareSemver("1.0.0-1.0.0", ...)` misparses when pre-release string contains dots resembling version segments (Knuth K2/K3, v3.5.0 review).
-- **Symlink guard coverage gaps in init.ts/update.ts** — deferred to #719. Symlink test coverage for ancestor-path traversal scenarios in the main entry points (Szabo S-01, Knuth K4, v3.5.0 review).
+- ~~**compareSemver multi-segment pre-release parsing gap** — deferred to #720.~~ **Resolved in v3.7.0 (#720, closed).** Edge-case tests added for multi-segment pre-release parsing.
+- ~~**Symlink guard coverage gaps in init.ts/update.ts** — deferred to #719.~~ **Resolved in v3.7.0 (#719, closed).** Symlink guard tests added for ancestor-path traversal scenarios.
 
 ## Quality Benchmarks
 
