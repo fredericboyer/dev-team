@@ -53,7 +53,8 @@ if (/--skip-review\b/.test(argsBeforeMessage)) {
 
 // ─── File classification ──────────────────────────────────────────────────────────────
 
-const CODE_FILE_PATTERN = /\.(js|ts|jsx|tsx|py|rb|go|java|rs|c|cpp|cs|swift|kt|scala|php)$/i;
+const CODE_FILE_PATTERN =
+  /\.(js|ts|jsx|tsx|py|rb|go|java|rs|c|cpp|cs|swift|kt|scala|php|r|sh|bash|zsh|fish)$/i;
 const TEST_FILE_PATTERN = /(\.test\.|\.spec\.)|_test\.|_spec\.|\/tests?\/|__tests__/;
 
 function isGatedFile(filePath) {
@@ -165,7 +166,7 @@ try {
     timeout: 3000,
   }).trim();
   if (branch && branch !== "HEAD") {
-    const safeBranch = branch.replace(/[^a-zA-Z0-9._-]/g, "_");
+    const safeBranch = branch.replace(/[^a-zA-Z0-9-]/g, "-");
     const assessmentPath = path.join(
       process.cwd(),
       ".dev-team",
