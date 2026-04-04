@@ -2615,3 +2615,229 @@ describe("dev-team-review-gate", () => {
     });
   });
 });
+
+// ─── Merge Gate ─────────────────────────────────────────────────────────────
+
+describe("dev-team-merge-gate", () => {
+  const hook = "dev-team-merge-gate.js";
+  let tmpDir;
+
+  /**
+   * Run the merge-gate hook with a custom cwd and optional PATH override.
+   * Uses spawnSync to capture stderr even on exit 0.
+   */
+  function runMergeGate(command, opts = {}) {
+    const { spawnSync } = require("child_process");
+    const input = JSON.stringify({ tool_input: { command } });
+    const env = { ...process.env, PATH: opts.PATH || process.env.PATH };
+    const result = spawnSync(process.execPath, [path.join(HOOKS_DIR, hook), input], {
+      encoding: "utf-8",
+      timeout: 5000,
+      cwd: opts.cwd || tmpDir,
+      env,
+    });
+    return { code: result.status, stdout: result.stdout || "", stderr: result.stderr || "" };
+  }
+
+  beforeEach(() => {
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "merge-gate-test-"));
+  });
+
+  afterEach(() => {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  });
+
+  // ─── Pass-through: non-merge commands ──────────────────────────────────────
+
+  describe("passes through non-merge commands (exit 0)", () => {
+    const passThrough = [
+      { name: "git status", command: "git status" },
+      { name: "git push", command: "git push origin main" },
+      { name: "npm test", command: "npm test" },
+      { name: "gh pr create", command: "gh pr create --title foo" },
+      { name: "gh pr view", command: "gh pr view 123" },
+      { name: "gh pr list", command: "gh pr list" },
+    ];
+
+    for (const { name, command } of passThrough) {
+      it(`passes through: ${name}`, () => {
+        const result = runMergeGate(command);
+        assert.equal(result.code, 0, `Expected exit 0 for "${command}"`);
+      });
+    }
+  });
+
+  // ─── Escape hatch: --skip-review ──────────────────────────────────────────
+
+  describe("--skip-review escape hatch (exit 0)", () => {
+    it("bypasses the gate with --skip-review", () => {
+      const result = runMergeGate("gh pr merge --skip-review");
+      assert.equal(result.code, 0);
+      assert.ok(result.stderr.includes("--skip-review used"), "should warn about bypass");
+    });
+
+    it("bypasses the gate with --skip-review and other flags", () => {
+      const result = runMergeGate("gh pr merge --auto --skip-review --squash");
+      assert.equal(result.code, 0);
+      assert.ok(result.stderr.includes("--skip-review used"));
+    });
+  });
+
+  // ─── JSON parse failure fails open ────────────────────────────────────────
+
+  it("fails open on malformed JSON input (exit 0)", () => {
+    const { spawnSync } = require("child_process");
+    const result = spawnSync(process.execPath, [path.join(HOOKS_DIR, hook), "not-json"], {
+      encoding: "utf-8",
+      timeout: 5000,
+      cwd: tmpDir,
+    });
+    assert.equal(result.status, 0, "should fail open with exit 0");
+  });
+
+  // ─── Detached HEAD / empty branch passes through ──────────────────────────
+
+  it("passes through when branch cannot be detected (exit 0)", () => {
+    // tmpDir is not a git repo, so git rev-parse fails and detectBranch returns ""
+    // No explicit branch in command, no PR number — all detection paths fail
+    const result = runMergeGate("gh pr merge");
+    assert.equal(result.code, 0, "empty branch should pass through");
+  });
+
+  // ─── Missing .reviews/ directory blocks ───────────────────────────────────
+
+  it("blocks when .dev-team/.reviews/ directory is missing (exit 2)", () => {
+    // Use explicit branch arg so detectBranch extracts via regex (no shell scripts needed)
+    const result = runMergeGate("gh pr merge feat/123-something");
+    assert.equal(result.code, 2, "missing .reviews/ should block");
+    assert.ok(result.stderr.includes("BLOCKED"));
+    assert.ok(result.stderr.includes("No .dev-team/.reviews/ directory exists"));
+  });
+
+  // ─── Sidecar matching ────────────────────────────────────────────────────
+
+  describe("sidecar validation", () => {
+    const branch = "feat/749-merge-gate-tests";
+    // Use explicit branch in command so detectBranch extracts via regex (cross-platform)
+    const mergeCmd = `gh pr merge ${branch}`;
+
+    function setupReviewsDir() {
+      const reviewsDir = path.join(tmpDir, ".dev-team", ".reviews");
+      fs.mkdirSync(reviewsDir, { recursive: true });
+      return reviewsDir;
+    }
+
+    it("allows merge when sidecar matches branch via JSON field (exit 0)", () => {
+      const reviewsDir = setupReviewsDir();
+      const sidecar = { branch, agent: "szabo", hash: "abc123", tier: "FULL" };
+      fs.writeFileSync(path.join(reviewsDir, "szabo-abc123.json"), JSON.stringify(sidecar));
+      const result = runMergeGate(mergeCmd);
+      assert.equal(result.code, 0, "matching sidecar should allow merge");
+    });
+
+    it("allows merge when sidecar matches branch via filename (exit 0)", () => {
+      const reviewsDir = setupReviewsDir();
+      // Sidecar without branch field — falls back to filename matching
+      const sidecar = { agent: "knuth", hash: "def456", tier: "FULL" };
+      const sanitized = branch.replace(/[^a-zA-Z0-9-]/g, "-");
+      fs.writeFileSync(
+        path.join(reviewsDir, `knuth-${sanitized}-def456.json`),
+        JSON.stringify(sidecar),
+      );
+      const result = runMergeGate(mergeCmd);
+      assert.equal(result.code, 0, "filename-matched sidecar should allow merge");
+    });
+
+    it("blocks when sidecars exist but belong to a different branch (exit 2)", () => {
+      const reviewsDir = setupReviewsDir();
+      const sidecar = { branch: "feat/other-branch", agent: "szabo", hash: "abc123", tier: "FULL" };
+      fs.writeFileSync(path.join(reviewsDir, "szabo-abc123.json"), JSON.stringify(sidecar));
+      const result = runMergeGate(mergeCmd);
+      assert.equal(result.code, 2, "wrong-branch sidecar should block");
+      assert.ok(result.stderr.includes("BLOCKED"));
+      assert.ok(result.stderr.includes("none match branch"));
+    });
+
+    it("blocks when .reviews/ directory is empty (exit 2)", () => {
+      setupReviewsDir();
+      const result = runMergeGate(mergeCmd);
+      assert.equal(result.code, 2, "empty reviews dir should block");
+      assert.ok(result.stderr.includes("BLOCKED"));
+      assert.ok(result.stderr.includes("is empty"));
+    });
+
+    it("ignores .cleanup-manifest.json in sidecar listing", () => {
+      const reviewsDir = setupReviewsDir();
+      fs.writeFileSync(path.join(reviewsDir, ".cleanup-manifest.json"), JSON.stringify({}));
+      const result = runMergeGate(mergeCmd);
+      assert.equal(result.code, 2, "cleanup manifest should not count as a sidecar");
+    });
+
+    it("skips sidecar files with unparseable JSON (falls through to next)", () => {
+      const reviewsDir = setupReviewsDir();
+      // One broken sidecar, one valid sidecar for the right branch
+      fs.writeFileSync(path.join(reviewsDir, "broken.json"), "not-json{{{");
+      const sidecar = { branch, agent: "brooks", hash: "ghi789", tier: "FULL" };
+      fs.writeFileSync(path.join(reviewsDir, "brooks-ghi789.json"), JSON.stringify(sidecar));
+      const result = runMergeGate(mergeCmd);
+      assert.equal(result.code, 0, "should still pass with one valid matching sidecar");
+    });
+
+    it("blocks when only broken JSON sidecars exist (exit 2)", () => {
+      const reviewsDir = setupReviewsDir();
+      fs.writeFileSync(path.join(reviewsDir, "broken.json"), "not-json{{{");
+      const result = runMergeGate(mergeCmd);
+      assert.equal(result.code, 2, "broken-only sidecars should block");
+    });
+  });
+
+  // ─── Regex matching for command variants ──────────────────────────────────
+
+  describe("command regex matching", () => {
+    it("matches gh pr merge --auto", () => {
+      // Use explicit branch arg to ensure detectBranch works cross-platform
+      const result = runMergeGate("gh pr merge feat/test --auto");
+      assert.equal(result.code, 2, "gh pr merge --auto should be intercepted");
+    });
+
+    it("matches gh pr merge with multiple spaces", () => {
+      const result = runMergeGate("gh  pr  merge feat/test --squash");
+      assert.equal(result.code, 2, "multi-space variant should be intercepted");
+    });
+
+    it("matches gh pr merge with explicit branch argument", () => {
+      const reviewsDir = path.join(tmpDir, ".dev-team", ".reviews");
+      fs.mkdirSync(reviewsDir, { recursive: true });
+      const sidecar = { branch: "feat/explicit-branch", agent: "szabo", hash: "abc", tier: "FULL" };
+      fs.writeFileSync(path.join(reviewsDir, "szabo-abc.json"), JSON.stringify(sidecar));
+      const result = runMergeGate("gh pr merge feat/explicit-branch --squash");
+      assert.equal(result.code, 0, "explicit branch arg should be used for matching");
+    });
+  });
+
+  // ─── detectBranch: PR number lookup ───────────────────────────────────────
+
+  describe("detectBranch with PR number", () => {
+    it(
+      "looks up branch from PR number via gh pr view",
+      { skip: process.platform === "win32" ? "shell scripts not supported on Windows" : undefined },
+      () => {
+        // This test uses shell scripts to fake gh — Unix-only
+        const binDir = path.join(tmpDir, "bin");
+        fs.mkdirSync(binDir, { recursive: true });
+        const ghScript = `#!/bin/sh\necho "feat/from-pr-number"\n`;
+        fs.writeFileSync(path.join(binDir, "gh"), ghScript, { mode: 0o755 });
+        fs.writeFileSync(path.join(binDir, "git"), "#!/bin/sh\nexit 1\n", { mode: 0o755 });
+
+        const reviewsDir = path.join(tmpDir, ".dev-team", ".reviews");
+        fs.mkdirSync(reviewsDir, { recursive: true });
+        const sidecar = { branch: "feat/from-pr-number", agent: "szabo", hash: "x", tier: "FULL" };
+        fs.writeFileSync(path.join(reviewsDir, "szabo-x.json"), JSON.stringify(sidecar));
+
+        const fakePATH = binDir + path.delimiter + process.env.PATH;
+        const result = runMergeGate("gh pr merge 42 --squash", { PATH: fakePATH });
+        assert.equal(result.code, 0, "PR number should resolve to branch via gh pr view");
+      },
+    );
+  });
+});
