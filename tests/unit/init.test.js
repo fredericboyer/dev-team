@@ -392,15 +392,17 @@ describe("DEFAULT_WORKFLOW", () => {
     assert.ok(
       typeof DEFAULT_WORKFLOW.review === "boolean" || DEFAULT_WORKFLOW.review === "complex",
     );
+    assert.ok(
+      typeof DEFAULT_WORKFLOW.learn === "boolean" || DEFAULT_WORKFLOW.learn === "complex",
+    );
   });
 
   it("WorkflowSwitch fields are booleans", () => {
-    // implement, pr, merge, release, learn are WorkflowSwitch (boolean only)
+    // implement, pr, merge, release are WorkflowSwitch (boolean only)
     assert.equal(typeof DEFAULT_WORKFLOW.implement, "boolean");
     assert.equal(typeof DEFAULT_WORKFLOW.pr, "boolean");
     assert.equal(typeof DEFAULT_WORKFLOW.merge, "boolean");
     assert.equal(typeof DEFAULT_WORKFLOW.release, "boolean");
-    assert.equal(typeof DEFAULT_WORKFLOW.learn, "boolean");
   });
 });
 

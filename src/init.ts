@@ -31,7 +31,7 @@ export interface WorkflowConfig {
   pr: WorkflowSwitch;
   merge: WorkflowSwitch;
   release: WorkflowSwitch;
-  learn: WorkflowSwitch;
+  learn: WorkflowToggle;
 }
 
 export const DEFAULT_WORKFLOW: WorkflowConfig = {
