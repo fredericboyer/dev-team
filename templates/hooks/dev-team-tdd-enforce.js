@@ -164,12 +164,23 @@ const CANDIDATE_PATTERNS = [
   path.join(dir, `${name}Test${ext}`),
 ];
 
-// Top-level tests/ directory — search for matching test files recursively
+// Top-level tests/ directory — search for matching test files recursively.
+// Guards: symlink rejection (prevents tests/evil -> / traversal), depth cap (5 levels),
+// short-circuit on first match, and parent-directory context check to avoid basename
+// collisions (tests/api/handler.test.js must NOT match src/cli/handler.js).
 if (projectRoot) {
   const topTestsDir = path.join(projectRoot, "tests");
   try {
     if (fs.statSync(topTestsDir).isDirectory()) {
-      const walkForTests = (dirPath) => {
+      const MAX_DEPTH = 5;
+      // Source-root names that do not carry module identity — no parent-dir guard needed.
+      const SOURCE_ROOTS = new Set(["src", "lib", "app", "pkg", "internal", "source", "sources"]);
+      const implParent = path.basename(dir);
+      const implIsInSourceRoot = SOURCE_ROOTS.has(implParent);
+      // found flag enables short-circuit: stop walking once a match is discovered.
+      const state = { found: false };
+      const walkForTests = (dirPath, depth) => {
+        if (state.found || depth > MAX_DEPTH) return;
         let entries;
         try {
           entries = fs.readdirSync(dirPath, { withFileTypes: true });
@@ -177,15 +188,30 @@ if (projectRoot) {
           return;
         }
         for (const entry of entries) {
+          if (state.found) return;
+          // Skip symlinks to avoid escaping the project tree (e.g., tests/evil -> /)
+          if (entry.isSymbolicLink()) continue;
+          // Skip node_modules to avoid traversing installed packages
+          if (entry.name === "node_modules") continue;
           const fullPath = path.join(dirPath, entry.name);
           if (entry.isDirectory()) {
-            walkForTests(fullPath);
+            walkForTests(fullPath, depth + 1);
           } else if (entry.isFile() && isCorrespondingTest(fullPath, name)) {
-            CANDIDATE_PATTERNS.push(fullPath);
+            // Apply parent-directory guard to prevent basename collisions.
+            // When the impl is in a named module dir (e.g. src/cli/), only accept
+            // tests whose immediate parent matches (e.g. tests/cli/handler.test.js).
+            // When the impl is in a generic source root (src/, lib/), any location matches.
+            const testParent = path.basename(path.dirname(fullPath));
+            const parentOk = implIsInSourceRoot || testParent === implParent;
+            if (parentOk) {
+              CANDIDATE_PATTERNS.push(fullPath);
+              state.found = true;
+              return;
+            }
           }
         }
       };
-      walkForTests(topTestsDir);
+      walkForTests(topTestsDir, 0);
     }
   } catch {
     // No top-level tests/ directory — fine
