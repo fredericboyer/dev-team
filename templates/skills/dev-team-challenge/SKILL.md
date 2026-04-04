@@ -1,6 +1,7 @@
 ---
 name: dev-team-challenge
 description: Challenge a proposed approach, implementation, or design decision. Use when the user says "challenge this", "what could go wrong", "play devil's advocate", or wants a critical review of an idea before committing to it.
+disable-model-invocation: false
 ---
 
 Critically examine the following proposal or implementation: $ARGUMENTS
