@@ -2190,24 +2190,33 @@ describe("dev-team-review-gate", () => {
     }
 
     /**
-     * Helper: stage a file and return its content hash (first 12 chars of SHA-256).
+     * Helper: stage a file.
      */
     function stageFile(filePath, content) {
       const dir = path.dirname(filePath);
       fs.mkdirSync(dir, { recursive: true });
       fs.writeFileSync(filePath, content);
       execFileSync("git", ["-C", tmpDir, "add", filePath], { stdio: "pipe" });
-      const { createHash } = require("crypto");
-      return createHash("sha256").update(Buffer.from(content)).digest("hex").slice(0, 12);
     }
 
     /**
-     * Helper: write a review sidecar file.
+     * Helper: get current branch and its sanitized form (matches hook logic).
      */
-    function writeSidecar(agent, contentHash, data = {}) {
+    function getBranchInfo() {
+      const branch = execFileSync("git", ["-C", tmpDir, "rev-parse", "--abbrev-ref", "HEAD"], {
+        encoding: "utf-8",
+      }).trim();
+      const sanitized = branch.replace(/[^a-zA-Z0-9-]/g, "-");
+      return { branch, sanitized };
+    }
+
+    /**
+     * Helper: write a review sidecar file keyed by sanitized branch name.
+     */
+    function writeSidecar(agent, sanitizedBranch, data = {}) {
       const reviewsDir = path.join(tmpDir, ".dev-team", ".reviews");
       fs.mkdirSync(reviewsDir, { recursive: true });
-      const sidecarPath = path.join(reviewsDir, `${agent}--${contentHash}.json`);
+      const sidecarPath = path.join(reviewsDir, `${agent}--${sanitizedBranch}.json`);
       fs.writeFileSync(sidecarPath, JSON.stringify(data));
     }
 
@@ -2233,11 +2242,12 @@ describe("dev-team-review-gate", () => {
       assert.ok(result.stderr.includes("reviews missing"), "should mention missing reviews");
     });
 
-    it("exits 0 when any sidecar exists (SIMPLE task)", () => {
+    it("exits 0 when any sidecar exists for the branch (SIMPLE task)", () => {
       const content = "module.exports = {}";
-      const hash = stageFile(path.join(tmpDir, "src", "handler.js"), content);
-      // SIMPLE task: any sidecar for the content hash suffices
-      writeSidecar("dev-team-knuth", hash);
+      stageFile(path.join(tmpDir, "src", "handler.js"), content);
+      const { sanitized } = getBranchInfo();
+      // SIMPLE task: any sidecar for the current branch suffices
+      writeSidecar("dev-team-knuth", sanitized);
       const result = runGate('git commit -m "reviewed"');
       assert.equal(result.code, 0, `Expected exit 0, stderr: ${result.stderr}`);
     });
@@ -2245,43 +2255,39 @@ describe("dev-team-review-gate", () => {
     it("blocks when implementation staged with no sidecars (SIMPLE task)", () => {
       const content = "module.exports = {}";
       stageFile(path.join(tmpDir, "src", "handler.js"), content);
-      // No sidecars written — SIMPLE task requires at least one
+      // No sidecars written — SIMPLE task requires at least one for this branch
       const result = runGate('git commit -m "no sidecars"');
       assert.equal(result.code, 2, "should block with no sidecars");
       assert.ok(result.stderr.includes("no review found"), "should indicate no review found");
     });
 
-    it("blocks when sidecar hash does not match staged content", () => {
+    it("blocks when sidecar is keyed to a different branch", () => {
       const content = "module.exports = {}";
       stageFile(path.join(tmpDir, "src", "handler.js"), content);
-      // Write sidecars with wrong hash (stale review)
-      writeSidecar("dev-team-knuth", "wronghash1234");
-      writeSidecar("dev-team-brooks", "wronghash1234");
-      const result = runGate('git commit -m "stale review"');
-      assert.equal(result.code, 2, "stale review sidecars should not match");
+      // Write sidecars keyed to a different branch — should not match current branch
+      writeSidecar("dev-team-knuth", "feat-other-branch");
+      writeSidecar("dev-team-brooks", "feat-other-branch");
+      const result = runGate('git commit -m "wrong branch sidecar"');
+      assert.equal(result.code, 2, "sidecars for a different branch should not match");
     });
 
     it("COMPLEX task: blocks when required reviewer sidecar is missing", () => {
       const content = "module.exports = {}";
-      const hash = stageFile(path.join(tmpDir, "src", "auth", "login.js"), content);
+      stageFile(path.join(tmpDir, "src", "auth", "login.js"), content);
+      const { branch, sanitized } = getBranchInfo();
       // Write assessment sidecar marking this as COMPLEX with szabo required
       const assessmentsDir = path.join(tmpDir, ".dev-team", ".assessments");
       fs.mkdirSync(assessmentsDir, { recursive: true });
-      const branchResult = require("child_process")
-        .execFileSync("git", ["-C", tmpDir, "rev-parse", "--abbrev-ref", "HEAD"], {
-          encoding: "utf-8",
-        })
-        .trim();
-      const safeBranch = branchResult.replace(/[^a-zA-Z0-9._-]/g, "_");
       fs.writeFileSync(
-        path.join(assessmentsDir, `${safeBranch}.json`),
+        path.join(assessmentsDir, `${sanitized}.json`),
         JSON.stringify({
+          branch,
           complexity: "COMPLEX",
           requiredReviewers: ["dev-team-szabo", "dev-team-knuth"],
         }),
       );
       // Provide knuth but not szabo
-      writeSidecar("dev-team-knuth", hash);
+      writeSidecar("dev-team-knuth", sanitized);
       const result = runGate('git commit -m "complex without szabo"');
       assert.equal(result.code, 2, "COMPLEX task should require szabo");
       assert.ok(result.stderr.includes("dev-team-szabo"), "should list szabo as missing");
@@ -2289,25 +2295,21 @@ describe("dev-team-review-gate", () => {
 
     it("COMPLEX task: exits 0 when all required reviewers present", () => {
       const content = "module.exports = {}";
-      const hash = stageFile(path.join(tmpDir, "src", "auth", "login.js"), content);
+      stageFile(path.join(tmpDir, "src", "auth", "login.js"), content);
+      const { branch, sanitized } = getBranchInfo();
       // Write assessment sidecar marking this as COMPLEX
       const assessmentsDir = path.join(tmpDir, ".dev-team", ".assessments");
       fs.mkdirSync(assessmentsDir, { recursive: true });
-      const branchResult = require("child_process")
-        .execFileSync("git", ["-C", tmpDir, "rev-parse", "--abbrev-ref", "HEAD"], {
-          encoding: "utf-8",
-        })
-        .trim();
-      const safeBranch = branchResult.replace(/[^a-zA-Z0-9._-]/g, "_");
       fs.writeFileSync(
-        path.join(assessmentsDir, `${safeBranch}.json`),
+        path.join(assessmentsDir, `${sanitized}.json`),
         JSON.stringify({
+          branch,
           complexity: "COMPLEX",
           requiredReviewers: ["dev-team-szabo", "dev-team-knuth"],
         }),
       );
-      writeSidecar("dev-team-szabo", hash);
-      writeSidecar("dev-team-knuth", hash);
+      writeSidecar("dev-team-szabo", sanitized);
+      writeSidecar("dev-team-knuth", sanitized);
       const result = runGate('git commit -m "complex fully reviewed"');
       assert.equal(result.code, 0, `Expected exit 0, stderr: ${result.stderr}`);
     });
@@ -2316,13 +2318,13 @@ describe("dev-team-review-gate", () => {
 
     it("blocks on unresolved [DEFECT] findings", () => {
       const content = "module.exports = {}";
-      const hash = stageFile(path.join(tmpDir, "src", "handler.js"), content);
-      writeSidecar("dev-team-knuth", hash, {
+      stageFile(path.join(tmpDir, "src", "handler.js"), content);
+      const { sanitized } = getBranchInfo();
+      writeSidecar("dev-team-knuth", sanitized, {
         findings: [
           { classification: "[DEFECT]", description: "Null pointer risk", resolved: false },
         ],
       });
-      writeSidecar("dev-team-brooks", hash);
       const result = runGate('git commit -m "has defect"');
       assert.equal(result.code, 2, "should block on unresolved defects");
       assert.ok(result.stderr.includes("[DEFECT]"), "should mention DEFECT");
@@ -2331,37 +2333,37 @@ describe("dev-team-review-gate", () => {
 
     it("allows resolved [DEFECT] findings", () => {
       const content = "module.exports = {}";
-      const hash = stageFile(path.join(tmpDir, "src", "handler.js"), content);
-      writeSidecar("dev-team-knuth", hash, {
+      stageFile(path.join(tmpDir, "src", "handler.js"), content);
+      const { sanitized } = getBranchInfo();
+      writeSidecar("dev-team-knuth", sanitized, {
         findings: [{ classification: "[DEFECT]", description: "Fixed issue", resolved: true }],
       });
-      writeSidecar("dev-team-brooks", hash);
       const result = runGate('git commit -m "defect resolved"');
       assert.equal(result.code, 0, `Expected exit 0, stderr: ${result.stderr}`);
     });
 
     it("allows [RISK] findings (advisory, not blocking)", () => {
       const content = "module.exports = {}";
-      const hash = stageFile(path.join(tmpDir, "src", "handler.js"), content);
-      writeSidecar("dev-team-knuth", hash, {
+      stageFile(path.join(tmpDir, "src", "handler.js"), content);
+      const { sanitized } = getBranchInfo();
+      writeSidecar("dev-team-knuth", sanitized, {
         findings: [
           { classification: "[RISK]", description: "Potential perf issue", resolved: false },
         ],
       });
-      writeSidecar("dev-team-brooks", hash);
       const result = runGate('git commit -m "risk is advisory"');
       assert.equal(result.code, 0, `Expected exit 0, stderr: ${result.stderr}`);
     });
 
     it("allows [SUGGESTION] findings (advisory, not blocking)", () => {
       const content = "module.exports = {}";
-      const hash = stageFile(path.join(tmpDir, "src", "handler.js"), content);
-      writeSidecar("dev-team-knuth", hash, {
+      stageFile(path.join(tmpDir, "src", "handler.js"), content);
+      const { sanitized } = getBranchInfo();
+      writeSidecar("dev-team-knuth", sanitized, {
         findings: [
           { classification: "[SUGGESTION]", description: "Could refactor", resolved: false },
         ],
       });
-      writeSidecar("dev-team-brooks", hash);
       const result = runGate('git commit -m "suggestion is advisory"');
       assert.equal(result.code, 0, `Expected exit 0, stderr: ${result.stderr}`);
     });
@@ -2370,12 +2372,12 @@ describe("dev-team-review-gate", () => {
 
     it("skips defect check for LIGHT review depth (advisory only)", () => {
       const content = "module.exports = {}";
-      const hash = stageFile(path.join(tmpDir, "src", "handler.js"), content);
-      writeSidecar("dev-team-knuth", hash, {
+      stageFile(path.join(tmpDir, "src", "handler.js"), content);
+      const { sanitized } = getBranchInfo();
+      writeSidecar("dev-team-knuth", sanitized, {
         reviewDepth: "LIGHT",
         findings: [{ classification: "[DEFECT]", description: "Minor issue", resolved: false }],
       });
-      writeSidecar("dev-team-brooks", hash);
       const result = runGate('git commit -m "light review"');
       assert.equal(result.code, 0, "LIGHT reviews should be advisory only");
     });
@@ -2384,9 +2386,9 @@ describe("dev-team-review-gate", () => {
 
     it("handles sidecar with non-array findings (sanitized to empty)", () => {
       const content = "module.exports = {}";
-      const hash = stageFile(path.join(tmpDir, "src", "handler.js"), content);
-      writeSidecar("dev-team-knuth", hash, { findings: "not-an-array" });
-      writeSidecar("dev-team-brooks", hash);
+      stageFile(path.join(tmpDir, "src", "handler.js"), content);
+      const { sanitized } = getBranchInfo();
+      writeSidecar("dev-team-knuth", sanitized, { findings: "not-an-array" });
       const result = runGate('git commit -m "malformed findings"');
       assert.equal(
         result.code,
@@ -2397,24 +2399,25 @@ describe("dev-team-review-gate", () => {
 
     it("handles sidecar with null findings entries (filtered out)", () => {
       const content = "module.exports = {}";
-      const hash = stageFile(path.join(tmpDir, "src", "handler.js"), content);
-      writeSidecar("dev-team-knuth", hash, {
+      stageFile(path.join(tmpDir, "src", "handler.js"), content);
+      const { sanitized } = getBranchInfo();
+      writeSidecar("dev-team-knuth", sanitized, {
         findings: [null, { classification: "[RISK]", description: "ok", resolved: false }],
       });
-      writeSidecar("dev-team-brooks", hash);
       const result = runGate('git commit -m "null findings"');
       assert.equal(result.code, 0, `Null findings should be filtered, stderr: ${result.stderr}`);
     });
 
     it("rejects sidecar that is a symlink", { skip: process.platform === "win32" }, () => {
       const content = "module.exports = {}";
-      const hash = stageFile(path.join(tmpDir, "src", "handler.js"), content);
+      stageFile(path.join(tmpDir, "src", "handler.js"), content);
+      const { sanitized } = getBranchInfo();
       // Create a valid sidecar, then replace with symlink
       const reviewsDir = path.join(tmpDir, ".dev-team", ".reviews");
       fs.mkdirSync(reviewsDir, { recursive: true });
       const targetFile = path.join(tmpDir, "sidecar-target.json");
       fs.writeFileSync(targetFile, JSON.stringify({}));
-      const sidecarPath = path.join(reviewsDir, `dev-team-knuth--${hash}.json`);
+      const sidecarPath = path.join(reviewsDir, `dev-team-knuth--${sanitized}.json`);
       fs.symlinkSync(targetFile, sidecarPath);
       // No real sidecar — only the symlink exists, which is rejected
       const result = runGate('git commit -m "symlink sidecar"');
@@ -2425,9 +2428,10 @@ describe("dev-team-review-gate", () => {
 
     it("writes cleanup manifest on successful gate pass", () => {
       const content = "module.exports = {}";
-      const hash = stageFile(path.join(tmpDir, "src", "handler.js"), content);
-      writeSidecar("dev-team-knuth", hash);
-      writeSidecar("dev-team-brooks", hash);
+      stageFile(path.join(tmpDir, "src", "handler.js"), content);
+      const { sanitized } = getBranchInfo();
+      writeSidecar("dev-team-knuth", sanitized);
+      writeSidecar("dev-team-brooks", sanitized);
       const result = runGate('git commit -m "with cleanup"');
       assert.equal(result.code, 0, `Expected exit 0, stderr: ${result.stderr}`);
       const manifestPath = path.join(tmpDir, ".dev-team", ".reviews", ".cleanup-manifest.json");
@@ -2441,9 +2445,9 @@ describe("dev-team-review-gate", () => {
 
     it("only gates implementation files, not co-staged non-code files", () => {
       stageFile(path.join(tmpDir, "README.md"), "# Updated docs");
-      const content = "module.exports = {}";
-      const hash = stageFile(path.join(tmpDir, "src", "handler.js"), content);
-      writeSidecar("dev-team-knuth", hash);
+      stageFile(path.join(tmpDir, "src", "handler.js"), "module.exports = {}");
+      const { sanitized } = getBranchInfo();
+      writeSidecar("dev-team-knuth", sanitized);
       const result = runGate('git commit -m "mixed files"');
       assert.equal(
         result.code,
@@ -2788,5 +2792,124 @@ describe("dev-team-merge-gate", () => {
         assert.equal(result.code, 0, "PR number should resolve to branch via gh pr view");
       },
     );
+  });
+});
+
+// ─── Implementer Guard ──────────────────────────────────────────────────────
+
+describe("dev-team-implementer-guard", () => {
+  const HOOK = "dev-team-implementer-guard.js";
+  let tmpDir;
+
+  function runGuard(input, extraEnv = {}) {
+    const jsonInput = JSON.stringify(input);
+    try {
+      const stdout = execFileSync(process.execPath, [path.join(HOOKS_DIR, HOOK), jsonInput], {
+        encoding: "utf-8",
+        timeout: 5000,
+        cwd: tmpDir,
+        env: { ...process.env, PATH: process.env.PATH, ...extraEnv },
+      });
+      return { code: 0, stdout, stderr: "" };
+    } catch (err) {
+      return { code: err.status, stdout: err.stdout || "", stderr: err.stderr || "" };
+    }
+  }
+
+  beforeEach(() => {
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "impl-guard-"));
+    // Create .dev-team directory structure
+    fs.mkdirSync(path.join(tmpDir, ".dev-team"), { recursive: true });
+    fs.writeFileSync(
+      path.join(tmpDir, ".dev-team", "config.json"),
+      JSON.stringify({ workflow: { review: true } }),
+    );
+    // Initialize a git repo on a feature branch
+    execFileSync("git", ["init"], { cwd: tmpDir, stdio: "pipe" });
+    execFileSync("git", ["checkout", "-b", "feat/123-test"], { cwd: tmpDir, stdio: "pipe" });
+  });
+
+  afterEach(() => {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  });
+
+  it("allows non-SendMessage tool calls", () => {
+    const result = runGuard({ tool_name: "Bash", tool_input: { command: "ls" } });
+    assert.equal(result.code, 0);
+  });
+
+  it("allows SendMessage that is not a shutdown_request", () => {
+    const result = runGuard({
+      tool_name: "SendMessage",
+      tool_input: { to: "voss-implement", message: "status update" },
+    });
+    assert.equal(result.code, 0);
+  });
+
+  it("allows shutdown of non-implement agents", () => {
+    const result = runGuard({
+      tool_name: "SendMessage",
+      tool_input: {
+        to: "knuth-review",
+        message: { type: "shutdown_request" },
+      },
+    });
+    assert.equal(result.code, 0);
+  });
+
+  it("blocks shutdown of implementer without review evidence", () => {
+    const result = runGuard({
+      tool_name: "SendMessage",
+      tool_input: {
+        to: "voss-implement-773",
+        message: { type: "shutdown_request" },
+      },
+    });
+    assert.equal(result.code, 2, "should block shutdown without review sidecars");
+    assert.ok(result.stderr.includes("BLOCKED"), "should include BLOCKED message");
+  });
+
+  it("allows shutdown of implementer with review evidence", () => {
+    // Create a review sidecar matching the branch
+    const reviewsDir = path.join(tmpDir, ".dev-team", ".reviews");
+    fs.mkdirSync(reviewsDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(reviewsDir, "knuth--feat-123-test.json"),
+      JSON.stringify({ agent: "knuth", branch: "feat/123-test" }),
+    );
+    const result = runGuard({
+      tool_name: "SendMessage",
+      tool_input: {
+        to: "voss-implement-773",
+        message: { type: "shutdown_request" },
+      },
+    });
+    assert.equal(result.code, 0, "should allow shutdown with review evidence");
+  });
+
+  it("allows shutdown when workflow.review is false", () => {
+    fs.writeFileSync(
+      path.join(tmpDir, ".dev-team", "config.json"),
+      JSON.stringify({ workflow: { review: false } }),
+    );
+    const result = runGuard({
+      tool_name: "SendMessage",
+      tool_input: {
+        to: "voss-implement-773",
+        message: { type: "shutdown_request" },
+      },
+    });
+    assert.equal(result.code, 0, "should allow when review disabled");
+  });
+
+  it("allows --force-shutdown bypass", () => {
+    const result = runGuard({
+      tool_name: "SendMessage",
+      tool_input: {
+        to: "voss-implement-773",
+        message: "shutdown_request --force-shutdown",
+      },
+    });
+    assert.equal(result.code, 0, "should allow with force-shutdown");
   });
 });

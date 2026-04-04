@@ -5,11 +5,16 @@
  * PreToolUse hook on Bash — stateless commit gates for adversarial review enforcement.
  *
  * Intercepts `git commit` and enforces two gates:
- *   Gate 1 — Review evidence: required review sidecar files must exist
+ *   Gate 1 — Review evidence: required review sidecar files must exist for this branch
  *   Gate 2 — Findings resolution: no unresolved [DEFECT] findings
  *
+ * Sidecar naming (ADR-044):
+ *   Review sidecars are keyed by branch name, not content hash:
+ *   .dev-team/.reviews/<agent>--<sanitized-branch>.json
+ *   Branch sanitization: replace any char that is not alphanumeric or hyphen with hyphen.
+ *
  * Agent selection authority:
- *   - SIMPLE tasks: any sidecar matching the content hash suffices (any reviewer)
+ *   - SIMPLE tasks: any sidecar matching the current branch suffices (any reviewer)
  *   - COMPLEX tasks: the assessment sidecar at .dev-team/.assessments/<branch>.json
  *     lists requiredReviewers[] — each must have a matching sidecar.
  *
@@ -18,12 +23,11 @@
  *   - LIGHT review depth (from sidecar metadata) is advisory only
  *   - Non-code files are not gated
  *
- * See ADR-029 for design rationale.
+ * See ADR-029, ADR-044 for design rationale.
  */
 
 "use strict";
 
-const { createHash } = require("crypto");
 const { execFileSync } = require("child_process");
 const fs = require("fs");
 const path = require("path");
@@ -51,7 +55,7 @@ if (/--skip-review\b/.test(argsBeforeMessage)) {
   process.exit(0);
 }
 
-// ─── File classification ──────────────────────────────────────────────────────────────
+// --- File classification ---
 
 const CODE_FILE_PATTERN =
   /\.(js|ts|jsx|tsx|py|rb|go|java|rs|c|cpp|cs|swift|kt|scala|php|r|sh|bash|zsh|fish)$/i;
@@ -62,19 +66,27 @@ function isGatedFile(filePath) {
   return CODE_FILE_PATTERN.test(fullPath) && !TEST_FILE_PATTERN.test(fullPath);
 }
 
-function stagedContentHash(filePath) {
+// --- Branch resolution ---
+
+function currentBranch() {
   try {
-    const content = execFileSync("git", ["show", `:${filePath}`], {
-      encoding: "buffer",
-      timeout: 5000,
-    });
-    return createHash("sha256").update(content).digest("hex").slice(0, 12);
+    const branch = execFileSync("git", ["rev-parse", "--abbrev-ref", "HEAD"], {
+      encoding: "utf-8",
+      stdio: ["pipe", "pipe", "pipe"],
+      timeout: 3000,
+    }).trim();
+    if (!branch || branch === "HEAD") return null;
+    return branch;
   } catch {
     return null;
   }
 }
 
-// ─── Main gate logic ──────────────────────────────────────────────────────────────────────────────
+function sanitizeBranch(branch) {
+  return branch.replace(/[^a-zA-Z0-9-]/g, "-");
+}
+
+// --- Main gate logic ---
 
 let stagedFiles = "";
 try {
@@ -132,12 +144,12 @@ function readSidecar(sidecarPath) {
   }
 }
 
-function findSidecarsForHash(contentHash) {
+function findSidecarsForBranch(sanitizedBranch) {
   const results = [];
   try {
     const entries = fs.readdirSync(reviewsDir);
     for (const entry of entries) {
-      if (!entry.endsWith(`--${contentHash}.json`)) continue;
+      if (!entry.endsWith("--" + sanitizedBranch + ".json")) continue;
       const sidecarPath = path.join(reviewsDir, entry);
       const data = readSidecar(sidecarPath);
       if (data) results.push({ path: sidecarPath, data, name: entry });
@@ -148,49 +160,50 @@ function findSidecarsForHash(contentHash) {
   return results;
 }
 
-function findSidecar(agent, contentHash) {
-  const expectedName = `${agent}--${contentHash}.json`;
+function findSidecar(agent, sanitizedBranch) {
+  const expectedName = agent + "--" + sanitizedBranch + ".json";
   const sidecarPath = path.join(reviewsDir, expectedName);
   const data = readSidecar(sidecarPath);
   if (!data) return null;
   return { path: sidecarPath, data };
 }
 
-// ─── Load assessment sidecar ─────────────────────────────────────────────────────
+// --- Resolve current branch ---
+
+const branch = currentBranch();
+if (!branch) {
+  // Cannot determine branch - skip gates to avoid blocking detached HEAD states
+  process.exit(0);
+}
+const sanitizedBranch = sanitizeBranch(branch);
+
+// --- Load assessment sidecar ---
 
 let assessment = null;
 try {
-  const branch = execFileSync("git", ["rev-parse", "--abbrev-ref", "HEAD"], {
-    encoding: "utf-8",
-    stdio: ["pipe", "pipe", "pipe"],
-    timeout: 3000,
-  }).trim();
-  if (branch && branch !== "HEAD") {
-    const safeBranch = branch.replace(/[^a-zA-Z0-9-]/g, "-");
-    const assessmentPath = path.join(
-      process.cwd(),
-      ".dev-team",
-      ".assessments",
-      `${safeBranch}.json`,
-    );
-    try {
-      const stat = fs.lstatSync(assessmentPath);
-      if (!stat.isSymbolicLink() && stat.isFile()) {
-        const raw = fs.readFileSync(assessmentPath, "utf-8");
-        const parsed = JSON.parse(raw);
-        if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
-          assessment = parsed;
-        }
+  const assessmentPath = path.join(
+    process.cwd(),
+    ".dev-team",
+    ".assessments",
+    sanitizedBranch + ".json",
+  );
+  try {
+    const stat = fs.lstatSync(assessmentPath);
+    if (!stat.isSymbolicLink() && stat.isFile()) {
+      const raw = fs.readFileSync(assessmentPath, "utf-8");
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+        assessment = parsed;
       }
-    } catch {
-      // No assessment sidecar
     }
+  } catch {
+    // No assessment sidecar
   }
 } catch {
-  // git not available
+  // assessment loading failed
 }
 
-// ─── Gate 1: Review evidence ────────────────────────────────────────────────────────────────────────────
+// --- Gate 1: Review evidence ---
 
 const isComplexTask =
   assessment &&
@@ -200,83 +213,65 @@ const isComplexTask =
 
 const missingReviews = [];
 
-for (const file of gatedFiles) {
-  const contentHash = stagedContentHash(file);
-  if (!contentHash) continue;
-
-  if (isComplexTask) {
-    for (const agent of assessment.requiredReviewers) {
-      const sidecar = findSidecar(agent, contentHash);
-      if (!sidecar) {
-        missingReviews.push({ file, agent });
-      }
+if (isComplexTask) {
+  for (const agent of assessment.requiredReviewers) {
+    const sidecar = findSidecar(agent, sanitizedBranch);
+    if (!sidecar) {
+      missingReviews.push({ agent });
     }
-  } else {
-    const sidecars = findSidecarsForHash(contentHash);
-    if (sidecars.length === 0) {
-      missingReviews.push({ file, agent: null });
-    }
+  }
+} else {
+  const sidecars = findSidecarsForBranch(sanitizedBranch);
+  if (sidecars.length === 0) {
+    missingReviews.push({ agent: null });
   }
 }
 
 if (missingReviews.length > 0) {
-  console.error("[dev-team review-gate] BLOCKED — required reviews missing:\n");
-  const byFile = {};
-  for (const { file, agent } of missingReviews) {
-    if (!byFile[file]) byFile[file] = [];
-    byFile[file].push(agent);
-  }
-  for (const [file, agents] of Object.entries(byFile)) {
-    console.error(`  ${file}:`);
-    for (const agent of agents) {
-      if (agent) {
-        console.error(`    - ${agent} (required by COMPLEX task assessment)`);
-      } else {
-        console.error(`    - (no review found — run /dev-team:review)`);
-      }
+  console.error("[dev-team review-gate] BLOCKED - required reviews missing:\n");
+  console.error("  Branch: " + branch);
+  for (const { agent } of missingReviews) {
+    if (agent) {
+      console.error("    - " + agent + " (required by COMPLEX task assessment)");
+    } else {
+      console.error("    - (no review found for this branch - run /dev-team:review)");
     }
   }
   if (isComplexTask) {
-    console.error(`\nCOMPLEX task: required reviewers: ${assessment.requiredReviewers.join(", ")}`);
+    console.error("\nCOMPLEX task: required reviewers: " + assessment.requiredReviewers.join(", "));
   }
   console.error("\nRun /dev-team:review, or use --skip-review to bypass.");
   process.exit(2);
 }
 
-// ─── Gate 2: Findings resolution ───────────────────────────────────────────────────────────────────────────────
+// --- Gate 2: Findings resolution ---
 
 const unresolvedDefects = [];
 
-for (const file of gatedFiles) {
-  const contentHash = stagedContentHash(file);
-  if (!contentHash) continue;
+const allSidecars = findSidecarsForBranch(sanitizedBranch);
+for (const { data: sidecar, name } of allSidecars) {
+  if (sidecar.reviewDepth === "LIGHT") continue;
 
-  const sidecars = findSidecarsForHash(contentHash);
-  for (const { data: sidecar, name } of sidecars) {
-    if (sidecar.reviewDepth === "LIGHT") continue;
-
-    const findings = sidecar.findings;
-    if (!Array.isArray(findings)) continue;
-    const agent = name.split("--")[0];
-    for (const finding of findings) {
-      if (finding.classification === "[DEFECT]" && !finding.resolved) {
-        unresolvedDefects.push({
-          file,
-          agent,
-          description: finding.description,
-          line: finding.line,
-        });
-      }
+  const findings = sidecar.findings;
+  if (!Array.isArray(findings)) continue;
+  const agent = name.split("--")[0];
+  for (const finding of findings) {
+    if (finding.classification === "[DEFECT]" && !finding.resolved) {
+      unresolvedDefects.push({
+        agent,
+        description: finding.description,
+        line: finding.line,
+      });
     }
   }
 }
 
 if (unresolvedDefects.length > 0) {
-  console.error("[dev-team review-gate] BLOCKED — unresolved [DEFECT] findings:\n");
-  for (const { file, agent, description, line } of unresolvedDefects) {
-    const loc = line ? `:${line}` : "";
-    console.error(`  ${file}${loc} (${agent}):`);
-    console.error(`    ${description}`);
+  console.error("[dev-team review-gate] BLOCKED - unresolved [DEFECT] findings:\n");
+  for (const { agent, description, line } of unresolvedDefects) {
+    const loc = line ? ":" + line : "";
+    console.error("  " + agent + loc + ":");
+    console.error("    " + description);
   }
   console.error(
     "\nFix the defects and re-run reviews, dismiss findings explicitly, or use --skip-review to bypass.",
@@ -284,22 +279,15 @@ if (unresolvedDefects.length > 0) {
   process.exit(2);
 }
 
-// ─── Cleanup manifest ────────────────────────────────────────────────────────────────────────────────────
+// --- Cleanup manifest ---
 
 try {
   if (fs.existsSync(reviewsDir)) {
-    const manifest = [];
-    for (const file of gatedFiles) {
-      const contentHash = stagedContentHash(file);
-      if (!contentHash) continue;
-      const sidecars = findSidecarsForHash(contentHash);
-      for (const { name } of sidecars) {
-        manifest.push(name);
-      }
-    }
+    const sidecars = findSidecarsForBranch(sanitizedBranch);
+    const manifest = sidecars.map(({ name }) => name);
     if (manifest.length > 0) {
       const manifestPath = path.join(reviewsDir, ".cleanup-manifest.json");
-      const tmpFile = `${manifestPath}.${process.pid}.tmp`;
+      const tmpFile = manifestPath + "." + process.pid + ".tmp";
       fs.writeFileSync(tmpFile, JSON.stringify(manifest, null, 2), { mode: 0o600 });
       fs.renameSync(tmpFile, manifestPath);
     }
