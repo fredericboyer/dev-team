@@ -516,11 +516,6 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
       copyFile(libFile, path.join(hooksDir, "lib", relative));
     }
   }
-  // Copy agent-patterns.json (authoritative pattern source for hooks)
-  const patternsSrc = path.join(templates, "hooks", "agent-patterns.json");
-  if (fileExists(patternsSrc)) {
-    copyFile(patternsSrc, path.join(hooksDir, "agent-patterns.json"));
-  }
 
   // Step 11: Merge hook settings
   const settingsContent = readFile(path.join(templates, "settings.json"));

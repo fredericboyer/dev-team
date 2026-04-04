@@ -100,7 +100,7 @@ Do NOT skip this. Do NOT treat hook output as optional. If you believe a review 
 - `/dev-team:extract` — Borges memory extraction, metrics verification, and memory formation gates
 - `/dev-team:scorecard` — audit process conformance for a completed task
 
-> **Non-JS/TS projects:** Hooks detect the ecosystem and delegate language-specific reasoning to agents. File patterns in `agent-patterns.json` cover common conventions; agents apply their built-in knowledge for language-specific test naming, build tools, and framework structures beyond these patterns (see ADR-034).
+> **Non-JS/TS projects:** Hooks detect the ecosystem and delegate language-specific reasoning to agents. The review skill selects the appropriate specialist agents based on changed file domains. Agents apply their built-in knowledge for language-specific test naming, build tools, and framework structures (see ADR-034).
 
 > **Multi-runtime support:** Use `--runtime` flag during `dev-team init` to target additional runtimes (e.g., `--runtime claude,copilot` or `--runtime codex`). Each runtime adapter generates native configuration files. Run `dev-team update` after changing runtimes to regenerate all adapter output.
 

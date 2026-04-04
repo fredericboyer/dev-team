@@ -162,7 +162,7 @@ describe("dev-team-review-gate", () => {
       }
     });
 
-    it("blocks when only some required sidecars exist", () => {
+    it("exits 0 when any single sidecar exists (SIMPLE task)", () => {
       const tmpDir = createTempRepo();
       try {
         const code = "module.exports = {}";
@@ -171,7 +171,7 @@ describe("dev-team-review-gate", () => {
 
         const hash = contentHash(code);
 
-        // Only provide knuth, missing brooks
+        // SIMPLE task: only knuth sidecar — no assessment, so any sidecar suffices
         writeSidecar(tmpDir, "dev-team-knuth", hash, {
           agent: "dev-team-knuth",
           file: "handler.js",
@@ -181,8 +181,7 @@ describe("dev-team-review-gate", () => {
         });
 
         const result = runGate({ command: "git commit -m 'feat'" }, tmpDir);
-        assert.equal(result.code, 2, "should block for missing brooks review");
-        assert.ok(result.stderr.includes("dev-team-brooks"));
+        assert.equal(result.code, 0, `SIMPLE task: one sidecar should suffice: ${result.stderr}`);
       } finally {
         fs.rmSync(tmpDir, { recursive: true, force: true });
       }
@@ -502,8 +501,21 @@ describe("dev-team-review-gate", () => {
 
   // ─── Security-pattern files triggering Szabo ───────────────────────────────
 
-  describe("security-pattern file gating", () => {
-    it("requires dev-team-szabo sidecar for auth.js", () => {
+  describe("COMPLEX task — required reviewers from assessment sidecar", () => {
+    function writeAssessment(tmpDir, requiredReviewers) {
+      const branch = execFileSync("git", ["-C", tmpDir, "rev-parse", "--abbrev-ref", "HEAD"], {
+        encoding: "utf-8",
+      }).trim();
+      const safeBranch = branch.replace(/[^a-zA-Z0-9._-]/g, "_");
+      const assessmentsDir = path.join(tmpDir, ".dev-team", ".assessments");
+      fs.mkdirSync(assessmentsDir, { recursive: true });
+      fs.writeFileSync(
+        path.join(assessmentsDir, `${safeBranch}.json`),
+        JSON.stringify({ complexity: "COMPLEX", requiredReviewers }),
+      );
+    }
+
+    it("COMPLEX task blocks when a required reviewer sidecar is missing", () => {
       const tmpDir = createTempRepo();
       try {
         const code = "module.exports = { login() {} }";
@@ -511,8 +523,9 @@ describe("dev-team-review-gate", () => {
         execFileSync("git", ["add", "auth.js"], { cwd: tmpDir, encoding: "utf-8" });
 
         const hash = contentHash(code);
+        writeAssessment(tmpDir, ["dev-team-szabo", "dev-team-knuth"]);
 
-        // Provide knuth + brooks but NOT szabo
+        // Provide knuth but NOT szabo (which is required by assessment)
         writeSidecar(tmpDir, "dev-team-knuth", hash, {
           agent: "dev-team-knuth",
           file: "auth.js",
@@ -520,23 +533,16 @@ describe("dev-team-review-gate", () => {
           reviewDepth: "STANDARD",
           findings: [],
         });
-        writeSidecar(tmpDir, "dev-team-brooks", hash, {
-          agent: "dev-team-brooks",
-          file: "auth.js",
-          contentHash: hash,
-          reviewDepth: "STANDARD",
-          findings: [],
-        });
 
         const result = runGate({ command: "git commit -m 'feat: auth'" }, tmpDir);
-        assert.equal(result.code, 2, "should block — missing szabo review");
+        assert.equal(result.code, 2, "should block — missing required szabo review");
         assert.ok(result.stderr.includes("dev-team-szabo"), "should mention szabo");
       } finally {
         fs.rmSync(tmpDir, { recursive: true, force: true });
       }
     });
 
-    it("passes when szabo sidecar is provided for security file", () => {
+    it("COMPLEX task passes when all required reviewers present", () => {
       const tmpDir = createTempRepo();
       try {
         const code = "module.exports = { verify() {} }";
@@ -544,6 +550,7 @@ describe("dev-team-review-gate", () => {
         execFileSync("git", ["add", "token-service.ts"], { cwd: tmpDir, encoding: "utf-8" });
 
         const hash = contentHash(code);
+        writeAssessment(tmpDir, ["dev-team-szabo", "dev-team-knuth"]);
 
         writeSidecar(tmpDir, "dev-team-szabo", hash, {
           agent: "dev-team-szabo",
@@ -554,13 +561,6 @@ describe("dev-team-review-gate", () => {
         });
         writeSidecar(tmpDir, "dev-team-knuth", hash, {
           agent: "dev-team-knuth",
-          file: "token-service.ts",
-          contentHash: hash,
-          reviewDepth: "STANDARD",
-          findings: [],
-        });
-        writeSidecar(tmpDir, "dev-team-brooks", hash, {
-          agent: "dev-team-brooks",
           file: "token-service.ts",
           contentHash: hash,
           reviewDepth: "STANDARD",
@@ -665,15 +665,7 @@ describe("dev-team-review-gate", () => {
         );
         fs.symlinkSync(realFile, path.join(reviewsDir, `dev-team-knuth--${hash}.json`));
 
-        // Brooks sidecar is real
-        writeSidecar(tmpDir, "dev-team-brooks", hash, {
-          agent: "dev-team-brooks",
-          file: "handler.js",
-          contentHash: hash,
-          reviewDepth: "STANDARD",
-          findings: [],
-        });
-
+        // knuth is symlinked (rejected) and no other real sidecar exists — should block
         const result = runGate({ command: "git commit -m 'feat'" }, tmpDir);
         assert.equal(result.code, 2, "should reject symlinked sidecar");
       } finally {
