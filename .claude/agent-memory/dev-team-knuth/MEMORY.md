@@ -3,112 +3,14 @@
 
 ## Coverage Gaps Identified
 
-### [2026-03-25] No coverage tool configured — coverage is not measured
-- **Type**: PATTERN [verified]
-- **Source**: package.json analysis
-- **Tags**: testing, coverage
-- **Outcome**: verified
-- **Last-verified**: 2026-04-03 (v3.6.0 audit K-07 reconfirmed; Node 22 built-in --experimental-test-coverage available)
-- **Context**: No c8, istanbul, or similar coverage tool in devDependencies or scripts. Coverage gaps must be identified by code review, not metrics.
-
-### [2026-03-29] mergeClaudeMd duplicate BEGIN — FIXED in v1.8.0
-- **Type**: RISK [fixed]
-- **Source**: #461, PR #479
-- **Tags**: boundary-condition, merge-logic
-- **Outcome**: fixed
-- **Last-verified**: 2026-03-30
-- **Context**: Missing END marker now triggers replace-from-BEGIN-to-EOF instead of append. Also fixed END-before-BEGIN edge case by searching for END only after BEGIN position. Two distinct boundary conditions fixed in same PR.
-
-### [2026-03-29] v1.8.0: 18 new tests added — assertNotSymlink, assertNoSymlinkInPath, safeRegex
-- **Type**: PATTERN [new]
-- **Source**: #480, PR #480
-- **Tags**: testing, coverage, symlink, regex
-- **Outcome**: fixed
-- **Last-verified**: 2026-03-29
-- **Context**: Test coverage expanded for security-critical functions. Tests cover: leaf symlink rejection, ancestor symlink traversal, realpathSync design tradeoff, safeRegex nested quantifier rejection. Follows sentinel-throw pattern established in v1.7.0.
-
-## Recurring Boundary Conditions
-
-### [2026-03-25] Vocabulary alignment across agent/skill boundaries
-- **Type**: PATTERN [verified]
-- **Source**: v1.2.0 Branch A (#275, #266) — task skill review
-- **Tags**: vocabulary, cross-agent, skill-definition
-- **Outcome**: verified
-- **Last-verified**: 2026-03-29
-- **Context**: Finding outcome vocabularies must stay aligned between skill definitions that produce outcomes (task, review) and agents that consume them (Borges). The task skill originally used "addressed/deferred/disputed" but Borges expects "accepted/overruled/fixed/ignored". Mismatches break automated memory extraction.
+### [2026-03-25→2026-03-30] v1.2.0–v2.0 consolidated calibration
+- **Type**: CALIBRATION [compressed]
+- **Tags**: testing, coverage, boundary-condition, path-correctness, calibration, vocabulary
+- **Last-verified**: 2026-04-04
+- **Context**: **Coverage**: No coverage tool configured (reconfirmed v3.6.0); coverage gaps identified by code review. Test expansion in v1.7.0–v1.11.0 (symlink guards, sentinel-throw, init/update error paths, createAgent, CLI help). **Boundary conditions**: mergeClaudeMd BEGIN/END edge cases fixed (v1.8.0). Vocabulary alignment across agent/skill boundaries — 3 instances fixed (v1.2.0, v1.9.0 x2). **Path correctness**: recurring 6-time pattern (doctor.ts, status.ts, review skill, memory dir, merge skill .claude copy, agent-patterns.json). **Calibration**: v1.2.0 17 findings 0 overruled; v1.10.1 hotfix 2 ignored (defense-in-depth, error handling — no quality signal). **Composability**: skill-calls-skill pattern verified (v1.9.0). **Dual-code-path**: MCP deriveRequiredAgents diverged from hook (v2.0 K10, fixed). **Working directory**: stray commits from shared directory (v1.10.0, 2 bundled PRs).
 
 ## Calibration Log
 <!-- Challenges accepted/overruled — tunes adversarial intensity over time -->
-
-### [2026-03-25] v1.2.0–v1.7.0 calibration baseline (consolidated)
-- **Type**: CALIBRATION
-- **Tags**: audit, calibration, migration, path-correctness, testing
-- **Last-verified**: 2026-03-27
-- **Context**: v1.2.0: 17 findings, 0 overruled, 3/3 DEFECTs fixed. Naming/overlap suggestions tend to get deferred — raise threshold unless functionally ambiguous. Full audit (2026-03-26): 11 findings, all accepted. 2 DEFECTs were migration drift (doctor.ts + status.ts not updated when v1.6.0 moved files to .claude/rules/) — fixed in v1.6.1/v1.7.0. Coverage gaps on doctor.ts/status.ts/prompts.ts fixed (sentinel-throw pattern). Memory path deming/ → dev-team-deming/ fixed (path-correctness, 4th occurrence). lib copy: Chain B recursive approach superseded Chain A single-file at merge.
-
-### [2026-03-29] v1.9.0: Skill composability — skill-calls-skill pattern verified
-- **Type**: PATTERN [verified]
-- **Source**: PR #492 finding #12, PR #496 finding #17
-- **Tags**: skills, composability, architecture
-- **Outcome**: accepted
-- **Last-verified**: 2026-03-29
-- **Context**: /dev-team:extract is invoked by /dev-team:task and /dev-team:retro. /dev-team:review is invoked by /dev-team:task with --embedded flag. Skill-calls-skill runtime confirmed working. Edge cases documented: empty finding log handled, compact summary passthrough for subsequent review rounds. ADR-035 deferred to #493 for formal documentation of the composability pattern.
-
-### [2026-03-29] v1.9.0: Vocabulary alignment reinforced — "consumed programmatically" wording fixed
-- **Type**: SUGGESTION [accepted]
-- **Source**: PR #496 finding #16
-- **Tags**: vocabulary, skill-definition, review
-- **Outcome**: accepted
-- **Last-verified**: 2026-03-29
-- **Context**: Review skill SKILL.md had misleading "consumed programmatically" wording. Fixed to clarify that the output is consumed by the orchestrating skill (task), not by a machine parser. Vocabulary alignment pattern continues (Seen: 3 times — v1.2.0 task skill, v1.9.0 extract skill, v1.9.0 review skill).
-
-### [2026-03-29] v1.10.0: Missing gate in .claude copy of merge skill — FIXED
-- **Type**: DEFECT [fixed]
-- **Source**: PR #512, finding #7
-- **Tags**: path-correctness, skill-definition, merge
-- **Outcome**: fixed
-- **Last-verified**: 2026-03-29
-- **Context**: Merge skill gate logic was updated in .claude/skills/ source but the installed copy was not staged. Path correctness pattern continues — Seen: 5 times (doctor.ts K1, status.ts K3, review skill path, memory dir deming/, merge skill .claude copy).
-
-### [2026-03-29] v1.10.0: Stray commits from shared working directory — bundled wrong commits into PRs
-- **Type**: RISK [accepted]
-- **Source**: PR #509 finding #8, PR #511 finding #9
-- **Tags**: agent-teams, working-directory, contention, stray-commits
-- **Outcome**: accepted
-- **Last-verified**: 2026-04-02
-- **Context**: PR #509 bundled commits from #490 + #494; PR #511 bundled #490 + #493. Both caused by agents sharing a working directory. Reinforces v1.7.0 finding — worktree isolation prevents cross-branch contamination. Seen: 2nd occurrence (v1.7.0 had 3 stray commits, v1.10.0 had 2 bundled PRs).
-
-### [2026-03-29] v1.10.1: 3 findings ignored — defense-in-depth, test scope, error handling
-- **Type**: CALIBRATION
-- **Source**: #515, PR #516
-- **Tags**: calibration, hotfix
-- **Outcome**: 0 accepted, 1 deferred, 2 ignored
-- **Last-verified**: 2026-03-29
-- **Context**: HOOK_FILES redundancy with ghost filter (ignored — defense in depth), hookRemovals test gap (deferred — unit tests cover it), removeHooksFromSettings swallowing invalid JSON (ignored — mergeSettings runs first). All advisory, no quality signal.
-
-### [2026-03-26] Review skill had wrong path for agent-patterns.json
-- **Type**: DEFECT [fixed]
-- **Source**: PR #365 (fix/355), Copilot finding
-- **Tags**: routing, review-skill, path
-- **Outcome**: fixed
-- **Last-verified**: 2026-03-26
-- **Context**: Review skill referenced agent-patterns.json at wrong path. Corrected to `.dev-team/hooks/agent-patterns.json`. Path correctness is a recurring theme — verify paths in skill definitions during review. Seen: 4 times (this + doctor.ts K1 + status.ts K3 + memory dir deming/ v1.7.0).
-
-### [2026-03-29] v1.11.0: Test coverage expanded — init error paths, update backup, createAgent, CLI help
-- **Type**: PATTERN [new]
-- **Source**: #540, #541, #542, #545, #548, PR #557
-- **Tags**: testing, coverage, init, update, cli
-- **Outcome**: fixed
-- **Last-verified**: 2026-03-29
-- **Context**: 5 test coverage issues addressed in single PR. New tests for: init error paths (missing package.json, invalid config), update backup flow, createAgent validation (empty name, missing fields), CLI --help output, hookRemovals integration. Continues the coverage expansion pattern from v1.7.0 (#438) and v1.8.0 (#480).
-
-### [2026-03-30] v2.0: MCP deriveRequiredAgents diverged from hook — FIXED (K10)
-- **Type**: DEFECT [fixed]
-- **Source**: PR #572, Knuth finding K10
-- **Tags**: mcp, review-gate, agent-patterns, code-sync, quality
-- **Outcome**: fixed
-- **Last-verified**: 2026-03-30
-- **Context**: Initial MCP review_gate implementation used hardcoded agent routing instead of loading from agent-patterns.json. This diverged from the hook's approach and would drift as patterns evolve. Fixed: MCP tool now loads and parses agent-patterns.json with proper fallback. This is the dual-code-path sync risk noted in ADR-037 — first instance of the pattern drifting.
 
 ### [2026-04-02] v3.3.0: .mergify.yml inline comment DEFECT — FULL review justified
 - **Type**: DEFECT [fixed]
