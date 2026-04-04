@@ -17,13 +17,7 @@ import {
 } from "./files.js";
 import type { HookSettings, HookMatcher } from "./files.js";
 import fs from "fs";
-import {
-  ALL_AGENTS,
-  QUALITY_HOOKS,
-  INFRA_HOOKS,
-  DEFAULT_WORKFLOW,
-  mergeWorkflowConfig,
-} from "./init.js";
+import { ALL_AGENTS, QUALITY_HOOKS, INFRA_HOOKS, mergeWorkflowConfig } from "./init.js";
 import type { WorkflowConfig } from "./init.js";
 import { parseAgentDefinition } from "./formats/canonical.js";
 import { getAdaptersForRuntimes } from "./formats/adapters.js";
@@ -882,15 +876,6 @@ export async function update(targetDir: string): Promise<void> {
       }
     }
   }
-  // Copy agent-patterns.json (authoritative pattern source for hooks)
-  const patternsSrc = path.join(templates, "hooks", "agent-patterns.json");
-  const patternsDest = path.join(hooksDir, "agent-patterns.json");
-  const patternsSrcContent = readFile(patternsSrc);
-  const patternsDestContent = readFile(patternsDest);
-  if (patternsSrcContent && patternsSrcContent !== patternsDestContent) {
-    copyFile(patternsSrc, patternsDest);
-  }
-
   // Step 4: Update settings
   const settingsPath = path.join(claudeDir, "settings.json");
   const settingsContent = readFile(path.join(templates, "settings.json"));
@@ -1014,7 +999,7 @@ export async function update(targetDir: string): Promise<void> {
   }
 
   // Backfill workflow config — merge existing user values with new defaults (additive only)
-  // Never removes user-set keys; new keys from DEFAULT_WORKFLOW are added with their defaults.
+  // Never removes user-set keys; new keys are added with their defaults.
   prefs.workflow = mergeWorkflowConfig(prefs.workflow ?? {});
 
   // Clean up ghost entries (labels from removed hooks/agents)

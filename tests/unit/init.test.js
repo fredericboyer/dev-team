@@ -392,9 +392,7 @@ describe("DEFAULT_WORKFLOW", () => {
     assert.ok(
       typeof DEFAULT_WORKFLOW.review === "boolean" || DEFAULT_WORKFLOW.review === "complex",
     );
-    assert.ok(
-      typeof DEFAULT_WORKFLOW.learn === "boolean" || DEFAULT_WORKFLOW.learn === "complex",
-    );
+    assert.ok(typeof DEFAULT_WORKFLOW.learn === "boolean" || DEFAULT_WORKFLOW.learn === "complex");
   });
 
   it("WorkflowSwitch fields are booleans", () => {
