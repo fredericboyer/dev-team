@@ -1,7 +1,7 @@
 ---
 name: dev-team-merge
 description: Merge a PR with monitoring -- waits for review workflows, addresses unresolved threads, resolves them via GraphQL, sets auto-merge, and monitors until complete.
-user_invocable: true
+disable-model-invocation: false
 ---
 
 Merge a pull request with full monitoring: $ARGUMENTS

@@ -899,6 +899,146 @@ describe("dev-team-tdd-enforce", () => {
         assert.equal(err.status, 2, "non-matching test in tests/ should not exempt");
       }
     });
+
+    it(
+      "rejects symlink directories during walk — does not traverse tests/evil",
+      { skip: process.platform === "win32" },
+      () => {
+        fs.mkdirSync(path.join(tmpDir, "src"), { recursive: true });
+        const implFile = path.join(tmpDir, "src", "handler.js");
+        fs.writeFileSync(implFile, "module.exports = {}");
+
+        // Create a symlink inside tests/ that points to an arbitrary large directory tree.
+        // The hook must skip it rather than traversing it.
+        fs.mkdirSync(path.join(tmpDir, "tests"), { recursive: true });
+        fs.symlinkSync(process.cwd(), path.join(tmpDir, "tests", "evil"));
+
+        const input = JSON.stringify({ tool_input: { file_path: implFile } });
+        try {
+          execFileSync(process.execPath, [path.join(HOOKS_DIR, hook), input], {
+            encoding: "utf-8",
+            timeout: 5000,
+            cwd: tmpDir,
+          });
+          assert.fail("Should have exited with code 2");
+        } catch (err) {
+          assert.equal(err.status, 2, "symlink directory should be skipped, not traversed");
+        }
+      },
+    );
+
+    it("depth cap: test at depth 6 is not found (cap is 5)", () => {
+      fs.mkdirSync(path.join(tmpDir, "src"), { recursive: true });
+      const implFile = path.join(tmpDir, "src", "handler.js");
+      fs.writeFileSync(implFile, "module.exports = {}");
+
+      // tests/a/b/c/d/e/f/ = depth 6 from topTestsDir
+      const deepDir = path.join(tmpDir, "tests", "a", "b", "c", "d", "e", "f");
+      fs.mkdirSync(deepDir, { recursive: true });
+      fs.writeFileSync(path.join(deepDir, "handler.test.js"), 'test("handler", () => {})');
+
+      const input = JSON.stringify({ tool_input: { file_path: implFile } });
+      try {
+        execFileSync(process.execPath, [path.join(HOOKS_DIR, hook), input], {
+          encoding: "utf-8",
+          timeout: 5000,
+          cwd: tmpDir,
+        });
+        assert.fail("Should have exited with code 2");
+      } catch (err) {
+        assert.equal(err.status, 2, "test beyond depth cap should not be found");
+      }
+    });
+
+    it("depth cap: test at depth 4 is found (within cap)", () => {
+      fs.mkdirSync(path.join(tmpDir, "src"), { recursive: true });
+      const implFile = path.join(tmpDir, "src", "handler.js");
+      fs.writeFileSync(implFile, "module.exports = {}");
+
+      // tests/a/b/c/ = depth 3 from topTestsDir — within the 5-level cap
+      const shallowDir = path.join(tmpDir, "tests", "a", "b", "c");
+      fs.mkdirSync(shallowDir, { recursive: true });
+      fs.writeFileSync(path.join(shallowDir, "handler.test.js"), 'test("handler", () => {})');
+
+      const input = JSON.stringify({ tool_input: { file_path: implFile } });
+      execFileSync(process.execPath, [path.join(HOOKS_DIR, hook), input], {
+        encoding: "utf-8",
+        timeout: 5000,
+        cwd: tmpDir,
+      });
+      assert.ok(true, "test within depth cap should be found");
+    });
+
+    it("basename collision: tests/api/handler.test.js must NOT match src/cli/handler.js", () => {
+      // impl is in a named module dir "cli" — not a generic source root
+      fs.mkdirSync(path.join(tmpDir, "src", "cli"), { recursive: true });
+      const implFile = path.join(tmpDir, "src", "cli", "handler.js");
+      fs.writeFileSync(implFile, "module.exports = {}");
+
+      // test has same basename but a DIFFERENT parent module "api"
+      fs.mkdirSync(path.join(tmpDir, "tests", "api"), { recursive: true });
+      fs.writeFileSync(
+        path.join(tmpDir, "tests", "api", "handler.test.js"),
+        'test("api handler", () => {})',
+      );
+
+      const input = JSON.stringify({ tool_input: { file_path: implFile } });
+      try {
+        execFileSync(process.execPath, [path.join(HOOKS_DIR, hook), input], {
+          encoding: "utf-8",
+          timeout: 5000,
+          cwd: tmpDir,
+        });
+        assert.fail("Should have exited with code 2");
+      } catch (err) {
+        assert.equal(
+          err.status,
+          2,
+          "tests/api/handler.test.js must NOT match src/cli/handler.js — parent dirs differ",
+        );
+      }
+    });
+
+    it("parent match: tests/cli/handler.test.js matches src/cli/handler.js", () => {
+      // impl in named module dir "cli"
+      fs.mkdirSync(path.join(tmpDir, "src", "cli"), { recursive: true });
+      const implFile = path.join(tmpDir, "src", "cli", "handler.js");
+      fs.writeFileSync(implFile, "module.exports = {}");
+
+      // test has same parent module name "cli"
+      fs.mkdirSync(path.join(tmpDir, "tests", "cli"), { recursive: true });
+      fs.writeFileSync(
+        path.join(tmpDir, "tests", "cli", "handler.test.js"),
+        'test("cli handler", () => {})',
+      );
+
+      const input = JSON.stringify({ tool_input: { file_path: implFile } });
+      execFileSync(process.execPath, [path.join(HOOKS_DIR, hook), input], {
+        encoding: "utf-8",
+        timeout: 5000,
+        cwd: tmpDir,
+      });
+      assert.ok(true, "tests/cli/handler.test.js should match src/cli/handler.js");
+    });
+
+    it("session allow: staged corresponding test file exempts the implementation edit", () => {
+      // A corresponding test file staged in git diff --name-only should allow the impl edit
+      fs.mkdirSync(path.join(tmpDir, "src"), { recursive: true });
+      const implFile = path.join(tmpDir, "src", "widget.js");
+      fs.writeFileSync(implFile, "module.exports = {}");
+
+      const testFile = path.join(tmpDir, "src", "widget.test.js");
+      fs.writeFileSync(testFile, 'test("widget", () => {})');
+      execFileSync("git", ["add", "src/widget.test.js"], { cwd: tmpDir, encoding: "utf-8" });
+
+      const input = JSON.stringify({ tool_input: { file_path: implFile } });
+      execFileSync(process.execPath, [path.join(HOOKS_DIR, hook), input], {
+        encoding: "utf-8",
+        timeout: 5000,
+        cwd: tmpDir,
+      });
+      assert.ok(true, "staged corresponding test allows the implementation edit");
+    });
   });
 });
 
