@@ -42,6 +42,15 @@
         ]
       },
       {
+        "matcher": "SendMessage",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .dev-team/hooks/dev-team-implementer-guard.js"
+          }
+        ]
+      },
+      {
         "matcher": "Agent",
         "hooks": [
           {

@@ -242,6 +242,11 @@ const QUALITY_HOOKS: HookDefinition[] = [
     file: "dev-team-merge-gate.js",
     description: "Block gh pr merge when no review evidence exists for the branch",
   },
+  {
+    label: "Implementer guard",
+    file: "dev-team-implementer-guard.js",
+    description: "Block shutdown of implementing agents before review completes",
+  },
 ];
 
 interface PresetDefinition {

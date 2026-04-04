@@ -137,7 +137,7 @@ npx @fredericboyer/dev-team create-agent <name>     # Scaffold a custom agent
 
 **Opus** agents do deep analysis — Szabo, Knuth, Brooks, and Turing are read-only; Drucker uses opus for orchestration with full access. **Sonnet** agents implement (faster, full write access). Borges runs at end-of-workflow for memory consolidation. Rams reviews design system compliance.
 
-### Hooks (11)
+### Hooks (12)
 
 | Hook | Trigger | Behavior |
 |------|---------|----------|
@@ -149,6 +149,8 @@ npx @fredericboyer/dev-team create-agent <name>     # Scaffold a custom agent
 | Pre-commit lint | Before commit | **Blocks** commit if lint or format checks fail. |
 | Agent teams guide | Before Agent spawn | **Advisory** guidance for worktree isolation and team coordination patterns. |
 | Review gate | Before commit | **Blocks** commit without review evidence. Stateless commit gates for adversarial review enforcement. |
+| Merge gate | Before merge | **Blocks** `gh pr merge` without review sidecars. Complexity-aware enforcement via assessment sidecars. |
+| Implementer guard | Before SendMessage | **Blocks** shutdown of implementing agents before review findings are routed. Config-aware. |
 | Worktree create | Before worktree creation | **Serializes** parallel worktree creation to prevent git lock races. |
 | Worktree remove | After worktree removal | **Cleans up** worktree artifacts and stale branch references. |
 
