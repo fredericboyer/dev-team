@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.8.0] — 2026-04-04
+
+### Added
+- **Workflow config schema in config.json**: structured `workflow` block with `reviewTier`, `complexity`, and `mergeGate` fields — validates on load (#773)
+- **Hook to prevent premature implementer shutdown**: pre-shutdown hook blocks agent exit if branch has no associated PR, preventing work loss before review (#795)
+- **ADR-043**: assessment sidecar contract — defines structure, location, and lifecycle of `.dev-team/.assessments/` files (#771)
+- **ADR-044**: branch-level sidecar keying — replaces content-hash keys with branch names for stable cross-agent lookup (#787)
+
+### Changed
+- **Sidecar model redesign**: branch-level keying replaces content hashes — sidecars are now keyed by branch name, enabling stable lookup without content re-computation (#787)
+- **Realign disable-model-invocation, remove --embedded flag**: orchestration skills enforced via `disable-model-invocation: true`; `--embedded` flag removed as unnecessary complexity (#786)
+- **Eliminate agent-patterns.json, move agent selection to review skill**: static pattern file replaced with dynamic agent selection logic inside the review skill (#781)
+
+### Fixed
+- **Harden TDD hook walkForTests**: symlink guard prevents directory traversal, depth cap bounds recursion, short-circuit exits on first test file found (#770)
+- **Symlink guards and logging for merge-gate assessment path**: assessment path resolution hardened against symlink traversal; structured logging added for audit trail (#769)
+
 ## [3.7.0] — 2026-04-04
 
 ### Added
