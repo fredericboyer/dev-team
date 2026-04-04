@@ -3,9 +3,7 @@
 const { describe, it } = require("node:test");
 const assert = require("node:assert/strict");
 const { execFileSync } = require("child_process");
-const fs = require("fs");
 const path = require("path");
-const os = require("os");
 
 const HOOKS_DIR = path.join(__dirname, "..", "..", "templates", "hooks");
 
