@@ -1,6 +1,12 @@
-## Research Brief: OpenClaw Heartbeat Mechanism
+# Research Brief: OpenClaw Heartbeat Mechanism
 
-### Question
+**Date**: 2026-04-04
+**Issue**: #803
+**Researcher**: Turing
+
+---
+
+## Question
 How does OpenClaw's heartbeat mechanism work, and is it applicable to dev-team's agent monitoring needs?
 
 ### What is OpenClaw?
@@ -39,7 +45,7 @@ The heartbeat is a **scheduled main-session turn** — a periodic message the sy
 
 ### Applicability to dev-team
 
-**What dev-team needs (from project_agent_heartbeat.md):** Agent heartbeat/progress updates for long-running background work. The orchestrator currently polls agent-status files.
+**What dev-team needs:** Agent heartbeat/progress updates for long-running background work. The orchestrator checks agent-status files on demand during orchestrator turns (per ADR-026), not via a dedicated polling loop.
 
 **OpenClaw heartbeat is a different pattern.** It solves "make an idle agent check for work periodically" — not "monitor whether a working agent is alive and making progress." Key differences:
 
