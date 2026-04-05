@@ -108,11 +108,11 @@ When the same agent (e.g., Szabo) runs on two different models reviewing the sam
 
 **A. Structured output matching (recommended)**
 
-dev-team already uses classified findings with structured fields: severity (`[DEFECT]`, `[RISK]`, `[QUESTION]`, `[SUGGESTION]`), file:line location, category, and description. This enables:
+dev-team already uses classified findings with a classification field (`[DEFECT]`, `[RISK]`, `[QUESTION]`, `[SUGGESTION]`) and free-text descriptions. Structured `file`, `line_range`, and `category` fields would need to be added to the finding format to enable deterministic dedup. With those additions, this enables:
 
 1. **Location-based grouping**: Findings targeting the same file:line range are candidates for deduplication.
-2. **Severity-category match**: Same location + same severity + same category = high-confidence duplicate.
-3. **Cross-model convergence flag**: When two models independently flag the same location with the same severity, mark as "converged" (high confidence).
+2. **Severity-category match**: Same location + same classification + same category = high-confidence duplicate.
+3. **Cross-model convergence flag**: When two models independently flag the same location with the same classification, mark as "converged" (high confidence).
 
 This is the approach used by Mozilla's Star Chamber, which classifies findings as consensus (all models), majority (2+ models), or individual (1 model only).
 
@@ -193,15 +193,14 @@ Rather than detecting availability at runtime, declare the model configuration s
   "models": {
     "default": "opus",
     "agents": {
-      "szabo": { "primary": "opus", "shadow": "sonnet" },
-      "knuth": { "primary": "opus", "shadow": "sonnet" }
-    },
-    "fallback": "sonnet"
+      "szabo": ["opus", "sonnet"],
+      "knuth": ["opus", "sonnet"]
+    }
   }
 }
 ```
 
-If a shadow model fails (rate limit, unavailable), the review proceeds with the primary model alone. The alloy review is additive -- its absence degrades to current behavior, not failure.
+This uses the array-based format from the #807 issue spec: first element is primary, subsequent elements are shadow models (used for alloy reviews). A single string value means no alloy. If a shadow model fails (rate limit, unavailable), the review proceeds with the primary model alone. The alloy review is additive -- its absence degrades to current behavior, not failure.
 
 This is consistent with how Claude Code handles model fallback today: "Claude Code may automatically fall back to Sonnet if you hit a usage threshold with Opus."
 
@@ -406,8 +405,8 @@ No published benchmark directly measures multi-model code review defect detectio
 | Copilot coding agent model picker: Auto, Claude Sonnet 4.5, Opus 4.5, Opus 4.6, GPT-5.2-Codex | [docs.github.com/en/copilot/how-tos/use-copilot-agents/coding-agent/changing-the-ai-model](https://docs.github.com/en/copilot/how-tos/use-copilot-agents/coding-agent/changing-the-ai-model) | yes |
 | Codex CLI per-agent model in TOML config, inherits from parent | [developers.openai.com/codex/subagents](https://developers.openai.com/codex/subagents) | yes |
 | Codex CLI supports profiles with different model configs | [developers.openai.com/codex/config-advanced](https://developers.openai.com/codex/config-advanced) | yes |
-| GPT-5.4: $2.50/MTok input, $15/MTok output | OpenAI pricing page (via search) | yes |
-| o3: $2/MTok input, $8/MTok output | OpenAI pricing page (via search) | yes |
+| GPT-5.4: $2.50/MTok input, $15/MTok output | OpenAI pricing page (no stable URL) | UNVERIFIED |
+| o3: $2/MTok input, $8/MTok output | OpenAI pricing page (no stable URL) | UNVERIFIED |
 | Star Chamber: multi-LLM consensus code review | [blog.mozilla.ai/the-star-chamber-multi-llm-consensus-for-code-quality/](https://blog.mozilla.ai/the-star-chamber-multi-llm-consensus-for-code-quality/) | yes |
 | LLM ensemble theoretical upper bound: 83% above best single model | [arxiv.org/abs/2510.21513](https://arxiv.org/abs/2510.21513) | yes |
 | Diversity-based selection realizes 95% of theoretical ensemble potential | [arxiv.org/abs/2510.21513](https://arxiv.org/abs/2510.21513) | yes |
