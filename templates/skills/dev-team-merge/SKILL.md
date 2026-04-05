@@ -153,26 +153,23 @@ After merge is confirmed:
 
 3. **Clean up sidecar files** for the merged branch:
 
-   Sanitize the branch name (replace any character that is not alphanumeric or hyphen with a hyphen):
-   ```
-   sanitized = branchName.replace(/[^a-zA-Z0-9-]/g, "-")
+   Get the merged branch name and sanitize it (replace any character that is not alphanumeric or hyphen with a hyphen):
+   ```bash
+   branchName="$(gh pr view {number} --json headRefName --jq '.headRefName')"
+   sanitized="$(printf '%s' "$branchName" | sed 's/[^[:alnum:]-]/-/g')"
    ```
 
    Remove the assessment sidecar:
    ```bash
-   rm -f .dev-team/.assessments/{sanitized}.json
+   rm -f ".dev-team/.assessments/$sanitized.json"
    ```
 
    Remove all review sidecars for this branch:
    ```bash
-   rm -f .dev-team/.reviews/*--{sanitized}.json
+   find .dev-team/.reviews -maxdepth 1 -type f -name "*--$sanitized.json" -delete 2>/dev/null || true
    ```
 
-   Commit the cleanup if any files were removed:
-   ```bash
-   git add .dev-team/.assessments/ .dev-team/.reviews/
-   git diff --cached --quiet || git commit -m "chore: clean up sidecars for {branchName}"
-   ```
+   This cleanup is **local-only** — do not `git add` or commit these deletions. Sidecar files are ephemeral process state and should be gitignored (see ADR-043, ADR-044).
 
 4. **Check for next work:** suggest starting next issue if one is queued.
 
