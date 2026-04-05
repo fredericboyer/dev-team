@@ -67,6 +67,32 @@ Do NOT skip this. Do NOT treat hook output as optional. If you believe a review 
 
 > **Multi-runtime support:** Use `--runtime` flag during `dev-team init` to target additional runtimes (e.g., `--runtime claude,copilot` or `--runtime codex`). Each runtime adapter generates native configuration files. Run `dev-team update` after changing runtimes to regenerate all adapter output.
 
+### Model configuration
+
+Configure per-agent model tiers and alloy multi-model reviews in `.dev-team/config.json`:
+
+```json
+{
+  "models": {
+    "default": "opus",
+    "agents": {
+      "szabo": ["opus", "sonnet"],
+      "knuth": ["opus", "sonnet"],
+      "brooks": ["opus"],
+      "voss": "sonnet"
+    }
+  }
+}
+```
+
+- `default` — model tier for agents not listed in the `agents` map
+- String value (e.g., `"sonnet"`) — single model, no fallback
+- Array value (e.g., `["opus", "sonnet"]`) — ordered: first is primary, rest are shadow models for alloy multi-model reviews
+- Agent names are lowercase without the `dev-team-` prefix
+- Available tiers: `opus`, `sonnet`, `haiku`
+
+**Alloy tiers** (used by `/dev-team:review`): LIGHT uses primary only. FULL uses primary + first shadow. DEEP uses all models. When alloy is active, the same agent runs on multiple models in parallel, and findings are deduplicated.
+
 ### Project-specific customization
 
 `.dev-team/` is managed by dev-team and updated by `dev-team update`. Do not add project-specific files here.

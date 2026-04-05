@@ -11,8 +11,10 @@ const {
   DEFAULT_WORKFLOW,
   DEFAULT_VERSIONING,
   DEFAULT_PR_CONFIG,
+  DEFAULT_MODELS,
   validateWorkflowConfig,
   mergeWorkflowConfig,
+  mergeModelsConfig,
 } = require("../../dist/init");
 
 // ─── ALL_AGENTS ───────────────────────────────────────────────────────────────
@@ -592,5 +594,73 @@ describe("DEFAULT_PR_CONFIG", () => {
   it("only contains expected keys", () => {
     const keys = Object.keys(DEFAULT_PR_CONFIG).sort();
     assert.deepEqual(keys, ["autoLabel", "draft", "linkKeyword", "template", "titleFormat"]);
+  });
+});
+
+// ─── DEFAULT_MODELS ─────────────────────────────────────────────────────────
+
+describe("DEFAULT_MODELS", () => {
+  it("is exported", () => {
+    assert.ok(DEFAULT_MODELS, "DEFAULT_MODELS should be exported");
+  });
+
+  it("has default set to 'opus'", () => {
+    assert.equal(DEFAULT_MODELS.default, "opus");
+  });
+
+  it("has agents as an empty object", () => {
+    assert.deepEqual(DEFAULT_MODELS.agents, {});
+  });
+
+  it("only contains expected keys", () => {
+    const keys = Object.keys(DEFAULT_MODELS).sort();
+    assert.deepEqual(keys, ["agents", "default"]);
+  });
+});
+
+// ─── mergeModelsConfig ──────────────────────────────────────────────────────
+
+describe("mergeModelsConfig", () => {
+  it("returns default models when called with empty object", () => {
+    const merged = mergeModelsConfig({});
+    assert.equal(merged.default, "opus");
+    assert.deepEqual(merged.agents, {});
+  });
+
+  it("preserves existing agent assignments", () => {
+    const merged = mergeModelsConfig({
+      agents: { szabo: ["opus", "sonnet"], voss: "sonnet" },
+    });
+    assert.deepEqual(merged.agents.szabo, ["opus", "sonnet"]);
+    assert.equal(merged.agents.voss, "sonnet");
+  });
+
+  it("preserves existing default tier", () => {
+    const merged = mergeModelsConfig({ default: "sonnet" });
+    assert.equal(merged.default, "sonnet");
+  });
+
+  it("fills defaults when partial config provided", () => {
+    const merged = mergeModelsConfig({ agents: { knuth: "opus" } });
+    assert.equal(merged.default, "opus", "default should be filled from DEFAULT_MODELS");
+    assert.equal(merged.agents.knuth, "opus");
+  });
+
+  it("does not mutate DEFAULT_MODELS", () => {
+    const before = { default: DEFAULT_MODELS.default, agents: { ...DEFAULT_MODELS.agents } };
+    mergeModelsConfig({ default: "haiku", agents: { szabo: "sonnet" } });
+    assert.equal(DEFAULT_MODELS.default, before.default);
+    assert.deepEqual(DEFAULT_MODELS.agents, before.agents);
+  });
+
+  it("handles empty agents map in input", () => {
+    const merged = mergeModelsConfig({ default: "opus", agents: {} });
+    assert.deepEqual(merged.agents, {});
+  });
+
+  it("result always contains default and agents keys", () => {
+    const merged = mergeModelsConfig({});
+    assert.ok(Object.hasOwn(merged, "default"), "should have default key");
+    assert.ok(Object.hasOwn(merged, "agents"), "should have agents key");
   });
 });
