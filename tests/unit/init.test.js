@@ -45,9 +45,7 @@ describe("ALL_AGENTS", () => {
   it("includes all expected agents", () => {
     const labels = ALL_AGENTS.map((a) => a.label);
     const expected = [
-      "Voss",
-      "Hamilton",
-      "Mori",
+      "Hopper",
       "Szabo",
       "Knuth",
       "Deming",
@@ -58,6 +56,9 @@ describe("ALL_AGENTS", () => {
       "Borges",
       "Turing",
       "Rams",
+      "Voss",
+      "Hamilton",
+      "Mori",
     ];
     for (const name of expected) {
       assert.ok(labels.includes(name), `Expected agent ${name} to be in ALL_AGENTS`);
@@ -253,7 +254,7 @@ describe("PRESETS", () => {
 
   it("backend preset includes core backend agents", () => {
     const backendAgents = PRESETS.backend.agents;
-    assert.ok(backendAgents.includes("Voss"), "backend should include Voss");
+    assert.ok(backendAgents.includes("Hopper"), "backend should include Hopper");
     assert.ok(backendAgents.includes("Szabo"), "backend should include Szabo");
     assert.ok(backendAgents.includes("Drucker"), "backend should include Drucker");
   });

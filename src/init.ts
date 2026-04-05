@@ -172,16 +172,10 @@ interface HookDefinition {
 }
 
 const ALL_AGENTS: AgentDefinition[] = [
-  { label: "Voss", file: "dev-team-voss.md", description: "Backend Engineer" },
   {
-    label: "Hamilton",
-    file: "dev-team-hamilton.md",
-    description: "Infrastructure Engineer",
-  },
-  {
-    label: "Mori",
-    file: "dev-team-mori.md",
-    description: "Frontend/UI Engineer",
+    label: "Hopper",
+    file: "dev-team-hopper.md",
+    description: "Full-stack Engineer (backend, frontend, infrastructure)",
   },
   {
     label: "Szabo",
@@ -232,6 +226,23 @@ const ALL_AGENTS: AgentDefinition[] = [
     label: "Rams",
     file: "dev-team-rams.md",
     description: "Design System Reviewer",
+  },
+  // Deprecated in v4.0.0 — consolidated into Hopper. Retained for backward compatibility.
+  // Will be removed in v5.0.0. See ADR-046.
+  {
+    label: "Voss",
+    file: "dev-team-voss.md",
+    description: "Backend Engineer (deprecated — use Hopper)",
+  },
+  {
+    label: "Hamilton",
+    file: "dev-team-hamilton.md",
+    description: "Infrastructure Engineer (deprecated — use Hopper)",
+  },
+  {
+    label: "Mori",
+    file: "dev-team-mori.md",
+    description: "Frontend/UI Engineer (deprecated — use Hopper)",
   },
 ];
 
@@ -314,17 +325,7 @@ const PRESETS: Record<string, PresetDefinition> = {
   backend: {
     label: "backend",
     description: "Backend-heavy — API, security, architecture, quality",
-    agents: [
-      "Voss",
-      "Hamilton",
-      "Szabo",
-      "Knuth",
-      "Deming",
-      "Brooks",
-      "Conway",
-      "Drucker",
-      "Borges",
-    ],
+    agents: ["Hopper", "Szabo", "Knuth", "Deming", "Brooks", "Conway", "Drucker", "Borges"],
     hooks: QUALITY_HOOKS.map((h) => h.label),
   },
   fullstack: {
@@ -336,7 +337,7 @@ const PRESETS: Record<string, PresetDefinition> = {
   data: {
     label: "data",
     description: "Data pipeline — backend, quality, security, tooling",
-    agents: ["Voss", "Szabo", "Knuth", "Deming", "Tufte", "Drucker", "Borges"],
+    agents: ["Hopper", "Szabo", "Knuth", "Deming", "Tufte", "Drucker", "Borges"],
     hooks: QUALITY_HOOKS.map((h) => h.label),
   },
 };

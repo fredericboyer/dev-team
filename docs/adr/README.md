@@ -70,3 +70,4 @@ What becomes easier or more difficult?
 | [043](043-assessment-sidecar-contract.md) | Assessment sidecar contract for complexity-aware merge enforcement | accepted |
 | [044](044-branch-level-sidecar-keying.md) | Branch-level sidecar keying replaces content hashes | accepted |
 | [045](045-model-tier-abstraction.md) | Model tier abstraction for multi-model reviews | accepted |
+| [046](046-consolidate-implementers-hopper.md) | Consolidate Voss + Hamilton + Mori into Hopper agent | accepted |

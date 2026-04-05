@@ -51,8 +51,8 @@ describe("Node.js project scenario", () => {
 
     // Agents installed in .claude/agents/ (runtime-native)
     const agents = fs.readdirSync(path.join(tmpDir, ".claude", "agents"));
-    assert.equal(agents.length, 14); // 13 agents + SHARED.md
-    assert.ok(agents.includes("dev-team-voss.agent.md"));
+    assert.equal(agents.length, 15); // 11 active + 3 deprecated agents + SHARED.md
+    assert.ok(agents.includes("dev-team-hopper.agent.md"));
     assert.ok(agents.includes("SHARED.md"));
 
     // Hooks installed in .dev-team/
@@ -79,13 +79,13 @@ describe("Node.js project scenario", () => {
   it("agent files reference language-agnostic patterns", async () => {
     await run(tmpDir, ["--all"]);
 
-    // Voss agent should not be Node-specific
-    const voss = fs.readFileSync(
-      path.join(tmpDir, ".claude", "agents", "dev-team-voss.agent.md"),
+    // Hopper agent should not be Node-specific
+    const hopper = fs.readFileSync(
+      path.join(tmpDir, ".claude", "agents", "dev-team-hopper.agent.md"),
       "utf-8",
     );
-    assert.ok(!voss.includes("require("), "agent should not contain Node-specific code");
-    assert.ok(voss.includes("description:"), "should have valid frontmatter");
+    assert.ok(!hopper.includes("require("), "agent should not contain Node-specific code");
+    assert.ok(hopper.includes("description:"), "should have valid frontmatter");
   });
 
   it("hooks are executable Node.js scripts", async () => {

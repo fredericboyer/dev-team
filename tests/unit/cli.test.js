@@ -273,7 +273,7 @@ describe("--all flag combinations", () => {
         cwd: tmpDir,
         timeout: 10000,
       });
-      assert.ok(output.includes("Voss"), "should include Voss");
+      assert.ok(output.includes("Hopper"), "should include Hopper");
       assert.ok(output.includes("Drucker"), "should include Drucker");
       assert.ok(output.includes("Rams"), "should include Rams");
     } finally {

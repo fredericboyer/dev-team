@@ -58,7 +58,7 @@ function scaffold(opts = {}) {
 
   const config = {
     version: "1.0.0",
-    agents: opts.agents || ["Voss"],
+    agents: opts.agents || ["Hopper"],
     hooks: opts.hooks || ["TDD enforcement"],
     ...opts.configOverrides,
   };
@@ -138,9 +138,9 @@ describe("status — basic output", () => {
   });
 
   it("lists agents", () => {
-    scaffold({ agents: ["Voss", "Szabo"] });
+    scaffold({ agents: ["Hopper", "Szabo"] });
     const { output } = runStatus(tmpDir);
-    assert.ok(output.includes("Voss"));
+    assert.ok(output.includes("Hopper"));
     assert.ok(output.includes("Szabo"));
   });
 
@@ -195,21 +195,21 @@ describe("status — workflow fields", () => {
 
 describe("status — memory", () => {
   it("reports 'no memory file' for agents without MEMORY.md", () => {
-    scaffold({ agents: ["Voss"] });
+    scaffold({ agents: ["Hopper"] });
     const { output } = runStatus(tmpDir);
     assert.ok(output.includes("no memory file"));
   });
 
   it("reports 'empty (template only)' for MEMORY.md without dated entries", () => {
-    scaffold({ agents: ["Voss"], memory: { Voss: "# Memory\n\nNo entries yet." } });
+    scaffold({ agents: ["Hopper"], memory: { Hopper: "# Memory\n\nNo entries yet." } });
     const { output } = runStatus(tmpDir);
     assert.ok(output.includes("empty (template only)"));
   });
 
   it("reports 'has learnings' for MEMORY.md with dated entries", () => {
     scaffold({
-      agents: ["Voss"],
-      memory: { Voss: "# Memory\n\n### [2026-03-01] Some finding\nDetails here." },
+      agents: ["Hopper"],
+      memory: { Hopper: "# Memory\n\n### [2026-03-01] Some finding\nDetails here." },
     });
     const { output } = runStatus(tmpDir);
     assert.ok(output.includes("has learnings"));
