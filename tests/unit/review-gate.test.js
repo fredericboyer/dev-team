@@ -115,6 +115,30 @@ describe("dev-team-review-gate", () => {
     }
   });
 
+  it("exits 0 with warning on detached HEAD", () => {
+    const tmpDir = createTempRepo();
+    try {
+      // Detach HEAD by checking out a specific SHA
+      const sha = execFileSync("git", ["rev-parse", "HEAD"], {
+        cwd: tmpDir,
+        encoding: "utf-8",
+      }).trim();
+      execFileSync("git", ["checkout", sha], { cwd: tmpDir, encoding: "utf-8" });
+
+      fs.writeFileSync(path.join(tmpDir, "handler.js"), "module.exports = {}");
+      execFileSync("git", ["add", "handler.js"], { cwd: tmpDir, encoding: "utf-8" });
+
+      const result = runGate({ command: "git commit -m 'detached'" }, tmpDir);
+      assert.equal(result.code, 0, "detached HEAD should exit 0");
+      assert.ok(
+        result.stderr.includes("detached HEAD"),
+        "should warn about detached HEAD: " + result.stderr,
+      );
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+
   // --- Gate 1: Review evidence ---
 
   describe("Gate 1 - review evidence", () => {
