@@ -115,7 +115,7 @@ npx @fredericboyer/dev-team create-agent <name>     # Scaffold a custom agent
 
 ## What you get
 
-### Agents (11)
+### Agents (14)
 
 | Agent | Role | Model | When to use |
 |-------|------|-------|-------------|
