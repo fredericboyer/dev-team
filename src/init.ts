@@ -20,6 +20,18 @@ import { parseAgentDefinition } from "./formats/canonical.js";
 import { getAdaptersForRuntimes } from "./formats/adapters.js";
 import "./adapters/index.js";
 
+export type VersioningScheme = "semver" | "none";
+
+export interface VersioningConfig {
+  scheme: VersioningScheme;
+  source: string;
+}
+
+export const DEFAULT_VERSIONING: VersioningConfig = {
+  scheme: "semver",
+  source: "package.json",
+};
+
 export type WorkflowToggle = boolean | "complex";
 export type WorkflowSwitch = boolean;
 
@@ -595,6 +607,7 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
     taskBranchPattern: "(feat|fix)\\/",
     platform: "github",
     agentTeams: agentTeamsEnabled,
+    versioning: DEFAULT_VERSIONING,
     workflow: DEFAULT_WORKFLOW,
   };
   if (preset) {

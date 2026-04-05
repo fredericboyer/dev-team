@@ -17,8 +17,14 @@ import {
 } from "./files.js";
 import type { HookSettings, HookMatcher } from "./files.js";
 import fs from "fs";
-import { ALL_AGENTS, QUALITY_HOOKS, INFRA_HOOKS, mergeWorkflowConfig } from "./init.js";
-import type { WorkflowConfig } from "./init.js";
+import {
+  ALL_AGENTS,
+  QUALITY_HOOKS,
+  INFRA_HOOKS,
+  mergeWorkflowConfig,
+  DEFAULT_VERSIONING,
+} from "./init.js";
+import type { WorkflowConfig, VersioningConfig } from "./init.js";
 import { parseAgentDefinition } from "./formats/canonical.js";
 import { getAdaptersForRuntimes } from "./formats/adapters.js";
 import "./adapters/index.js";
@@ -368,6 +374,7 @@ interface Preferences {
   branchConvention: string;
   platform?: string;
   agentTeams?: boolean;
+  versioning?: VersioningConfig;
   workflow?: Partial<WorkflowConfig>;
 }
 
@@ -997,6 +1004,11 @@ export async function update(targetDir: string): Promise<void> {
   // Backfill platform field for existing installs (added in v1.5.0)
   if (!prefs.platform) {
     prefs.platform = "github";
+  }
+
+  // Backfill versioning config for existing installs
+  if (!prefs.versioning) {
+    prefs.versioning = DEFAULT_VERSIONING;
   }
 
   // Backfill workflow config — merge existing user values with new defaults (additive only)
