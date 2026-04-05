@@ -13,6 +13,8 @@ const {
   DEFAULT_PR_CONFIG,
   validateWorkflowConfig,
   mergeWorkflowConfig,
+  DEFAULT_MODELS,
+  mergeModelsConfig,
 } = require("../../dist/init");
 
 // ─── ALL_AGENTS ───────────────────────────────────────────────────────────────

@@ -658,6 +658,7 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
     versioning: DEFAULT_VERSIONING,
     workflow: DEFAULT_WORKFLOW,
     pr: DEFAULT_PR_CONFIG,
+    models: DEFAULT_MODELS,
   };
   if (preset) {
     prefs.preset = preset.label;
