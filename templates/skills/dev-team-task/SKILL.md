@@ -52,11 +52,13 @@ Phase markers are consistent with agent-level progress reporting (ADR-026).
 
 ## Step 1: Implement
 
-Call `/dev-team:implement` with the task description. The implement skill handles agent selection, Brooks pre-assessment, Definition of Done negotiation, best-practices research, implementation, validation, and PR creation.
+Call `/dev-team:implement` with the task description. The implement skill handles agent selection, Brooks pre-assessment, Definition of Done negotiation, best-practices research, implementation, and validation. It pushes the branch but does not create a PR.
 
 For SIMPLE tasks (or when `--skip-assessment` is appropriate), pass that flag through.
 
-The implement skill returns: branch name, PR number, files changed, complexity classification, and whether an ADR was written. Use the complexity classification to determine review intensity in Step 2.
+After implementation completes, call `/dev-team:pr` to create the pull request. The pr skill reads format config from `.dev-team/config.json`, links the issue, and applies labels.
+
+The implement skill returns: branch name, files changed, complexity classification, and whether an ADR was written. The pr skill returns: PR number and URL. Use the complexity classification to determine review intensity in Step 2.
 
 ## Step 2: Review
 
