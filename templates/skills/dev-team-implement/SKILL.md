@@ -81,21 +81,18 @@ The implementing agent works on the task on a feature branch.
 - Clean working tree: no uncommitted debris
 - If validation fails, route back to implementer with specific failure reason. If it fails twice, escalate to human.
 
-**Deliver the work**: Create the PR. The PR body must include `Closes #NNN` for the associated GitHub issue.
+**Deliver the work**: Push the branch to remote. PR creation is handled by the orchestrator or a separate pipeline step (`/dev-team:pr`). Do NOT create a PR from this skill.
 
-**Clean up worktree**: If the work was done in a worktree, clean it up after the branch is pushed and the PR is created.
+**Clean up worktree**: If the work was done in a worktree, clean it up after the branch is pushed.
 
 ## Output
 
 Return a structured summary:
 
 - Branch name
-- PR number
 - Files changed
 - Complexity classification
 - Whether ADR was written
-
-Report the PR URL on completion.
 
 ## Security preamble
 
