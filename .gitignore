@@ -11,6 +11,7 @@ coverage/
 .dev-team/.memory-reviewed
 .dev-team/agent-status/
 .dev-team/.reviews/
+.dev-team/.assessments/
 
 # Claude Code runtime artifacts
 .claude/worktrees/
