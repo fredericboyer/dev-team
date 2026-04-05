@@ -19,7 +19,7 @@
  * Every adapter can use these fields.
  */
 export interface PortableFields {
-  /** Agent identifier (e.g., "dev-team-voss"). */
+  /** Agent identifier (e.g., "dev-team-hopper"). */
   name: string;
 
   /** One-line role description for discovery and routing. */
@@ -57,7 +57,7 @@ export interface CanonicalAgentDefinition extends PortableFields, RuntimeSpecifi
  * Expected format:
  * ```
  * ---
- * name: dev-team-voss
+ * name: dev-team-hopper
  * description: Backend engineer. ...
  * tools: Read, Edit, Write, Bash
  * model: sonnet
