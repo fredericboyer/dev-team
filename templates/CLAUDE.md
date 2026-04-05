@@ -62,6 +62,8 @@ Do NOT skip this. Do NOT treat hook output as optional. If you believe a review 
 - `/dev-team:retro` — audit knowledge base health (learnings, agent memory, CLAUDE.md)
 - `/dev-team:extract` — Borges memory extraction, metrics verification, and memory formation gates
 - `/dev-team:scorecard` — audit process conformance for a completed task
+- `/dev-team:pr` — create a PR from the current branch using pr format config
+- `/dev-team:merge` — merge a PR with monitoring, review handling, and CI verification
 
 > **Non-JS/TS projects:** Hooks detect the ecosystem and delegate language-specific reasoning to agents. The review skill selects the appropriate specialist agents based on changed file domains. Agents apply their built-in knowledge for language-specific test naming, build tools, and framework structures (see ADR-034).
 
