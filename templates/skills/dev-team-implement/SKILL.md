@@ -93,7 +93,3 @@ Return a structured summary:
 - Files changed
 - Complexity classification
 - Whether ADR was written
-
-## Security preamble
-
-Before starting work, check for open security alerts using the project's security monitoring process (e.g., a `/security-status` skill). Flag any critical findings before proceeding.
