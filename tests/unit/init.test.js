@@ -9,6 +9,7 @@ const {
   QUALITY_HOOKS,
   INFRA_HOOKS,
   DEFAULT_WORKFLOW,
+  DEFAULT_VERSIONING,
   validateWorkflowConfig,
   mergeWorkflowConfig,
 } = require("../../dist/init");
@@ -536,5 +537,26 @@ describe("mergeWorkflowConfig", () => {
     assert.equal(merged.release, true);
     // New key added with default
     assert.equal(merged.learn, DEFAULT_WORKFLOW.learn);
+  });
+});
+
+// ─── DEFAULT_VERSIONING ─────────────────────────────────────────────────────
+
+describe("DEFAULT_VERSIONING", () => {
+  it("is exported", () => {
+    assert.ok(DEFAULT_VERSIONING, "DEFAULT_VERSIONING should be exported");
+  });
+
+  it("has scheme set to 'semver'", () => {
+    assert.equal(DEFAULT_VERSIONING.scheme, "semver");
+  });
+
+  it("has source set to 'package.json'", () => {
+    assert.equal(DEFAULT_VERSIONING.source, "package.json");
+  });
+
+  it("only contains scheme and source keys", () => {
+    const keys = Object.keys(DEFAULT_VERSIONING).sort();
+    assert.deepEqual(keys, ["scheme", "source"]);
   });
 });
