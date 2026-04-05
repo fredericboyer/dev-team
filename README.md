@@ -156,13 +156,14 @@ npx @fredericboyer/dev-team create-agent <name>     # Scaffold a custom agent
 
 All hooks are Node.js scripts — work on macOS, Linux, and Windows.
 
-### Skills (9)
+### Skills (10)
 
 | Skill | What it does |
 |-------|-------------|
 | `/dev-team:implement` | Implement a task on a feature branch — agent selection, pre-assessment, validation, PR creation |
 | `/dev-team:task` | Iterative task loop — implement, review, fix defects, repeat until clean |
 | `/dev-team:review` | Parallel multi-agent review — spawns agents based on changed file patterns |
+| `/dev-team:research` | Pre-implementation research brief — spawns Turing, produces structured analysis with citations |
 | `/dev-team:audit` | Full codebase scan — Szabo (security) + Knuth (quality) + Deming (tooling) |
 | `/dev-team:challenge` | Critical examination of a proposal or design decision |
 | `/dev-team:retro` | Audit knowledge base health — learnings, agent memory, CLAUDE.md accuracy |
