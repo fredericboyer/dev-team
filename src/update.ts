@@ -1006,10 +1006,8 @@ export async function update(targetDir: string): Promise<void> {
     prefs.platform = "github";
   }
 
-  // Backfill versioning config for existing installs
-  if (!prefs.versioning) {
-    prefs.versioning = DEFAULT_VERSIONING;
-  }
+  // Backfill versioning config — merge existing user values with defaults (additive only)
+  prefs.versioning = { ...DEFAULT_VERSIONING, ...(prefs.versioning ?? {}) };
 
   // Backfill workflow config — merge existing user values with new defaults (additive only)
   // Never removes user-set keys; new keys are added with their defaults.
