@@ -10,8 +10,10 @@ const {
   INFRA_HOOKS,
   DEFAULT_WORKFLOW,
   DEFAULT_VERSIONING,
+  DEFAULT_MODELS,
   validateWorkflowConfig,
   mergeWorkflowConfig,
+  mergeModelsConfig,
 } = require("../../dist/init");
 
 // ─── ALL_AGENTS ───────────────────────────────────────────────────────────────
@@ -558,5 +560,82 @@ describe("DEFAULT_VERSIONING", () => {
   it("only contains scheme and source keys", () => {
     const keys = Object.keys(DEFAULT_VERSIONING).sort();
     assert.deepEqual(keys, ["scheme", "source"]);
+  });
+});
+
+// ─── DEFAULT_MODELS ───────────────────────────────────────────────────────────
+
+describe("DEFAULT_MODELS", () => {
+  it("is exported", () => {
+    assert.ok(DEFAULT_MODELS, "DEFAULT_MODELS should be exported");
+  });
+
+  it("has default set to 'opus'", () => {
+    assert.equal(DEFAULT_MODELS.default, "opus");
+  });
+
+  it("has an empty agents object", () => {
+    assert.deepEqual(DEFAULT_MODELS.agents, {});
+  });
+
+  it("only contains default and agents keys", () => {
+    const keys = Object.keys(DEFAULT_MODELS).sort();
+    assert.deepEqual(keys, ["agents", "default"]);
+  });
+});
+
+// ─── mergeModelsConfig ────────────────────────────────────────────────────────
+
+describe("mergeModelsConfig", () => {
+  it("returns default models when called with empty object", () => {
+    const merged = mergeModelsConfig({});
+    assert.deepEqual(merged, DEFAULT_MODELS);
+  });
+
+  it("preserves user-set default tier", () => {
+    const merged = mergeModelsConfig({ default: "sonnet" });
+    assert.equal(merged.default, "sonnet");
+  });
+
+  it("preserves user-set agent string assignments", () => {
+    const merged = mergeModelsConfig({ agents: { voss: "sonnet", mori: "haiku" } });
+    assert.equal(merged.agents.voss, "sonnet");
+    assert.equal(merged.agents.mori, "haiku");
+  });
+
+  it("preserves user-set agent array assignments", () => {
+    const merged = mergeModelsConfig({ agents: { szabo: ["opus", "sonnet"] } });
+    assert.deepEqual(merged.agents.szabo, ["opus", "sonnet"]);
+  });
+
+  it("uses default tier when no default is provided", () => {
+    const merged = mergeModelsConfig({ agents: { voss: "sonnet" } });
+    assert.equal(merged.default, "opus");
+  });
+
+  it("returns empty agents when none provided", () => {
+    const merged = mergeModelsConfig({ default: "sonnet" });
+    assert.deepEqual(merged.agents, {});
+  });
+
+  it("does not mutate DEFAULT_MODELS", () => {
+    const before = { default: DEFAULT_MODELS.default, agents: { ...DEFAULT_MODELS.agents } };
+    mergeModelsConfig({ default: "haiku", agents: { szabo: ["opus", "sonnet"] } });
+    assert.deepEqual(DEFAULT_MODELS, before, "DEFAULT_MODELS must not be mutated");
+  });
+
+  it("handles mixed string and array agent assignments", () => {
+    const merged = mergeModelsConfig({
+      agents: {
+        szabo: ["opus", "sonnet"],
+        knuth: ["opus", "sonnet"],
+        voss: "sonnet",
+        mori: "haiku",
+      },
+    });
+    assert.deepEqual(merged.agents.szabo, ["opus", "sonnet"]);
+    assert.deepEqual(merged.agents.knuth, ["opus", "sonnet"]);
+    assert.equal(merged.agents.voss, "sonnet");
+    assert.equal(merged.agents.mori, "haiku");
   });
 });
