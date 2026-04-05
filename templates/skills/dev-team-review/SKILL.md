@@ -84,10 +84,30 @@ Before spawning reviewers, read `.dev-team/config.json` and check for a `models`
 When alloy is enabled (agent has an array assignment with more than one model and the review depth permits shadow models):
 1. Spawn the same agent definition on each permitted model tier in parallel
 2. Collect findings from all model runs
-3. Deduplicate findings across models — keep the most specific version when multiple models flag the same issue
-4. Tag each finding with the model that produced it for calibration tracking
+3. Deduplicate findings across models using the process in "Finding deduplication" below
+4. Tag each finding with the originating model and convergence level for calibration tracking
 
 If no `models` section exists in config, use `"opus"` for all agents (single-model mode, no alloy).
+
+## Finding deduplication (alloy reviews)
+
+When alloy multi-model review produces findings from the same agent running on multiple models, deduplicate before the judge pass:
+
+**Pass 1 — Structured matching (deterministic, no API calls):**
+Group findings by file path + overlapping line range + classification type (`[DEFECT]`, `[RISK]`, `[SUGGESTION]`, `[QUESTION]`). Findings that share all three dimensions are candidates for merging.
+
+**Pass 2 — Convergence classification:**
+Tag each deduplicated finding with a `convergence` field:
+- `unanimous` — all models flagged this finding (high confidence signal)
+- `majority` — 2+ out of N models flagged this (moderate confidence)
+- `unique` — only one model flagged this (primary value of alloy)
+
+**Pass 3 — Description merging:**
+For `unanimous` and `majority` findings, use the primary model's wording as the canonical description. If a shadow model's phrasing is substantively different (not just stylistic), append it as a "Shadow note" for context.
+
+**Do NOT discard unique findings.** They are the primary value proposition of alloy reviews. Consensus amplifies common errors (the "popularity trap") — a finding that only one model catches may be the most valuable in the set. Unique findings pass through to the judge pass unmodified, tagged with the originating model.
+
+Include convergence tags in the review report so reviewers can weigh confidence accordingly.
 
 ## Filter findings (judge pass)
 
