@@ -7,6 +7,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.0.0] — 2026-04-05
+
+### Breaking Changes
+
+- **Config-driven composable pipeline**: Task skill rewritten from monolithic 4-step to 8-step composable orchestrator reading `workflow.*` config. Pipeline order changed: research → challenge → implement → review → PR → merge → release → learn (#778, #784, #785)
+- **PR creation decoupled from implement skill**: Implement skill stops at "committed on branch." PR creation is now a separate pipeline step via `/dev-team:pr` (#776, #788)
+- **Agent consolidation**: Voss, Hamilton, and Mori consolidated into `@dev-team-hopper` (Grace Hopper). Deprecated agents retained with notices, will be removed in v5.0.0 (#825)
+
+### Added
+
+- **Model tier abstraction**: Per-agent model assignment via `models` config section. Alloy (multi-model) review support with LIGHT/FULL/DEEP tiers (#807)
+- **Finding deduplication**: Structured matching for alloy reviews — convergence classification (unanimous/majority/unique) (#808)
+- **Standalone research skill**: `/dev-team:research` for pre-implementation research briefs with depth control (`--depth shallow|standard|deep`) (#774, #827)
+- **PR format config**: `pr` section in config.json for title format, link keywords, draft mode, required sections, auto-labeling (#777)
+- **PR format enforcement hooks**: 5 new PreToolUse hooks validating PR format against config (#780)
+- **Versioning config**: `versioning` section in config.json for scheme (semver/none) and version source file (#783)
+- **Workflow config lib**: Shared `lib/workflow-config.js` module for hooks to read workflow toggles. Hooks now respect `workflow.*` config (#779)
+- **ADR-045**: Model tier abstraction for multi-model reviews
+- **ADR-046**: Consolidate implementer agents into Hopper
+
+### Fixed
+
+- Detached HEAD path in review-gate now logs a warning instead of exiting silently (#806)
+- `.dev-team/.assessments/` added to .gitignore template (#804)
+- Post-merge cleanup for assessment and review sidecar files (#805)
+- Security preamble removed from skill templates — security checking is a manually invoked project-specific skill (#831)
+
+### Research
+
+- Cross-provider alloy reviews via GitHub Copilot (#812) — Copilot CLI parallel sessions with per-agent model pinning recommended
+- Agent consolidation trade-offs — hybrid approach: consolidate implementers, keep specialized reviewers
+
+### Deferred to v4.1.0
+
+- #810: Parallel shadow model execution in review skill
+- #811: Codex CLI adapter for model tier config
+- #826: Evaluate Tufte + Conway merge into Docs agent
+- #809: Prototype alloy FULL review on a real PR
+
 ## [3.8.0] — 2026-04-04
 
 ### Added
