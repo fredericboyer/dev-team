@@ -23,8 +23,9 @@ import {
   INFRA_HOOKS,
   mergeWorkflowConfig,
   DEFAULT_VERSIONING,
+  DEFAULT_PR_CONFIG,
 } from "./init.js";
-import type { WorkflowConfig, VersioningConfig } from "./init.js";
+import type { WorkflowConfig, VersioningConfig, PrConfig } from "./init.js";
 import { parseAgentDefinition } from "./formats/canonical.js";
 import { getAdaptersForRuntimes } from "./formats/adapters.js";
 import "./adapters/index.js";
@@ -376,6 +377,7 @@ interface Preferences {
   agentTeams?: boolean;
   versioning?: VersioningConfig;
   workflow?: Partial<WorkflowConfig>;
+  pr?: Partial<PrConfig>;
 }
 
 interface UpdateSummary {
@@ -1014,6 +1016,9 @@ export async function update(targetDir: string): Promise<void> {
   // Backfill workflow config — merge existing user values with new defaults (additive only)
   // Never removes user-set keys; new keys are added with their defaults.
   prefs.workflow = mergeWorkflowConfig(prefs.workflow ?? {});
+
+  // Backfill PR format config — merge existing user values with defaults (additive only)
+  prefs.pr = prefs.pr ? { ...DEFAULT_PR_CONFIG, ...prefs.pr } : { ...DEFAULT_PR_CONFIG };
 
   // Clean up ghost entries (labels from removed hooks/agents)
   prefs.hooks = prefs.hooks.filter((label) => Object.hasOwn(HOOK_FILES, label));

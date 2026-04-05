@@ -32,6 +32,24 @@ export const DEFAULT_VERSIONING: VersioningConfig = {
   source: "package.json",
 };
 
+export type PrTitleFormat = "conventional" | "plain" | "issue-prefix";
+
+export interface PrConfig {
+  titleFormat: PrTitleFormat;
+  linkKeyword: string;
+  draft: boolean;
+  template: string[];
+  autoLabel: boolean;
+}
+
+export const DEFAULT_PR_CONFIG: PrConfig = {
+  titleFormat: "conventional",
+  linkKeyword: "Closes",
+  draft: false,
+  template: ["summary", "testPlan"],
+  autoLabel: true,
+};
+
 export type WorkflowToggle = boolean | "complex";
 export type WorkflowSwitch = boolean;
 
@@ -609,6 +627,7 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
     agentTeams: agentTeamsEnabled,
     versioning: DEFAULT_VERSIONING,
     workflow: DEFAULT_WORKFLOW,
+    pr: DEFAULT_PR_CONFIG,
   };
   if (preset) {
     prefs.preset = preset.label;
