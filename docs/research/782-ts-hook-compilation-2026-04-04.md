@@ -27,7 +27,7 @@ How should dev-team migrate its 12 hook scripts (~1920 lines) and 2 shared libra
 - Shared types can be imported from `src/` via project references
 
 **Cons:**
-- tsc cannot add shebang lines — requires a post-build script to prepend `#!/usr/bin/env node`
+- No official `tsc` option exists for adding shebang lines (verified by absence in CLI reference) — requires a post-build script to prepend `#!/usr/bin/env node`
 - tsc cannot bundle `lib/` imports into standalone files — the `require("./lib/safe-regex")` pattern persists in output, meaning the lib directory structure must be preserved
 - Compiled output goes to `templates/hooks/` which is git-tracked — creates noise (compiled JS alongside... nothing, since source moves to `src/hooks/`)
 - `composite` requires `declaration: true` — generates `.d.ts` files in output that must be excluded
@@ -59,7 +59,7 @@ How should dev-team migrate its 12 hook scripts (~1920 lines) and 2 shared libra
 // scripts/build-hooks.js
 const esbuild = require("esbuild");
 const glob = require("node:fs").readdirSync("src/hooks")
-  .filter(f => f.endsWith(".ts") && !f.startsWith("lib/"));
+  .filter(f => f.endsWith(".ts"));
 
 esbuild.buildSync({
   entryPoints: glob.map(f => `src/hooks/${f}`),
@@ -130,7 +130,7 @@ The build pipeline change is:
 | Shared types | Direct imports from `../init` or `../files` | Requires path mapping or copy |
 | IDE navigation | Standard — same source tree | Two disconnected source trees |
 | Build config | One esbuild config targeting `templates/hooks/` | Separate tsconfig with different rootDir |
-| oxlint/oxfmt | Already lints `templates/hooks/` — would lint `src/hooks/` naturally | No change needed |
+| oxlint/oxfmt | Lint/format scripts retargeted to `src/hooks/`; `templates/hooks/` excluded as compiled output | Works but lint/format scripts must exclude generated files |
 | Git tracking | Source in `src/`, compiled output in `templates/` (both tracked) | Source and output in same directory — confusing |
 
 ### Delivery mechanism impact
@@ -174,7 +174,7 @@ Types that would benefit from sharing between `src/` and `src/hooks/`:
 The ADR should cover:
 
 1. **Decision**: Migrate hook source from `templates/hooks/*.js` to `src/hooks/*.ts`; compile via esbuild to standalone JS files in `templates/hooks/`
-2. **Context**: Hooks are the only non-TypeScript source in the project (~2264 lines). They share patterns with `src/` but cannot use shared types, have no type safety, and linting coverage is limited to what oxlint can infer from JS
+2. **Context**: Hooks are the largest non-TypeScript subsystem in the project (~2264 lines). They share patterns with `src/` but cannot use shared types, have no type safety, and linting coverage is limited to what oxlint can infer from JS
 3. **Build tool choice**: esbuild over tsc project references — single-file output, shebang injection, speed
 4. **Source location**: `src/hooks/` over `templates/hooks/` — natural imports, shared types, IDE coherence
 5. **Delivery unchanged**: `templates/hooks/` remains the shipping directory; `init.ts`/`update.ts` copy from there as before
