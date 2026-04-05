@@ -151,7 +151,27 @@ After merge is confirmed:
    git log -1 --format="%H %s"
    ```
 
-3. **Check for next work:** suggest starting next issue if one is queued.
+3. **Clean up sidecar files** for the merged branch:
+
+   Get the merged branch name and sanitize it (replace any character that is not alphanumeric or hyphen with a hyphen):
+   ```bash
+   branchName="$(gh pr view {number} --json headRefName --jq '.headRefName')"
+   sanitized="$(printf '%s' "$branchName" | sed 's/[^[:alnum:]-]/-/g')"
+   ```
+
+   Remove the assessment sidecar:
+   ```bash
+   rm -f ".dev-team/.assessments/$sanitized.json"
+   ```
+
+   Remove all review sidecars for this branch:
+   ```bash
+   find .dev-team/.reviews -maxdepth 1 -type f -name "*--$sanitized.json" -delete 2>/dev/null || true
+   ```
+
+   This cleanup is **local-only** — do not `git add` or commit these deletions. Sidecar files are ephemeral process state and should be gitignored (see ADR-043, ADR-044).
+
+4. **Check for next work:** suggest starting next issue if one is queued.
 
 ## Error handling
 
