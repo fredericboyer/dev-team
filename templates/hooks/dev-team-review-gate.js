@@ -173,6 +173,7 @@ function findSidecar(agent, sanitizedBranch) {
 const branch = currentBranch();
 if (!branch) {
   // Cannot determine branch - skip gates to avoid blocking detached HEAD states
+  console.warn("[dev-team review-gate] WARNING: detached HEAD — review gate skipped.");
   process.exit(0);
 }
 const sanitizedBranch = sanitizeBranch(branch);
