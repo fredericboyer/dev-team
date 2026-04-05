@@ -17,14 +17,14 @@ Run a multi-agent parallel review of: $ARGUMENTS
 
 2. Categorize changed files by domain to determine which agents to spawn. This skill is the **sole authority** for agent selection — the hooks no longer determine which agents to run. Use the following domain-to-agent routing to select reviewers based on the diff:
    - Security/auth/crypto/token → @dev-team-szabo
-   - API routes/contracts/schemas → @dev-team-mori
+   - API routes/contracts/schemas → @dev-team-hopper
    - Frontend/UI/components → @dev-team-rams
-   - Config/data model/migrations → @dev-team-voss
+   - Config/data model/migrations → @dev-team-hopper
    - Tooling/build/CI/linting → @dev-team-deming
    - Documentation/ADRs → @dev-team-tufte
    - Architecture/abstractions/boundaries → @dev-team-brooks
    - Release artifacts/versioning → @dev-team-conway
-   - Infrastructure/deployment/ops → @dev-team-hamilton
+   - Infrastructure/deployment/ops → @dev-team-hopper
    - Any implementation code (catch-all) → @dev-team-knuth + @dev-team-brooks
 
 3. **Always-on reviewers** (spawn regardless of file patterns):
@@ -40,9 +40,54 @@ Before spawning reviewers, verify the changes are reviewable:
 1. **Non-empty diff**: The diff contains actual changes to review. If empty, report "nothing to review" and stop.
 2. **Tests pass**: If the project has a test command, confirm tests pass. Flag test failures in the review report header.
 
+## Model assignment (alloy multi-model reviews)
+
+Before spawning reviewers, read the `models` section from `.dev-team/config.json`:
+
+```json
+{
+  "models": {
+    "default": "opus",
+    "agents": {
+      "szabo": ["opus", "sonnet"],
+      "knuth": ["opus", "sonnet"],
+      "brooks": ["opus"],
+      "voss": "sonnet"
+    }
+  }
+}
+```
+
+**Rules:**
+- `default` — model tier used for agents not listed in `agents`
+- String value — single model, no shadow review
+- Array value — ordered preference: first is primary, subsequent are shadow models for alloy reviews
+
+**Alloy behavior by review tier:**
+
+| Review tier | Model strategy |
+|------------|---------------|
+| LIGHT | Primary only (first model in array, or the string value) |
+| FULL | Primary + first shadow (first two models in array) |
+| DEEP | All models in array |
+
+When alloy is enabled (agent has an array with 2+ models and the review tier calls for shadows):
+1. Spawn the primary reviewer as normal (using the first model in the array via the agent's `model:` frontmatter field)
+2. Spawn a shadow reviewer for each additional model the tier requires. Shadow reviewers use the same agent prompt but with a different `model:` field. Name them `{agent}-review-shadow-{model}` (e.g., `szabo-review-shadow-sonnet`)
+3. Shadow reviews run in parallel with the primary review
+4. If a shadow model fails (rate limit, unavailable), the review proceeds with the primary model alone — alloy is additive, not required
+
+**Finding deduplication for alloy reviews:**
+When multiple models review the same diff, deduplicate findings using structured matching:
+1. Group findings by (file, line range, classification)
+2. If all models flagged the same location + classification: mark as `unanimous` (high confidence)
+3. If 2+ models flagged it: mark as `majority`
+4. If only one model flagged it: mark as `unique:{model}` — these are the primary value of alloy reviews, do NOT discard them
+5. Use the primary model's wording for the merged finding description
+
 ## Execution
 
-1. Spawn each selected agent as a **parallel background subagent** using the Agent tool with `subagent_type: "general-purpose"`. Use the agent teammate naming convention: `{agent}-review` (e.g., `szabo-review`, `knuth-review`, `brooks-review`). **Timeout**: If a reviewer has not reported progress (status file or message) within 2 minutes, send a status ping. If no response within 1 additional minute, terminate the reviewer and proceed with findings from the other reviewers.
+1. Spawn each selected agent as a **parallel background subagent** using the Agent tool with `subagent_type: "general-purpose"`. Use the agent teammate naming convention: `{agent}-review` (e.g., `szabo-review`, `knuth-review`, `brooks-review`). Set the agent's `model:` based on the models config (see Model assignment above). **Timeout**: If a reviewer has not reported progress (status file or message) within 2 minutes, send a status ping. If no response within 1 additional minute, terminate the reviewer and proceed with findings from the other reviewers.
 
 2. Each agent's prompt must include:
    - The agent's full definition (read from `.claude/agents/<agent>.agent.md`)
@@ -51,7 +96,7 @@ Before spawning reviewers, verify the changes are reviewable:
    - Instruction to read the actual code — not just the diff — for full context
    - In LIGHT mode: inform the reviewer that this is a LIGHT advisory review — findings will not block progress
 
-3. Wait for all agents to complete.
+3. Wait for all agents to complete (including shadow reviewers if alloy is active).
 
 ## Filter findings (judge pass)
 

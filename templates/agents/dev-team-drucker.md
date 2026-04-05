@@ -34,9 +34,9 @@ Based on the classification, select:
 **Implementing agent** (one):
 | Domain | Agent | When |
 |--------|-------|------|
-| Backend, API, data | @dev-team-voss | API design, data modeling, system architecture |
-| Infrastructure, IaC, containers, deployment | @dev-team-hamilton | Dockerfiles, CI/CD, Terraform, Helm, k8s, health checks, monitoring |
-| Frontend, UI, components | @dev-team-mori | Components, accessibility, UX patterns |
+| Backend, API, data | @dev-team-hopper | API design, data modeling, system architecture |
+| Infrastructure, IaC, containers, deployment | @dev-team-hopper | Dockerfiles, CI/CD, Terraform, Helm, k8s, health checks, monitoring |
+| Frontend, UI, components | @dev-team-hopper | Components, accessibility, UX patterns |
 | Tooling, CI/CD, hooks, config | @dev-team-deming | Linters, formatters, CI/CD, automation |
 | Documentation | @dev-team-tufte | README, API docs, inline comments, doc-code sync |
 | Release, versioning | @dev-team-conway | Changelog, semver, release readiness |
@@ -49,7 +49,6 @@ Based on the classification, select:
 | Quality/correctness | @dev-team-knuth | Always for code changes |
 | Architecture & quality attributes | @dev-team-brooks | Always for code changes (structural review + performance, maintainability, scalability assessment) |
 | Documentation | @dev-team-tufte | When APIs, public interfaces, or documentation files change |
-| Operations | @dev-team-hamilton | When infrastructure files change (Dockerfile, docker-compose, CI workflows, Terraform, Helm, k8s, health checks, logging/monitoring config, .env templates) |
 | Release | @dev-team-conway | When version-related files change (package.json, changelog, version bumps, release workflows) |
 | Design system | @dev-team-rams | When frontend/UI files change (no-ops if no design system) |
 
@@ -97,7 +96,7 @@ Turing's output: a structured research brief passed to the implementing agent as
 ### 4. Delegate
 
 **Agent teammate naming convention:** When spawning teammates, use `{agent}-{role}[-{qualifier}]`:
-- Implementers: `{agent}-implement[-{qualifier}]` (e.g., `voss-implement`, `deming-implement-auth`)
+- Implementers: `{agent}-implement[-{qualifier}]` (e.g., `hopper-implement`, `deming-implement-auth`)
 - Reviewers: `{agent}-review` (e.g., `szabo-review`, `knuth-review`)
 - Research: `turing-research[-{qualifier}]`
 - Memory extraction: `borges-extract`
@@ -249,11 +248,11 @@ When Claude Code agent teams are enabled (`CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=
 **File ownership conventions:**
 | Domain | Default owner | Files |
 |--------|--------------|-------|
-| Backend/API | Voss | `src/`, `lib/`, application code |
-| Infrastructure | Hamilton | `Dockerfile`, `.github/workflows/`, IaC |
+| Backend/API | Hopper | `src/`, `lib/`, application code |
+| Infrastructure | Hopper | `Dockerfile`, `.github/workflows/`, IaC |
 | Tooling/config | Deming | `package.json`, linter configs, build scripts |
 | Documentation | Tufte | `docs/`, `*.md`, `README` |
-| Frontend | Mori | `components/`, `pages/`, UI code |
+| Frontend | Hopper | `components/`, `pages/`, UI code |
 | Release | Conway | `CHANGELOG.md`, version files |
 
 **Constraints:**

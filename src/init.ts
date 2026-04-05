@@ -50,6 +50,36 @@ export const DEFAULT_PR_CONFIG: PrConfig = {
   autoLabel: true,
 };
 
+export type ModelTier = "opus" | "sonnet" | "haiku";
+export type ModelAssignment = ModelTier | ModelTier[];
+
+export interface ModelsConfig {
+  default: ModelTier;
+  agents: Record<string, ModelAssignment>;
+}
+
+export const DEFAULT_MODELS: ModelsConfig = {
+  default: "opus",
+  agents: {},
+};
+
+/**
+ * Merges a partial models config into the defaults, preserving all user-set values
+ * and adding new keys with their defaults.
+ */
+export function mergeModelsConfig(existing: Partial<ModelsConfig>): ModelsConfig {
+  const merged: ModelsConfig = {
+    default: existing.default || DEFAULT_MODELS.default,
+    agents: {},
+  };
+  if (existing.agents) {
+    for (const [key, value] of Object.entries(existing.agents)) {
+      merged.agents[key] = value;
+    }
+  }
+  return merged;
+}
+
 export type WorkflowToggle = boolean | "complex";
 export type WorkflowSwitch = boolean;
 
@@ -148,17 +178,7 @@ interface HookDefinition {
 }
 
 const ALL_AGENTS: AgentDefinition[] = [
-  { label: "Voss", file: "dev-team-voss.md", description: "Backend Engineer" },
-  {
-    label: "Hamilton",
-    file: "dev-team-hamilton.md",
-    description: "Infrastructure Engineer",
-  },
-  {
-    label: "Mori",
-    file: "dev-team-mori.md",
-    description: "Frontend/UI Engineer",
-  },
+  { label: "Hopper", file: "dev-team-hopper.md", description: "Full-Stack Implementation Engineer" },
   {
     label: "Szabo",
     file: "dev-team-szabo.md",
@@ -291,8 +311,7 @@ const PRESETS: Record<string, PresetDefinition> = {
     label: "backend",
     description: "Backend-heavy — API, security, architecture, quality",
     agents: [
-      "Voss",
-      "Hamilton",
+      "Hopper",
       "Szabo",
       "Knuth",
       "Deming",
@@ -312,7 +331,7 @@ const PRESETS: Record<string, PresetDefinition> = {
   data: {
     label: "data",
     description: "Data pipeline — backend, quality, security, tooling",
-    agents: ["Voss", "Szabo", "Knuth", "Deming", "Tufte", "Drucker", "Borges"],
+    agents: ["Hopper", "Szabo", "Knuth", "Deming", "Tufte", "Drucker", "Borges"],
     hooks: QUALITY_HOOKS.map((h) => h.label),
   },
 };
@@ -628,6 +647,7 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
     versioning: DEFAULT_VERSIONING,
     workflow: DEFAULT_WORKFLOW,
     pr: DEFAULT_PR_CONFIG,
+    models: DEFAULT_MODELS,
   };
   if (preset) {
     prefs.preset = preset.label;

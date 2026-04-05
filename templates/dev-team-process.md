@@ -56,13 +56,13 @@ When working on multiple independent issues, combine agent teams with worktree i
 - **Review/read-only agents** should assess whether they need access to an implementer's worktree (to run tests or read changed files in context), or should work in their own isolation for independent analysis.
 
 **Agent teammate naming convention:** Use `{agent}-{role}[-{qualifier}]`:
-- `{agent}` — dev-team agent name (lowercase): `voss`, `deming`, `szabo`, etc.
+- `{agent}` — dev-team agent name (lowercase): `hopper`, `deming`, `szabo`, etc.
 - `{role}` — action: `implement`, `review`, `research`, `audit`, `extract`
 - `{qualifier}` — optional, for disambiguation (e.g., issue number, feature name)
 
 | Role suffix | When used | Examples |
 |-------------|-----------|---------|
-| `-implement` | Implementing agent on a task branch | `voss-implement`, `deming-implement-auth` |
+| `-implement` | Implementing agent on a task branch | `hopper-implement`, `deming-implement-auth` |
 | `-review` | Reviewer in a review wave | `szabo-review`, `knuth-review` |
 | `-research` | Turing research brief | `turing-research`, `turing-research-caching` |
 | `-audit` | Full codebase audit pass | `szabo-audit`, `knuth-audit` |

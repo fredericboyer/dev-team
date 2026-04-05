@@ -130,7 +130,7 @@ Check each agent's memory file for:
 
 ### Inconsistencies
 - Agent memory that contradicts `.claude/rules/dev-team-learnings.md`
-- Agent memory that contradicts another agent's memory (e.g., Szabo says "auth uses sessions" but Voss says "auth uses JWT")
+- Agent memory that contradicts another agent's memory (e.g., Szabo says "auth uses sessions" but Hopper says "auth uses JWT")
 - Agent memory that contradicts `CLAUDE.md`
 
 ### Coverage gaps
@@ -139,7 +139,7 @@ Check each agent's memory file for:
 
 ### Memory promotion opportunities
 - Scan each agent's `MEMORY.md` for entries that describe project-wide patterns, conventions, or rules rather than agent-specific calibration
-- Examples of promotable entries: "all API endpoints require rate limiting" (Szabo), "we always use transactions for multi-table writes" (Voss), "components must support keyboard navigation" (Mori)
+- Examples of promotable entries: "all API endpoints require rate limiting" (Szabo), "we always use transactions for multi-table writes" (Hopper), "components must support keyboard navigation" (Hopper)
 - Examples of non-promotable entries: "I tend to over-flag SQL injection in parameterized queries" (agent-specific calibration), "coverage is weak in the parser module" (agent-specific observation)
 - Flag entries that would benefit other agents if promoted to `.claude/rules/dev-team-learnings.md`
 - Classify each as `[SUGGESTION]` with the specific entry text and recommended shared learning wording

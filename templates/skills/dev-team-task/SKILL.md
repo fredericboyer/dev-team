@@ -52,11 +52,13 @@ Phase markers are consistent with agent-level progress reporting (ADR-026).
 
 ## Step 1: Implement
 
-Call `/dev-team:implement` with the task description. The implement skill handles agent selection, Brooks pre-assessment, Definition of Done negotiation, best-practices research, implementation, validation, and PR creation.
+Call `/dev-team:implement` with the task description. The implement skill handles agent selection, Brooks pre-assessment, Definition of Done negotiation, best-practices research, implementation, and validation. It pushes the branch but does not create a PR.
 
 For SIMPLE tasks (or when `--skip-assessment` is appropriate), pass that flag through.
 
-The implement skill returns: branch name, PR number, files changed, complexity classification, and whether an ADR was written. Use the complexity classification to determine review intensity in Step 2.
+After implementation completes, call `/dev-team:pr` to create the pull request. The pr skill reads format config from `.dev-team/config.json`, links the issue, and applies labels.
+
+The implement skill returns: branch name, files changed, complexity classification, and whether an ADR was written. The pr skill returns: PR number and URL. Use the complexity classification to determine review intensity in Step 2.
 
 ## Step 2: Review
 
@@ -151,7 +153,7 @@ Spawn @dev-team-brooks once with all issues. Brooks identifies:
 Issues in the same conflict group execute sequentially. Independent issues proceed in parallel.
 
 ### Step 1 (parallel): Implementation
-Drucker spawns one implementing agent per independent issue, each on its own branch (`feat/<issue>-<description>`). Use the agent teammate naming convention: `{agent}-implement[-{qualifier}]` (e.g., `voss-implement`, `deming-implement-auth`, `tufte-implement-319`). Agents work concurrently without awareness of each other. Drucker tracks which issues are assigned to which agents and branches in conversation context.
+Drucker spawns one implementing agent per independent issue, each on its own branch (`feat/<issue>-<description>`). Use the agent teammate naming convention: `{agent}-implement[-{qualifier}]` (e.g., `hopper-implement`, `deming-implement-auth`, `tufte-implement-319`). Agents work concurrently without awareness of each other. Drucker tracks which issues are assigned to which agents and branches in conversation context.
 
 **Sequential chains:** For sequential chains, verify the previous change is integrated before starting the next dependent task. Do not start multiple sequential agents from the same stale baseline — this causes integration conflicts that negate the sequencing benefit.
 
