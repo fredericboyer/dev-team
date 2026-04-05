@@ -133,7 +133,7 @@ npx @fredericboyer/dev-team create-agent <name>     # Scaffold a custom agent
 
 **Opus** agents do deep analysis — Szabo, Knuth, Brooks, and Turing are read-only; Drucker uses opus for orchestration with full access. **Sonnet** agents implement (faster, full write access). Hopper handles backend, frontend, and infrastructure. Borges runs at end-of-workflow for memory consolidation. Rams reviews design system compliance.
 
-### Hooks (12)
+### Hooks (17)
 
 | Hook | Trigger | Behavior |
 |------|---------|----------|
@@ -147,6 +147,11 @@ npx @fredericboyer/dev-team create-agent <name>     # Scaffold a custom agent
 | Review gate | Before commit | **Blocks** commit without review evidence. Stateless commit gates for adversarial review enforcement. |
 | Merge gate | Before merge | **Blocks** `gh pr merge` without review sidecars. Complexity-aware enforcement via assessment sidecars. |
 | Implementer guard | Before SendMessage | **Blocks** shutdown of implementing agents before review findings are routed. Config-aware. |
+| PR title format | Before `gh pr create` | **Blocks** PR creation when title does not match `pr.titleFormat` (conventional, issue-prefix, plain). |
+| PR link keyword | Before `gh pr create` | **Blocks** PR creation when body is missing `pr.linkKeyword` issue reference (e.g., `Closes #123`). |
+| PR draft advisory | Before `gh pr create` | **Advisory** warning when `pr.draft` is enabled but `--draft` flag is missing. Never blocks. |
+| PR template sections | Before `gh pr create` | **Blocks** PR creation when body is missing required sections from `pr.template` array. |
+| PR auto-label | Before `gh pr create` | **Advisory** label suggestions based on branch prefix (`feat/` -> enhancement, `fix/` -> bug). |
 | Worktree create | Before worktree creation | **Serializes** parallel worktree creation to prevent git lock races. |
 | Worktree remove | After worktree removal | **Cleans up** worktree artifacts and stale branch references. |
 
@@ -324,7 +329,7 @@ Updates agents, hooks, and skills to the latest templates. Preserves your agent 
 
 ```
 .dev-team/
-  hooks/               # 8 quality enforcement scripts
+  hooks/               # 13 quality enforcement scripts
   config.json          # Installation preferences
 .claude/
   agents/              # 11 agent definitions (.agent.md, YAML frontmatter + prompt)

@@ -38,6 +38,26 @@
           {
             "type": "command",
             "command": "node .dev-team/hooks/dev-team-merge-gate.js"
+          },
+          {
+            "type": "command",
+            "command": "node .dev-team/hooks/dev-team-pr-title-format.js"
+          },
+          {
+            "type": "command",
+            "command": "node .dev-team/hooks/dev-team-pr-link-keyword.js"
+          },
+          {
+            "type": "command",
+            "command": "node .dev-team/hooks/dev-team-pr-draft.js"
+          },
+          {
+            "type": "command",
+            "command": "node .dev-team/hooks/dev-team-pr-template.js"
+          },
+          {
+            "type": "command",
+            "command": "node .dev-team/hooks/dev-team-pr-auto-label.js"
           }
         ]
       },

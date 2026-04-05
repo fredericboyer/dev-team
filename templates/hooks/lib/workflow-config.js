@@ -73,4 +73,25 @@ function _resetCache() {
   _workflow = null;
 }
 
-module.exports = { isEnabled, _resetCache };
+/**
+ * Read and return the full .dev-team/config.json object.
+ * Returns an empty object on any failure. Result is NOT cached
+ * (config may change between hook invocations in a session).
+ */
+function readConfig() {
+  try {
+    const configPath = path.join(process.cwd(), ".dev-team", "config.json");
+    const stat = fs.lstatSync(configPath);
+    if (stat.isSymbolicLink() || !stat.isFile()) return {};
+    const raw = fs.readFileSync(configPath, "utf-8");
+    const config = JSON.parse(raw);
+    if (config && typeof config === "object" && !Array.isArray(config)) {
+      return config;
+    }
+  } catch {
+    // Missing config, parse error — return empty
+  }
+  return {};
+}
+
+module.exports = { isEnabled, readConfig, _resetCache };

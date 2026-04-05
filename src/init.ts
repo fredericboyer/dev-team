@@ -312,6 +312,31 @@ const QUALITY_HOOKS: HookDefinition[] = [
     file: "dev-team-implementer-guard.js",
     description: "Block shutdown of implementing agents before review completes",
   },
+  {
+    label: "PR title format",
+    file: "dev-team-pr-title-format.js",
+    description: "Validate PR title matches configured format (conventional, issue-prefix, plain)",
+  },
+  {
+    label: "PR link keyword",
+    file: "dev-team-pr-link-keyword.js",
+    description: "Require PR body to contain an issue link keyword (e.g., Closes #NNN)",
+  },
+  {
+    label: "PR draft advisory",
+    file: "dev-team-pr-draft.js",
+    description: "Warn when pr.draft is enabled but --draft flag is missing (advisory only)",
+  },
+  {
+    label: "PR template sections",
+    file: "dev-team-pr-template.js",
+    description: "Validate PR body contains required template sections",
+  },
+  {
+    label: "PR auto-label",
+    file: "dev-team-pr-auto-label.js",
+    description: "Auto-suggest labels based on branch prefix when pr.autoLabel is enabled",
+  },
 ];
 
 interface PresetDefinition {
