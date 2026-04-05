@@ -10,6 +10,7 @@ const {
   INFRA_HOOKS,
   DEFAULT_WORKFLOW,
   DEFAULT_VERSIONING,
+  DEFAULT_PR_CONFIG,
   validateWorkflowConfig,
   mergeWorkflowConfig,
 } = require("../../dist/init");
@@ -558,5 +559,38 @@ describe("DEFAULT_VERSIONING", () => {
   it("only contains scheme and source keys", () => {
     const keys = Object.keys(DEFAULT_VERSIONING).sort();
     assert.deepEqual(keys, ["scheme", "source"]);
+  });
+});
+
+// ─── DEFAULT_PR_CONFIG ──────────────────────────────────────────────────────
+
+describe("DEFAULT_PR_CONFIG", () => {
+  it("is exported", () => {
+    assert.ok(DEFAULT_PR_CONFIG, "DEFAULT_PR_CONFIG should be exported");
+  });
+
+  it("has titleFormat set to 'conventional'", () => {
+    assert.equal(DEFAULT_PR_CONFIG.titleFormat, "conventional");
+  });
+
+  it("has linkKeyword set to 'Closes'", () => {
+    assert.equal(DEFAULT_PR_CONFIG.linkKeyword, "Closes");
+  });
+
+  it("has draft set to false", () => {
+    assert.equal(DEFAULT_PR_CONFIG.draft, false);
+  });
+
+  it("has template with summary and testPlan", () => {
+    assert.deepEqual(DEFAULT_PR_CONFIG.template, ["summary", "testPlan"]);
+  });
+
+  it("has autoLabel set to true", () => {
+    assert.equal(DEFAULT_PR_CONFIG.autoLabel, true);
+  });
+
+  it("only contains expected keys", () => {
+    const keys = Object.keys(DEFAULT_PR_CONFIG).sort();
+    assert.deepEqual(keys, ["autoLabel", "draft", "linkKeyword", "template", "titleFormat"]);
   });
 });

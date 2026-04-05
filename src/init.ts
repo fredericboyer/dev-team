@@ -32,6 +32,54 @@ export const DEFAULT_VERSIONING: VersioningConfig = {
   source: "package.json",
 };
 
+export type PrTitleFormat = "conventional" | "plain" | "issue-prefix";
+
+export interface PrConfig {
+  titleFormat: PrTitleFormat;
+  linkKeyword: string;
+  draft: boolean;
+  template: string[];
+  autoLabel: boolean;
+}
+
+export const DEFAULT_PR_CONFIG: PrConfig = {
+  titleFormat: "conventional",
+  linkKeyword: "Closes",
+  draft: false,
+  template: ["summary", "testPlan"],
+  autoLabel: true,
+};
+
+export type ModelTier = "opus" | "sonnet" | "haiku";
+export type ModelAssignment = ModelTier | ModelTier[];
+
+export interface ModelsConfig {
+  default: ModelTier;
+  agents: Record<string, ModelAssignment>;
+}
+
+export const DEFAULT_MODELS: ModelsConfig = {
+  default: "opus",
+  agents: {},
+};
+
+/**
+ * Merges a partial models config into the defaults, preserving all user-set values
+ * and adding new keys with their defaults.
+ */
+export function mergeModelsConfig(existing: Partial<ModelsConfig>): ModelsConfig {
+  const merged: ModelsConfig = {
+    default: existing.default || DEFAULT_MODELS.default,
+    agents: {},
+  };
+  if (existing.agents) {
+    for (const [key, value] of Object.entries(existing.agents)) {
+      merged.agents[key] = value;
+    }
+  }
+  return merged;
+}
+
 export type WorkflowToggle = boolean | "complex";
 export type WorkflowSwitch = boolean;
 
@@ -609,6 +657,8 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
     agentTeams: agentTeamsEnabled,
     versioning: DEFAULT_VERSIONING,
     workflow: DEFAULT_WORKFLOW,
+    models: DEFAULT_MODELS,
+    pr: DEFAULT_PR_CONFIG,
   };
   if (preset) {
     prefs.preset = preset.label;
