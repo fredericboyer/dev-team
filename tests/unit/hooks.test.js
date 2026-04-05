@@ -145,6 +145,7 @@ describe("dev-team-post-change-review", () => {
     const result = runHook(hook, { file_path: "/app/src/auth/login.ts" });
     assert.equal(result.code, 0);
     assert.ok(!result.stdout.includes("@dev-team-szabo"), "should not name szabo");
+    assert.ok(!result.stdout.includes("@dev-team-hopper"), "should not name hopper");
     assert.ok(!result.stdout.includes("@dev-team-mori"), "should not name mori");
     assert.ok(!result.stdout.includes("@dev-team-knuth"), "should not name knuth");
     assert.ok(!result.stdout.includes("@dev-team-brooks"), "should not name brooks");
@@ -1543,7 +1544,7 @@ describe("dev-team-watch-list", () => {
       watchLists: [
         {
           pattern: "\\.graphql$",
-          agents: ["dev-team-mori", "dev-team-voss"],
+          agents: ["dev-team-hopper"],
           reason: "API schema changed",
         },
         { pattern: "src/db/", agents: ["dev-team-codd"], reason: "database code changed" },
@@ -1557,8 +1558,7 @@ describe("dev-team-watch-list", () => {
       timeout: 5000,
       cwd: tmpDir,
     });
-    assert.ok(stdout.includes("@dev-team-mori"), "should recommend mori");
-    assert.ok(stdout.includes("@dev-team-voss"), "should recommend voss");
+    assert.ok(stdout.includes("@dev-team-hopper"), "should recommend hopper");
   });
 
   it("exits 0 with empty watchLists", () => {
@@ -1578,7 +1578,7 @@ describe("dev-team-watch-list", () => {
     const prefs = {
       watchLists: [
         { pattern: "src/db/", reason: "database code changed" },
-        { pattern: "src/api/", agents: ["dev-team-voss"], reason: "api changed" },
+        { pattern: "src/api/", agents: ["dev-team-hopper"], reason: "api changed" },
       ],
     };
     fs.writeFileSync(path.join(tmpDir, ".dev-team", "config.json"), JSON.stringify(prefs));
@@ -1597,7 +1597,7 @@ describe("dev-team-watch-list", () => {
     const prefs = {
       watchLists: [
         { pattern: "[invalid(regex", agents: ["dev-team-codd"], reason: "bad regex" },
-        { pattern: "src/api/", agents: ["dev-team-voss"], reason: "api changed" },
+        { pattern: "src/api/", agents: ["dev-team-hopper"], reason: "api changed" },
       ],
     };
     fs.writeFileSync(path.join(tmpDir, ".dev-team", "config.json"), JSON.stringify(prefs));
@@ -1610,7 +1610,7 @@ describe("dev-team-watch-list", () => {
     });
     // Invalid regex should be skipped gracefully, valid entry should still match
     assert.ok(
-      stdout.includes("@dev-team-voss"),
+      stdout.includes("@dev-team-hopper"),
       "should still match valid entries after invalid regex",
     );
   });

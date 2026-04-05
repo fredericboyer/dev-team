@@ -6,7 +6,7 @@
 
 Adversarial AI agent team for any project. Installs [Claude Code](https://claude.ai/claude-code) agents, hooks, and skills that enforce quality through productive friction.
 
-Instead of an AI that agrees with everything, dev-team gives you fourteen opinionated specialists that challenge each other — and you. Hooks enforce the process deterministically. Agents can't skip reviews. Commits are blocked until the team signs off.
+Instead of an AI that agrees with everything, dev-team gives you eleven opinionated specialists that challenge each other — and you. Hooks enforce the process deterministically. Agents can't skip reviews. Commits are blocked until the team signs off.
 
 ## How the system works
 
@@ -25,9 +25,7 @@ graph TB
     end
 
     subgraph Impl["Implementation Agents (sonnet)"]
-        Voss["@dev-team-voss\nBackend"]
-        Mori["@dev-team-mori\nFrontend"]
-        Hamilton["@dev-team-hamilton\nInfrastructure"]
+        Hopper["@dev-team-hopper\nFull-stack"]
         Deming["@dev-team-deming\nTooling"]
         Tufte["@dev-team-tufte\nDocumentation"]
         Conway["@dev-team-conway\nRelease Manager"]
@@ -117,14 +115,12 @@ npx @fredericboyer/dev-team create-agent <name>     # Scaffold a custom agent
 
 ## What you get
 
-### Agents (13)
+### Agents (14)
 
 | Agent | Role | Model | When to use |
 |-------|------|-------|-------------|
 | `@dev-team-drucker` | **Orchestrator** | opus | Auto-delegates to specialists, manages review loops |
-| `@dev-team-voss` | Backend Engineer | sonnet | API design, data modeling, system architecture |
-| `@dev-team-mori` | Frontend Engineer | sonnet | Components, accessibility, UX patterns |
-| `@dev-team-hamilton` | Infrastructure Engineer | sonnet | Dockerfiles, IaC, CI/CD, k8s, deployment, monitoring |
+| `@dev-team-hopper` | Full-stack Engineer | sonnet | Backend, frontend, and infrastructure implementation |
 | `@dev-team-szabo` | Security Auditor | opus | Vulnerability review, auth flows, attack surfaces |
 | `@dev-team-knuth` | Quality Auditor | opus | Coverage gaps, boundary conditions, correctness |
 | `@dev-team-deming` | Tooling Optimizer | sonnet | Linters, formatters, CI/CD, hooks, automation |
@@ -135,7 +131,7 @@ npx @fredericboyer/dev-team create-agent <name>     # Scaffold a custom agent
 | `@dev-team-rams` | Design System Reviewer | sonnet | Token compliance, spacing consistency, design-code alignment |
 | `@dev-team-borges` | Librarian | sonnet | Memory extraction, cross-agent coherence, system improvement |
 
-**Opus** agents do deep analysis — Szabo, Knuth, Brooks, and Turing are read-only; Drucker uses opus for orchestration with full access. **Sonnet** agents implement (faster, full write access). Borges runs at end-of-workflow for memory consolidation. Rams reviews design system compliance.
+**Opus** agents do deep analysis — Szabo, Knuth, Brooks, and Turing are read-only; Drucker uses opus for orchestration with full access. **Sonnet** agents implement (faster, full write access). Hopper handles backend, frontend, and infrastructure. Borges runs at end-of-workflow for memory consolidation. Rams reviews design system compliance.
 
 ### Hooks (12)
 
@@ -186,7 +182,7 @@ Or use the task loop for automatic iteration:
 /dev-team:task Add rate limiting to the API endpoints
 ```
 
-Drucker analyzes the task, picks Voss (backend), and spawns Szabo + Knuth + Brooks as reviewers.
+Drucker analyzes the task, picks Hopper (full-stack), and spawns Szabo + Knuth + Brooks as reviewers.
 
 ### 2. Let the agents work
 
@@ -269,7 +265,7 @@ Each agent maintains persistent memory that calibrates over time:
 ```
 .claude/
   agent-memory/
-    dev-team-voss/MEMORY.md     # Voss's project-specific patterns
+    dev-team-hopper/MEMORY.md   # Hopper's project-specific patterns
     dev-team-szabo/MEMORY.md    # Szabo's security findings
     dev-team-knuth/MEMORY.md    # Knuth's coverage observations
     ...
@@ -301,7 +297,7 @@ Add file-pattern-to-agent mappings in `.dev-team/config.json`:
 {
   "watchLists": [
     { "pattern": "src/db/", "agents": ["dev-team-codd"], "reason": "database code changed" },
-    { "pattern": "\\.graphql$", "agents": ["dev-team-mori"], "reason": "API schema changed" }
+    { "pattern": "\\.graphql$", "agents": ["dev-team-hopper"], "reason": "API schema changed" }
   ]
 }
 ```
@@ -310,9 +306,9 @@ Add file-pattern-to-agent mappings in `.dev-team/config.json`:
 
 | Preset | Agents included |
 |--------|----------------|
-| `backend` | Voss, Hamilton, Szabo, Knuth, Deming, Brooks, Conway |
-| `fullstack` | All 13 agents |
-| `data` | Voss, Szabo, Knuth, Deming, Tufte |
+| `backend` | Hopper, Szabo, Knuth, Deming, Brooks, Conway |
+| `fullstack` | All agents (11 active + 3 deprecated) |
+| `data` | Hopper, Szabo, Knuth, Deming, Tufte |
 
 Drucker (orchestrator) and Borges (librarian) are included in all presets. For non-fullstack presets, invoke Drucker with `@dev-team-drucker` for automatic delegation.
 
@@ -331,7 +327,7 @@ Updates agents, hooks, and skills to the latest templates. Preserves your agent 
   hooks/               # 8 quality enforcement scripts
   config.json          # Installation preferences
 .claude/
-  agents/              # 13 agent definitions (.agent.md, YAML frontmatter + prompt)
+  agents/              # 11 agent definitions (.agent.md, YAML frontmatter + prompt)
   agent-memory/        # Per-agent persistent memory (never overwritten on update)
   rules/
     dev-team-learnings.md  # Shared team knowledge (never overwritten on update)

@@ -12,7 +12,7 @@
  * {
  *   "watchLists": [
  *     { "pattern": "src/db/", "agents": ["dev-team-codd"], "reason": "database code changed" },
- *     { "pattern": "\\.graphql$", "agents": ["dev-team-mori", "dev-team-voss"], "reason": "API schema changed" }
+ *     { "pattern": "\\.graphql$", "agents": ["dev-team-hopper"], "reason": "API schema changed" }
  *   ]
  * }
  */

@@ -17,14 +17,14 @@ Run a multi-agent parallel review of: $ARGUMENTS
 
 2. Categorize changed files by domain to determine which agents to spawn. This skill is the **sole authority** for agent selection — the hooks no longer determine which agents to run. Use the following domain-to-agent routing to select reviewers based on the diff:
    - Security/auth/crypto/token → @dev-team-szabo
-   - API routes/contracts/schemas → @dev-team-mori
+   - API routes/contracts/schemas → @dev-team-hopper
    - Frontend/UI/components → @dev-team-rams
-   - Config/data model/migrations → @dev-team-voss
+   - Config/data model/migrations → @dev-team-hopper
    - Tooling/build/CI/linting → @dev-team-deming
    - Documentation/ADRs → @dev-team-tufte
    - Architecture/abstractions/boundaries → @dev-team-brooks
    - Release artifacts/versioning → @dev-team-conway
-   - Infrastructure/deployment/ops → @dev-team-hamilton
+   - Infrastructure/deployment/ops → @dev-team-hopper
    - Any implementation code (catch-all) → @dev-team-knuth + @dev-team-brooks
 
 3. **Always-on reviewers** (spawn regardless of file patterns):

@@ -35,7 +35,7 @@ describe("dev-team update", () => {
     await run(tmpDir, ["--all"]);
 
     // Modify an installed agent to simulate a stale version
-    const agentPath = path.join(tmpDir, ".claude", "agents", "dev-team-voss.agent.md");
+    const agentPath = path.join(tmpDir, ".claude", "agents", "dev-team-hopper.agent.md");
     fs.writeFileSync(agentPath, "old content");
 
     // Run update
@@ -43,7 +43,7 @@ describe("dev-team update", () => {
 
     // Agent should be restored to template content
     const content = fs.readFileSync(agentPath, "utf-8");
-    assert.ok(content.includes("dev-team-voss"), "agent should be updated to latest template");
+    assert.ok(content.includes("dev-team-hopper"), "agent should be updated to latest template");
     assert.ok(!content.includes("old content"), "old content should be replaced");
   });
 
@@ -51,8 +51,8 @@ describe("dev-team update", () => {
     await run(tmpDir, ["--all"]);
 
     // Add custom content to agent memory
-    const memoryPath = path.join(tmpDir, ".claude", "agent-memory", "dev-team-voss", "MEMORY.md");
-    fs.writeFileSync(memoryPath, "# Custom learnings\nVoss learned something important.");
+    const memoryPath = path.join(tmpDir, ".claude", "agent-memory", "dev-team-hopper", "MEMORY.md");
+    fs.writeFileSync(memoryPath, "# Custom learnings\nHopper learned something important.");
 
     await update(tmpDir);
 
@@ -379,7 +379,7 @@ describe("dev-team update", () => {
     assert.ok(!updated.agents.includes("Phantom"), "ghost agent should be removed");
     // Real entries should still be there
     assert.ok(updated.hooks.includes("Safety guard"), "real hook should remain");
-    assert.ok(updated.agents.includes("Voss"), "real agent should remain");
+    assert.ok(updated.agents.includes("Hopper"), "real agent should remain");
   });
 
   it("handles config where all entries are ghosts (empty arrays after filter)", async () => {
@@ -407,20 +407,20 @@ describe("dev-team update", () => {
     // Simulate a pre-migration install (files in .claude/ with dev-team.json)
     fs.mkdirSync(path.join(tmpDir, ".claude", "agents"), { recursive: true });
     fs.mkdirSync(path.join(tmpDir, ".claude", "hooks"), { recursive: true });
-    fs.mkdirSync(path.join(tmpDir, ".claude", "agent-memory", "dev-team-voss"), {
+    fs.mkdirSync(path.join(tmpDir, ".claude", "agent-memory", "dev-team-hopper"), {
       recursive: true,
     });
     fs.writeFileSync(
-      path.join(tmpDir, ".claude", "agents", "dev-team-voss.agent.md"),
-      "---\nname: dev-team-voss\n---",
+      path.join(tmpDir, ".claude", "agents", "dev-team-hopper.agent.md"),
+      "---\nname: dev-team-hopper\n---",
     );
     fs.writeFileSync(
       path.join(tmpDir, ".claude", "hooks", "dev-team-safety-guard.js"),
       "#!/usr/bin/env node\n// safety-guard",
     );
     fs.writeFileSync(
-      path.join(tmpDir, ".claude", "agent-memory", "dev-team-voss", "MEMORY.md"),
-      "# Voss Memory\nCustom learnings here",
+      path.join(tmpDir, ".claude", "agent-memory", "dev-team-hopper", "MEMORY.md"),
+      "# Hopper Memory\nCustom learnings here",
     );
     fs.writeFileSync(
       path.join(tmpDir, ".claude", "dev-team-learnings.md"),
@@ -431,7 +431,7 @@ describe("dev-team update", () => {
       JSON.stringify(
         {
           version: "0.4.0",
-          agents: ["Voss"],
+          agents: ["Hopper"],
           hooks: ["Safety guard"],
           issueTracker: "GitHub Issues",
           branchConvention: "feat/123-description",
@@ -468,13 +468,13 @@ describe("dev-team update", () => {
     );
     // Agent memory should stay in .claude/agent-memory/ (runtime-native)
     assert.ok(
-      fs.existsSync(path.join(tmpDir, ".claude", "agent-memory", "dev-team-voss", "MEMORY.md")),
+      fs.existsSync(path.join(tmpDir, ".claude", "agent-memory", "dev-team-hopper", "MEMORY.md")),
       "memory should be in .claude/agent-memory/",
     );
 
     // Memory content preserved
     const memory = fs.readFileSync(
-      path.join(tmpDir, ".claude", "agent-memory", "dev-team-voss", "MEMORY.md"),
+      path.join(tmpDir, ".claude", "agent-memory", "dev-team-hopper", "MEMORY.md"),
       "utf-8",
     );
     assert.ok(memory.includes("Custom learnings"), "memory content should be preserved");
@@ -555,7 +555,7 @@ describe("dev-team update", () => {
       JSON.stringify(
         {
           version: "0.4.0",
-          agents: ["Voss"],
+          agents: ["Hopper"],
           hooks: ["Safety guard"],
           issueTracker: "GitHub Issues",
           branchConvention: "feat/123-description",
@@ -839,18 +839,18 @@ describe("migrateToV3Layout", () => {
     const oldAgentsDir = path.join(tmpDir, ".dev-team", "agents");
     fs.mkdirSync(oldAgentsDir, { recursive: true });
     fs.writeFileSync(
-      path.join(oldAgentsDir, "dev-team-voss.md"),
-      "---\nname: dev-team-voss\n---\n# Voss agent definition",
+      path.join(oldAgentsDir, "dev-team-hopper.md"),
+      "---\nname: dev-team-hopper\n---\n# Hopper agent definition",
     );
-    const newAgentPath = path.join(tmpDir, ".claude", "agents", "dev-team-voss.agent.md");
+    const newAgentPath = path.join(tmpDir, ".claude", "agents", "dev-team-hopper.agent.md");
     fs.unlinkSync(newAgentPath);
     const log = migrateToV3Layout(tmpDir);
     assert.ok(
       fs.existsSync(newAgentPath),
-      "agent should be at .claude/agents/dev-team-voss.agent.md",
+      "agent should be at .claude/agents/dev-team-hopper.agent.md",
     );
     const content = fs.readFileSync(newAgentPath, "utf-8");
-    assert.ok(content.includes("Voss agent definition"), "content should be preserved");
+    assert.ok(content.includes("Hopper agent definition"), "content should be preserved");
     assert.ok(!fs.existsSync(oldAgentsDir), ".dev-team/agents/ should be removed");
     assert.ok(
       log.some((l) => l.includes("Migrated") && l.includes("agents")),
@@ -863,10 +863,10 @@ describe("migrateToV3Layout", () => {
     const oldAgentsDir = path.join(tmpDir, ".dev-team", "agents");
     fs.mkdirSync(oldAgentsDir, { recursive: true });
     fs.writeFileSync(
-      path.join(oldAgentsDir, "dev-team-voss.md"),
-      "---\nname: dev-team-voss\n---\n# Voss",
+      path.join(oldAgentsDir, "dev-team-hopper.md"),
+      "---\nname: dev-team-hopper\n---\n# Hopper",
     );
-    const newAgentPath = path.join(tmpDir, ".claude", "agents", "dev-team-voss.agent.md");
+    const newAgentPath = path.join(tmpDir, ".claude", "agents", "dev-team-hopper.agent.md");
     fs.unlinkSync(newAgentPath);
     migrateToV3Layout(tmpDir);
     const firstContent = fs.readFileSync(newAgentPath, "utf-8");
@@ -883,39 +883,39 @@ describe("migrateToV3Layout", () => {
     await run(tmpDir, ["--all"]);
     const oldAgentsDir = path.join(tmpDir, ".dev-team", "agents");
     fs.mkdirSync(oldAgentsDir, { recursive: true });
-    const newMoriPath = path.join(tmpDir, ".claude", "agents", "dev-team-mori.agent.md");
-    fs.unlinkSync(newMoriPath);
+    const newHopperPath = path.join(tmpDir, ".claude", "agents", "dev-team-hopper.agent.md");
+    fs.unlinkSync(newHopperPath);
     fs.writeFileSync(
-      path.join(oldAgentsDir, "dev-team-mori.md"),
-      "---\nname: dev-team-mori\n---\n# Mori old",
+      path.join(oldAgentsDir, "dev-team-hopper.md"),
+      "---\nname: dev-team-hopper\n---\n# Hopper old",
     );
     fs.writeFileSync(
-      path.join(oldAgentsDir, "dev-team-voss.md"),
-      "---\nname: dev-team-voss\n---\n# Voss OLD -- should not overwrite",
+      path.join(oldAgentsDir, "dev-team-szabo.md"),
+      "---\nname: dev-team-szabo\n---\n# Szabo OLD -- should not overwrite",
     );
     migrateToV3Layout(tmpDir);
-    const vossContent = fs.readFileSync(
-      path.join(tmpDir, ".claude", "agents", "dev-team-voss.agent.md"),
+    const szaboContent = fs.readFileSync(
+      path.join(tmpDir, ".claude", "agents", "dev-team-szabo.agent.md"),
       "utf-8",
     );
     assert.ok(
-      !vossContent.includes("should not overwrite"),
+      !szaboContent.includes("should not overwrite"),
       "existing agent should not be overwritten",
     );
-    assert.ok(fs.existsSync(newMoriPath), "mori should be migrated");
-    const moriContent = fs.readFileSync(newMoriPath, "utf-8");
-    assert.ok(moriContent.includes("Mori old"), "migrated mori should have old content");
+    assert.ok(fs.existsSync(newHopperPath), "hopper should be migrated");
+    const hopperContent = fs.readFileSync(newHopperPath, "utf-8");
+    assert.ok(hopperContent.includes("Hopper old"), "migrated hopper should have old content");
   });
 
   it("migrates agent-memory from .dev-team/agent-memory/ to .claude/agent-memory/", async () => {
     await run(tmpDir, ["--all"]);
-    const oldMemoryDir = path.join(tmpDir, ".dev-team", "agent-memory", "dev-team-voss");
+    const oldMemoryDir = path.join(tmpDir, ".dev-team", "agent-memory", "dev-team-hopper");
     fs.mkdirSync(oldMemoryDir, { recursive: true });
     fs.writeFileSync(
       path.join(oldMemoryDir, "MEMORY.md"),
-      "# Voss Memory\nCustom calibration data here.",
+      "# Hopper Memory\nCustom calibration data here.",
     );
-    const newMemoryDir = path.join(tmpDir, ".claude", "agent-memory", "dev-team-voss");
+    const newMemoryDir = path.join(tmpDir, ".claude", "agent-memory", "dev-team-hopper");
     fs.rmSync(newMemoryDir, { recursive: true });
     const log = migrateToV3Layout(tmpDir);
     const memoryPath = path.join(newMemoryDir, "MEMORY.md");

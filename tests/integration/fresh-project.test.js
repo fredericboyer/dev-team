@@ -27,8 +27,7 @@ describe("fresh project installation", () => {
     await run(tmpDir, ["--all"]);
 
     // Agents (runtime-native: .claude/agents/*.agent.md)
-    assert.ok(fs.existsSync(path.join(tmpDir, ".claude", "agents", "dev-team-voss.agent.md")));
-    assert.ok(fs.existsSync(path.join(tmpDir, ".claude", "agents", "dev-team-mori.agent.md")));
+    assert.ok(fs.existsSync(path.join(tmpDir, ".claude", "agents", "dev-team-hopper.agent.md")));
     assert.ok(fs.existsSync(path.join(tmpDir, ".claude", "agents", "dev-team-szabo.agent.md")));
     assert.ok(fs.existsSync(path.join(tmpDir, ".claude", "agents", "dev-team-knuth.agent.md")));
     assert.ok(fs.existsSync(path.join(tmpDir, ".claude", "agents", "dev-team-deming.agent.md")));
@@ -51,7 +50,7 @@ describe("fresh project installation", () => {
     assert.ok(fs.existsSync(path.join(tmpDir, ".claude", "skills", "dev-team-retro", "SKILL.md")));
     // Memory (runtime-native: .claude/agent-memory/)
     assert.ok(
-      fs.existsSync(path.join(tmpDir, ".claude", "agent-memory", "dev-team-voss", "MEMORY.md")),
+      fs.existsSync(path.join(tmpDir, ".claude", "agent-memory", "dev-team-hopper", "MEMORY.md")),
     );
     assert.ok(fs.existsSync(path.join(tmpDir, ".claude", "rules", "dev-team-learnings.md")));
     assert.ok(fs.existsSync(path.join(tmpDir, ".dev-team", "metrics.md")));
@@ -116,7 +115,7 @@ describe("fresh project installation", () => {
     const content = fs.readFileSync(path.join(tmpDir, "CLAUDE.md"), "utf-8");
     assert.ok(content.includes("<!-- dev-team:begin -->"));
     assert.ok(content.includes("<!-- dev-team:end -->"));
-    assert.ok(content.includes("@dev-team-voss"));
+    assert.ok(content.includes("@dev-team-hopper"));
   });
 
   it("preferences file records selections", async () => {
@@ -127,7 +126,7 @@ describe("fresh project installation", () => {
     );
     assert.ok(prefs.version, "should have a version");
     assert.ok(/^\d+\.\d+\.\d+/.test(prefs.version), "version should be semver");
-    assert.ok(prefs.agents.includes("Voss"));
+    assert.ok(prefs.agents.includes("Hopper"));
     assert.ok(prefs.hooks.includes("TDD enforcement"));
     assert.equal(prefs.issueTracker, "GitHub Issues");
     assert.equal(prefs.branchConvention, "feat/123-description");
@@ -171,12 +170,11 @@ describe("fresh project installation", () => {
       fs.readFileSync(path.join(tmpDir, ".dev-team", "config.json"), "utf-8"),
     );
     assert.equal(prefs.preset, "backend");
-    assert.ok(prefs.agents.includes("Voss"), "should include Voss");
+    assert.ok(prefs.agents.includes("Hopper"), "should include Hopper");
     assert.ok(prefs.agents.includes("Szabo"), "should include Szabo");
     assert.ok(prefs.agents.includes("Brooks"), "should include Architect");
     assert.ok(prefs.agents.includes("Drucker"), "should include Lead");
     assert.ok(prefs.agents.includes("Borges"), "should include Borges");
-    assert.ok(!prefs.agents.includes("Mori"), "should not include Mori");
     assert.ok(!prefs.agents.includes("Tufte"), "should not include Docs");
 
     // Only selected agents should have files (plus SHARED.md)
@@ -192,7 +190,7 @@ describe("fresh project installation", () => {
       fs.readFileSync(path.join(tmpDir, ".dev-team", "config.json"), "utf-8"),
     );
     assert.equal(prefs.preset, "fullstack");
-    assert.equal(prefs.agents.length, 13);
+    assert.equal(prefs.agents.length, 14);
   });
 
   it("--preset data installs data pipeline agents", async () => {
@@ -202,9 +200,8 @@ describe("fresh project installation", () => {
       fs.readFileSync(path.join(tmpDir, ".dev-team", "config.json"), "utf-8"),
     );
     assert.equal(prefs.preset, "data");
-    assert.ok(prefs.agents.includes("Voss"), "should include Voss");
+    assert.ok(prefs.agents.includes("Hopper"), "should include Hopper");
     assert.ok(prefs.agents.includes("Tufte"), "should include Docs");
-    assert.ok(!prefs.agents.includes("Mori"), "should not include Mori");
     assert.ok(!prefs.agents.includes("Brooks"), "should not include Architect");
   });
 
@@ -241,7 +238,7 @@ describe("fresh project installation", () => {
       fs.readFileSync(path.join(tmpDir, ".dev-team", "config.json"), "utf-8"),
     );
     assert.equal(prefs.preset, "backend");
-    assert.ok(prefs.agents.includes("Voss"), "should include Voss");
+    assert.ok(prefs.agents.includes("Hopper"), "should include Hopper");
     assert.ok(prefs.agents.includes("Szabo"), "should include Szabo");
   });
 
@@ -286,7 +283,7 @@ describe("fresh project installation", () => {
     await run(tmpDir, ["--all", "--runtime", "claude"]);
 
     // Standard Claude Code files
-    assert.ok(fs.existsSync(path.join(tmpDir, ".claude", "agents", "dev-team-voss.agent.md")));
+    assert.ok(fs.existsSync(path.join(tmpDir, ".claude", "agents", "dev-team-hopper.agent.md")));
     assert.ok(fs.existsSync(path.join(tmpDir, ".claude", "settings.json")));
     assert.ok(fs.existsSync(path.join(tmpDir, "CLAUDE.md")));
 
@@ -318,7 +315,7 @@ describe("fresh project installation", () => {
     await run(tmpDir, ["--all", "--runtime", "claude,copilot"]);
 
     // Claude Code files
-    assert.ok(fs.existsSync(path.join(tmpDir, ".claude", "agents", "dev-team-voss.agent.md")));
+    assert.ok(fs.existsSync(path.join(tmpDir, ".claude", "agents", "dev-team-hopper.agent.md")));
     assert.ok(fs.existsSync(path.join(tmpDir, "CLAUDE.md")));
 
     // Copilot files

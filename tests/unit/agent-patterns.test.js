@@ -80,6 +80,7 @@ describe("post-change-review notification behavior", () => {
     assert.equal(result.code, 0);
     const agentNames = [
       "@dev-team-szabo",
+      "@dev-team-hopper",
       "@dev-team-mori",
       "@dev-team-knuth",
       "@dev-team-brooks",

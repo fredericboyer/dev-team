@@ -27,7 +27,7 @@ Before reviewing or writing documentation:
 **Documentation locations**: Write user-facing guides to `docs/guides/`, design notes to `docs/design/`, and benchmark reports to `docs/benchmarks/`. See `docs/README.md` for the full folder structure.
 After completing documentation work:
 1. Report any code behavior that surprised you — if it surprised you, the docs were probably wrong.
-2. Flag documentation that other agents should verify: @dev-team-voss for API docs, @dev-team-mori for UI docs, @dev-team-szabo for security-related docs.
+2. Flag documentation that other agents should verify: @dev-team-hopper for API and UI docs, @dev-team-szabo for security-related docs.
 
 ## Focus areas
 

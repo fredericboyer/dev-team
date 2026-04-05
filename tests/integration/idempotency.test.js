@@ -63,8 +63,11 @@ describe("idempotency", () => {
     await run(tmpDir, ["--all"]);
 
     // Simulate accumulated memory
-    const memoryPath = path.join(tmpDir, ".claude", "agent-memory", "dev-team-voss", "MEMORY.md");
-    fs.writeFileSync(memoryPath, "# Agent Memory: Voss\n\n## Learned patterns\n- API uses REST\n");
+    const memoryPath = path.join(tmpDir, ".claude", "agent-memory", "dev-team-hopper", "MEMORY.md");
+    fs.writeFileSync(
+      memoryPath,
+      "# Agent Memory: Hopper\n\n## Learned patterns\n- API uses REST\n",
+    );
 
     await run(tmpDir, ["--all", "--force"]);
 

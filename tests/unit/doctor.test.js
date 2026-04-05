@@ -42,7 +42,7 @@ function scaffold(opts = {}) {
   const devTeam = path.join(tmpDir, ".dev-team");
   fs.mkdirSync(devTeam, { recursive: true });
 
-  const agents = opts.agents || ["Voss"];
+  const agents = opts.agents || ["Hopper"];
   const hooks = opts.hooks || ["TDD enforcement"];
 
   const config = {
@@ -173,16 +173,16 @@ describe("doctor — config.json", () => {
 
 describe("doctor — agent files", () => {
   it("passes when agent files exist", () => {
-    scaffold({ agents: ["Voss", "Szabo"] });
+    scaffold({ agents: ["Hopper", "Szabo"] });
     const { output } = runDoctor(tmpDir);
-    assert.match(output, /OK\s+Agent: Voss\s+—\s+dev-team-voss\.agent\.md/);
+    assert.match(output, /OK\s+Agent: Hopper\s+—\s+dev-team-hopper\.agent\.md/);
     assert.match(output, /OK\s+Agent: Szabo\s+—\s+dev-team-szabo\.agent\.md/);
   });
 
   it("fails when agent file is missing", () => {
-    scaffold({ agents: ["Voss"], skipAgents: true });
+    scaffold({ agents: ["Hopper"], skipAgents: true });
     const { output, exitCode } = runDoctor(tmpDir);
-    assert.match(output, /FAIL\s+Agent: Voss\s+—\s+dev-team-voss\.agent\.md missing/);
+    assert.match(output, /FAIL\s+Agent: Hopper\s+—\s+dev-team-hopper\.agent\.md missing/);
     assert.equal(exitCode, 1);
   });
 });
@@ -256,13 +256,13 @@ describe("doctor — agent memory", () => {
   it("passes when MEMORY.md exists", () => {
     scaffold();
     const { output } = runDoctor(tmpDir);
-    assert.match(output, /OK\s+Memory: Voss\s+—\s+MEMORY\.md present/);
+    assert.match(output, /OK\s+Memory: Hopper\s+—\s+MEMORY\.md present/);
   });
 
   it("fails when MEMORY.md is missing", () => {
     scaffold({ skipMemory: true });
     const { output, exitCode } = runDoctor(tmpDir);
-    assert.match(output, /FAIL\s+Memory: Voss\s+—\s+MEMORY\.md missing/);
+    assert.match(output, /FAIL\s+Memory: Hopper\s+—\s+MEMORY\.md missing/);
     assert.equal(exitCode, 1);
   });
 });
