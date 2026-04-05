@@ -124,7 +124,7 @@ describe("dev-team-pr-title-format", () => {
     it("allows conventional title with breaking change indicator", () => {
       const result = runHook(
         hook,
-        { command: 'gh pr create --title "feat\!: breaking change"' },
+        { command: 'gh pr create --title "feat!: breaking change"' },
         { cwd: tmpDir },
       );
       assert.equal(result.code, 0);
