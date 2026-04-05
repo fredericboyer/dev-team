@@ -33,6 +33,7 @@ const fs = require("fs");
 const path = require("path");
 
 const { cachedGitDiff } = require("./lib/git-cache");
+const { isEnabled } = require("./lib/workflow-config");
 let input = {};
 try {
   input = JSON.parse(process.argv[2] || "{}");
@@ -43,6 +44,11 @@ try {
 const command = (input.tool_input && input.tool_input.command) || "";
 
 if (!/\bgit\s+commit(\s|$)/.test(command)) {
+  process.exit(0);
+}
+
+// Skip review gates when review workflow is disabled
+if (!isEnabled("review")) {
   process.exit(0);
 }
 

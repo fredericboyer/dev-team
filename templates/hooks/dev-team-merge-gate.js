@@ -31,6 +31,8 @@ const { execFileSync } = require("child_process");
 const fs = require("fs");
 const path = require("path");
 
+const { isEnabled } = require("./lib/workflow-config");
+
 let input = {};
 try {
   input = JSON.parse(process.argv[2] || "{}");
@@ -43,6 +45,11 @@ const command = (input.tool_input && input.tool_input.command) || "";
 
 // Only intercept gh pr merge commands
 if (!/\bgh\s+pr\s+merge\b/.test(command)) {
+  process.exit(0);
+}
+
+// Skip review-evidence check when review workflow is disabled
+if (!isEnabled("review")) {
   process.exit(0);
 }
 

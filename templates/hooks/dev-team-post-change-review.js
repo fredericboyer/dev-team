@@ -17,6 +17,13 @@
 const fs = require("fs");
 const path = require("path");
 
+const { isEnabled } = require("./lib/workflow-config");
+
+// Skip entirely when review workflow is disabled
+if (!isEnabled("review")) {
+  process.exit(0);
+}
+
 let input = {};
 try {
   input = JSON.parse(process.argv[2] || "{}");

@@ -20,6 +20,7 @@ const fs = require("fs");
 const path = require("path");
 
 const { safeRegex } = require("./lib/safe-regex");
+const { isEnabled } = require("./lib/workflow-config");
 
 const { cachedGitDiff } = require("./lib/git-cache");
 let stagedFiles = "";
@@ -40,6 +41,8 @@ if (files.length === 0) {
 }
 
 // Memory freshness check (blocking unless overridden)
+// Skip memory freshness gate when learn workflow is disabled
+const learnEnabled = isEnabled("learn");
 
 const hasImplFiles = files.some(
   (f) => /\.(js|ts|jsx|tsx|py|rb|go|java|rs)$/.test(f) && !/\.(test|spec)\./.test(f),
@@ -88,7 +91,7 @@ function hasSubstantiveContent(filePath) {
 }
 
 // If memory files are staged, verify they have substantive content
-if (hasMemoryUpdates) {
+if (learnEnabled && hasMemoryUpdates) {
   const allSubstantive = memoryFiles.every((f) => hasSubstantiveContent(f));
   if (!allSubstantive) {
     console.error(
@@ -100,7 +103,7 @@ if (hasMemoryUpdates) {
 }
 
 let memoryGatePassed = false;
-if (hasImplFiles && !hasMemoryUpdates) {
+if (learnEnabled && hasImplFiles && !hasMemoryUpdates) {
   // Check for .memory-reviewed override marker
   const markerPath = path.join(process.cwd(), ".dev-team", ".memory-reviewed");
   let hasOverride = false;
