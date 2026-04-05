@@ -151,7 +151,30 @@ After merge is confirmed:
    git log -1 --format="%H %s"
    ```
 
-3. **Check for next work:** suggest starting next issue if one is queued.
+3. **Clean up sidecar files** for the merged branch:
+
+   Sanitize the branch name (replace any character that is not alphanumeric or hyphen with a hyphen):
+   ```
+   sanitized = branchName.replace(/[^a-zA-Z0-9-]/g, "-")
+   ```
+
+   Remove the assessment sidecar:
+   ```bash
+   rm -f .dev-team/.assessments/{sanitized}.json
+   ```
+
+   Remove all review sidecars for this branch:
+   ```bash
+   rm -f .dev-team/.reviews/*--{sanitized}.json
+   ```
+
+   Commit the cleanup if any files were removed:
+   ```bash
+   git add .dev-team/.assessments/ .dev-team/.reviews/
+   git diff --cached --quiet || git commit -m "chore: clean up sidecars for {branchName}"
+   ```
+
+4. **Check for next work:** suggest starting next issue if one is queued.
 
 ## Error handling
 
