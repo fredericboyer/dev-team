@@ -53,6 +53,42 @@ Before spawning reviewers, verify the changes are reviewable:
 
 3. Wait for all agents to complete.
 
+## Model assignment (alloy multi-model reviews)
+
+Before spawning reviewers, read `.dev-team/config.json` and check for a `models` section:
+
+```json
+{
+  "models": {
+    "default": "opus",
+    "agents": {
+      "szabo": ["opus", "sonnet"],
+      "knuth": ["opus", "sonnet"],
+      "brooks": ["opus"],
+      "voss": "sonnet"
+    }
+  }
+}
+```
+
+- `default` — model tier for agents not listed in the `agents` map
+- String value — single model, no fallback
+- Array value — ordered list: first element is the primary model, remaining elements are shadow models for alloy multi-model review
+
+**Review depth determines which models are used:**
+
+- **LIGHT**: Primary model only (first element of array, or the string value)
+- **FULL**: Primary + first shadow model (first two elements of array)
+- **DEEP**: All models in the array
+
+When alloy is enabled (agent has an array assignment with more than one model and the review depth permits shadow models):
+1. Spawn the same agent definition on each permitted model tier in parallel
+2. Collect findings from all model runs
+3. Deduplicate findings across models — keep the most specific version when multiple models flag the same issue
+4. Tag each finding with the model that produced it for calibration tracking
+
+If no `models` section exists in config, use `"opus"` for all agents (single-model mode, no alloy).
+
 ## Filter findings (judge pass)
 
 Before producing the report, filter raw findings to maximize signal quality:

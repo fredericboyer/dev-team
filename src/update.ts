@@ -22,10 +22,11 @@ import {
   QUALITY_HOOKS,
   INFRA_HOOKS,
   mergeWorkflowConfig,
+  mergeModelsConfig,
   DEFAULT_VERSIONING,
   DEFAULT_PR_CONFIG,
 } from "./init.js";
-import type { WorkflowConfig, VersioningConfig, PrConfig } from "./init.js";
+import type { WorkflowConfig, VersioningConfig, PrConfig, ModelsConfig } from "./init.js";
 import { parseAgentDefinition } from "./formats/canonical.js";
 import { getAdaptersForRuntimes } from "./formats/adapters.js";
 import "./adapters/index.js";
@@ -378,6 +379,7 @@ interface Preferences {
   versioning?: VersioningConfig;
   workflow?: Partial<WorkflowConfig>;
   pr?: Partial<PrConfig>;
+  models?: Partial<ModelsConfig>;
 }
 
 interface UpdateSummary {
@@ -1019,6 +1021,9 @@ export async function update(targetDir: string): Promise<void> {
 
   // Backfill PR format config — merge existing user values with defaults (additive only)
   prefs.pr = prefs.pr ? { ...DEFAULT_PR_CONFIG, ...prefs.pr } : { ...DEFAULT_PR_CONFIG };
+
+  // Backfill models config — merge existing user values with defaults (additive only)
+  prefs.models = prefs.models ? mergeModelsConfig(prefs.models) : mergeModelsConfig({});
 
   // Clean up ghost entries (labels from removed hooks/agents)
   prefs.hooks = prefs.hooks.filter((label) => Object.hasOwn(HOOK_FILES, label));

@@ -20,6 +20,30 @@ import { parseAgentDefinition } from "./formats/canonical.js";
 import { getAdaptersForRuntimes } from "./formats/adapters.js";
 import "./adapters/index.js";
 
+export type ModelTier = "opus" | "sonnet" | "haiku";
+export type ModelAssignment = ModelTier | ModelTier[];
+
+export interface ModelsConfig {
+  default: ModelTier;
+  agents: Record<string, ModelAssignment>;
+}
+
+export const DEFAULT_MODELS: ModelsConfig = {
+  default: "opus",
+  agents: {},
+};
+
+/**
+ * Merges a partial models config into the defaults, preserving all user-set values
+ * and adding new keys with their defaults.
+ */
+export function mergeModelsConfig(existing: Partial<ModelsConfig>): ModelsConfig {
+  return {
+    default: existing.default ? existing.default : DEFAULT_MODELS.default,
+    agents: existing.agents ? { ...existing.agents } : {},
+  };
+}
+
 export type VersioningScheme = "semver" | "none";
 
 export interface VersioningConfig {
@@ -628,6 +652,7 @@ export async function run(targetDir: string, flags: string[] = []): Promise<void
     versioning: DEFAULT_VERSIONING,
     workflow: DEFAULT_WORKFLOW,
     pr: DEFAULT_PR_CONFIG,
+    models: DEFAULT_MODELS,
   };
   if (preset) {
     prefs.preset = preset.label;
