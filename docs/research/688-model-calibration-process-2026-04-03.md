@@ -179,7 +179,7 @@ Not all guards are equal candidates for retirement:
 - **Borges** tracks calibration decisions in agent memory (calibration outcomes are learnings)
 - **Deming** can run calibration task sets as part of quality audits
 - **Conway** includes calibration metadata in release notes when a guard status changes
-- The `/dev-team:retro` skill should check for stale calibration entries (not calibrated in 2+ model generations)
+- The `dev-team-retro` skill should check for stale calibration entries (not calibrated in 2+ model generations)
 
 ### What NOT to Calibrate
 
@@ -227,7 +227,7 @@ Some components should be excluded from the retirement process:
   **Scope**: M
   **Details**: Create the initial `calibration.json` with current model version and "keep" status for all components. This establishes the baseline for future comparisons.
 
-- **Title**: Add calibration staleness check to `/dev-team:retro`
+- **Title**: Add calibration staleness check to `dev-team-retro`
   **Severity**: P2
   **Files affected**: `templates/skills/dev-team-retro.md`
   **Scope**: S

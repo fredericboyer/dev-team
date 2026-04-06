@@ -16,7 +16,7 @@ Users need to be able to:
 ## Decision
 Build the CLI installer (`npx dev-team init`) as the primary distribution mechanism. Files are copied into the project and owned by the user.
 
-Plugin distribution is a future addition — either as a managed "auto-update" mode or with a `/dev-team:eject` command that copies files locally for editing.
+Plugin distribution is a future addition — either as a managed "auto-update" mode or with a `dev-team-eject` command that copies files locally for editing.
 
 ## Consequences
 - Users can customize everything immediately after install

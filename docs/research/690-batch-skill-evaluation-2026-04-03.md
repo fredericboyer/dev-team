@@ -9,7 +9,7 @@
 
 ## Question
 
-Claude Code ships a built-in `/batch` skill that orchestrates parallel codebase changes via worktrees. `/dev-team:task` parallel mode does similar orchestration but adds adversarial review gates. Should dev-team integrate `/batch`, replace parts of its parallel mode with it, or treat it as an independent tool for simpler use cases?
+Claude Code ships a built-in `/batch` skill that orchestrates parallel codebase changes via worktrees. `dev-team-task` parallel mode does similar orchestration but adds adversarial review gates. Should dev-team integrate `/batch`, replace parts of its parallel mode with it, or treat it as an independent tool for simpler use cases?
 
 ---
 
@@ -44,7 +44,7 @@ Per official documentation (https://code.claude.com/docs/en/skills#bundled-skill
 
 ---
 
-## 2. /dev-team:task Parallel Mode Capabilities
+## 2. dev-team-task Parallel Mode Capabilities
 
 ### What it does
 
@@ -55,7 +55,7 @@ The task skill orchestrates a four-step pipeline per branch: Implement, Review, 
 1. **Phase 0: Brooks pre-assessment** -- identifies file conflicts, ADR needs, complexity per issue (SIMPLE/COMPLEX)
 2. **Step 1: Parallel implementation** -- one agent per independent issue, each on its own branch via agent teams or worktree subagents
 3. **Step 2: Adversarial review** -- per-branch review the moment implementation finishes (LIGHT for SIMPLE, FULL for COMPLEX)
-4. **Step 3: Merge** -- per-branch merge via `/dev-team:merge` as each branch clears review
+4. **Step 3: Merge** -- per-branch merge via `dev-team-merge` as each branch clears review
 5. **Step 4: Extract** -- Borges memory extraction across all branches
 
 ### Key properties
@@ -68,13 +68,13 @@ The task skill orchestrates a four-step pipeline per branch: Implement, Review, 
 | Human checkpoints | Issue creation, plan approval (optional), dispute escalation |
 | Review | Adversarial multi-agent review with classified findings |
 | Customization | Fully configurable agents, hooks, review tiers, finding vocabulary |
-| Invocation | `/dev-team:task` (project skill, requires dev-team installation) |
+| Invocation | `dev-team-task` (project skill, requires dev-team installation) |
 
 ---
 
 ## 3. Comparison Matrix
 
-| Dimension | `/batch` | `/dev-team:task` parallel |
+| Dimension | `/batch` | `dev-team-task` parallel |
 |-----------|----------|--------------------------|
 | **Decomposition** | AI-driven (5-30 units from a single instruction) | Human-driven (one branch per GitHub issue) |
 | **Granularity** | Fine-grained (e.g., "migrate each file") | Coarse-grained (e.g., "implement feature X") |
@@ -83,7 +83,7 @@ The task skill orchestrates a four-step pipeline per branch: Implement, Review, 
 | **Memory/learning** | None | Borges extraction, metrics, learnings |
 | **Conflict detection** | Assumes units are independent | Brooks pre-assessment identifies file conflicts |
 | **Sequential chains** | Not supported | Supported (sequential gate for dependent issues) |
-| **Merge strategy** | Leaves PRs open for human merge | Automated merge via `/dev-team:merge` |
+| **Merge strategy** | Leaves PRs open for human merge | Automated merge via `dev-team-merge` |
 | **Setup cost** | Zero (built-in) | Requires dev-team installation |
 | **Customization** | None | Full (agents, hooks, skills, rules) |
 
@@ -105,7 +105,7 @@ The task skill orchestrates a four-step pipeline per branch: Implement, Review, 
 - Add license headers to all source files
 - Convert callback-style code to async/await in each module
 
-**Anti-patterns for /batch** (use `/dev-team:task` instead):
+**Anti-patterns for /batch** (use `dev-team-task` instead):
 - Feature implementation requiring design decisions
 - Changes that need architectural review
 - Security-sensitive modifications
@@ -114,11 +114,11 @@ The task skill orchestrates a four-step pipeline per branch: Implement, Review, 
 
 ---
 
-## 5. Can /dev-team:task Delegate to /batch?
+## 5. Can dev-team-task Delegate to /batch?
 
 ### The delegation idea
 
-`/dev-team:task` could use `/batch` for Step 1 (implementation) while retaining Steps 2-4 (review, merge, extract). This would leverage `/batch`'s native worktree isolation and decomposition while preserving dev-team's adversarial review loop.
+`dev-team-task` could use `/batch` for Step 1 (implementation) while retaining Steps 2-4 (review, merge, extract). This would leverage `/batch`'s native worktree isolation and decomposition while preserving dev-team's adversarial review loop.
 
 ### Analysis
 
@@ -148,22 +148,22 @@ The task skill orchestrates a four-step pipeline per branch: Implement, Review, 
 
 ## 6. Recommendation: Complementary Tools, Not Integration
 
-`/batch` and `/dev-team:task` serve different purposes and should coexist as independent tools:
+`/batch` and `dev-team-task` serve different purposes and should coexist as independent tools:
 
 | Scenario | Recommended tool |
 |----------|-----------------|
 | Mechanical transformation across many files | `/batch` |
-| Feature implementation with quality gates | `/dev-team:task` |
-| Migration with architectural review needed | `/dev-team:task` |
+| Feature implementation with quality gates | `dev-team-task` |
+| Migration with architectural review needed | `dev-team-task` |
 | Bulk refactoring with CI as quality gate | `/batch` |
-| Multi-issue sprint with adversarial review | `/dev-team:task` parallel mode |
+| Multi-issue sprint with adversarial review | `dev-team-task` parallel mode |
 | One-off codebase-wide find-and-replace | `/batch` |
 
 ### Actionable guidance for dev-team users
 
 Add guidance to the CLAUDE.md template or rules explaining when to use which:
 
-> **Parallel execution:** Use `/batch` for mechanical, repetitive transformations (migrations, renames, bulk refactoring) where CI alone provides sufficient quality assurance. Use `/dev-team:task` for feature work, security-sensitive changes, or any work requiring adversarial review and memory extraction.
+> **Parallel execution:** Use `/batch` for mechanical, repetitive transformations (migrations, renames, bulk refactoring) where CI alone provides sufficient quality assurance. Use `dev-team-task` for feature work, security-sensitive changes, or any work requiring adversarial review and memory extraction.
 
 ### No code changes needed
 
@@ -189,13 +189,13 @@ This evaluation confirms that `/batch` is a complement, not a replacement or int
 
 ## Confidence Level
 
-**High.** All claims about `/batch` verified against official Claude Code documentation. All claims about `/dev-team:task` verified against the skill definition. The recommendation is conservative (no integration) which carries low risk.
+**High.** All claims about `/batch` verified against official Claude Code documentation. All claims about `dev-team-task` verified against the skill definition. The recommendation is conservative (no integration) which carries low risk.
 
 ---
 
 ## Recommended Actions
 
-- **Documentation only.** Add guidance to `templates/CLAUDE.md` or `.claude/rules/` explaining when to use `/batch` vs `/dev-team:task`. This could be a one-liner in the Skills section of the CLAUDE.md template.
+- **Documentation only.** Add guidance to `templates/CLAUDE.md` or `.claude/rules/` explaining when to use `/batch` vs `dev-team-task`. This could be a one-liner in the Skills section of the CLAUDE.md template.
   - **Severity:** P3 (nice-to-have)
   - **Files affected:** `templates/CLAUDE.md` or project rules
   - **Scope:** S (documentation only)

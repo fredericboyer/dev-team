@@ -131,7 +131,7 @@ The Bash-only scope makes Codex hooks useful only for command interception, not 
 
 1. **Format is remarkably similar.** Both use `SKILL.md` with YAML frontmatter containing `name` and `description`. The core skill authoring experience is nearly identical.
 
-2. **Invocation model differs.** Claude Code uses explicit slash commands (`/dev-team:task`). Codex supports both explicit (`/skills` menu) and implicit (auto-matching based on description). dev-team's orchestration skills use `disable-model-invocation: true` to prevent autonomous firing; the Codex equivalent is `policy.allow_implicit_invocation: false` in an adjacent YAML file.
+2. **Invocation model differs.** Claude Code uses explicit slash commands (`dev-team-task`). Codex supports both explicit (`/skills` menu) and implicit (auto-matching based on description). dev-team's orchestration skills use `disable-model-invocation: true` to prevent autonomous firing; the Codex equivalent is `policy.allow_implicit_invocation: false` in an adjacent YAML file.
 
 3. **Tool dependency declaration is Codex-only.** Codex skills can declare MCP tool dependencies in `agents/openai.yaml`. Claude Code skills do not declare dependencies — the agent discovers tools from the environment.
 

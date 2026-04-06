@@ -30,7 +30,7 @@ For non-trivial work: explore the area first, then implement, then review.
 
 **Automatic invocation (hooks):** Agents are auto-spawned based on changed file patterns. See `.dev-team/hooks/` for the watch-list patterns that determine which agents are triggered. Turing is on-demand only (spawned by Drucker for research tasks).
 
-**End-of-workflow agents:** Borges is mandatory at end of every `/dev-team:task`, `/dev-team:review`, `/dev-team:audit`, and `/dev-team:retro` (invoked via `/dev-team:extract`).
+**End-of-workflow agents:** Borges is mandatory at end of every `dev-team-task`, `dev-team-review`, `dev-team-audit`, and `dev-team-retro` (invoked via `dev-team-extract`).
 
 **Orchestration:** Drucker delegates tasks to the right implementing agent and spawns reviewers. Szabo, Knuth, and Brooks review all code changes.
 
@@ -54,15 +54,15 @@ Do NOT skip this. Do NOT treat hook output as optional. If you believe a review 
 ### Skills
 
 **Framework skills** (installed automatically, updated with `dev-team update`):
-- `/dev-team:challenge` — critically examine a proposal or implementation
-- `/dev-team:implement` — implement a task on a feature branch with pre-assessment and validation
-- `/dev-team:task` — start an iterative task loop with adversarial review gates
-- `/dev-team:review` — orchestrated multi-agent parallel review of changes
-- `/dev-team:audit` — full codebase security + quality + tooling audit
-- `/dev-team:retro` — audit knowledge base health (learnings, agent memory, CLAUDE.md)
-- `/dev-team:extract` — Borges memory extraction, metrics verification, and memory formation gates
-- `/dev-team:scorecard` — audit process conformance for a completed task
-- `/dev-team:pr` — create a well-formatted PR from the current branch using project config
+- `dev-team-challenge` — critically examine a proposal or implementation
+- `dev-team-implement` — implement a task on a feature branch with pre-assessment and validation
+- `dev-team-task` — start an iterative task loop with adversarial review gates
+- `dev-team-review` — orchestrated multi-agent parallel review of changes
+- `dev-team-audit` — full codebase security + quality + tooling audit
+- `dev-team-retro` — audit knowledge base health (learnings, agent memory, CLAUDE.md)
+- `dev-team-extract` — Borges memory extraction, metrics verification, and memory formation gates
+- `dev-team-scorecard` — audit process conformance for a completed task
+- `dev-team-pr` — create a well-formatted PR from the current branch using project config
 
 > **Non-JS/TS projects:** Hooks detect the ecosystem and delegate language-specific reasoning to agents. The review skill selects the appropriate specialist agents based on changed file domains. Agents apply their built-in knowledge for language-specific test naming, build tools, and framework structures (see ADR-034).
 
@@ -92,7 +92,7 @@ Configure per-agent model tiers and alloy multi-model reviews in `.dev-team/conf
 - Agent names are lowercase without the `dev-team-` prefix
 - Available tiers: `opus`, `sonnet`, `haiku`
 
-**Alloy tiers** (used by `/dev-team:review`): LIGHT uses primary only. FULL uses primary + first shadow. DEEP uses all models. When alloy is active, the same agent runs on multiple models in parallel, and findings are deduplicated.
+**Alloy tiers** (used by `dev-team-review`): LIGHT uses primary only. FULL uses primary + first shadow. DEEP uses all models. When alloy is active, the same agent runs on multiple models in parallel, and findings are deduplicated.
 
 ### Project-specific customization
 

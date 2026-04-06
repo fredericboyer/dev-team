@@ -10,9 +10,9 @@ Start a task loop for: $ARGUMENTS
 
 1. Parse the task description and any flags:
    - `--max-iterations N` (default: 10)
-   - Reviewer selection is handled by `/dev-team:review` based on changed file patterns — no `--reviewers` flag needed
+   - Reviewer selection is handled by `dev-team-review` based on changed file patterns — no `--reviewers` flag needed
 
-2. Agent selection, pre-assessment, and Definition of Done are handled by `/dev-team:implement`. See that skill for details on agent routing, Brooks pre-assessment, and complexity classification.
+2. Agent selection, pre-assessment, and Definition of Done are handled by `dev-team-implement`. See that skill for details on agent routing, Brooks pre-assessment, and complexity classification.
 
 ## Four-step model
 
@@ -22,7 +22,7 @@ The task skill orchestrates four steps per branch. Each step has a clear entry c
 |------|---------------|-----------------|----------------|
 | **1. Implement** | Agent works on branch, validates output | Task assigned | Non-empty diff, tests pass, PR created |
 | **2. Review** | Adversarial review, finding routing, defect fixing | PR exists | Zero `[DEFECT]`s, all findings acknowledged |
-| **3. Merge** | Merge via `/dev-team:merge` skill, CI verification | Review passed | PR merged |
+| **3. Merge** | Merge via `dev-team-merge` skill, CI verification | Review passed | PR merged |
 | **4. Extract** | Borges memory extraction, metrics | All branches merged | Metrics recorded, memory updated |
 
 ## Phase checkpoints
@@ -31,28 +31,28 @@ At each phase boundary, emit a structured status line before proceeding. This gi
 
 **Single-issue mode:**
 ```
-[dev-team:task] Step 1/4: Implement — <agent> on <branch>...
-[dev-team:task] Step 2/4: Review — /dev-team:review (round <N>)...
-[dev-team:task] Step 3/4: Merge — /dev-team:merge PR #NNN...
-[dev-team:task] Step 4/4: Extract — spawning Borges...
-[dev-team:task] Done — PR #NNN merged, <N> DEFECTs fixed
+[dev-team-task] Step 1/4: Implement — <agent> on <branch>...
+[dev-team-task] Step 2/4: Review — dev-team-review (round <N>)...
+[dev-team-task] Step 3/4: Merge — dev-team-merge PR #NNN...
+[dev-team-task] Step 4/4: Extract — spawning Borges...
+[dev-team-task] Done — PR #NNN merged, <N> DEFECTs fixed
 ```
 
 **Parallel mode (multiple issues):**
 ```
-[dev-team:task] Parallel mode — <N> branches
-[dev-team:task] <branch>: Step 1 complete — starting review
-[dev-team:task] <branch>: Step 2 complete — merging
-[dev-team:task] <branch>: Step 3 complete — merged
-[dev-team:task] All branches merged — Step 4: extracting memories
-[dev-team:task] Done — <N> PRs merged
+[dev-team-task] Parallel mode — <N> branches
+[dev-team-task] <branch>: Step 1 complete — starting review
+[dev-team-task] <branch>: Step 2 complete — merging
+[dev-team-task] <branch>: Step 3 complete — merged
+[dev-team-task] All branches merged — Step 4: extracting memories
+[dev-team-task] Done — <N> PRs merged
 ```
 
 Phase markers are consistent with agent-level progress reporting (ADR-026).
 
 ## Step 1: Implement
 
-Call `/dev-team:implement` with the task description. The implement skill handles agent selection, Brooks pre-assessment, Definition of Done negotiation, best-practices research, implementation, validation, and PR creation.
+Call `dev-team-implement` with the task description. The implement skill handles agent selection, Brooks pre-assessment, Definition of Done negotiation, best-practices research, implementation, validation, and PR creation.
 
 For SIMPLE tasks (or when `--skip-assessment` is appropriate), pass that flag through.
 
@@ -62,11 +62,11 @@ The implement skill returns: branch name, PR number, files changed, complexity c
 
 **Review intensity** is determined by the complexity classification from Brooks' pre-assessment:
 
-- **SIMPLE tasks -> LIGHT review**: Call `/dev-team:review --light`. LIGHT reviews are advisory only — all findings (including `[DEFECT]`) are treated as advisory. A single reviewer is spawned. The review serves as a quality signal but does not block progress.
-- **COMPLEX tasks -> FULL review**: Call `/dev-team:review`. Full reviewer set, blocking `[DEFECT]` semantics, standard iteration loop.
+- **SIMPLE tasks -> LIGHT review**: Call `dev-team-review --light`. LIGHT reviews are advisory only — all findings (including `[DEFECT]`) are treated as advisory. A single reviewer is spawned. The review serves as a quality signal but does not block progress.
+- **COMPLEX tasks -> FULL review**: Call `dev-team-review`. Full reviewer set, blocking `[DEFECT]` semantics, standard iteration loop.
 - **If pre-assessment was skipped** (bug fixes, typo fixes, config tweaks): default to LIGHT review.
 
-Call `/dev-team:review [--light]` with the current branch or PR as the argument. The review skill handles:
+Call `dev-team-review [--light]` with the current branch or PR as the argument. The review skill handles:
 - Agent selection based on changed file patterns (full set for FULL review, single reviewer for LIGHT)
 - Spawning reviewers in parallel as background tasks
 - Timeout handling for unresponsive reviewers
@@ -99,7 +99,7 @@ After the implementer has acknowledged all findings, **compact the context** bef
 - Produce a structured summary: all findings (agent, classification, file, status/outcome), files changed, outstanding items
 - This compact summary is available in the task skill's context for continuity across rounds
 
-Call `/dev-team:review` again for the next round, passing the compact summary as part of the arguments so that reviewers have prior-round context (which findings were raised, how they were resolved, and what remains outstanding). The review skill spawns fresh reviewers each round — they receive the current diff, the compact summary, and their agent definition. They do NOT receive raw conversation history from prior rounds.
+Call `dev-team-review` again for the next round, passing the compact summary as part of the arguments so that reviewers have prior-round context (which findings were raised, how they were resolved, and what remains outstanding). The review skill spawns fresh reviewers each round — they receive the current diff, the compact summary, and their agent definition. They do NOT receive raw conversation history from prior rounds.
 
 Continue iterating until no `[DEFECT]` remains or max iterations reached. If max iterations reached without convergence, report remaining defects and exit.
 
@@ -107,7 +107,7 @@ Continue iterating until no `[DEFECT]` remains or max iterations reached. If max
 
 The task skill's iteration model uses two strategies to manage context growth:
 
-1. **Fresh reviewers per round**: Each `/dev-team:review` call spawns new reviewer agents. They receive only the current diff and the compact summary — not raw conversation history from prior rounds. This provides a natural context reset that prevents reviewers from anchoring on stale findings.
+1. **Fresh reviewers per round**: Each `dev-team-review` call spawns new reviewer agents. They receive only the current diff and the compact summary — not raw conversation history from prior rounds. This provides a natural context reset that prevents reviewers from anchoring on stale findings.
 
 2. **Compact summaries between rounds**: After each round, the orchestrator produces a structured summary (findings, outcomes, files changed, outstanding items). This compressed representation replaces verbose raw findings in subsequent rounds.
 
@@ -119,13 +119,13 @@ After creating a PR, check for automated review findings from the platform's rev
 
 ## Step 3: Merge
 
-**Use the project's merge skill (e.g., `/dev-team:merge`) for every PR.** Do not use raw `gh pr merge` or other git commands — the merge skill handles automated review monitoring, CI verification, and post-merge actions. If no merge skill exists, ensure the PR is mergeable and report readiness. If merge fails (CI failures, merge conflicts, branch protection), report the blocker to the human rather than leaving work unattended.
+**Use the project's merge skill (e.g., `dev-team-merge`) for every PR.** Do not use raw `gh pr merge` or other git commands — the merge skill handles automated review monitoring, CI verification, and post-merge actions. If no merge skill exists, ensure the PR is mergeable and report readiness. If merge fails (CI failures, merge conflicts, branch protection), report the blocker to the human rather than leaving work unattended.
 
 ## Step 4: Extract
 
-Format the **finding outcome log** from all review rounds (use single-branch or multi-branch format as appropriate — see `/dev-team:extract` for the log schema). Then call `/dev-team:extract` with the formatted log.
+Format the **finding outcome log** from all review rounds (use single-branch or multi-branch format as appropriate — see `dev-team-extract` for the log schema). Then call `dev-team-extract` with the formatted log.
 
-`/dev-team:extract` handles Borges spawning, metrics verification, and memory formation gates. Do not emit "Done" or report task completion until `/dev-team:extract` reports success. If it reports failure, follow its guidance to retry.
+`dev-team-extract` handles Borges spawning, metrics verification, and memory formation gates. Do not emit "Done" or report task completion until `dev-team-extract` reports success. If it reports failure, follow its guidance to retry.
 
 Summarize what was accomplished across all iterations. Report any remaining `[RISK]` or `[SUGGESTION]` items, including Borges's recommendations.
 
@@ -158,7 +158,7 @@ Drucker spawns one implementing agent per independent issue, each on its own bra
 **Sequential chain gate:** When issues are sequenced due to file conflicts, verify the previous change is integrated into the shared codebase before starting the next dependent task. Do not spawn the next agent until integration is confirmed. This is a hard gate.
 
 ### Steps 2–3 (per-branch, as each PR lands)
-Review each branch **the moment its implementing agent finishes** — do not wait for all implementations to complete. As soon as an agent reports completion and passes Step 1 validation (non-empty diff, tests pass, relevance, clean tree), immediately call `/dev-team:review [--light]` for that branch (using `--light` for SIMPLE branches, omitting it for COMPLEX branches).
+Review each branch **the moment its implementing agent finishes** — do not wait for all implementations to complete. As soon as an agent reports completion and passes Step 1 validation (non-empty diff, tests pass, relevance, clean tree), immediately call `dev-team-review [--light]` for that branch (using `--light` for SIMPLE branches, omitting it for COMPLEX branches).
 
 This means reviews and implementations run concurrently: some branches are under review while others are still being implemented. For sequential chains, the first branch in a chain enters review while the next dependent branch is being implemented — though the next branch still waits for the predecessor to merge before starting.
 

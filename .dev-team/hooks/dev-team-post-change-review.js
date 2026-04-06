@@ -7,7 +7,7 @@
  * After an implementation file is modified, emits a notification that review
  * may be needed. Advisory only — always exits 0.
  *
- * Agent selection is NOT done here. The review skill (/dev-team:review) is the
+ * Agent selection is NOT done here. The review skill (dev-team-review) is the
  * sole authority for deciding which agents to spawn based on the full diff context.
  * This hook's role: detect that an implementation file changed, emit a notification.
  */
@@ -142,7 +142,7 @@ console.log(
 console.log(`[dev-team] File: ${filePath}`);
 console.log(`[dev-team] Review depth: ${reviewDepth} (complexity score: ${complexityScore})`);
 if (reviewDepth === "LIGHT") {
-  console.log(`[dev-team] LIGHT review: advisory only — use /dev-team:review to run review skill.`);
+  console.log(`[dev-team] LIGHT review: advisory only — use dev-team-review to run review skill.`);
 } else if (reviewDepth === "DEEP") {
   console.log(
     `[dev-team] DEEP review: high complexity — request thorough analysis from all reviewers.`,

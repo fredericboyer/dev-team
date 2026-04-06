@@ -90,7 +90,7 @@
 - **Tags**: skills, composability, extract, review, merge, retro, dx
 - **Outcome**: fixed
 - **Last-verified**: 2026-03-29
-- **Context**: Consolidated from 5 entries. Key decisions: (1) Retro skill cross-checks tech debt against issue tracker (#473). (2) Extract skill decomposed from task/retro into standalone /dev-team:extract — first skill-calls-skill instance (#492). (3) Review delegation: task delegates to /dev-team:review --embedded (#496). (4) Merge skill auto-merge timing guard — wait for Copilot before auto-merge (#512). (5) Scorecard updated for /dev-team:extract awareness (#510). All stable — no changes since v1.10.0.
+- **Context**: Consolidated from 5 entries. Key decisions: (1) Retro skill cross-checks tech debt against issue tracker (#473). (2) Extract skill decomposed from task/retro into standalone dev-team-extract — first skill-calls-skill instance (#492). (3) Review delegation: task delegates to dev-team-review --embedded (#496). (4) Merge skill auto-merge timing guard — wait for Copilot before auto-merge (#512). (5) Scorecard updated for dev-team-extract awareness (#510). All stable — no changes since v1.10.0.
 
 ### [2026-03-29] v1.10.1: init/update bug trio — config completeness, init guard, settings merge
 - **Type**: DECISION [new]

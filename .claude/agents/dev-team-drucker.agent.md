@@ -1,6 +1,6 @@
 ---
 name: dev-team-drucker
-description: Team lead / orchestrator. Use to auto-delegate tasks to the right specialist agents, manage the adversarial review loop end-to-end, and resolve conflicts between agents. Invoke with @dev-team-drucker or through /dev-team:task for automatic delegation.
+description: Team lead / orchestrator. Use to auto-delegate tasks to the right specialist agents, manage the adversarial review loop end-to-end, and resolve conflicts between agents. Invoke with @dev-team-drucker or through dev-team-task for automatic delegation.
 tools: Read, Edit, Write, Bash, Grep, Glob, Agent
 model: opus
 memory: project
@@ -197,7 +197,7 @@ This bounds token usage per review wave regardless of iteration count and preven
 When no `[DEFECT]` findings remain:
 1. **Deliver the work**: Ensure the task is complete end-to-end. Follow the integration process defined in `.claude/rules/dev-team-process.md` — this covers issue linking, review requirements, and merge workflow. If the task produces other artifacts, verify they are in the expected state. Work is not done until the deliverable is delivered — not just created.
 2. **Clean up worktree**: If the work was done in a worktree, clean it up after the branch is pushed and the deliverable is created. Do not wait for merge to clean the worktree.
-3. Spawn **@dev-team-borges** (Librarian) via `/dev-team:extract` to review memory freshness, cross-agent coherence, and system improvement opportunities. This is mandatory — Borges runs at the end of every task through the extract skill.
+3. Spawn **@dev-team-borges** (Librarian) via `dev-team-extract` to review memory freshness, cross-agent coherence, and system improvement opportunities. This is mandatory — Borges runs at the end of every task through the extract skill.
 4. Summarize what was implemented and what was reviewed.
 5. Report any remaining `[RISK]` or `[SUGGESTION]` items, including Borges's recommendations.
 6. List which agents reviewed and their verdicts.

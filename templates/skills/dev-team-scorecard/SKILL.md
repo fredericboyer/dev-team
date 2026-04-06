@@ -15,9 +15,9 @@ Audit process conformance for: $ARGUMENTS
    - If no argument, audit the most recent completed workflow (last merged PR or last entry in `.dev-team/metrics.md`)
 
 2. Detect the workflow type from the metrics entry or PR body:
-   - **task** — iterative task loop (`/dev-team:task`): implementation + review waves + convergence
-   - **review** — multi-agent review (`/dev-team:review`): review-only, no implementation phase
-   - **audit** — codebase audit (`/dev-team:audit`): parallel audit agents, no implementation phase
+   - **task** — iterative task loop (`dev-team-task`): implementation + review waves + convergence
+   - **review** — multi-agent review (`dev-team-review`): review-only, no implementation phase
+   - **audit** — codebase audit (`dev-team-audit`): parallel audit agents, no implementation phase
 
 3. Collect context:
    - The issue number and PR number (if applicable)
@@ -36,12 +36,12 @@ Before issuing any `gh issue`, `gh pr`, or other platform-specific CLI commands,
 
 Run each check and record pass/fail with evidence.
 
-### 1. Borges ran (via `/dev-team:extract`)
+### 1. Borges ran (via `dev-team-extract`)
 
-**Check**: Borges memory extraction is invoked via `/dev-team:extract` at the end of orchestration workflows (`/dev-team:task`, `/dev-team:review`, `/dev-team:audit`, `/dev-team:retro`). The verification artifact is a `.dev-team/metrics.md` entry. Read `.dev-team/metrics.md` and search for an entry matching the workflow's issue number, PR number, or branch name.
+**Check**: Borges memory extraction is invoked via `dev-team-extract` at the end of orchestration workflows (`dev-team-task`, `dev-team-review`, `dev-team-audit`, `dev-team-retro`). The verification artifact is a `.dev-team/metrics.md` entry. Read `.dev-team/metrics.md` and search for an entry matching the workflow's issue number, PR number, or branch name.
 
 - **Pass**: Entry exists with the workflow reference
-- **Fail**: No matching entry found (Borges was not invoked, or `/dev-team:extract` was skipped)
+- **Fail**: No matching entry found (Borges was not invoked, or `dev-team-extract` was skipped)
 
 ### 2. All findings acknowledged
 

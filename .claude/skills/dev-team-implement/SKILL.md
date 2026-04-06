@@ -1,6 +1,6 @@
 ---
 name: dev-team-implement
-description: Implement a task on a feature branch with architect pre-assessment, agent selection, and validation. Use standalone or as Step 1 of /dev-team:task.
+description: Implement a task on a feature branch with architect pre-assessment, agent selection, and validation. Use standalone or as Step 1 of dev-team-task.
 disable-model-invocation: false
 ---
 

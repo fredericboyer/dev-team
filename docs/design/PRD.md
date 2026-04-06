@@ -79,7 +79,7 @@ All hooks are Node.js scripts — work on macOS, Linux, and Windows.
 
 ### 4. Task loop (iterative quality convergence)
 
-`/dev-team:task` — inspired by the Ralph Loop pattern. When tasked with non-trivial work:
+`dev-team-task` — inspired by the Ralph Loop pattern. When tasked with non-trivial work:
 1. Implementing agent works
 2. Review agents challenge in parallel
 3. If `[DEFECT]` found → loop continues with fixes
@@ -116,8 +116,8 @@ Creates `.claude/agents/`, `.claude/skills/`, `.claude/agent-memory/`, `.dev-tea
 
 | Skill | Purpose |
 |-------|---------|
-| `/dev-team:challenge` | Devil's advocate — critically examine a proposal, approach, or implementation |
-| `/dev-team:task` | Start an iterative task loop with adversarial review gates |
+| `dev-team-challenge` | Devil's advocate — critically examine a proposal, approach, or implementation |
+| `dev-team-task` | Start an iterative task loop with adversarial review gates |
 
 ## Success Criteria
 
@@ -149,14 +149,14 @@ Creates `.claude/agents/`, `.claude/skills/`, `.claude/agent-memory/`, `.dev-tea
 
 ### v0.2 — Expansion
 - Additional agents: Docs, Architect, Release Manager
-- `/dev-team:review` skill (orchestrated multi-agent parallel review)
-- `/dev-team:audit` skill (security + quality + coverage scan)
+- `dev-team-review` skill (orchestrated multi-agent parallel review)
+- `dev-team-audit` skill (security + quality + coverage scan)
 - `npx dev-team update` command (upgrade agents in-place)
 - Enhanced onboarding (Deming auto-scans for linters, SAST, CI gaps)
 
 ### v0.3 — Distribution
 - Plugin format for Claude Code marketplace
-- `/dev-team:eject` command (plugin → local files)
+- `dev-team-eject` command (plugin → local files)
 - Custom agent authoring guide
 - Preset bundles (backend-heavy, full-stack, data-pipeline)
 

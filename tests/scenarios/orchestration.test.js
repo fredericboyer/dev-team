@@ -193,8 +193,8 @@ describe("Orchestration scenario: review output format", () => {
     });
     assert.equal(result.exitCode, 0);
     assert.ok(
-      result.stdout.includes("review skill") || result.stdout.includes("/dev-team:review"),
-      "should reference review skill or /dev-team:review command",
+      result.stdout.includes("review skill") || result.stdout.includes("dev-team-review"),
+      "should reference review skill or dev-team-review command",
     );
     assert.ok(!result.stdout.includes("@dev-team-"), "should not name specific agents");
   });

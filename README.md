@@ -13,11 +13,11 @@ Instead of an AI that agrees with everything, dev-team gives you eleven opiniona
 ```mermaid
 graph TB
     subgraph Skills["Skills (entry points)"]
-        S1["/dev-team:task"]
-        S2["/dev-team:review"]
-        S3["/dev-team:audit"]
-        S4["/dev-team:challenge"]
-        S5["/dev-team:retro"]
+        S1["dev-team-task"]
+        S2["dev-team-review"]
+        S3["dev-team-audit"]
+        S4["dev-team-challenge"]
+        S5["dev-team-retro"]
     end
 
     subgraph Lead["Orchestrator"]
@@ -83,7 +83,7 @@ graph TB
 
 ### The flow
 
-1. **You give a task** → `@dev-team-drucker` or `/dev-team:task`
+1. **You give a task** → `@dev-team-drucker` or `dev-team-task`
 2. **Drucker delegates** → picks the right implementer (Voss for backend, Mori for frontend, etc.)
 3. **Implementer writes code** → hooks fire automatically on every edit
 4. **Hooks flag reviewers** → `ACTION REQUIRED` directive + tracking file written
@@ -161,17 +161,17 @@ All hooks are Node.js scripts — work on macOS, Linux, and Windows.
 
 | Skill | What it does |
 |-------|-------------|
-| `/dev-team:implement` | Implement a task on a feature branch — agent selection, pre-assessment, validation, PR creation |
-| `/dev-team:task` | Iterative task loop — implement, review, fix defects, repeat until clean |
-| `/dev-team:review` | Parallel multi-agent review — spawns agents based on changed file patterns |
-| `/dev-team:research` | Pre-implementation research brief — spawns Turing, produces structured analysis with citations |
-| `/dev-team:audit` | Full codebase scan — Szabo (security) + Knuth (quality) + Deming (tooling) |
-| `/dev-team:challenge` | Critical examination of a proposal or design decision |
-| `/dev-team:retro` | Audit knowledge base health — learnings, agent memory, CLAUDE.md accuracy |
-| `/dev-team:extract` | Borges memory extraction — spawns Borges, verifies metrics and memory formation |
-| `/dev-team:scorecard` | Audit process conformance — verify Borges, findings, metrics, memory, issue closure |
-| `/dev-team:pr` | Create a well-formatted PR from the current branch using project config |
-| `/dev-team:merge` | Merge a PR with monitoring — review check, auto-merge, CI verification |
+| `dev-team-implement` | Implement a task on a feature branch — agent selection, pre-assessment, validation, PR creation |
+| `dev-team-task` | Iterative task loop — implement, review, fix defects, repeat until clean |
+| `dev-team-review` | Parallel multi-agent review — spawns agents based on changed file patterns |
+| `dev-team-research` | Pre-implementation research brief — spawns Turing, produces structured analysis with citations |
+| `dev-team-audit` | Full codebase scan — Szabo (security) + Knuth (quality) + Deming (tooling) |
+| `dev-team-challenge` | Critical examination of a proposal or design decision |
+| `dev-team-retro` | Audit knowledge base health — learnings, agent memory, CLAUDE.md accuracy |
+| `dev-team-extract` | Borges memory extraction — spawns Borges, verifies metrics and memory formation |
+| `dev-team-scorecard` | Audit process conformance — verify Borges, findings, metrics, memory, issue closure |
+| `dev-team-pr` | Create a well-formatted PR from the current branch using project config |
+| `dev-team-merge` | Merge a PR with monitoring — review check, auto-merge, CI verification |
 
 ## Step-by-step usage guide
 
@@ -184,7 +184,7 @@ All hooks are Node.js scripts — work on macOS, Linux, and Windows.
 Or use the task loop for automatic iteration:
 
 ```
-/dev-team:task Add rate limiting to the API endpoints
+dev-team-task Add rate limiting to the API endpoints
 ```
 
 Drucker analyzes the task, picks Hopper (full-stack), and spawns Szabo + Knuth + Brooks as reviewers.
@@ -235,17 +235,17 @@ If you try to commit with pending reviews, the pre-commit gate **blocks**:
 
 **Review a PR or branch:**
 ```
-/dev-team:review
+dev-team-review
 ```
 
 **Audit the whole codebase:**
 ```
-/dev-team:audit src/
+dev-team-audit src/
 ```
 
 **Challenge a design before building it:**
 ```
-/dev-team:challenge Should we use JWT or session tokens for auth?
+dev-team-challenge Should we use JWT or session tokens for auth?
 ```
 
 ## Challenge protocol

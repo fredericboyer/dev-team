@@ -95,7 +95,7 @@
 - **Tags**: trust-boundary, skills, arguments
 - **Outcome**: ignored (self-answered)
 - **Last-verified**: 2026-03-29
-- **Context**: Szabo raised $ARGUMENTS trust boundary question for /dev-team:extract skill. Self-answered — skill is invoked only by other orchestration skills (task, review, retro), not by untrusted input. Acceptable trust boundary for skill-to-skill invocation. No action needed.
+- **Context**: Szabo raised $ARGUMENTS trust boundary question for dev-team-extract skill. Self-answered — skill is invoked only by other orchestration skills (task, review, retro), not by untrusted input. Acceptable trust boundary for skill-to-skill invocation. No action needed.
 
 ### [2026-04-02] v3.3.0: safe-regex ? quantifier and complexity accepted as advisory
 - **Type**: CALIBRATION

@@ -84,18 +84,16 @@ for (const hookFile of hookFiles) {
   }
 }
 
-// Skills: extract from markdown table rows like "| `/dev-team:foo` |"
-const skillPattern = /\| `\/dev-team:([a-z-]+)` \|/g;
+// Skills: extract from markdown table rows like "| `dev-team-foo` |"
+const skillPattern = /\| `(dev-team-[a-z-]+)` \|/g;
 let skillMatch;
 while ((skillMatch = skillPattern.exec(readme)) !== null) {
   const name = skillMatch[1];
-  const dir = path.join(root, "templates", "skills", `dev-team-${name}`);
+  const dir = path.join(root, "templates", "skills", name);
   if (!fs.existsSync(dir)) {
-    fail(
-      `README references skill /dev-team:${name} but templates/skills/dev-team-${name}/ does not exist`,
-    );
+    fail(`README references skill ${name} but templates/skills/${name}/ does not exist`);
   } else {
-    console.log(`  ok skill dev-team-${name}`);
+    console.log(`  ok skill ${name}`);
   }
 }
 
