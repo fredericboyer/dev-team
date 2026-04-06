@@ -91,9 +91,7 @@ while ((skillMatch = skillPattern.exec(readme)) !== null) {
   const name = skillMatch[1];
   const dir = path.join(root, "templates", "skills", name);
   if (!fs.existsSync(dir)) {
-    fail(
-      `README references skill ${name} but templates/skills/${name}/ does not exist`,
-    );
+    fail(`README references skill ${name} but templates/skills/${name}/ does not exist`);
   } else {
     console.log(`  ok skill ${name}`);
   }
