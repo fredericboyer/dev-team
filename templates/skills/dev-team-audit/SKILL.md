@@ -96,7 +96,7 @@ Before issuing any `gh issue`, `gh pr`, or other platform-specific CLI commands,
 ### Completion
 
 After the audit report is delivered:
-1. Format the **finding outcome log** with every finding's classification, source agent, and outcome. Then call `/dev-team:extract` with the formatted log.
-2. If `/dev-team:extract` was not called, the audit is INCOMPLETE.
-3. `/dev-team:extract` handles Borges spawning, metrics verification, and memory formation gates. Do not report the audit as complete until `/dev-team:extract` reports success.
+1. Format the **finding outcome log** with every finding's classification, source agent, and outcome. Then call `dev-team-extract` with the formatted log.
+2. If `dev-team-extract` was not called, the audit is INCOMPLETE.
+3. `dev-team-extract` handles Borges spawning, metrics verification, and memory formation gates. Do not report the audit as complete until `dev-team-extract` reports success.
 4. Include Borges's recommendations in the final report.

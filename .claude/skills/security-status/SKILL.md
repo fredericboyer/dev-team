@@ -40,4 +40,4 @@ Proactively monitor all GitHub Advanced Security signals for this repository.
 - **Every session start** — quick baseline check
 - **Before creating a release** — compliance gate
 - **After merging Dependabot PRs** — verify alerts resolved
-- **On request** — `/dev-team:security-status`
+- **On request** — `dev-team-security-status`

@@ -299,9 +299,9 @@ Thresholds:
 ## Completion
 
 After the health report is delivered:
-1. Format the **finding outcome log** with every finding's classification, source agent (retro itself), and outcome. Then call `/dev-team:extract` with the formatted log.
-2. If `/dev-team:extract` was not called, the retro is INCOMPLETE.
-3. `/dev-team:extract` handles Borges spawning, metrics verification, and memory formation gates. Do not report the retro as complete until `/dev-team:extract` reports success.
+1. Format the **finding outcome log** with every finding's classification, source agent (retro itself), and outcome. Then call `dev-team-extract` with the formatted log.
+2. If `dev-team-extract` was not called, the retro is INCOMPLETE.
+3. `dev-team-extract` handles Borges spawning, metrics verification, and memory formation gates. Do not report the retro as complete until `dev-team-extract` reports success.
 4. Include Borges's recommendations in the final report.
 
 ## When to run
@@ -310,4 +310,4 @@ After the health report is delivered:
 - **After major refactors** — code changes may invalidate learnings
 - **Before onboarding** — ensure the knowledge base is accurate for new team members
 - **After resolving many review findings** — learnings and memory may need cleanup
-- **On request** — `/dev-team:retro`
+- **On request** — `dev-team-retro`

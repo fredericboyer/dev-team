@@ -8,7 +8,7 @@ The adversarial review system — the core value proposition of dev-team — is 
 
 1. Post-change hooks print directives ("ACTION REQUIRED — spawn these agents") but Claude can ignore them
 2. No mechanism ensures findings are addressed — even when reviews run, `[DEFECT]` findings can be silently skipped
-3. The review-fix-verify cycle only exists inside `/dev-team:task` — ad-hoc work bypasses it entirely
+3. The review-fix-verify cycle only exists inside `dev-team-task` — ad-hoc work bypasses it entirely
 4. Previous file-based enforcement (`review-pending.json`) was removed in PR #113 due to orphaned-file bugs with parallel agents
 
 ADR-013 documented the original tracking-file approach. That approach failed because a shared mutable file (`review-pending.json`) caused contention and orphaned entries in parallel agent workflows.
@@ -16,7 +16,7 @@ ADR-013 documented the original tracking-file approach. That approach failed bec
 ### Design constraints
 
 - No shared mutable state between agents (learned from ADR-013 failure)
-- Must work outside `/dev-team:task` — ad-hoc work must be gated too
+- Must work outside `dev-team-task` — ad-hoc work must be gated too
 - Must support parallel agents writing reviews concurrently
 - Must be stateless at commit time — derive required reviews from staged files
 - Cross-platform (plain JS, no dependencies, per ADR-002)
@@ -69,7 +69,7 @@ The review-fix-verify cycle emerges without conversation-level orchestration:
 
 ## Consequences
 
-- The adversarial review loop is enforced for all work, not just `/dev-team:task`
+- The adversarial review loop is enforced for all work, not just `dev-team-task`
 - No shared mutable state — each agent writes its own sidecar file, no contention
 - Sidecar directory is gitignored — no review artifacts in version control
 - Content hash ensures stale reviews (from before a fix) do not satisfy the gate

@@ -5,15 +5,15 @@ Status: accepted
 
 ## Context
 
-The `/dev-team:task` skill is monolithic — it bundles agent selection, pre-assessment, implementation, review, merge, and extraction into a single 240-line skill definition. Users cannot invoke individual steps (e.g., "just implement without triggering review/merge/extract").
+The `dev-team-task` skill is monolithic — it bundles agent selection, pre-assessment, implementation, review, merge, and extraction into a single 240-line skill definition. Users cannot invoke individual steps (e.g., "just implement without triggering review/merge/extract").
 
-Steps 2-4 already exist as standalone skills (`/dev-team:review`, `/dev-team:merge`, `/dev-team:extract`), but Step 1 (implement) is only available as part of the full task loop. This creates an all-or-nothing experience.
+Steps 2-4 already exist as standalone skills (`dev-team-review`, `dev-team-merge`, `dev-team-extract`), but Step 1 (implement) is only available as part of the full task loop. This creates an all-or-nothing experience.
 
 ADR-035 established the skill composability pattern (orchestration skills invoking sub-skills via `--embedded`). This ADR extends that pattern to the task skill's implementation step.
 
 ## Decision
 
-Extract Step 1 into a standalone `/dev-team:implement` skill that handles:
+Extract Step 1 into a standalone `dev-team-implement` skill that handles:
 - Agent selection (routing table)
 - Brooks pre-assessment (complexity classification, ADR needs)
 - Definition of Done negotiation (COMPLEX tasks only)
@@ -23,10 +23,10 @@ Extract Step 1 into a standalone `/dev-team:implement` skill that handles:
 - PR creation
 
 The task skill becomes a pure orchestrator:
-1. `/dev-team:implement --embedded` → returns branch, PR, complexity
-2. `/dev-team:review --embedded` → returns findings
-3. `/dev-team:merge` → merges PR
-4. `/dev-team:extract` → Borges memory extraction
+1. `dev-team-implement --embedded` → returns branch, PR, complexity
+2. `dev-team-review --embedded` → returns findings
+3. `dev-team-merge` → merges PR
+4. `dev-team-extract` → Borges memory extraction
 
 Each step is independently invocable by the user.
 

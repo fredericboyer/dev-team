@@ -32,7 +32,7 @@ This brief analyzes every applicable pattern from the article and its linked res
 
 **Article (Building Effective Agents)**: The "Orchestrator-Workers" pattern uses a "central LLM [that] dynamically breaks down unpredictable subtasks, delegates to workers, [and] synthesizes results."
 
-**dev-team alignment**: Drucker is precisely this pattern. Drucker analyzes tasks, selects implementing and reviewing agents based on domain classification, manages the iteration loop, and synthesizes results. The `/dev-team:task` skill codifies the orchestration protocol.
+**dev-team alignment**: Drucker is precisely this pattern. Drucker analyzes tasks, selects implementing and reviewing agents based on domain classification, manages the iteration loop, and synthesizes results. The `dev-team-task` skill codifies the orchestration protocol.
 
 **Assessment**: Strong validation. dev-team's Drucker agent is a textbook implementation of the Orchestrator-Workers pattern.
 
@@ -53,7 +53,7 @@ This brief analyzes every applicable pattern from the article and its linked res
 
 **Article**: "Building an evaluator that graded outputs reliably — and with taste — meant first developing a set of criteria that could turn subjective judgments like 'is this design good?' into concrete, gradable terms." Four criteria: Design Quality, Originality, Craft, Functionality.
 
-**dev-team alignment**: dev-team's challenge classification system (DEFECT/RISK/QUESTION/SUGGESTION) serves the same purpose — turning subjective "is this code good?" into concrete, categorized findings. The SHARED.md protocol requires concrete scenarios for every challenge, and the judge pass in `/dev-team:review` filters findings against ADRs, learnings, and agent memory.
+**dev-team alignment**: dev-team's challenge classification system (DEFECT/RISK/QUESTION/SUGGESTION) serves the same purpose — turning subjective "is this code good?" into concrete, categorized findings. The SHARED.md protocol requires concrete scenarios for every challenge, and the judge pass in `dev-team-review` filters findings against ADRs, learnings, and agent memory.
 
 **Assessment**: Strong validation. dev-team's classification is more operational (blocks/doesn't block) while the article's is more qualitative (scored rubrics). Both address the same core problem of making evaluation concrete and repeatable.
 
@@ -62,7 +62,7 @@ This brief analyzes every applicable pattern from the article and its linked res
 **Article (Long-Running Agents)**: "Finding a way for agents to quickly understand the state of work when starting with a fresh context window, which is accomplished with the `claude-progress.txt` file alongside the git history."
 
 **dev-team alignment**: dev-team has multiple handoff mechanisms:
-- Phase checkpoints in `/dev-team:task` (status lines at each step boundary)
+- Phase checkpoints in `dev-team-task` (status lines at each step boundary)
 - Agent status files written at phase boundaries
 - Compact context summaries between review rounds ("produce a structured summary: all findings, files changed, outstanding items")
 - Git commit history as implicit state
@@ -73,7 +73,7 @@ This brief analyzes every applicable pattern from the article and its linked res
 
 **Article (Building Effective Agents)**: Parallelization via "sectioning" (independent subtasks) and "voting" (multiple perspectives).
 
-**dev-team alignment**: dev-team's parallel mode in `/dev-team:task` sections independent issues across branches. The review skill spawns multiple reviewer agents in parallel (a form of voting — multiple perspectives on the same code). The process file mandates "aggressively parallelize independent work."
+**dev-team alignment**: dev-team's parallel mode in `dev-team-task` sections independent issues across branches. The review skill spawns multiple reviewer agents in parallel (a form of voting — multiple perspectives on the same code). The process file mandates "aggressively parallelize independent work."
 
 **Assessment**: Strong validation. dev-team implements both sectioning (parallel implementation branches) and voting (parallel review agents).
 
@@ -151,7 +151,7 @@ This aligns with the existing template design principle of "platform-neutral" �
 
 Some of these assumptions may become stale as models improve. The article explicitly warns that "those assumptions become stale quickly and require regular re-examination."
 
-**Recommendation**: Add a periodic "harness assumption audit" to the `/dev-team:retro` skill. Each retro should ask: "Which dev-team components compensate for model limitations? Are those limitations still present?" This should be a lightweight check, not a full redesign — just flagging components that might be over-engineering given current model capabilities. Track assumptions in a dedicated file (e.g., `docs/design/harness-assumptions.md`) with last-validated dates.
+**Recommendation**: Add a periodic "harness assumption audit" to the `dev-team-retro` skill. Each retro should ask: "Which dev-team components compensate for model limitations? Are those limitations still present?" This should be a lightweight check, not a full redesign — just flagging components that might be over-engineering given current model capabilities. Track assumptions in a dedicated file (e.g., `docs/design/harness-assumptions.md`) with last-validated dates.
 
 ---
 

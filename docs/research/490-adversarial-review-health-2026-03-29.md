@@ -269,7 +269,7 @@ What would increase confidence to High:
   **Severity**: P1
   **Files affected**: `.dev-team/skills/dev-team-retro/SKILL.md`, `.dev-team/agents/dev-team-borges.md`, `.dev-team/metrics.md`
   **Scope**: M
-  **Description**: Add the acceptance rate bands (60–85% healthy), overrule rate bands (1–10% healthy), DEFECT-to-advisory ratio monitoring, and per-agent drift detection to Borges's retro skill. Borges should flag deviations at the end of each `/dev-team:retro` run. Include the rubber-stamping co-occurrence detector (3+ signals required).
+  **Description**: Add the acceptance rate bands (60–85% healthy), overrule rate bands (1–10% healthy), DEFECT-to-advisory ratio monitoring, and per-agent drift detection to Borges's retro skill. Borges should flag deviations at the end of each `dev-team-retro` run. Include the rubber-stamping co-occurrence detector (3+ signals required).
 
 - **Title**: Add minimum sample size gate before calibration alerts
   **Severity**: P1

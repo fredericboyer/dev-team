@@ -63,7 +63,7 @@ Three interrelated questions:
 | Command | Purpose | Overlap with dev-team? |
 |---------|---------|----------------------|
 | `/agents` | Manage agent configurations | Partial — dev-team agents are file-based |
-| `/batch <instruction>` | Parallel codebase changes via worktrees | **Yes** — overlaps with `/dev-team:task` parallel mode |
+| `/batch <instruction>` | Parallel codebase changes via worktrees | **Yes** — overlaps with `dev-team-task` parallel mode |
 | `/compact` | Context compaction | No |
 | `/context` | Visualize context usage | No |
 | `/diff` | Interactive diff viewer | No |
@@ -87,7 +87,7 @@ Three interrelated questions:
 | `/claude-api` | API reference for Claude SDK | No |
 | `/debug` | Enable debug logging and troubleshoot | No |
 | `/loop` | Repeat prompt on interval | No |
-| `/simplify` | Multi-agent code quality review | **Moderate** — 3 parallel reviewers, similar to `/dev-team:review` |
+| `/simplify` | Multi-agent code quality review | **Moderate** — 3 parallel reviewers, similar to `dev-team-review` |
 
 ### 1.4 Hook System (30 event types)
 
@@ -279,13 +279,13 @@ Based on investigation:
 
 ### 4.2 Current dev-team Task Decomposition
 
-The `/dev-team:task` skill uses a four-step model:
-1. Implementation (via `/dev-team:implement` with Brooks pre-assessment)
-2. Review (via `/dev-team:review` with multi-agent parallel review)
+The `dev-team-task` skill uses a four-step model:
+1. Implementation (via `dev-team-implement` with Brooks pre-assessment)
+2. Review (via `dev-team-review` with multi-agent parallel review)
 3. Fix cycle (iterate until no [DEFECT] findings)
-4. Extraction (via `/dev-team:extract` for memory/metrics)
+4. Extraction (via `dev-team-extract` for memory/metrics)
 
-The `/dev-team:implement` skill handles:
+The `dev-team-implement` skill handles:
 - Agent selection based on task domain
 - Brooks pre-assessment for complexity
 - Feature branch creation

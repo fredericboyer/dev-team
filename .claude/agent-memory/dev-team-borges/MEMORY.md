@@ -27,7 +27,7 @@
 - **Tags**: metrics, calibration, baseline
 - **Outcome**: verified
 - **Last-verified**: 2026-03-25
-- **Context**: First real entry in `.dev-team/metrics.md`. Establishes baseline: 0% overrule rate, 100% DEFECT fix rate, 50% advisory defer rate. Future `/dev-team:retro` runs can now trend these numbers. Knuth was sole reviewer across all 4 branches; Deming sole implementer.
+- **Context**: First real entry in `.dev-team/metrics.md`. Establishes baseline: 0% overrule rate, 100% DEFECT fix rate, 50% advisory defer rate. Future `dev-team-retro` runs can now trend these numbers. Knuth was sole reviewer across all 4 branches; Deming sole implementer.
 
 ### [2026-03-25] Vocabulary alignment is a cross-agent coherence risk
 - **Type**: PATTERN [verified]
@@ -41,7 +41,7 @@
 <!-- Recommendations accepted/deferred — tunes what to flag over time -->
 
 ### [2026-03-25] v1.2.0 extraction — high defer rate on advisory findings
-- Knuth's 50% advisory defer rate (7/14) is not a quality problem — deferred items were legitimate follow-ups outside the PR scope. But it signals that `/dev-team:retro` should track defer-to-issue conversion (are deferred findings actually becoming issues?).
+- Knuth's 50% advisory defer rate (7/14) is not a quality problem — deferred items were legitimate follow-ups outside the PR scope. But it signals that `dev-team-retro` should track defer-to-issue conversion (are deferred findings actually becoming issues?).
 
 ### [2026-03-26] v1.5.0 extraction — 18 findings, 100% acceptance, 1 round to convergence
 - **Type**: MILESTONE [verified]
@@ -69,7 +69,7 @@
 
 ### [2026-03-26] Full codebase audit extraction — 37 findings, 3 agents, 11 issues
 - **Type**: MILESTONE [verified]
-- **Source**: /dev-team:audit (Szabo, Knuth, Deming)
+- **Source**: dev-team-audit (Szabo, Knuth, Deming)
 - **Tags**: metrics, calibration, extraction, audit
 - **Outcome**: verified
 - **Last-verified**: 2026-03-26
@@ -121,7 +121,7 @@
 - **Tags**: metrics, calibration, extraction, process-gap
 - **Outcome**: verified
 - **Last-verified**: 2026-03-29
-- **Context**: Post-hoc extraction — Borges was not spawned during delivery. v1.8.0 bypassed `/dev-team:task` and agent reviews entirely. ~30 Copilot findings, all addressed. No formal DEFECTs. New entries written: Szabo (1 new + 1 updated), Knuth (2), Brooks (2), Deming (2), Beck (1), Conway (1), Voss (1). Process learning added to shared learnings (process gap). Key architectural changes: INFRA_HOOKS separation, task skill 4-step decomposition, assertNoSymlinkInPath ancestor guard. System improvement identified: v1.8.0 process gap confirms that bypassing the adversarial loop should be reserved for hotfixes, not feature releases.
+- **Context**: Post-hoc extraction — Borges was not spawned during delivery. v1.8.0 bypassed `dev-team-task` and agent reviews entirely. ~30 Copilot findings, all addressed. No formal DEFECTs. New entries written: Szabo (1 new + 1 updated), Knuth (2), Brooks (2), Deming (2), Beck (1), Conway (1), Voss (1). Process learning added to shared learnings (process gap). Key architectural changes: INFRA_HOOKS separation, task skill 4-step decomposition, assertNoSymlinkInPath ancestor guard. System improvement identified: v1.8.0 process gap confirms that bypassing the adversarial loop should be reserved for hotfixes, not feature releases.
 
 ### [2026-03-29] v1.11.0 extraction — 27 issues, 8 PRs, ~18 findings, 6% acceptance, hardening release
 - **Type**: MILESTONE [verified]
@@ -181,7 +181,7 @@
 
 ### [2026-04-03] v3.6.0 audit extraction — 24 findings, 0 DEFECTs, 96% acceptance, codebase matured
 - **Type**: MILESTONE [verified]
-- **Source**: /dev-team:audit v3.6.0 (Szabo, Knuth, Deming)
+- **Source**: dev-team-audit v3.6.0 (Szabo, Knuth, Deming)
 - **Tags**: metrics, calibration, extraction, audit
 - **Outcome**: verified
 - **Last-verified**: 2026-04-03

@@ -12,14 +12,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Breaking Changes
 
 - **Config-driven composable pipeline**: Task skill rewritten from monolithic 4-step to 8-step composable orchestrator reading `workflow.*` config. Pipeline order changed: research → challenge → implement → review → PR → merge → release → learn (#778, #784, #785)
-- **PR creation decoupled from implement skill**: Implement skill stops at "committed on branch." PR creation is now a separate pipeline step via `/dev-team:pr` (#776, #788)
+- **PR creation decoupled from implement skill**: Implement skill stops at "committed on branch." PR creation is now a separate pipeline step via `dev-team-pr` (#776, #788)
 - **Agent consolidation**: Voss, Hamilton, and Mori consolidated into `@dev-team-hopper` (Grace Hopper). Deprecated agents retained with notices, will be removed in v5.0.0 (#825)
 
 ### Added
 
 - **Model tier abstraction**: Per-agent model assignment via `models` config section. Alloy (multi-model) review support with LIGHT/FULL/DEEP tiers (#807)
 - **Finding deduplication**: Structured matching for alloy reviews — convergence classification (unanimous/majority/unique) (#808)
-- **Standalone research skill**: `/dev-team:research` for pre-implementation research briefs with depth control (`--depth shallow|standard|deep`) (#774, #827)
+- **Standalone research skill**: `dev-team-research` for pre-implementation research briefs with depth control (`--depth shallow|standard|deep`) (#774, #827)
 - **PR format config**: `pr` section in config.json for title format, link keywords, draft mode, required sections, auto-labeling (#777)
 - **PR format enforcement hooks**: 5 new PreToolUse hooks validating PR format against config (#780)
 - **Versioning config**: `versioning` section in config.json for scheme (semver/none) and version source file (#783)
@@ -154,7 +154,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.2.0] - 2026-04-01
 
 ### Added
-- `/dev-team:implement` skill — standalone implementation step extracted from task skill (ADR-039, #608).
+- `dev-team-implement` skill — standalone implementation step extracted from task skill (ADR-039, #608).
 - Mergify merge queue configuration (`.mergify.yml`) — handles branch update cascades automatically (#645).
 - Orchestration validation loop — continuous monitoring obligation for PR pipeline, agent liveness, task completion verification (#653).
 - ADR-039: Decompose task skill into composable sub-skills.
@@ -167,7 +167,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - "When writing tests" section added to SHARED.md (from retired Beck agent).
 
 ### Changed
-- `/merge` renamed to `/dev-team:merge` for namespace consistency (#609).
+- `/merge` renamed to `dev-team-merge` for namespace consistency (#609).
 - Merge skill rewritten: reviewer-agnostic thread handling via GraphQL instead of Copilot-specific login regex (#647).
 - Task skill simplified to orchestrate composable sub-skills: implement → review → merge → extract.
 - Template design principle changed from "Platform-neutral" to "GitHub-first" (ADR-040).
@@ -337,11 +337,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Merge skill auto-merge timing guard enforced as a GATE — prevents premature auto-merge before Copilot findings are addressed (#489, #512).
 - Agent timeouts aligned to 2-minute threshold across all skills and hooks (#512).
-- Scorecard skill now references `/dev-team:extract` for Borges extraction checks (#494, #510).
+- Scorecard skill now references `dev-team-extract` for Borges extraction checks (#494, #510).
 
 ### Fixed
 - Auto-merge timing enforcement — merge skill step ordering codified to wait for Copilot, address findings, then set auto-merge (#489, #512).
-- Scorecard extract awareness — scorecard correctly detects `/dev-team:extract` invocation (#494, #510).
+- Scorecard extract awareness — scorecard correctly detects `dev-team-extract` invocation (#494, #510).
 
 ### Internal
 - Updated dev-team installation to v1.9.0 (#498).
@@ -349,8 +349,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.9.0] - 2026-03-29
 
 ### Added
-- `/dev-team:extract` sub-skill — Borges memory extraction decoupled from retro, invocable standalone (#485, #492).
-- Task skill delegates review rounds to `/dev-team:review --embedded` — unified review orchestration instead of inline reviewer spawning (#486, #496).
+- `dev-team-extract` sub-skill — Borges memory extraction decoupled from retro, invocable standalone (#485, #492).
+- Task skill delegates review rounds to `dev-team-review --embedded` — unified review orchestration instead of inline reviewer spawning (#486, #496).
 
 ### Changed
 - **BREAKING: `--reviewers` flag removed from task skill** — reviewer selection is now automatic via the review skill's routing logic. Manual reviewer override is no longer supported.
@@ -464,7 +464,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Shared agent protocol extracted into `SHARED.md` — 16% agent definition size reduction (#353).
 - Process rules extracted from `CLAUDE.md` into `.dev-team/process.md` — CLAUDE.md under 100 lines (#348).
-- `/dev-team:scorecard` skill for process conformance tracking (#351).
+- `dev-team-scorecard` skill for process conformance tracking (#351).
 - Non-GitHub platform guidance and `platform` config field (#358).
 - Turing research briefs now end with triage-ready Recommended Actions (#368).
 - Non-JS/TS ecosystem benchmark for dev-team harness (#325).
@@ -516,7 +516,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Deferred findings conversion tracking in retro skill (#305).
 
 ### Changed
-- `/dev-team:assess` renamed to `/dev-team:retro` (#297).
+- `dev-team-assess` renamed to `dev-team-retro` (#297).
 - Project-specific skills dropped `dev-team` prefix (#290).
 - Template references to merge/security-status skills made generic (#304).
 
@@ -541,7 +541,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Learnings Output (mandatory) section standardized across all 14 agent definitions. Szabo, Knuth, Brooks, Borges, and Drucker gain the section; Turing and Rams upgraded to full format (#274).
-- Agent memory to shared learnings promotion check in both `/dev-team:assess` and `/assess-learnings` skills (#265).
+- Agent memory to shared learnings promotion check in both `dev-team-assess` and `/assess-learnings` skills (#265).
 - Post-promotion cleanup guidance to prevent duplication after memory entries are promoted (#265).
 - Dispute escalation protocol added to parallel mode Phase 3 in task skill (#275).
 
@@ -549,7 +549,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Ghost hook/agent entries (e.g., "Task loop") in config.json are now cleaned up during `dev-team update` (#260).
-- Framework skills (`/dev-team:task`, `/dev-team:review`, etc.) now discoverable via symlinks from `.claude/skills/` to `.dev-team/skills/` (#262).
+- Framework skills (`dev-team-task`, `dev-team-review`, etc.) now discoverable via symlinks from `.claude/skills/` to `.dev-team/skills/` (#262).
 - Merge skill now detects Copilot as a pending reviewer (not just check run) and waits for review before merging (#268).
 - Symlink guard preserves any non-symlink path in `.claude/skills/`, not just directories containing SKILL.md (#269).
 - `Object.hasOwn()` used instead of `in` operator for ghost entry filtering to avoid prototype pollution (#269).
@@ -567,7 +567,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **New agent: dev-team-rams** — design system reviewer, graceful no-op when no design system detected (#249).
 - **Progress reporting** sections added to Conway, Drucker, Borges, Brooks agent definitions (#244).
 - **Escalation points** added to Conway and Drucker for blocked background agents (#248).
-- **Phase milestone checkpoints** added to `/dev-team:task` skill for both single-issue and parallel modes (#245).
+- **Phase milestone checkpoints** added to `dev-team-task` skill for both single-issue and parallel modes (#245).
 - **Heartbeat mechanism** — background agents write status to `.dev-team/agent-status/{agent}.json` for visibility (#246).
 - **"What belongs in memory" guidance** in all implementing agent definitions — agents record patterns/calibration, not derivable counts (#256).
 - **Borges extraction filter** — skips volatile numeric metrics and config-derivable facts (#256).
@@ -592,19 +592,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Copilot merge gate hook** -- Project-specific hook in `.claude/hooks/` enforcing Copilot review before merge (#234).
 - **Cross-model reviewer assignment (ADR-023)** -- Architecture for running reviewers on alternative models for cross-validation (#223).
 - **Cold start seed entries** for all 12 agent memories -- New installations start with bootstrapped domain-appropriate memory entries (#225).
-- **`/dev-team:assess` skill** added to README documentation.
+- **`dev-team-assess` skill** added to README documentation.
 - **Legacy workflow skill cleanup migration** -- `dev-team update` from pre-1.0 versions removes leftover `dev-team-merge` and `dev-team-security-status` dirs from `.dev-team/skills/`.
 
 ### Changed
 - **BREAKING: Minimum Node.js version bumped to 22+** (was 18+) (#230).
-- **BREAKING: Workflow skills removed from templates** -- `/dev-team:merge` and `/dev-team:security-status` are no longer installed by `dev-team init`. Projects that need them should add them to `.claude/skills/` (#237).
+- **BREAKING: Workflow skills removed from templates** -- `dev-team-merge` and `dev-team-security-status` are no longer installed by `dev-team init`. Projects that need them should add them to `.claude/skills/` (#237).
 - **Project-specific hooks moved from `.dev-team/hooks/` to `.claude/hooks/`** -- Survives `dev-team update` without overwrite (#240).
 - Parallelization guidance reconciled -- agent teams and worktrees documented as complementary approaches (#232).
 - Drucker main loop pattern enforced for this repo (#232).
 - README.md updated: agent names corrected (drucker/tufte/brooks/conway), Hamilton and Borges added to diagram, Node.js 22+, 5 skills, 12 agents.
 - Docs restructured: PRD.md moved to `docs/`, guides to `docs/guides/`, research to `docs/research/`.
 - `cross_model: false` removed from agent definitions -- field is omitted until multi-model runtime is available (per ADR-023).
-- Conway template merge process made conditional on `/dev-team:merge` availability.
+- Conway template merge process made conditional on `dev-team-merge` availability.
 - Template CLAUDE.md wording clarified: `.claude/hooks/` and `.claude/skills/` are not overwritten by update (not the entire `.claude/` directory).
 - Merge skill `minimizeComment` documented as hiding comments only (GitHub API limitation, does not resolve threads).
 - Agent memory test counts corrected from 217 to 306 in Beck and Borges memories.
@@ -691,7 +691,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.8.1] - 2026-03-24
 
 ### Changed
-- Generalized Drucker's task completion from PR-merge-specific to deliverable-focused — work is done when the deliverable is delivered, not just when a PR is merged. Projects can still use `/dev-team:merge` if configured, but it is no longer hardcoded as the default (#149).
+- Generalized Drucker's task completion from PR-merge-specific to deliverable-focused — work is done when the deliverable is delivered, not just when a PR is merged. Projects can still use `dev-team-merge` if configured, but it is no longer hardcoded as the default (#149).
 - Review skill no longer auto-triggers merge on Approve verdict — reviews report verdicts, they don't take merge actions (#149).
 
 ### Internal
@@ -717,8 +717,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.7.0] - 2026-03-24
 
 ### Added
-- `/dev-team:assess` skill — audit knowledge base health: learnings staleness, agent memory gaps, CLAUDE.md accuracy, and cross-source contradictions (#128, #129).
-- `/dev-team:merge` skill — PR merge monitoring workflow with Copilot review handling, auto-merge with squash strategy, CI status monitoring, and post-merge actions (#122).
+- `dev-team-assess` skill — audit knowledge base health: learnings staleness, agent memory gaps, CLAUDE.md accuracy, and cross-source contradictions (#128, #129).
+- `dev-team-merge` skill — PR merge monitoring workflow with Copilot review handling, auto-merge with squash strategy, CI status monitoring, and post-merge actions (#122).
 - Agent eval framework spike — test samples and evaluation runner for measuring agent quality (#118, #123).
 - Implementing agents now research current practices before proposing solutions — reduces reinvention and aligns with ecosystem conventions (#133).
 - Meta assess-learnings skill for dogfooding dev-team's own knowledge base (#134).
@@ -744,7 +744,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Hamilton agent (`@dev-team-hamilton`) — new infrastructure implementing agent covering Dockerfiles, IaC, CI/CD, Kubernetes, deployment, health checks, and monitoring. Named after Margaret Hamilton. Replaces Voss's infrastructure scope.
-- `/dev-team:security-status` skill — proactive GitHub security signal monitoring (code scanning, Dependabot, secret scanning). 5 skills total.
+- `dev-team-security-status` skill — proactive GitHub security signal monitoring (code scanning, Dependabot, secret scanning). 5 skills total.
 - NFR ownership codified — all 9 standard NFR dimensions mapped to explicit agent ownership: Mori (API compatibility), Voss (data compatibility), Deming (portability).
 - Dependabot enabled for npm and GitHub Actions version updates.
 - CodeQL explicit workflow permissions added to CI.
@@ -772,7 +772,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Cached git diff helper in tdd-enforce and pre-commit-gate hooks (reduced redundant git calls)
 - Process audit: all 11 agents now have at least one automatic invocation trigger
 - Beck flagged by post-change-review hook when test files change
-- Borges spawned at completion of /dev-team:review and /dev-team:audit skills
+- Borges spawned at completion of dev-team-review and dev-team-audit skills
 - Drucker parallel orchestration section for multi-issue coordination
 - 15 new tests from comprehensive coverage pass (174 total)
 
@@ -854,8 +854,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - 3 new agents: Docs (documentation sync), Architect (ADR compliance, read-only/opus), Release Manager (versioning, changelog, semver)
-- `/dev-team:review` skill — orchestrated multi-agent parallel review with file-pattern-based agent selection
-- `/dev-team:audit` skill — full codebase security + quality + tooling audit with priority matrix
+- `dev-team-review` skill — orchestrated multi-agent parallel review with file-pattern-based agent selection
+- `dev-team-audit` skill — full codebase security + quality + tooling audit with priority matrix
 - `npx dev-team update` command — in-place upgrades preserving agent memory, learnings, and CLAUDE.md customizations
 - Deming auto-scan on install — detects linters, formatters, SAST, CI/CD, and dependency audit gaps
 - Post-change-review hook patterns for Docs, Architect, and Release Manager agents
@@ -873,7 +873,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - 6 adversarial agents: Voss (backend), Mori (frontend), Szabo (security), Knuth (quality), Beck (tests), Deming (tooling)
 - 5 enforced hooks: safety guard, TDD enforcement, post-change review, pre-commit gate, task loop
-- 2 skills: /dev-team:challenge, /dev-team:task
+- 2 skills: dev-team-challenge, dev-team-task
 - CLI installer with onboarding wizard (npx dev-team init)
 - Persistent agent memory with adversarial calibration
 - Shared team learnings file

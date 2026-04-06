@@ -1,7 +1,7 @@
 # Agent Calibration Metrics
 <!-- Appendable log of per-task agent performance metrics. -->
 <!-- Borges records an entry after each task cycle. -->
-<!-- Used by /dev-team:retro to track acceptance rates and signal quality over time. -->
+<!-- Used by dev-team-retro to track acceptance rates and signal quality over time. -->
 
 ## Format
 <!-- Each entry follows this structure:
@@ -120,7 +120,7 @@
 - **Defer rate (advisory)**: 21% (3/14 — #493 x2, #494)
 - **Ignore rate (advisory)**: 21% (3/14 — self-answered questions, minor wording)
 - **Duration**: single session, 2 branches (feat/485-extract-skill, feat/486-review-delegation)
-- **Notes**: First v1.9.0 delivery with full adversarial review loop restored (v1.8.0 had process gap). Skill composability pattern established — /dev-team:extract and /dev-team:review --embedded are now sub-skills of /dev-team:task. Turing research brief on adversarial review health thresholds (#490) produced calibration data. Retro ran pre-implementation. 3 issues created from retro (#489, #490, #491), 2 from review (#493, #494). Clean approve from Szabo (security-neutral refactor). Higher ignore rate (50%) reflects advisory findings on minor wording — no functional issues.
+- **Notes**: First v1.9.0 delivery with full adversarial review loop restored (v1.8.0 had process gap). Skill composability pattern established — dev-team-extract and dev-team-review --embedded are now sub-skills of dev-team-task. Turing research brief on adversarial review health thresholds (#490) produced calibration data. Retro ran pre-implementation. 3 issues created from retro (#489, #490, #491), 2 from review (#493, #494). Clean approve from Szabo (security-neutral refactor). Higher ignore rate (50%) reflects advisory findings on minor wording — no functional issues.
 
 ### [2026-03-29] Task: v1.10.0 retro-derived fixes (#489, #490, #493, #494) — PRs #509, #510, #511, #512
 - **Agents**: implementing: Deming (#489/#490/#494), Tufte (#493); reviewers: Szabo, Knuth, Brooks; research: Turing; extract: Borges
@@ -150,7 +150,7 @@
 - **Fix rate (DEFECTs)**: N/A (0 formal DEFECTs)
 - **Defer rate (advisory)**: 0%
 - **Duration**: single session, 12 PRs (#470-#483)
-- **Notes**: v1.8.0 delivered without `/dev-team:task` or dev-team agent reviews. All implementation by orchestrator directly. Copilot was sole reviewer. ~30 Copilot findings across 12 PRs, all addressed. Key PRs with substantive findings: #475 (8 findings on symlink guards — 5 fixed, 3 acknowledged), #479 (mergeClaudeMd edge case), #478 (readFile docstring). Process gap: no adversarial review loop, no Borges extraction during delivery. This post-hoc extraction fills the memory gap. Key deliverables: worktree serialization hooks (INFRA_HOOKS), task skill 4-step decomposition, assertNoSymlinkInPath, readFile error hardening, mergeClaudeMd boundary fix, 18 new tests.
+- **Notes**: v1.8.0 delivered without `dev-team-task` or dev-team agent reviews. All implementation by orchestrator directly. Copilot was sole reviewer. ~30 Copilot findings across 12 PRs, all addressed. Key PRs with substantive findings: #475 (8 findings on symlink guards — 5 fixed, 3 acknowledged), #479 (mergeClaudeMd edge case), #478 (readFile docstring). Process gap: no adversarial review loop, no Borges extraction during delivery. This post-hoc extraction fills the memory gap. Key deliverables: worktree serialization hooks (INFRA_HOOKS), task skill 4-step decomposition, assertNoSymlinkInPath, readFile error hardening, mergeClaudeMd boundary fix, 18 new tests.
 
 ### [2026-03-29] Task: v1.10.1 hotfix (#515) — PR #516
 - **Agents**: implementing: Deming, reviewers: Szabo, Knuth, Brooks

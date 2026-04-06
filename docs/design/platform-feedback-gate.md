@@ -4,7 +4,7 @@
 
 ## Problem
 
-The `/dev-team:merge` skill is GitHub-specific (Copilot review, `gh` CLI). But the underlying principle — "before completing work, check all automated feedback and address it" — is universal. Every platform has automated review bots, CI feedback, and code analysis tools.
+The `dev-team-merge` skill is GitHub-specific (Copilot review, `gh` CLI). But the underlying principle — "before completing work, check all automated feedback and address it" — is universal. Every platform has automated review bots, CI feedback, and code analysis tools.
 
 Currently, Copilot feedback is missed because:
 - The merge skill lives in `.claude/skills/` (project-specific), so agents don't always use it
@@ -46,7 +46,7 @@ Drucker already coordinates the implement -> review -> merge flow. Add a step be
 
 ## How This Affects Existing Architecture
 
-- `/dev-team:merge` skill stays in `.claude/skills/` as the GitHub-specific implementation of the gate
+- `dev-team-merge` skill stays in `.claude/skills/` as the GitHub-specific implementation of the gate
 - `templates/agents/dev-team-drucker.md` gets a generic "check platform feedback" step
 - `templates/skills/dev-team-task/SKILL.md` completion section references the gate
 - Conway's definition references the gate for release PRs specifically

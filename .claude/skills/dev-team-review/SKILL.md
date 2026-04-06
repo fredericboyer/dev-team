@@ -151,7 +151,7 @@ Before issuing any `gh issue`, `gh pr`, or other platform-specific CLI commands,
 ### Completion
 
 After the review report is delivered:
-1. Format the **finding outcome log** with every finding's classification, source agent, and outcome (accepted/overruled/ignored), including reasoning for overrules. Then call `/dev-team:extract` with the formatted log.
-2. If `/dev-team:extract` was not called, the review is INCOMPLETE.
-3. `/dev-team:extract` handles Borges spawning, metrics verification, and memory formation gates. Do not report the review as complete until `/dev-team:extract` reports success.
+1. Format the **finding outcome log** with every finding's classification, source agent, and outcome (accepted/overruled/ignored), including reasoning for overrules. Then call `dev-team-extract` with the formatted log.
+2. If `dev-team-extract` was not called, the review is INCOMPLETE.
+3. `dev-team-extract` handles Borges spawning, metrics verification, and memory formation gates. Do not report the review as complete until `dev-team-extract` reports success.
 4. Include Borges's recommendations in the final report.

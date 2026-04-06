@@ -4,7 +4,7 @@ Annotated examples of correctly classified findings from this project's review h
 
 ### Example 1: IGNORED — $ARGUMENTS trust boundary in extract skill
 
-**Finding:** Szabo raised a trust boundary question about $ARGUMENTS usage in /dev-team:extract skill — could untrusted input flow through skill arguments?
+**Finding:** Szabo raised a trust boundary question about $ARGUMENTS usage in dev-team-extract skill — could untrusted input flow through skill arguments?
 **Classification:** [QUESTION]
 **Outcome:** ignored (self-answered)
 **Why:** The skill is invoked only by other orchestration skills (task, review, retro), not by untrusted external input. Skill-to-skill invocation is an internal trust boundary with no user-controlled data crossing it.

@@ -234,13 +234,13 @@ if (missingReviews.length > 0) {
     if (agent) {
       console.error("    - " + agent + " (required by COMPLEX task assessment)");
     } else {
-      console.error("    - (no review found for this branch - run /dev-team:review)");
+      console.error("    - (no review found for this branch - run dev-team-review)");
     }
   }
   if (isComplexTask) {
     console.error("\nCOMPLEX task: required reviewers: " + assessment.requiredReviewers.join(", "));
   }
-  console.error("\nRun /dev-team:review, or use --skip-review to bypass.");
+  console.error("\nRun dev-team-review, or use --skip-review to bypass.");
   process.exit(2);
 }
 

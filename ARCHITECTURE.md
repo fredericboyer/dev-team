@@ -141,12 +141,12 @@ Skills are user-invocable workflows defined in Markdown (`SKILL.md`). Orchestrat
 
 ```mermaid
 graph TB
-    Task["/dev-team:task<br/>(orchestration loop)"]
+    Task["dev-team-task<br/>(orchestration loop)"]
 
-    Implement["/dev-team:implement<br/>(agent selection, branch, PR)"]
-    Review["/dev-team:review<br/>(parallel reviewer wave)"]
-    Merge["/dev-team:merge<br/>(CI wait, thread resolution, auto-merge)"]
-    Extract["/dev-team:extract<br/>(Borges memory + metrics)"]
+    Implement["dev-team-implement<br/>(agent selection, branch, PR)"]
+    Review["dev-team-review<br/>(parallel reviewer wave)"]
+    Merge["dev-team-merge<br/>(CI wait, thread resolution, auto-merge)"]
+    Extract["dev-team-extract<br/>(Borges memory + metrics)"]
 
     Task -->|"Step 1"| Implement
     Task -->|"Step 2"| Review
@@ -155,10 +155,10 @@ graph TB
     Task -->|"Step 4"| Extract
 
     subgraph "Standalone skills"
-        Challenge["/dev-team:challenge<br/>(critical examination)"]
-        Audit["/dev-team:audit<br/>(full codebase audit)"]
-        Retro["/dev-team:retro<br/>(knowledge base health)"]
-        Scorecard["/dev-team:scorecard<br/>(process conformance)"]
+        Challenge["dev-team-challenge<br/>(critical examination)"]
+        Audit["dev-team-audit<br/>(full codebase audit)"]
+        Retro["dev-team-retro<br/>(knowledge base health)"]
+        Scorecard["dev-team-scorecard<br/>(process conformance)"]
     end
 
     Audit -->|"at end"| Extract
@@ -207,7 +207,7 @@ graph TB
 | ADRs | `docs/adr/` | Formal decisions | Agents when reviewing related areas |
 | Machine-local | `~/.claude/projects/` | User-specific preferences only | Claude Code (automatic) |
 
-Borges runs at the end of every workflow (`/dev-team:extract`). It evaluates memory freshness via `Last-verified` dates, merges duplicates, supersedes contradictions, and generates calibration rules when 3+ findings on the same tag are overruled.
+Borges runs at the end of every workflow (`dev-team-extract`). It evaluates memory freshness via `Last-verified` dates, merges duplicates, supersedes contradictions, and generates calibration rules when 3+ findings on the same tag are overruled.
 
 ## File Layout
 

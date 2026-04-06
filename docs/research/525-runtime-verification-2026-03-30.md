@@ -89,7 +89,7 @@ Should dev-team's review step include optional runtime verification (browser tes
 
 ### Where runtime verification fits in the review flow
 
-The current review skill (`/dev-team:review`) follows: determine changes -> spawn reviewers -> filter findings -> report -> completion. Runtime verification would insert between "spawn reviewers" and "filter findings" as an optional parallel step.
+The current review skill (`dev-team-review`) follows: determine changes -> spawn reviewers -> filter findings -> report -> completion. Runtime verification would insert between "spawn reviewers" and "filter findings" as an optional parallel step.
 
 **Option A — Reviewer agent invokes browser tool directly**:
 The reviewer (e.g., Knuth or a dedicated Voss instance) detects that the change affects UI code and invokes `playwright-cli` or `agent-browser` to verify behavior. This requires the reviewer agent to have Bash tool access (which it already has as a general-purpose subagent).
@@ -174,7 +174,7 @@ This keeps dev-team tool-agnostic while enabling runtime verification for web pr
 - [Playwright MCP with Claude Code (Simon Willison)](https://til.simonwillison.net/claude-code/playwright-mcp-claude-code) — MCP integration reference
 - [@playwright/cli on npm](https://www.npmjs.com/package/@playwright/cli) — package details
 - dev-team `skill-recommendations.json` — existing Playwright entry in trusted sources
-- dev-team `/dev-team:review` SKILL.md — current review flow (no runtime verification step)
+- dev-team `dev-team-review` SKILL.md — current review flow (no runtime verification step)
 
 ## Known issues / caveats
 

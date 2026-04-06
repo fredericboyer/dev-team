@@ -4,7 +4,7 @@ Annotated examples of correctly classified findings from this project's review h
 
 ### Example 1: DEFERRED — Skill composability ADR suggestion
 
-**Finding:** The skill-calls-skill pattern (/dev-team:extract invoked by /dev-team:task, /dev-team:review invoked with --embedded flag) should be formally documented in an ADR to establish the composability contract.
+**Finding:** The skill-calls-skill pattern (dev-team-extract invoked by dev-team-task, dev-team-review invoked with --embedded flag) should be formally documented in an ADR to establish the composability contract.
 **Classification:** [SUGGESTION]
 **Outcome:** deferred to #493, then completed in v1.10.0
 **Why:** The pattern was working correctly at runtime but lacked formal architectural documentation. Deferring was correct — the implementation was sound and shipping it was higher priority than documenting it. But the ADR was genuinely needed: without it, future skill authors would not know the composability contract (disable-model-invocation, --embedded flag semantics, output format expectations).
@@ -12,7 +12,7 @@ Annotated examples of correctly classified findings from this project's review h
 
 ### Example 2: ACCEPTED — --reviewers removal as breaking change
 
-**Finding:** Task skill now controls reviewer selection internally. The --reviewers flag on /dev-team:review is removed. Anyone invoking /dev-team:review directly with --reviewers will get an error.
+**Finding:** Task skill now controls reviewer selection internally. The --reviewers flag on dev-team-review is removed. Anyone invoking dev-team-review directly with --reviewers will get an error.
 **Classification:** [RISK]
 **Outcome:** accepted (flagged for release notes)
 **Why:** This is a genuine breaking change for direct review skill users. The --embedded pattern subsumes the old interface, but the removal is not backward-compatible. The correct action was to accept and ensure it appears in v1.9.0 release notes, not to maintain backward compatibility indefinitely.

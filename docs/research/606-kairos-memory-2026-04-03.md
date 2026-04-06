@@ -33,7 +33,7 @@ Research reveals that "KAIROS" and "auto-dream" are related but distinct:
 
 | Dimension | Auto-dream (Claude Code) | Borges (dev-team) |
 |-----------|------------------------|-------------------|
-| **Trigger** | Automatic (24h + 5 sessions) | Manual (end of every `/dev-team:task`, `/review`, `/audit`, `/retro`) |
+| **Trigger** | Automatic (24h + 5 sessions) | Manual (end of every `dev-team-task`, `/review`, `/audit`, `/retro`) |
 | **Scope** | Machine-local auto-memory (`~/.claude/projects/<project>/memory/`) | In-repo shared memory (`.claude/rules/dev-team-learnings.md` + `.claude/agent-memory/`) |
 | **Visibility** | Single developer, single machine | Team-wide via version control |
 | **Input** | Recent session transcripts (targeted search) | Classified findings from review agents, implementation decisions, human overrules |
@@ -64,9 +64,9 @@ Auto-dream operates exclusively on machine-local auto-memory (`~/.claude/project
 
 This means auto-dream cannot supersede `.claude/rules/dev-team-learnings.md` because it operates in a completely different scope. Dev-team's Tier 1 shared memory is version-controlled and team-visible; auto-dream's scope is machine-local and single-developer.
 
-### autoDream vs /dev-team:retro
+### autoDream vs dev-team-retro
 
-| Aspect | autoDream | /dev-team:retro |
+| Aspect | autoDream | dev-team-retro |
 |--------|-----------|-----------------|
 | **Purpose** | Clean stale machine-local memory | Audit knowledge base health across shared + agent memory |
 | **Trigger** | Automatic (time + session gate) | Manual invocation |

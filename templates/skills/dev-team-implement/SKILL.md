@@ -1,6 +1,6 @@
 ---
 name: dev-team-implement
-description: Implement a task on a feature branch with architect pre-assessment, agent selection, and validation. Use standalone or as Step 1 of /dev-team:task.
+description: Implement a task on a feature branch with architect pre-assessment, agent selection, and validation. Use standalone or as Step 1 of dev-team-task.
 disable-model-invocation: false
 ---
 
@@ -81,7 +81,7 @@ The implementing agent works on the task on a feature branch.
 - Clean working tree: no uncommitted debris
 - If validation fails, route back to implementer with specific failure reason. If it fails twice, escalate to human.
 
-**Deliver the work**: Push the branch to remote. PR creation is handled by the orchestrator or a separate pipeline step (`/dev-team:pr`). Do NOT create a PR from this skill.
+**Deliver the work**: Push the branch to remote. PR creation is handled by the orchestrator or a separate pipeline step (`dev-team-pr`). Do NOT create a PR from this skill.
 
 **Clean up worktree**: If the work was done in a worktree, clean it up after the branch is pushed.
 

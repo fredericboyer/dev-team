@@ -5,7 +5,7 @@ Supersedes: parts of ADR-009, ADR-010, ADR-014
 
 ## Context
 
-dev-team originally shipped two workflow skills (`/dev-team:merge` and `/dev-team:security-status`) as part of the install templates. These skills assumed a specific GitHub-centric workflow (Copilot review gating, GitHub security features) that does not apply to all projects.
+dev-team originally shipped two workflow skills (`dev-team-merge` and `dev-team-security-status`) as part of the install templates. These skills assumed a specific GitHub-centric workflow (Copilot review gating, GitHub security features) that does not apply to all projects.
 
 ADR-009 (idempotent update) treated all skills uniformly — the update command overwrote workflow skills alongside framework skills. ADR-010 (preset bundles) included workflow skills in preset definitions. ADR-014 (runtime auto-discovery) discovered all skills from `templates/skills/` without distinguishing framework from workflow.
 
