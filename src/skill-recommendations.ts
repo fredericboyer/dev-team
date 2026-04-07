@@ -224,12 +224,8 @@ function parseJavaDeps(targetDir: string, deps: Set<string>): void {
   // pom.xml — lightweight parsing for artifactId
   const pomContent = readFile(path.join(targetDir, "pom.xml"));
   if (pomContent) {
-    const matches = pomContent.match(/<artifactId>([^<]+)<\/artifactId>/g);
-    if (matches) {
-      for (const match of matches) {
-        const name = match.replace(/<\/?artifactId>/g, "");
-        deps.add(name);
-      }
+    for (const match of pomContent.matchAll(/<artifactId>([^<]+)<\/artifactId>/g)) {
+      deps.add(match[1]);
     }
   }
 
@@ -237,20 +233,12 @@ function parseJavaDeps(targetDir: string, deps: Set<string>): void {
   for (const gradleFile of ["build.gradle", "build.gradle.kts"]) {
     const gradleContent = readFile(path.join(targetDir, gradleFile));
     if (gradleContent) {
-      // Match: implementation 'group:artifact:version' or implementation("group:artifact:version")
-      const matches = gradleContent.match(
+      for (const match of gradleContent.matchAll(
         /(?:implementation|api|compileOnly|testImplementation)\s*[("']+([^"')]+)/g,
-      );
-      if (matches) {
-        for (const match of matches) {
-          const depStr = match.replace(
-            /(?:implementation|api|compileOnly|testImplementation)\s*[("']+/,
-            "",
-          );
-          const parts = depStr.split(":");
-          if (parts.length >= 2) {
-            deps.add(parts[1]); // artifactId
-          }
+      )) {
+        const parts = match[1].split(":");
+        if (parts.length >= 2) {
+          deps.add(parts[1]);
         }
       }
     }
