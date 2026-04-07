@@ -1,6 +1,5 @@
-import fs from "fs";
 import path from "path";
-import { fileExists, listSubdirectories, readFile, templateDir } from "./files.js";
+import { fileExists, readFile, templateDir } from "./files.js";
 
 export interface SkillRecommendation {
   id: string;
@@ -50,18 +49,7 @@ export function detectEcosystems(targetDir: string, catalog: SkillCatalog): stri
   const detected: string[] = [];
 
   for (const [key, eco] of Object.entries(catalog.ecosystems)) {
-    const found = eco.detectFiles.some((f) => {
-      if (f.startsWith("*")) {
-        // Glob pattern — check if any file in targetDir matches the extension
-        const ext = f.slice(1); // e.g., ".csproj"
-        try {
-          return fs.readdirSync(targetDir).some((entry: string) => entry.endsWith(ext));
-        } catch {
-          return false;
-        }
-      }
-      return fileExists(path.join(targetDir, f));
-    });
+    const found = eco.detectFiles.some((f) => fileExists(path.join(targetDir, f)));
     if (found) {
       detected.push(key);
     }
@@ -94,12 +82,6 @@ export function parseDependencies(targetDir: string, ecosystems: string[]): Set<
   }
   if (ecosystems.includes("java")) {
     parseJavaDeps(targetDir, deps);
-  }
-  if (ecosystems.includes("elixir")) {
-    parseElixirDeps(targetDir, deps);
-  }
-  if (ecosystems.includes("dotnet")) {
-    parseDotnetDeps(targetDir, deps);
   }
 
   return deps;
@@ -258,36 +240,6 @@ function parseJavaDeps(targetDir: string, deps: Set<string>): void {
         if (parts.length >= 2) {
           deps.add(parts[1]);
         }
-      }
-    }
-  }
-}
-
-function parseElixirDeps(targetDir: string, deps: Set<string>): void {
-  const content = readFile(path.join(targetDir, "mix.exs"));
-  if (!content) return;
-
-  for (const match of content.matchAll(/\{:([a-zA-Z0-9_]+)\s*,/g)) {
-    deps.add(match[1]);
-  }
-}
-
-function parseDotnetDeps(targetDir: string, deps: Set<string>): void {
-  const dirs = [targetDir, ...listSubdirectories(targetDir).map((d) => path.join(targetDir, d))];
-
-  for (const dir of dirs) {
-    let files: string[];
-    try {
-      files = fs.readdirSync(dir).filter((f: string) => f.endsWith(".csproj"));
-    } catch {
-      continue;
-    }
-    for (const file of files) {
-      const content = readFile(path.join(dir, file));
-      if (!content) continue;
-
-      for (const match of content.matchAll(/<PackageReference\s+Include="([^"]+)"/g)) {
-        deps.add(match[1]);
       }
     }
   }
