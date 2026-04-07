@@ -54,7 +54,10 @@ export function detectEcosystems(targetDir: string, catalog: SkillCatalog): stri
       if (f.startsWith("*")) {
         const ext = f.slice(1);
         if (ext.length === 0) return false;
-        const dirs = [targetDir, ...listSubdirectories(targetDir).map((d) => path.join(targetDir, d))];
+        const dirs = [
+          targetDir,
+          ...listSubdirectories(targetDir).map((d) => path.join(targetDir, d)),
+        ];
         return dirs.some((dir) => {
           try {
             return fs.readdirSync(dir).some((entry: string) => entry.endsWith(ext));
