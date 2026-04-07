@@ -92,10 +92,26 @@
 - **Last-verified**: 2026-04-04
 - **Context**: Branch sanitization logic diverged between review-gate and merge-gate hooks. Knuth K-02 and Szabo S-01 independently converged on the same finding — unified to ADR-043 spec. CODE_FILE_PATTERN also diverged between hooks (K-03, fixed). Cross-agent convergence validates review quality. Pattern: when hooks share concepts (branch names, file patterns), keep logic in a shared module or spec reference.
 
+### [2026-04-06] v4.0.0 audit: Go dep parser misparses single-line require directives (K-08)
+- **Type**: DEFECT [pending fix]
+- **Source**: v4.0.0 full codebase audit, Knuth K-08
+- **Tags**: parsing, go, dependency, skill-recommendations, defect
+- **Outcome**: pending fix
+- **Last-verified**: 2026-04-06
+- **Context**: skill-recommendations.ts lines 179-193 Go dependency parser fails on single-line `require` directives (e.g., `require github.com/foo v1.0.0`). Only handles multi-line `require ( ... )` blocks. Non-obvious because the parser appears complete but silently ignores a valid go.mod syntax variant.
+
+### [2026-04-06] v4.0.0 audit: update()/runMigrations()/migrateFromClaude() untested (K-01/K-02/K-03)
+- **Type**: RISK [pending fix]
+- **Source**: v4.0.0 full codebase audit, Knuth K-01/K-02/K-03
+- **Tags**: testing, coverage, update, migrations
+- **Outcome**: pending fix
+- **Last-verified**: 2026-04-06
+- **Context**: Three related test gaps in update.ts: update() main function, runMigrations() agent rename/removal logic, and migrateFromClaude() path. These are distinct from the init.ts/update.ts tests added in v3.5.0 (#715) which covered exported constants and pure utilities. The untested functions involve file system side effects and migration sequencing. Seen: recurring theme -- update-path test coverage lags behind init-path.
+
 ### [2026-04-04] v3.8.0: Boundary test gaps as recurring theme
 - **Type**: PATTERN [new]
 - **Source**: PRs #789-#797, multiple findings
 - **Tags**: testing, boundary, hooks, coverage
 - **Outcome**: accepted
-- **Last-verified**: 2026-04-04
+- **Last-verified**: 2026-04-06
 - **Context**: Boundary test gaps appeared across multiple PRs: boundary depth (5) untested (#791 K-04), no test for assessment sidecar branch mismatch (#793 K-04), missing branch field allows bypass (#794 K-02), no test for malformed assessment JSON (#794 K-03), no test for detached HEAD fail-open (#796 K-05). Seen: recurring pattern across v1.11.0, v3.5.0, v3.6.0, v3.8.0. Hook boundary conditions are consistently undertested.

@@ -65,29 +65,11 @@
 - **Last-verified**: 2026-03-26
 - **Context**: First full security audit. Zero DEFECTs — codebase has no critical security vulnerabilities. Primary themes: input validation (ReDoS), file system hardening (symlink guards), and advisory improvements. CLI trust boundary profile confirmed: no auth, no user data, no network — file system ops are the primary attack surface.
 
-### [2026-03-27] v1.7.0: TOCTOU in assertNotSymlink accepted as inherent POSIX limitation
-- **Type**: RISK [accepted]
-- **Source**: PR #454 (Chain A, #433)
-- **Tags**: symlink, toctou, posix, file-system
-- **Outcome**: accepted
-- **Last-verified**: 2026-03-27
-- **Context**: assertNotSymlink uses lstatSync before the operation — classic TOCTOU gap. Accepted because: check-then-act is inherent to POSIX, exploitability requires local attacker with write access to target dir (already game over), and no atomic alternative exists without OS-specific APIs.
-
-### [2026-03-27] v1.7.0: safeRegex bypass via {n,} quantifiers — fixed
-- **Type**: RISK [fixed]
-- **Source**: PR #455 (Chain B, #434)
-- **Tags**: regex, redos, input-validation, security
-- **Outcome**: fixed
-- **Last-verified**: 2026-03-27
-- **Context**: Initial safeRegex implementation missed `{n,}` quantifier syntax in the nested-quantifier check. Inner character class updated to include `{`. Reinforces: regex validation must cover all quantifier syntaxes, not just `*+?`.
-
-### [2026-03-29] v1.10.0: Clean approve across 4 PRs — no security findings
-- **Type**: CALIBRATION
-- **Source**: PRs #509/#510/#511/#512
-- **Tags**: calibration, security, review
-- **Outcome**: clean
-- **Last-verified**: 2026-03-29
-- **Context**: All 4 retro-derived PRs (#489/#490/#493/#494) approved with no security concerns. Changes were skill definitions, ADR, learnings, and merge timing — no new file system operations or trust boundary changes. Confirms: retro-derived work is typically low-risk from a security perspective.
+### [2026-03-27→2026-03-29] v1.7.0-v1.10.0 consolidated calibration
+- **Type**: CALIBRATION [compressed]
+- **Tags**: symlink, toctou, regex, redos, calibration, security
+- **Last-verified**: 2026-04-06
+- **Context**: **v1.7.0**: TOCTOU in assertNotSymlink accepted (inherent POSIX, requires local attacker). safeRegex {n,} quantifier bypass fixed. **v1.10.0**: Clean approve on 4 retro PRs (#509-#512) — retro-derived work is typically low-risk from security perspective.
 
 ### [2026-03-29] v1.9.0: Extract skill trust boundary — $ARGUMENTS acceptable
 - **Type**: CALIBRATION
@@ -174,7 +156,7 @@
 - **Source**: v3.6.0 full codebase audit, Szabo S-01
 - **Tags**: regex, safety-guard, bypass, security
 - **Outcome**: accepted
-- **Last-verified**: 2026-04-03
+- **Last-verified**: 2026-04-06
 - **Context**: Safety guard regex patterns have potential bypass vectors (trailing `$` anchors, split flags). Accepted as advisory — the Claude Code sandbox is the real security boundary. Safety guards are defense-in-depth, not primary protection. Pattern: when evaluating regex guard findings, consider the trust boundary — sandbox enforcement makes regex bypasses a lower-severity risk.
 
 ### [2026-04-03] v3.6.0 audit: Zero runtime dependencies — maintain posture (S-07)
@@ -184,6 +166,14 @@
 - **Outcome**: accepted
 - **Last-verified**: 2026-04-03
 - **Context**: Positive security finding: dev-team has zero runtime dependencies. All functionality is implemented directly. This eliminates supply-chain attack surface entirely for runtime. Maintain this posture — any proposal to add a runtime dependency should require explicit justification.
+
+### [2026-04-06] v4.0.0 audit: fileExists/dirExists follows symlinks — inconsistent with guard posture (S-02)
+- **Type**: RISK [deferred]
+- **Source**: v4.0.0 full codebase audit, Szabo S-02
+- **Tags**: symlink, file-system, consistency, security
+- **Outcome**: deferred (low priority)
+- **Last-verified**: 2026-04-06
+- **Context**: fileExists/dirExists utility functions use existsSync which follows symlinks. This is inconsistent with the assertNotSymlink/assertNoSymlinkInPath guard posture established in v1.7.0-v1.8.0. Low priority because these utilities are not on security-critical paths, but the inconsistency could mislead future developers. Same pattern as v3.6.0 existsSync finding (PR #735).
 
 ### [2026-04-04] v3.8.0: Sanitization mismatch cross-convergence with Knuth (PR #793)
 - **Type**: RISK [fixed]

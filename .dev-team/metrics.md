@@ -344,3 +344,19 @@
 - **Duration**: single session, 8 branches (4 LIGHT, 4 FULL)
 - **Notes**: First release with in-team adversarial review since v3.3.0. FULL reviews (PRs #790, #793, #796, #797) caught all 3 DEFECTs — LIGHT reviews caught 0. Tier system continues to validate: FULL review correctly concentrated on COMPLEX tasks. Szabo/Knuth cross-agent convergence on sanitization mismatch (#793) is a strong coherence signal. PR #793 was the only 2-round branch. Copilot re-reviews on push created thread resolution cascades requiring 2-3 rounds per PR. Implementer guard hook (#795) enforces agent liveness through review. Cross-branch contamination recurred heavily (shared working directory, stash conflicts, cherry-pick artifacts).
 - **[RISK] Zero-overrule alert**: Rolling overrule rate remains 0% at n>=271 in-team findings (v1.2.0 through v3.8.0). Per research brief #490, healthy adversarial review shows 1-10% overrule rate. Acceptance rate (65%) within healthy band (60-85%).
+
+### [2026-04-06] Audit: v4.0.0 full codebase audit (Szabo, Knuth, Deming)
+- **Agents**: implementing: n/a (audit); reviewers: Szabo, Knuth, Deming
+- **Rounds**: 1 (single audit pass)
+- **Findings**:
+  - Knuth: 1 DEFECT (K-08, pending fix), 4 RISK (K-01/K-02/K-03 pending fix, K-06 deferred)
+  - Deming: 2 DEFECT (D-01 pending update, D-02 pending fix), 5 RISK (R-01/R-02/R-05 pending fix, R-03/R-04 deferred), 2 QUESTION (Q-01/Q-02 pending)
+  - Szabo: 0 DEFECT, 2 RISK (S-01 accepted, S-02 deferred), 1 QUESTION (S-03 deferred)
+- **Total findings**: 17 (3 DEFECT, 11 RISK, 2 QUESTION, 1 SUGGESTION-equivalent)
+- **Acceptance rate**: 12% (2 accepted / 17 total) — low rate reflects audit scope with many pending-fix items
+- **Overrule rate**: 0% (0/17)
+- **Fix rate (DEFECTs)**: 0% pending (all 3 DEFECTs awaiting fix)
+- **Defer rate (advisory)**: 36% (5/14 advisory)
+- **Duration**: single audit pass
+- **Notes**: Third full codebase audit. Compared to prior audits: v1.0 (37 findings, 2 DEFECT), v3.6.0 (24 findings, 0 DEFECT), v4.0.0 (17 findings, 3 DEFECT). Finding count continues to decrease but DEFECT count rose — likely reflects new code from v4.0.0 task skill refactor (PR #843). K-08 Go parser bug is a real functional defect in skill-recommendations.ts. D-01/D-02 are dogfooding gaps (hooks not wired into settings.json or validated in CI). Key theme: validation coverage gaps for dogfooding copies vs template sources.
+- **[RISK] Zero-overrule alert**: Rolling overrule rate remains 0% at n>=288 in-team findings (v1.2.0 through v4.0.0). Per research brief #490, healthy adversarial review shows 1-10% overrule rate.

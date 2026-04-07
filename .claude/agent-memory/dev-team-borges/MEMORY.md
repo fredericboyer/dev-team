@@ -40,56 +40,11 @@
 ## Calibration Log
 <!-- Recommendations accepted/deferred — tunes what to flag over time -->
 
-### [2026-03-25] v1.2.0 extraction — high defer rate on advisory findings
-- Knuth's 50% advisory defer rate (7/14) is not a quality problem — deferred items were legitimate follow-ups outside the PR scope. But it signals that `dev-team-retro` should track defer-to-issue conversion (are deferred findings actually becoming issues?).
-
-### [2026-03-26] v1.5.0 extraction — 18 findings, 100% acceptance, 1 round to convergence
-- **Type**: MILESTONE [verified]
-- **Source**: v1.5.0 task loop (14 issues, 15 PRs)
-- **Tags**: metrics, calibration, extraction
-- **Outcome**: verified
-- **Last-verified**: 2026-03-26
-- **Context**: Largest task batch to date. 8 DEFECTs + 10 advisory, all fixed in first pass. Copilot was the primary reviewer (no in-team agents reviewing). Brooks provided pre-assessment. Key process learnings: merge-as-you-go for sequential chains, Copilot comments must be monitored during delivery not just at merge time. 3 new ADRs, SHARED.md extraction, process.md extraction, platform detection, scorecard skill added. Cleaned up 2 bootstrapped entries (Turing "first install", Rams "first install").
-
-### [2026-03-26] v1.5.1 extraction — 6 findings, 1 fixed, 5 ignored (install artifacts)
-- **Type**: MILESTONE [verified]
-- **Source**: v1.5.1 hotfix (#397, PR #398)
-- **Tags**: metrics, calibration, extraction
-- **Outcome**: verified
-- **Last-verified**: 2026-03-26
-- **Context**: Small hotfix. High ignore rate (83%) is not a signal quality issue — 5 ignored findings were all about local install artifact paths (hook files not committed to repo). The 1 DEFECT (contradiction in process.md) was fixed. New memory entries written for Deming (guarded files) and Conway (guarded files + update testing). Design principle "Don't encode what agents already know" was already in learnings from a prior commit in this session.
-
-### [2026-03-26] Deming pattern duplication entry superseded
-- **Type**: COHERENCE [resolved]
-- **Source**: cross-agent audit
-- **Tags**: coherence, deming, patterns
-- **Outcome**: resolved
-- **Last-verified**: 2026-03-26
-- **Context**: Deming had a RISK entry about review-gate pattern duplication. This was resolved in PR #344 (agent-patterns.json extraction). Updated entry from [acknowledged] to [resolved].
-
-### [2026-03-26] Full codebase audit extraction — 37 findings, 3 agents, 11 issues
-- **Type**: MILESTONE [verified]
-- **Source**: dev-team-audit (Szabo, Knuth, Deming)
+### [2026-03-25→2026-03-27] v1.2.0–v1.7.0 consolidated extractions
+- **Type**: MILESTONE [compressed]
 - **Tags**: metrics, calibration, extraction, audit
-- **Outcome**: verified
-- **Last-verified**: 2026-03-26
-- **Context**: First formal audit (not task-driven). 37 findings (2 DEFECT, 11 RISK, 4 QUESTION, 20 SUGGESTION), 100% acceptance, 0% overrule. 11 issues created (#431-#441). Cross-agent coherence: Knuth K1/K3 and Deming D8/D9 independently flagged same migration drift — confirms pattern. New shared learning: migration completeness. New memory entries: Szabo (3), Knuth (4), Deming (4). All agent acceptance rates remain at or above 100% — no noise signal.
-
-### [2026-03-26] v1.6.0 extraction — 16 PRs, Copilot-only review, no formal wave
-- **Type**: MILESTONE [verified]
-- **Source**: v1.6.0 task loop (16 issues, 16 PRs)
-- **Tags**: metrics, calibration, extraction
-- **Outcome**: verified
-- **Last-verified**: 2026-03-26
-- **Context**: Major architectural release. Research-first approach (Turing #406, #407). No formal review wave — Copilot sole reviewer. All findings addressed inline. 2 new ADRs (033, 034), 7 design principles codified. Key coherence update: Conway's guarded files entry updated for rules migration. New entries written for Deming (2), Tufte (2), Turing (2), Voss (1), Brooks (2), Drucker (1). Process learnings added to shared learnings (research-first, verify against official docs).
-
-### [2026-03-27] v1.7.0 extraction — 12 issues, 7 PRs, first formal review wave since v1.2.0
-- **Type**: MILESTONE [verified]
-- **Source**: v1.7.0 task loop (12 issues, 7 PRs #449-#455)
-- **Tags**: metrics, calibration, extraction
-- **Outcome**: verified
-- **Last-verified**: 2026-03-27
-- **Context**: All 12 audit-derived tech debt issues resolved. 11 raw findings (7 unique after dedup), 100% acceptance, 1 round. First in-team review wave (Szabo+Knuth+Brooks) since v1.2.0. 3 agents converged independently on the same process.exit stub finding — strong cross-agent coherence signal. New entries: Szabo (2), Knuth (2), Brooks (2), Beck (1), Voss (1), Tufte (1), Turing (1), Deming already had entries from implementation. Updated 3 existing entries (Szabo symlink+ReDoS fixed, Knuth test coverage fixed). 3 tech debt items marked resolved in shared learnings. 3 new process learnings added (working dir contention, merge cascades, retro staleness). Stale `deming/` memory dir flagged and fixed (finding #5). System improvement: agent teams need worktree isolation (#456 tracked).
+- **Last-verified**: 2026-04-06
+- **Context**: **v1.2.0**: First multi-branch task, 17 findings, 50% advisory defer rate (all deferred converted to issues — 100% conversion). **v1.5.0**: 18 findings, 100% acceptance, Copilot-only. **v1.5.1**: Hotfix, 6 findings, 83% ignore (install artifacts). **First audit (v1.0)**: 37 findings, 2 DEFECT, 11 issues created, cross-agent coherence confirmed (Knuth/Deming migration drift). **v1.6.0**: 16 PRs, research-first validated, Copilot-only. **v1.7.0**: 12 issues, first adversarial wave since v1.2.0, 3 agents converged on process.exit stub finding. Also resolved Deming pattern duplication coherence issue.
 
 ### [2026-03-29] v1.9.0 extraction — 2 branches, 20 findings, 71% acceptance, adversarial loop restored
 - **Type**: MILESTONE [verified]
@@ -194,3 +149,11 @@
 - **Outcome**: verified
 - **Last-verified**: 2026-04-04
 - **Context**: First in-team adversarial review since v3.3.0. 48 findings (3 DEFECT fixed, 31 accepted, 4 deferred, 10 ignored), 0 overruled. FULL reviews caught all 3 DEFECTs. Szabo/Knuth cross-convergence on sanitization mismatch (#793). New entries: Knuth (2), Szabo (1), Brooks (1+bump). 2 new shared learnings (Copilot re-review cascades, implementer guard). Contamination entry updated (6th occurrence). All agents under 200-line cap. Zero-overrule alert continues at n>=271.
+
+### [2026-04-06] v4.0.0 audit extraction — 17 findings, 3 DEFECTs pending, validation gap theme
+- **Type**: MILESTONE [verified]
+- **Source**: dev-team-audit v4.0.0 (Szabo, Knuth, Deming)
+- **Tags**: metrics, calibration, extraction, audit
+- **Outcome**: verified
+- **Last-verified**: 2026-04-06
+- **Context**: Third full codebase audit. 17 findings (3 DEFECT, 11 RISK, 2 QUESTION, 1 other), 0% overrule. Finding count down from v3.6.0 (24) but DEFECT count up (0→3) — reflects new v4.0.0 code (task skill refactor). Key theme: validation coverage gaps for dogfooding copies (D-01 hooks missing from settings, D-02 validate-hooks skips .dev-team/hooks/, R-05 validate-agents skips .claude/agents/). K-08 Go dep parser is a real functional defect. New entries: Szabo (1 new + 1 bump), Knuth (2 new + 1 bump), Deming (1 new + 2 bumps). 1 new shared learning (validation must cover dogfooding copies). Szabo compressed (202→184 lines), Borges compressed (196→151+new lines). All agents under 200-line cap. Zero-overrule alert continues at n>=288.
