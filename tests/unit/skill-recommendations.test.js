@@ -78,6 +78,24 @@ describe("detectEcosystems", () => {
     assert.ok(ecosystems.includes("java"));
   });
 
+  it("detects Elixir from mix.exs", () => {
+    fs.writeFileSync(path.join(tmpDir, "mix.exs"), "defmodule MyApp.MixProject do\nend\n");
+    const ecosystems = detectEcosystems(tmpDir, catalog);
+    assert.ok(ecosystems.includes("elixir"));
+  });
+
+  it("detects C#/.NET from .csproj file", () => {
+    fs.writeFileSync(path.join(tmpDir, "MyApp.csproj"), "<Project></Project>");
+    const ecosystems = detectEcosystems(tmpDir, catalog);
+    assert.ok(ecosystems.includes("dotnet"));
+  });
+
+  it("detects C#/.NET from .sln file", () => {
+    fs.writeFileSync(path.join(tmpDir, "MyApp.sln"), "Microsoft Visual Studio Solution File");
+    const ecosystems = detectEcosystems(tmpDir, catalog);
+    assert.ok(ecosystems.includes("dotnet"));
+  });
+
   it("detects multiple ecosystems simultaneously", () => {
     fs.writeFileSync(path.join(tmpDir, "package.json"), "{}");
     fs.writeFileSync(path.join(tmpDir, "requirements.txt"), "");
@@ -185,6 +203,37 @@ describe("parseDependencies", () => {
     );
     const deps = parseDependencies(tmpDir, ["java"]);
     assert.ok(deps.has("spring-boot-starter"));
+  });
+
+  it("parses Elixir dependencies from mix.exs", () => {
+    fs.writeFileSync(
+      path.join(tmpDir, "mix.exs"),
+      'defmodule MyApp.MixProject do\n  defp deps do\n    [\n      {:phoenix, "~> 1.7"},\n      {:phoenix_live_view, "~> 0.20"},\n      {:ecto_sql, "~> 3.10"}\n    ]\n  end\nend\n',
+    );
+    const deps = parseDependencies(tmpDir, ["elixir"]);
+    assert.ok(deps.has("phoenix"));
+    assert.ok(deps.has("phoenix_live_view"));
+    assert.ok(deps.has("ecto_sql"));
+  });
+
+  it("parses C#/.NET dependencies from .csproj PackageReference", () => {
+    fs.writeFileSync(
+      path.join(tmpDir, "MyApp.csproj"),
+      '<Project Sdk="Microsoft.NET.Sdk.Web">\n  <ItemGroup>\n    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.0" />\n    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />\n  </ItemGroup>\n</Project>\n',
+    );
+    const deps = parseDependencies(tmpDir, ["dotnet"]);
+    assert.ok(deps.has("Microsoft.EntityFrameworkCore"));
+    assert.ok(deps.has("Newtonsoft.Json"));
+  });
+
+  it("parses C#/.NET dependencies from nested .csproj", () => {
+    fs.mkdirSync(path.join(tmpDir, "src"));
+    fs.writeFileSync(
+      path.join(tmpDir, "src", "MyApp.csproj"),
+      '<Project>\n  <ItemGroup>\n    <PackageReference Include="Serilog" Version="3.0.0" />\n  </ItemGroup>\n</Project>\n',
+    );
+    const deps = parseDependencies(tmpDir, ["dotnet"]);
+    assert.ok(deps.has("Serilog"));
   });
 
   it("handles invalid package.json gracefully", () => {
@@ -318,6 +367,27 @@ describe("matchSkills", () => {
     const matches = matchSkills(tmpDir, catalog, ["java"], deps);
     const spring = matches.find((m) => m.id === "spring-boot");
     assert.ok(spring, "expected Spring Boot skill to match");
+  });
+
+  it("matches Phoenix skill from Elixir dependency", () => {
+    const deps = new Set(["phoenix"]);
+    const matches = matchSkills(tmpDir, catalog, ["elixir"], deps);
+    const phoenix = matches.find((m) => m.id === "phoenix");
+    assert.ok(phoenix, "expected Phoenix skill to match");
+  });
+
+  it("matches .NET skill from C# dependency", () => {
+    const deps = new Set(["Microsoft.EntityFrameworkCore"]);
+    const matches = matchSkills(tmpDir, catalog, ["dotnet"], deps);
+    const dotnet = matches.find((m) => m.id === "dotnet");
+    assert.ok(dotnet, "expected .NET skill to match");
+  });
+
+  it("matches .NET skill from ASP.NET dependency", () => {
+    const deps = new Set(["Microsoft.AspNetCore.App"]);
+    const matches = matchSkills(tmpDir, catalog, ["dotnet"], deps);
+    const dotnet = matches.find((m) => m.id === "dotnet");
+    assert.ok(dotnet, "expected .NET skill to match via ASP.NET dep");
   });
 
   it("matches Rust skill from Cargo.toml file", () => {
