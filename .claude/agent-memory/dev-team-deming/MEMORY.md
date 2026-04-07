@@ -16,7 +16,7 @@
 - **Source**: templates/hooks/ analysis
 - **Tags**: hooks, enforcement, dx
 - **Outcome**: verified
-- **Last-verified**: 2026-04-03
+- **Last-verified**: 2026-04-06
 - **Context**: dev-team-tdd-enforce.js (TDD), dev-team-safety-guard.js (safety), dev-team-post-change-review.js (review spawning), dev-team-pre-commit-lint.js (lint), dev-team-pre-commit-gate.js (blocking gate), dev-team-watch-list.js (file watch triggers). ADR-001: hooks over CLAUDE.md for enforcement.
 
 ### [2026-03-25] Agent and hook validation scripts run in CI
@@ -24,7 +24,7 @@
 - **Source**: .github/workflows/ci.yml analysis
 - **Tags**: ci, validation, agents, hooks
 - **Outcome**: verified
-- **Last-verified**: 2026-04-03
+- **Last-verified**: 2026-04-06
 - **Context**: scripts/validate-agents.js checks agent frontmatter. scripts/validate-hooks.js verifies hook scripts load without errors. Both are separate CI jobs. Hook validation runs cross-platform.
 
 ### [2026-03-25] TypeScript with NodeNext resolution — pretest builds before test
@@ -179,6 +179,14 @@
 - **Outcome**: accepted
 - **Last-verified**: 2026-04-03
 - **Context**: Both oxfmt and TypeScript 6 are pre-stable (pre-1.0 semver). Breaking changes possible on minor bumps. Monitor release channels for both. Mitigation: pin versions in package.json, test after upgrades. Acceptable risk given the speed benefits (oxfmt) and language features (TS 6).
+
+### [2026-04-06] v4.0.0 audit: validate-hooks.js skips .dev-team/hooks/ — installed hooks unvalidated (D-02)
+- **Type**: DEFECT [pending fix]
+- **Source**: v4.0.0 full codebase audit, Deming D-02
+- **Tags**: ci, validation, hooks, coverage, dx
+- **Outcome**: pending fix
+- **Last-verified**: 2026-04-06
+- **Context**: validate-hooks.js only validates templates/hooks/ but not .dev-team/hooks/ (installed hooks used for dogfooding). After PR #841 added new hooks, they are not validated in CI. Similarly, validate-agents.js skips .claude/agents/ (R-05). Pattern: validation scripts should cover both template sources AND installed copies when the project dogfoods its own tool.
 
 ### [2026-04-03] v3.6.0 audit: actions/checkout@v6 resolution unverified (R-05)
 - **Type**: RISK [accepted]
