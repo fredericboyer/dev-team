@@ -52,5 +52,7 @@
 - ~~**init.ts and update.ts core entry points have no unit tests.**~~ **Resolved in v3.5.0 (#715, PR #718).** 657 lines of tests added covering exported constants, pure utility functions (compareSemver, cleanupLegacyMemoryDirs, migrateToV3Layout). Interactive run() branches remain untested by design.
 - ~~**CI scripts must exist in package.json for local parity.**~~ **Resolved in v3.5.0 (#714, PR #717).** validate:docs script added to package.json.
 
+- **Validation scripts must cover dogfooding copies, not just templates.** v4.0.0 audit found validate-hooks.js only checks `templates/hooks/` and validate-agents.js only checks `templates/agents/`. The installed copies in `.dev-team/hooks/` and `.claude/agents/` (used for dogfooding) are unvalidated in CI. When the project dogfoods its own tool, validation must cover both template sources and installed copies.
+
 ## Overruled Challenges
 <\!-- When the human overrules an agent, record why — prevents re-flagging -->

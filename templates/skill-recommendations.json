@@ -10,7 +10,8 @@
     "supabase",
     "playwright",
     "vuejs",
-    "rust-lang"
+    "rust-lang",
+    "elixir-lang"
   ],
   "ecosystems": {
     "node": {
@@ -36,6 +37,14 @@
     "java": {
       "detectFiles": ["pom.xml", "build.gradle", "build.gradle.kts"],
       "label": "Java / Kotlin"
+    },
+    "elixir": {
+      "detectFiles": ["mix.exs"],
+      "label": "Elixir"
+    },
+    "dotnet": {
+      "detectFiles": ["*.csproj", "*.sln"],
+      "label": "C# / .NET"
     }
   },
   "skills": [
@@ -164,6 +173,24 @@
       "detectDeps": ["spring-boot-starter"],
       "detectFiles": [],
       "ecosystem": "java"
+    },
+    {
+      "id": "phoenix",
+      "name": "Phoenix Framework Documentation Lookup",
+      "description": "Search Phoenix docs for LiveView, channels, Ecto, and deployment",
+      "source": "elixir-lang",
+      "detectDeps": ["phoenix", "phoenix_html", "phoenix_live_view"],
+      "detectFiles": [],
+      "ecosystem": "elixir"
+    },
+    {
+      "id": "dotnet",
+      "name": ".NET Documentation Lookup",
+      "description": "Search .NET docs for ASP.NET Core, Entity Framework, Blazor, and MAUI",
+      "source": "microsoft",
+      "detectDeps": ["Microsoft.AspNetCore.App", "Microsoft.EntityFrameworkCore", "Microsoft.NET.Sdk.Blazor"],
+      "detectFiles": [],
+      "ecosystem": "dotnet"
     }
   ]
 }
