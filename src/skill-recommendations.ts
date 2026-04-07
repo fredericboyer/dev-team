@@ -53,11 +53,15 @@ export function detectEcosystems(targetDir: string, catalog: SkillCatalog): stri
     const found = eco.detectFiles.some((f) => {
       if (f.startsWith("*")) {
         const ext = f.slice(1);
-        try {
-          return fs.readdirSync(targetDir).some((entry: string) => entry.endsWith(ext));
-        } catch {
-          return false;
-        }
+        if (ext.length === 0) return false;
+        const dirs = [targetDir, ...listSubdirectories(targetDir).map((d) => path.join(targetDir, d))];
+        return dirs.some((dir) => {
+          try {
+            return fs.readdirSync(dir).some((entry: string) => entry.endsWith(ext));
+          } catch {
+            return false;
+          }
+        });
       }
       return fileExists(path.join(targetDir, f));
     });
@@ -297,8 +301,11 @@ function parseDotnetDeps(targetDir: string, deps: Set<string>): void {
       const content = readFile(path.join(dir, file));
       if (!content) continue;
 
-      for (const match of content.matchAll(/<PackageReference\s+Include="([^"]+)"/g)) {
-        deps.add(match[1]);
+      for (const tagMatch of content.matchAll(/<PackageReference\b[^>]*>/g)) {
+        const attr = /\b(?:Include|Update)\s*=\s*"([^"]+)"/.exec(tagMatch[0]);
+        if (attr) {
+          deps.add(attr[1]);
+        }
       }
     }
   }
